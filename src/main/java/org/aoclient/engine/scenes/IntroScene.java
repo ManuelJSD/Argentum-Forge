@@ -30,25 +30,17 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_ENTER;
 
 public final class IntroScene extends Scene {
 
-    private float timeScene = 15.0f; // 15 segundos de intro.
-    private float timeLogo = 5.0f; // 5seg
-    private float timePresentation = 3.33f;
-    private int nextInterface = 1;
+    private float timeScene = 5.0f; // 5 segundos de intro.
     private float alphaInterface;
 
-    private Texture[] imgs;
+    private Texture nolandLogo;
 
     @Override
     public void init() {
         super.init();
         this.alphaInterface = 0.0f;
         this.canChangeTo = SceneType.MAIN_SCENE;
-        this.imgs = new Texture[4];
-
-        this.imgs[0] = Surface.INSTANCE.createTexture("gui.ao", "noland", true);
-        this.imgs[1] = Surface.INSTANCE.createTexture("gui.ao", "Presentacion5", true);
-        this.imgs[2] = Surface.INSTANCE.createTexture("gui.ao", "Presentacion6", true);
-        this.imgs[3] = Surface.INSTANCE.createTexture("gui.ao", "Presentacion7", true);
+        this.nolandLogo = Surface.INSTANCE.createTexture("gui.ao", "argentumforge", true);
     }
 
     @Override
@@ -70,9 +62,7 @@ public final class IntroScene extends Scene {
     @Override
     public void render() {
         if (!visible) return; // Si no dejamos esto, es posible que al cerrarse la escena genere un NullPointerException.
-        // mientras no termine su tiempo se va a renderizar el efecto del logo.
-        if (timeLogo >= 0) effectNoLandStudios();
-        else showPresentation();
+        effectArgentumForge();
         checkEndScene();
     }
 
@@ -85,18 +75,6 @@ public final class IntroScene extends Scene {
     }
 
     /**
-     * Muestra y cambia la interfaz de presentacion (ya que son varias imagenes)
-     */
-    private void showPresentation() {
-        if (timePresentation <= 0 && nextInterface < 3) {
-            timePresentation = 3.75f;
-            nextInterface++;
-        }
-        geometryBoxRenderGUI(imgs[nextInterface], 0, 0, alphaInterface);
-        timePresentation -= deltaTime;
-    }
-
-    /**
      * Actualiza el tiempo total de la escena y al finalizar cambia de escena.
      */
     private void checkEndScene() {
@@ -105,12 +83,11 @@ public final class IntroScene extends Scene {
     }
 
     /**
-     * Efecto de logo No-Land Studios
+     * Efecto de logo Argentum Forge
      */
-    private void effectNoLandStudios() {
+    private void effectArgentumForge() {
         alphaInterface += 0.3f * deltaTime;
-        geometryBoxRenderGUI(imgs[0], 0, 0, alphaInterface);
-        timeLogo -= deltaTime;
+        geometryBoxRenderGUI(nolandLogo, 0, 0, alphaInterface);
     }
 
 }

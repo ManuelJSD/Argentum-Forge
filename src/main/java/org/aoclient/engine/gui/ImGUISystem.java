@@ -1,9 +1,6 @@
 package org.aoclient.engine.gui;
 
-import imgui.ImFontAtlas;
-import imgui.ImFontConfig;
-import imgui.ImGui;
-import imgui.ImGuiIO;
+import imgui.*;
 import imgui.callback.ImStrConsumer;
 import imgui.callback.ImStrSupplier;
 import imgui.flag.ImGuiBackendFlags;
@@ -12,6 +9,7 @@ import imgui.flag.ImGuiKey;
 import imgui.flag.ImGuiMouseCursor;
 import imgui.gl3.ImGuiImplGl3;
 import org.aoclient.engine.Window;
+import org.aoclient.engine.game.console.ImGuiFonts;
 import org.aoclient.engine.gui.forms.Form;
 
 import java.util.ArrayList;
@@ -166,29 +164,18 @@ public enum ImGUISystem {
         fontConfig.setPixelSnapH(true);
         fontConfig.setGlyphRanges(fontAtlas.getGlyphRangesCyrillic());
 
-        // We merge font loaded from resources with the default one. Thus we will get an absent cyrillic glyphs
-        //fontAtlas.addFontFromMemoryTTF(loadFromResources("basis33.ttf"), 16, fontConfig);
 
-        // Disable merged mode and add all other fonts normally
-        //fontConfig.setMergeMode(false);
-        //fontConfig.setPixelSnapH(false);
+        fontConfig.setMergeMode(false);
+        fontConfig.setPixelSnapH(false);
 
-        // ------------------------------
-        // Fonts from file/memory example
+        fontConfig.setRasterizerMultiply(1.2f);
 
-        //fontConfig.setRasterizerMultiply(1.2f); // This will make fonts a bit more readable
+        ImGuiFonts.fontRegular      = fontAtlas.addFontFromFileTTF("resources/fonts/LiberationSans-Regular.ttf", 13);
+        ImGuiFonts.fontBold         = fontAtlas.addFontFromFileTTF("resources/fonts/LiberationSans-Bold.ttf", 13);
+        ImGuiFonts.fontItalic       = fontAtlas.addFontFromFileTTF("resources/fonts/LiberationSans-Italic.ttf", 13);
+        ImGuiFonts.fontBoldItalic   = fontAtlas.addFontFromFileTTF("resources/fonts/LiberationSans-BoldItalic.ttf", 13);
 
-        // We can add new fonts directly from file
-        //fontAtlas.addFontFromFileTTF("src/test/resources/DroidSans.ttf", 13, fontConfig);
-        //fontAtlas.addFontFromFileTTF("src/test/resources/DroidSans.ttf", 14, fontConfig);
-
-        // Or directly from memory
-        //fontConfig.setName("Roboto-Regular.ttf, 13px"); // This name will be displayed in Style Editor
-        //fontAtlas.addFontFromMemoryTTF(loadFromResources("Roboto-Regular.ttf"), 13, fontConfig);
-        //fontConfig.setName("Roboto-Regular.ttf, 14px"); // We can apply a new config value every time we add a new font
-        //fontAtlas.addFontFromMemoryTTF(loadFromResources("Roboto-Regular.ttf"), 14, fontConfig);
-
-        fontConfig.destroy(); // After all fonts were added we don't need this config more
+        fontConfig.destroy();
     }
 
     public void destroy() {
@@ -197,14 +184,14 @@ public enum ImGUISystem {
     }
 
     public void renderGUI() {
+        final ImGuiIO io = ImGui.getIO();
+        if (io.getDeltaTime() <= 0) return;
+
         // Get window size properties and mouse position
         glfwGetWindowSize(window.getWindow(), winWidth, winHeight);
         glfwGetFramebufferSize(window.getWindow(), fbWidth, fbHeight);
         glfwGetCursorPos(window.getWindow(), mousePosX, mousePosY);
 
-        // IMPORTANT!!
-        // We SHOULD call those methods to update ImGui state for current frame
-        final ImGuiIO io = ImGui.getIO();
         io.setDisplaySize(winWidth[0], winHeight[0]);
         io.setDisplayFramebufferScale((float) fbWidth[0] / winWidth[0], (float) fbHeight[0] / winHeight[0]);
         io.setMousePos((float) mousePosX[0], (float) mousePosY[0]);

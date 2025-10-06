@@ -1,5 +1,7 @@
 package org.aoclient.network.protocol.handlers;
 
+import org.aoclient.engine.gui.ImGUISystem;
+import org.aoclient.engine.gui.forms.FForum;
 import org.aoclient.network.PacketBuffer;
 import org.tinylog.Logger;
 
@@ -18,6 +20,9 @@ public class ShowForumFormHandler implements PacketHandler {
         //    If Not MirandoForo Then
         //        frmForo.Show , //FrmMain
         //    End If
+
+        ImGUISystem.INSTANCE.show(new FForum(privilegios, canPostSticky));
+
         Logger.debug("handleShowForumForm Cargado! - FALTA TERMINAR!");
     }
 

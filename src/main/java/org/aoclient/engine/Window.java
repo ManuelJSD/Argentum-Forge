@@ -37,7 +37,7 @@ import static org.lwjgl.system.MemoryUtil.NULL;
  * actual. Al cerrar la aplicacion, esta clase se encarga de liberar correctamente todos los recursos asociados a los contextos de
  * OpenGL y OpenAL.
  * <p>
- * La clase mantiene las dimensiones constantes de la ventana (800x600) y gestiona el posicionamiento centrado en la pantalla del
+ * La clase mantiene las dimensiones constantes de la ventana (1024x1024) y gestiona el posicionamiento centrado en la pantalla del
  * usuario.
  */
 
@@ -59,7 +59,7 @@ public enum Window {
     private long cursorCrosshairID;
 
     Window() {
-        this.title = "Argentum Online Java";
+        this.title = "Argentum Forge";
         this.width = SCREEN_WIDTH;
         this.height = SCREEN_HEIGHT;
         this.cursorCrosshair = false;
@@ -202,7 +202,7 @@ public enum Window {
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
         glViewport(0, 0, width, height);
-        glOrtho(0, 800, 600, 0, 1, -1);
+        glOrtho(0, 1024, 1024, 0, 1, -1);
 
         glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
         glEnable(GL_ALPHA);

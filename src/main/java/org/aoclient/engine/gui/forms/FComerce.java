@@ -6,8 +6,9 @@ import imgui.flag.ImGuiCond;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImString;
-import org.aoclient.engine.game.Console;
-import org.aoclient.engine.game.User;
+import org.aoclient.engine.game.Messages;
+import org.aoclient.engine.game.console.Console;
+import org.aoclient.engine.game.console.FontStyle;
 import org.aoclient.engine.game.inventory.NPCInventory;
 import org.aoclient.engine.game.inventory.UserInventory;
 import org.aoclient.engine.renderer.RGBColor;
@@ -16,6 +17,7 @@ import java.io.IOException;
 
 import static org.aoclient.engine.audio.Sound.SND_CLICK;
 import static org.aoclient.engine.audio.Sound.playSound;
+import static org.aoclient.engine.game.Messages.MessageKey.ORO_INSUFICIENTE;
 import static org.aoclient.network.protocol.Protocol.*;
 
 /**
@@ -82,7 +84,7 @@ public final class FComerce extends Form {
                     commerceBuy(invNPC.getSlotSelected() + 1, Integer.parseInt(cant.get()));
                 }
             } else {
-                Console.INSTANCE.addMsgToConsole("No tienes oro suficiente.", true, false, new RGBColor(1f, 0.1f, 0.1f));
+                Console.INSTANCE.addMsgToConsole(Messages.get(ORO_INSUFICIENTE), FontStyle.BOLD, new RGBColor(1f, 0.1f, 0.1f));
             }
 
         }
