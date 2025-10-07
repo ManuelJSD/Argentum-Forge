@@ -70,7 +70,7 @@ public final class Engine {
         batch = new BatchRenderer();
 
         changeScene(INTRO_SCENE);
-        playMusic("intro.ogg");
+        //playMusic("intro.ogg");
     }
 
     /**

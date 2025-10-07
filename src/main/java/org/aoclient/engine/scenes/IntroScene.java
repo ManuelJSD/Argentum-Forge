@@ -16,7 +16,7 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_ENTER;
  * Esta escena maneja un temporizador que controla la duracion de su visualizacion y los efectos de fade-in/fade-out para las
  * imagenes mostradas. La secuencia incluye varios elementos visuales en el siguiente orden:
  * <ul>
- * <li>Logo de NoLand Studios con efecto de aparicion gradual
+ * <li>Logo de ArgentumForge con efecto de aparicion gradual
  * <li>Serie de imagenes de presentacion que se muestran secuencialmente
  * <li>Efecto de transicion hacia la {@code MainScene} al finalizar la secuencia
  * </ul>
@@ -33,14 +33,14 @@ public final class IntroScene extends Scene {
     private float timeScene = 5.0f; // 5 segundos de intro.
     private float alphaInterface;
 
-    private Texture nolandLogo;
+    private Texture ArgentumForgeLogo;
 
     @Override
     public void init() {
         super.init();
         this.alphaInterface = 0.0f;
         this.canChangeTo = SceneType.MAIN_SCENE;
-        this.nolandLogo = Surface.INSTANCE.createTexture("gui.ao", "argentumforge", true);
+        this.ArgentumForgeLogo = Surface.INSTANCE.createTexture("gui.ao", "argentumforge", true);
     }
 
     @Override
@@ -87,7 +87,7 @@ public final class IntroScene extends Scene {
      */
     private void effectArgentumForge() {
         alphaInterface += 0.3f * deltaTime;
-        geometryBoxRenderGUI(nolandLogo, 0, 0, alphaInterface);
+        geometryBoxRenderGUI(ArgentumForgeLogo, 0, 0, alphaInterface);
     }
 
 }
