@@ -2,7 +2,7 @@ plugins {
     id 'java'
 }
 
-group = 'org.aoclient'
+group = 'org.argentumforge'
 version = '1.0-SNAPSHOT'
 
 import org.gradle.internal.os.OperatingSystem

@@ -47,7 +47,7 @@ git clone https://github.com/gasti-jm/argentum-online-lwjgl3.git
    - Usando Gradle directamente: `./gradlew build`
 
 4. Ejecutar el proyecto:
-   - Localiza la clase principal `org.aoclient.engine.Main`
+   - Localiza la clase principal `org.argentumforge.engine.Main`
    - Haz clic derecho y selecciona 'Run' o presiona Shift+F10
 
 # Notas de Desarrollo
