@@ -8,8 +8,10 @@ import org.argentumforge.engine.gui.ImGUISystem;
 import org.argentumforge.engine.gui.forms.FMain;
 import org.argentumforge.engine.listeners.KeyHandler;
 import org.argentumforge.engine.listeners.MouseListener;
+import org.argentumforge.engine.utils.editor.Surface;
 
 import static org.argentumforge.engine.game.IntervalTimer.INT_SENTRPU;
+import static org.argentumforge.engine.game.models.Character.drawCharacter;
 import static org.argentumforge.engine.game.models.Key.TALK;
 import static org.argentumforge.engine.renderer.Drawn.drawTexture;
 import static org.argentumforge.engine.scenes.Camera.*;
@@ -59,6 +61,9 @@ public final class GameScene extends Scene {
     private float alphaCeiling = 1.0f;
     private boolean autoMove = false;
     private FMain frmMain;
+    private Surface surface;
+
+    private boolean DeleteLayer;
 
     @Override
     public void init() {
@@ -67,17 +72,22 @@ public final class GameScene extends Scene {
         canChangeTo = SceneType.MAIN_SCENE;
         weather = Weather.INSTANCE;
         frmMain = new FMain();
+        surface = Surface.getInstance();
 
         ImGUISystem.INSTANCE.addFrm(frmMain);
+
     }
 
     @Override
     public void render() {
+        // MODO EDITOR: Check de desconexión deshabilitado
         // si el usuario se desconecta debe regresar al menu principal.
+        /*
         if (!user.isUserConected()) {
             frmMain.close();
             this.close();
         }
+        */
 
         if (!visible) return;
 
@@ -114,64 +124,20 @@ public final class GameScene extends Scene {
      */
     @Override
     public void mouseEvents() {
-        if (user.isUserComerciando() || !ImGUISystem.INSTANCE.isMainLast()) return;
+        if (!ImGUISystem.INSTANCE.isMainLast()) return;
 
         // Estamos haciendo click en el render?
         if (inGameArea()) {
-            if (MouseListener.mouseButtonClick(GLFW_MOUSE_BUTTON_LEFT)) {
-                if (user.getUsingSkill() == 0) {
+            if (MouseListener.mouseButtonDown(GLFW_MOUSE_BUTTON_LEFT)) {
 
-                    // Estamos manteniendo Shift derecho?
-                    if ((KeyHandler.isKeyPressed(GLFW_KEY_RIGHT_SHIFT) || KeyHandler.isKeyPressed(GLFW_KEY_LEFT_SHIFT)) &&
-                            charList[user.getUserCharIndex()].getPriv() != 0) {
+                int x = getTileMouseX((int) MouseListener.getX() - POS_SCREEN_X);
+                int y = getTileMouseY((int) MouseListener.getY() - POS_SCREEN_Y);
 
-                        teleport("YO",
-                                user.getUserMap(),
-                                getTileMouseX((int) MouseListener.getX() - POS_SCREEN_X),
-                                getTileMouseY((int) MouseListener.getY() - POS_SCREEN_Y));
+                surface.surface_edit(x, y);
 
-                    } else {
-
-                        leftClick(
-                                getTileMouseX((int) MouseListener.getX() - POS_SCREEN_X),
-                                getTileMouseY((int) MouseListener.getY() - POS_SCREEN_Y));
-
-                    }
-
-                }
             }
 
-            if (MouseListener.mouseButtonReleased(GLFW_MOUSE_BUTTON_LEFT)) {
-                if (user.getUsingSkill() != 0) {
-                    workLeftClick(getTileMouseX((int) MouseListener.getX() - POS_SCREEN_X),
-                            getTileMouseY((int) MouseListener.getY() - POS_SCREEN_Y),
-                            user.getUsingSkill());
-
-                    user.setUsingSkill(0);
-                    Window.INSTANCE.setCursorCrosshair(false);
-                }
-            }
         }
-
-        // si no agrego esto, pierde el foco al npc selecionado.
-        // por ende al comerciar no va a permitir comprar o vender.
-
-
-        // estamos haciendo click en el inventario?
-        if (user.getUserInventory().inInventoryArea()) {
-            if (MouseListener.mouseButtonClick(GLFW_MOUSE_BUTTON_LEFT)) {
-                // cheakeamos tambien del inventario
-                user.getUserInventory().clickInventory();
-            }
-        }
-
-        // estamos haciendo doble click?
-        if (MouseListener.mouseButtonDoubleClick(GLFW_MOUSE_BUTTON_LEFT)) {
-            user.getUserInventory().dobleClickInventory();
-        } else if (MouseListener.mouseButtonDoubleClick(GLFW_MOUSE_BUTTON_RIGHT)) {
-            doubleClick(getTileMouseX((int) MouseListener.getX() - POS_SCREEN_X), getTileMouseY((int) MouseListener.getY() - POS_SCREEN_Y));
-        }
-
 
     }
 
@@ -356,11 +322,11 @@ public final class GameScene extends Scene {
                 }
 
                 //TODO: Reutilizar para modo caminata
-/*                if (mapData[x][y].getCharIndex() != 0) {
+                if (mapData[x][y].getCharIndex() != 0) {
                     drawCharacter(mapData[x][y].getCharIndex(),
                             POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX,
                             POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY, weather.getWeatherColor());
-                }*/
+                }
 
 
                 if (mapData[x][y].getLayer(3).getGrhIndex() != 0) {

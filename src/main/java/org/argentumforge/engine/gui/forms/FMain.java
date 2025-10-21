@@ -5,6 +5,7 @@ import imgui.flag.*;
 import imgui.type.ImString;
 import org.argentumforge.engine.Window;
 import org.argentumforge.engine.game.console.Console;
+import org.argentumforge.engine.gui.ImGUISystem;
 
 import static org.argentumforge.engine.gui.forms.FCreateCharacter.sendCreate;
 import static org.argentumforge.engine.utils.Time.FPS;
@@ -34,15 +35,10 @@ import static org.argentumforge.engine.utils.Time.FPS;
 
 public final class FMain extends Form {
 
-    private final ImString sendText = new ImString();
-
     private static final int TRANSPARENT_COLOR = ImGui.getColorU32(0f, 0f, 0f, 0f);
 
     public FMain() {
-        sendCreate = false; // una vez logiado resetiamos esto para que se pueda volver a crear pj.
-        USER.getUserInventory().setVisible(true);
-
-        Console.INSTANCE.clearConsole();
+        ImGUISystem.INSTANCE.show(new FSurfaceEditor());
 
     }
 

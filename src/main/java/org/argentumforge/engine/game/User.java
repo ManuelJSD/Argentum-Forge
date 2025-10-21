@@ -102,6 +102,8 @@ public enum User {
 
     private int privilege;
 
+    private boolean walkingmode;
+
     User() {
         this.userPos = new Position();
         this.addToUserPos = new Position();
@@ -110,6 +112,7 @@ public enum User {
         this.talking = false;
         this.userNavegando = false;
         this.userComerciando = false;
+        this.walkingmode = false;
     }
 
     public void resetGameState() {
@@ -327,10 +330,15 @@ public enum User {
             case LEFT -> moveToLegalPos(userPos.getX() - 1, userPos.getY());
         };
         if (legalOk && !charList[userCharIndex].isParalizado()) {
-            walk(direction);
+            // MODO EDITOR: Deshabilitado envío al servidor
+            // walk(direction);
             moveScreen(direction);
             moveCharbyHead(userCharIndex, direction);
-        } else if (charList[userCharIndex].getHeading() != direction) changeHeading(direction);
+        } else if (charList[userCharIndex].getHeading() != direction) {
+            // MODO EDITOR: Deshabilitado envío al servidor
+            // changeHeading(direction);
+            charList[userCharIndex].setHeading(direction);
+        }
 
     }
 
@@ -340,19 +348,21 @@ public enum User {
      *                  EN PROGRESO....
      */
     public void doPasosFx(int charIndex) {
-        if (!userNavegando) {
-            if (!charList[charIndex].isDead()
-                    && estaPCarea(charIndex)
-                    && (charList[charIndex].getPriv() == 0 || charList[charIndex].getPriv() > 5)) {
-                if (charList[charIndex].isPie()) {
-                    playSound(SND_PASOS1);
-                    charList[charIndex].setPie(false);
-                } else {
-                    playSound(SND_PASOS2);
-                    charList[charIndex].setPie(true);
+        if (walkingmode) {
+            if (!userNavegando) {
+                if (!charList[charIndex].isDead()
+                        && estaPCarea(charIndex)
+                        && (charList[charIndex].getPriv() == 0 || charList[charIndex].getPriv() > 5)) {
+                    if (charList[charIndex].isPie()) {
+                        playSound(SND_PASOS1);
+                        charList[charIndex].setPie(false);
+                    } else {
+                        playSound(SND_PASOS2);
+                        charList[charIndex].setPie(true);
+                    }
                 }
-            }
 
+            }
         }
     }
 
@@ -743,31 +753,36 @@ public enum User {
     private boolean moveToLegalPos(int x, int y) {
         // Limite del mapa
         if (x < minXBorder || x > maxXBorder || y < minYBorder || y > maxYBorder) return false;
-        // Tile Bloqueado?
-        if (mapData[x][y].getBlocked()) return false;
 
-        final int charIndex = mapData[x][y].getCharIndex();
+        //Modo caminata activo??
+        if (walkingmode) {
 
-        // ¿Hay un personaje?
-        if (charIndex > 0) {
-            if (mapData[userPos.getX()][userPos.getY()].getBlocked()) return false;
-            if (charList[charIndex].getiHead() != CASPER_HEAD && charList[charIndex].getiBody() != FRAGATA_FANTASMAL) {
-                return false;
-            } else {
-                // No puedo intercambiar con un casper que este en la orilla (Lado tierra)
-                if (hayAgua(userPos.getX(), userPos.getY())) {
-                    if (!hayAgua(x, y)) return false;
+            // Tile Bloqueado?
+            if (mapData[x][y].getBlocked()) return false;
+
+            final int charIndex = mapData[x][y].getCharIndex();
+
+            // ¿Hay un personaje?
+            if (charIndex > 0) {
+                if (mapData[userPos.getX()][userPos.getY()].getBlocked()) return false;
+                if (charList[charIndex].getiHead() != CASPER_HEAD && charList[charIndex].getiBody() != FRAGATA_FANTASMAL) {
+                    return false;
                 } else {
-                    // No puedo intercambiar con un casper que este en la orilla (Lado agua)
-                    if (hayAgua(x, y)) return false;
-                }
-                // Los admins no pueden intercambiar pos con caspers cuando estan invisibles
-                if (charList[userCharIndex].getPriv() > 0 && charList[userCharIndex].getPriv() < 6) {
-                    if (charList[userCharIndex].isInvisible()) return false;
+                    // No puedo intercambiar con un casper que este en la orilla (Lado tierra)
+                    if (hayAgua(userPos.getX(), userPos.getY())) {
+                        if (!hayAgua(x, y)) return false;
+                    } else {
+                        // No puedo intercambiar con un casper que este en la orilla (Lado agua)
+                        if (hayAgua(x, y)) return false;
+                    }
+                    // Los admins no pueden intercambiar pos con caspers cuando estan invisibles
+                    if (charList[userCharIndex].getPriv() > 0 && charList[userCharIndex].getPriv() < 6) {
+                        if (charList[userCharIndex].isInvisible()) return false;
+                    }
+
                 }
 
             }
-
         }
 
         if (userNavegando != hayAgua(x, y)) return false;
