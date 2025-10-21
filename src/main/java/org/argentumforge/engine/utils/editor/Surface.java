@@ -59,7 +59,8 @@ public class Surface {
     }
 
     private void insert(int x, int y) {
-
+        mapData[x][y].getLayer(layer).setGrhIndex(surfaceIndex);
+        mapData[x][y].setLayer(layer, initGrh(mapData[x][y].getLayer(layer), mapData[x][y].getLayer(layer).getGrhIndex(), true));
     }
 
     private void delete(int x, int y) {
