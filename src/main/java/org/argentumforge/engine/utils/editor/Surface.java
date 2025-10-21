@@ -64,7 +64,11 @@ public class Surface {
     }
 
     private void delete(int x, int y) {
-        mapData[x][y].getLayer(layer).setGrhIndex(1);
+        if (layer == 1) {
+            mapData[x][y].getLayer(layer).setGrhIndex(1);
+        } else {
+            mapData[x][y].getLayer(layer).setGrhIndex(0);
+        }
         mapData[x][y].setLayer(layer, initGrh(mapData[x][y].getLayer(layer), mapData[x][y].getLayer(layer).getGrhIndex(), true));
     }
 

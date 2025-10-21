@@ -9,6 +9,7 @@ import org.argentumforge.engine.gui.forms.FMain;
 import org.argentumforge.engine.listeners.KeyHandler;
 import org.argentumforge.engine.listeners.MouseListener;
 import org.argentumforge.engine.utils.editor.Surface;
+import org.argentumforge.engine.utils.inits.GrhInfo;
 
 import static org.argentumforge.engine.game.IntervalTimer.INT_SENTRPU;
 import static org.argentumforge.engine.game.models.Character.drawCharacter;
@@ -363,7 +364,6 @@ public final class GameScene extends Scene {
             }
         }
     }
-
 
     /**
      * Detecta si el usuario esta debajo del techo. Si es asi, se desvanecera y en caso contrario re aparece.
