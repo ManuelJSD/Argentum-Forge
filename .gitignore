@@ -41,6 +41,7 @@ bin/
 ### Extra ###
 Server/
 git
+Documentacion/
 ### ImGui ###
 resources/gui.ini
 

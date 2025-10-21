@@ -9,14 +9,18 @@ import imgui.type.ImString;
 import org.argentumforge.engine.Engine;
 import org.argentumforge.engine.Window;
 import org.argentumforge.engine.game.Messages;
+import org.argentumforge.engine.game.User;
+import org.argentumforge.engine.game.models.Direction;
 import org.argentumforge.engine.gui.ImGUISystem;
 import org.argentumforge.engine.gui.widgets.ImageButton3State;
+import org.argentumforge.engine.utils.GameData;
 import org.argentumforge.network.Connection;
 
 import java.io.IOException;
 
 import static org.argentumforge.engine.audio.Sound.playMusic;
 import static org.argentumforge.engine.game.Messages.MessageKey.ENTER_USER_PASS;
+import static org.argentumforge.engine.utils.GameData.charList;
 import static org.argentumforge.engine.utils.GameData.options;
 import static org.argentumforge.network.protocol.Protocol.loginExistingChar;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ENTER;
@@ -45,19 +49,9 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_ENTER;
 
 public final class FConnect extends Form {
 
-    private final ImString ipStr = new ImString(options.getIpServer());
-    private final ImString portStr = new ImString(options.getPortServer());
-    private final ImString nickStr = new ImString(options.getNick());
-    private final ImString passStr = new ImString();
-
     // Botones gráficos de 3 estados
     private ImageButton3State btnConnect;
     private ImageButton3State btnCreateCharacter;
-    private ImageButton3State btnRecovery;
-    private ImageButton3State btnManual;
-    private ImageButton3State btnRules;
-    private ImageButton3State btnSourceCode;
-    private ImageButton3State btnDeleteCharacter;
     private ImageButton3State btnExit;
 
     public FConnect() {
@@ -75,36 +69,6 @@ public final class FConnect extends Form {
                 loadTexture("BotonCrearPersonajeRolloverConectar"),
                 loadTexture("BotonCrearPersonajeClickConectar"),
                 45, 561, 89, 25
-            );
-            btnRecovery = new ImageButton3State(
-                loadTexture("BotonRecuperarPass"),
-                loadTexture("BotonRecuperarPassRollover"),
-                loadTexture("BotonRecuperarPassClick"),
-                149, 561, 89, 25
-            );
-            btnManual = new ImageButton3State(
-                loadTexture("BotonManual"),
-                loadTexture("BotonManualRollover"),
-                loadTexture("BotonManualClick"),
-                253, 561, 89, 25
-            );
-            btnRules = new ImageButton3State(
-                loadTexture("BotonReglamento"),
-                loadTexture("BotonReglamentoRollover"),
-                loadTexture("BotonReglamentoClick"),
-                357, 561, 89, 25
-            );
-            btnSourceCode = new ImageButton3State(
-                loadTexture("BotonCodigoFuente"),
-                loadTexture("BotonCodigoFuenteRollover"),
-                loadTexture("BotonCodigoFuenteClick"),
-                461, 561, 89, 25
-            );
-            btnDeleteCharacter = new ImageButton3State(
-                loadTexture("BotonBorrarPersonaje"),
-                loadTexture("BotonBorrarPersonajeRollover"),
-                loadTexture("BotonBorrarPersonajeClick"),
-                565, 561, 89, 25
             );
             btnExit = new ImageButton3State(
                 loadTexture("BotonSalirConnect"),
@@ -134,99 +98,74 @@ public final class FConnect extends Form {
 
         ImGui.getWindowDrawList().addImage(backgroundImage, 0, 0, Window.INSTANCE.getWidth(), Window.INSTANCE.getHeight());
 
-        //txtPort
-        ImGui.setCursorPos(329, 180);
-        ImGui.pushItemWidth(58);
-        ImGui.pushStyleColor(ImGuiCol.FrameBg, 0f, 0f, 0f, 1f);
-        ImGui.pushStyleColor(ImGuiCol.Text, 0f, 1f, 0f, 1f);
-
-        ImGui.pushID("Port");
-        ImGui.inputText("", portStr, ImGuiInputTextFlags.CharsDecimal);
-        ImGui.popID();
-
-        ImGui.popStyleColor();
-        ImGui.popStyleColor();
-        ImGui.popItemWidth();
-
-        //txtIP
-        ImGui.setCursorPos(389, 180);
-        ImGui.pushItemWidth(107);
-        ImGui.pushStyleColor(ImGuiCol.FrameBg, 0f, 0f, 0f, 1f);
-        ImGui.pushStyleColor(ImGuiCol.Text, 0f, 1f, 0f, 1f);
-
-        ImGui.pushID("IP Server");
-        ImGui.inputText("", ipStr, ImGuiInputTextFlags.CallbackResize);
-        ImGui.popID();
-
-        ImGui.popStyleColor();
-        ImGui.popStyleColor();
-        ImGui.popItemWidth();
-
-        //txtNickname
-        ImGui.setCursorPos(329, 214);
-        ImGui.pushItemWidth(167);
-        ImGui.pushStyleColor(ImGuiCol.FrameBg, 0, 0, 0, 1);
-
-        ImGui.pushID("Nickname");
-        ImGui.inputText("", nickStr, ImGuiInputTextFlags.CallbackResize);
-        ImGui.popID();
-
-        ImGui.popStyleColor();
-        ImGui.popItemWidth();
-
-        //txtPassword
-        ImGui.setCursorPos(329, 247);
-        ImGui.pushItemWidth(167);
-        ImGui.pushStyleColor(ImGuiCol.FrameBg, 0, 0, 0, 1);
-
-        ImGui.pushID("Password");
-        ImGui.inputText("", passStr, ImGuiInputTextFlags.Password | ImGuiInputTextFlags.CallbackResize);
-        ImGui.popID();
-
-        ImGui.popStyleColor();
-        ImGui.popItemWidth();
-
         // Botones gráficos de 3 estados
         if (btnConnect.render() || ImGui.isKeyPressed(GLFW_KEY_ENTER)) this.buttonConnect();
         if (btnCreateCharacter.render()) this.buttonCreateCharacter();
-        if (btnRecovery.render()) {
-            // Acción para recuperar contraseña (a implementar)
-        }
-        if (btnManual.render()) this.openURL("http://wiki.argentumonline.org/");
-        if (btnRules.render()) this.openURL("http://wiki.argentumonline.org/reglamento.html");
-        if (btnSourceCode.render()) this.openURL("https://github.com/gasti-jm/argentum-online-lwjgl3");
-        if (btnDeleteCharacter.render()) {
-            // Acción para borrar personaje (a implementar)
-        }
         if (btnExit.render()) this.buttonExitGame();
 
         ImGui.end();
     }
 
     private void buttonConnect() {
-        options.setIpServer(ipStr.get());
-        options.setPortServer(portStr.get());
-        if (!nickStr.get().isEmpty() && !passStr.get().isEmpty()) {
-            new Thread(() -> {
-                if (Connection.INSTANCE.connect()) loginExistingChar(nickStr.get(), passStr.get());
-            }).start();
-            options.setNick(nickStr.get());
-            USER.setUserName(nickStr.get());
-        } else ImGUISystem.INSTANCE.show(new FMessage(Messages.get(ENTER_USER_PASS)));
+
+        User.INSTANCE.setUserName("Editor");
+        // Simular conexión exitosa
+        simulateEditorConnection();
+
+    }
+    
+    /**
+     * Simula una conexión exitosa para modo editor (sin servidor).
+     * Inicializa todos los datos necesarios para que GameScene funcione localmente.
+     */
+    private void simulateEditorConnection() {
+        User user = User.INSTANCE;
+        
+        // 1. Configurar posición inicial del usuario
+        int startX = 50;
+        int startY = 50;
+        short charIndex = 1;
+        
+        user.getUserPos().setX(startX);
+        user.getUserPos().setY(startY);
+        user.setUserMap((short) 1);
+        user.setUserCharIndex(charIndex);
+        
+        // 2. Cargar mapa inicial (DEBE hacerse ANTES de configurar el personaje en mapData)
+        GameData.loadMap(1);
+        
+        // 3. Configurar el personaje en charList
+        charList[charIndex].getPos().setX(startX);
+        charList[charIndex].getPos().setY(startY);
+        charList[charIndex].setHeading(Direction.DOWN);
+        charList[charIndex].setiBody(1);      // ID del cuerpo gráfico
+        charList[charIndex].setiHead(1);      // ID de la cabeza gráfica
+        charList[charIndex].setDead(false);
+        charList[charIndex].setPriv(25);      // Privilegios de administrador
+        charList[charIndex].setActive(true);  // Marcar como activo
+        
+        // 4. Registrar el personaje en el mapa (CRÍTICO)
+        GameData.mapData[startX][startY].setCharIndex(charIndex);
+        
+        // 5. Actualizar áreas de visión
+        user.areaChange(startX, startY);
+        
+        // 6. Inicializar estados
+        user.setUserMoving(false);
+        user.setUserNavegando(false);
+        user.setUserComerciando(false);
+        
+        // 7. Marcar como conectado (esto activa la transición a GameScene)
+        user.setUserConected(true);
     }
 
     private void buttonCreateCharacter() {
         ImGUISystem.INSTANCE.show(new FCreateCharacter());
-        playMusic("7.ogg");
+        //playMusic("7.ogg");
 
         btnConnect.delete();
         btnCreateCharacter.delete();
         btnExit.delete();
-        btnManual.delete();
-        btnRecovery.delete();
-        btnDeleteCharacter.delete();
-        btnRules.delete();
-        btnSourceCode.delete();
         this.close();
     }
 
