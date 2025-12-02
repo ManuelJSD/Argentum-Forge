@@ -9,12 +9,14 @@ import org.argentumforge.engine.gui.forms.FMain;
 import org.argentumforge.engine.listeners.KeyHandler;
 import org.argentumforge.engine.listeners.MouseListener;
 import org.argentumforge.engine.utils.editor.Surface;
+import org.argentumforge.engine.utils.editor.Block;
 import org.argentumforge.engine.utils.inits.GrhInfo;
 
 import static org.argentumforge.engine.game.IntervalTimer.INT_SENTRPU;
 import static org.argentumforge.engine.game.models.Character.drawCharacter;
 import static org.argentumforge.engine.game.models.Key.TALK;
 import static org.argentumforge.engine.renderer.Drawn.drawTexture;
+import static org.argentumforge.engine.renderer.Drawn.drawColoredRect;
 import static org.argentumforge.engine.scenes.Camera.*;
 import static org.argentumforge.engine.utils.GameData.*;
 import static org.argentumforge.engine.utils.Time.deltaTime;
@@ -63,6 +65,7 @@ public final class GameScene extends Scene {
     private boolean autoMove = false;
     private FMain frmMain;
     private Surface surface;
+    private Block block;
 
     private boolean DeleteLayer;
 
@@ -74,6 +77,7 @@ public final class GameScene extends Scene {
         weather = Weather.INSTANCE;
         frmMain = new FMain();
         surface = Surface.getInstance();
+        block = Block.getInstance();
 
         ImGUISystem.INSTANCE.addFrm(frmMain);
 
@@ -134,7 +138,9 @@ public final class GameScene extends Scene {
                 int x = getTileMouseX((int) MouseListener.getX() - POS_SCREEN_X);
                 int y = getTileMouseY((int) MouseListener.getY() - POS_SCREEN_Y);
 
+                // Editar superficies o bloqueos según el modo activo
                 surface.surface_edit(x, y);
+                block.block_edit(x, y);
 
             }
 
@@ -253,6 +259,11 @@ public final class GameScene extends Scene {
         }
 
         renderFourthLayer(pixelOffsetX, pixelOffsetY);
+
+        // Renderizar overlays de bloqueos si está activado
+        if (block.isShowBlocks()) {
+            renderBlockOverlays(pixelOffsetX, pixelOffsetY);
+        }
 
         Dialogs.updateDialogs();
         Rain.INSTANCE.render(weather.getWeatherColor());
@@ -401,6 +412,34 @@ public final class GameScene extends Scene {
      */
     private byte getTileMouseY(int mouseY) {
         return (byte) (user.getUserPos().getY() + mouseY / TILE_PIXEL_SIZE - HALF_WINDOW_TILE_HEIGHT);
+    }
+
+    /**
+     * Renderiza overlays rojos semi-transparentes sobre los tiles bloqueados del mapa.
+     * Solo se renderiza cuando el modo de visualización de bloqueos está activado.
+     */
+    private void renderBlockOverlays(final int pixelOffsetX, final int pixelOffsetY) {
+        camera.setScreenY(camera.getMinYOffset() - TILE_BUFFER_SIZE);
+        for (int y = camera.getMinY(); y <= camera.getMaxY(); y++) {
+            camera.setScreenX(camera.getMinXOffset() - TILE_BUFFER_SIZE);
+            for (int x = camera.getMinX(); x <= camera.getMaxX(); x++) {
+                
+                // Si el tile está bloqueado, dibujamos un overlay rojo
+                if (mapData[x][y].getBlocked()) {
+                    drawColoredRect(
+                            POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX,
+                            POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY,
+                            TILE_PIXEL_SIZE,
+                            TILE_PIXEL_SIZE,
+                            new org.argentumforge.engine.renderer.RGBColor(1.0f, 0.0f, 0.0f), // Rojo
+                            0.4f // Alpha semi-transparente
+                    );
+                }
+                
+                camera.incrementScreenX();
+            }
+            camera.incrementScreenY();
+        }
     }
 
 }
