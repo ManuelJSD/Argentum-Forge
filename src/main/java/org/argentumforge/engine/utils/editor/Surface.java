@@ -4,7 +4,10 @@ import static org.argentumforge.engine.utils.GameData.initGrh;
 import static org.argentumforge.engine.utils.GameData.mapData;
 
 public class Surface {
-    private static final Surface instance = new Surface();
+
+    private static volatile Surface instance;
+    private static final Object lock = new Object();
+
     private int mode;
     private int surfaceIndex;
     private int layer;
@@ -16,7 +19,21 @@ public class Surface {
     }
 
     public static Surface getInstance() {
+        if (instance == null) {
+            synchronized (lock) {
+                if (instance == null) {
+                    instance = new Surface();
+                }
+            }
+        }
         return instance;
+    }
+
+    //Para testing
+    public static void resetInstance() {
+        synchronized (lock) {
+            instance = null;
+        }
     }
 
     public int getMode() {

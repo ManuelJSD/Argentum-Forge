@@ -234,4 +234,22 @@ public final class Drawn {
         glEnd();
     }
 
+    /**
+     * Dibuja un rectángulo de color sólido sin textura.
+     * Útil para overlays y efectos visuales.
+     */
+    public static void drawColoredRect(int x, int y, int width, int height, RGBColor color, float alpha) {
+        glDisable(GL_TEXTURE_2D);
+        glBegin(GL_QUADS);
+
+        glColor4f(color.getRed(), color.getGreen(), color.getBlue(), alpha);
+        glVertex2d(x, y + height);
+        glVertex2d(x, y);
+        glVertex2d(x + width, y);
+        glVertex2d(x + width, y + height);
+
+        glEnd();
+        glEnable(GL_TEXTURE_2D);
+    }
+
 }

@@ -165,7 +165,6 @@ public class PacketProcessor {
         handlers.put(ServerPacket.SPAWN_LIST, new SpawnListHandler());
         handlers.put(ServerPacket.SHOW_SOS_FORM, new ShowSOSFormHandler());
         handlers.put(ServerPacket.SHOW_MOTD_EDITION_FORM, new ShowMOTDEditionFormHandler());
-        handlers.put(ServerPacket.SHOW_GM_PANEL_FORM, new ShowGMPanelFormHandler());
         handlers.put(ServerPacket.USER_NAME_LIST, new UserNameListHandler());
         handlers.put(ServerPacket.SHOW_GUILD_ALIGN, new ShowGuildAlignHandler());
         handlers.put(ServerPacket.SHOW_PARTY_FORM, new ShowPartyFormHandler());

@@ -15,12 +15,12 @@ import static org.argentumforge.engine.utils.GameData.*;
 
 public class FSurfaceEditor extends Form {
 
-    private int selectedGrhIndex = -1;      // índice seleccionado en la lista principal (grhData)
+    private int selectedGrhIndex = -1; // índice seleccionado en la lista principal (grhData)
     private final ImInt selectedLayer = new ImInt(0); // índice seleccionado en el ComboBox de capas
     private final List<Integer> capas = new ArrayList<>(List.of(1, 2, 3, 4));
 
     private Surface surface;
-    private int activeMode = 0; // 0 = ninguno, 1 = insertar, 2 = borrar
+    // activeMode removed to avoid state desync
 
     public FSurfaceEditor() {
         surface = Surface.getInstance();
@@ -59,48 +59,50 @@ public class FSurfaceEditor extends Form {
         int normalColor = 0xFFFFFFFF; // blanco
         int activeColor = 0xFF00FF00; // verde
 
+        int currentMode = surface.getMode();
+
         // Botón Borrar
         boolean pushBorrar = false;
-        if (activeMode == 2) {
+        if (currentMode == 2) {
             ImGui.pushStyleColor(ImGuiCol.Button, activeColor);
             pushBorrar = true;
         }
         if (ImGui.button("Borrar")) {
-            if (activeMode == 2) {
-                activeMode = 0;
+            if (currentMode == 2) {
                 surface.setMode(0);
             } else {
-                activeMode = 2;
                 surface.setMode(2);
             }
         }
-        if (pushBorrar) ImGui.popStyleColor();
+        if (pushBorrar)
+            ImGui.popStyleColor();
 
         ImGui.sameLine();
 
         // Botón Insertar
         boolean pushInsertar = false;
         boolean insertEnabled = selectedGrhIndex > 0 && grhData != null;
-        if (activeMode == 1) {
+        if (currentMode == 1) {
             ImGui.pushStyleColor(ImGuiCol.Button, activeColor);
             pushInsertar = true;
         }
         // Deshabilitar botón si no hay GRH
-        if (!insertEnabled) ImGui.pushStyleColor(ImGuiCol.Button, 0x88888888); // gris
+        if (!insertEnabled)
+            ImGui.pushStyleColor(ImGuiCol.Button, 0x88888888); // gris
         if (ImGui.button("Insertar")) {
             if (!insertEnabled) {
                 // no hacer nada
-            } else if (activeMode == 1) {
-                activeMode = 0;
+            } else if (currentMode == 1) {
                 surface.setMode(0);
             } else {
-                activeMode = 1;
                 surface.setMode(1);
                 surface.setSurfaceIndex(selectedGrhIndex);
             }
         }
-        if (!insertEnabled) ImGui.popStyleColor();
-        if (pushInsertar) ImGui.popStyleColor();
+        if (!insertEnabled)
+            ImGui.popStyleColor();
+        if (pushInsertar)
+            ImGui.popStyleColor();
     }
 
     private void drawGrhList() {
@@ -109,7 +111,8 @@ public class FSurfaceEditor extends Form {
         if (grhData != null) {
             for (int i = 1; i < grhData.length; i++) {
                 GrhData g = grhData[i];
-                if (g == null) continue;
+                if (g == null)
+                    continue;
 
                 String label = String.format("GRH %d - %d frames", i, g.getNumFrames());
                 if (ImGui.selectable(label, selectedGrhIndex == i)) {
@@ -117,7 +120,7 @@ public class FSurfaceEditor extends Form {
                     ImGui.setScrollHereY();
 
                     // Si Insertar está activo, actualizamos surfaceIndex al seleccionar otro GRH
-                    if (activeMode == 1) {
+                    if (surface.getMode() == 1) {
                         surface.setSurfaceIndex(selectedGrhIndex);
                     }
                 }
