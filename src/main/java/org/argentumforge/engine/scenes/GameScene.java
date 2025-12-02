@@ -16,7 +16,7 @@ import static org.argentumforge.engine.game.IntervalTimer.INT_SENTRPU;
 import static org.argentumforge.engine.game.models.Character.drawCharacter;
 import static org.argentumforge.engine.game.models.Key.TALK;
 import static org.argentumforge.engine.renderer.Drawn.drawTexture;
-import static org.argentumforge.engine.renderer.Drawn.drawColoredRect;
+import static org.argentumforge.engine.renderer.Drawn.drawGrhIndex;
 import static org.argentumforge.engine.scenes.Camera.*;
 import static org.argentumforge.engine.utils.GameData.*;
 import static org.argentumforge.engine.utils.Time.deltaTime;
@@ -26,8 +26,10 @@ import static org.lwjgl.glfw.GLFW.*;
 
 /**
  * <p>
- * {@code GameScene} es la escena mas compleja, responsable de manejar toda la logica y renderizado del mundo de Argentum Online
- * cuando el jugador esta activamente conectado y controlando su personaje. Esta escena se activa una vez que el usuario ha
+ * {@code GameScene} es la escena mas compleja, responsable de manejar toda la
+ * logica y renderizado del mundo de Argentum Online
+ * cuando el jugador esta activamente conectado y controlando su personaje. Esta
+ * escena se activa una vez que el usuario ha
  * iniciado sesion satisfactoriamente desde {@code MainScene}.
  * <p>
  * Funcionalidades principales:
@@ -38,13 +40,17 @@ import static org.lwjgl.glfw.GLFW.*;
  * <li>Manejo de efectos como la lluvia y efectos visuales
  * <li>Mostrar dialogos sobre los personajes
  * <li>Control de la camara centrada en el personaje
- * <li>Renderizado de la interfaz de usuario superpuesta (inventario, chat, estadisticas)
+ * <li>Renderizado de la interfaz de usuario superpuesta (inventario, chat,
+ * estadisticas)
  * </ul>
  * <p>
- * Esta escena monitorea constantemente el estado de conexion del usuario. Si se detecta una desconexion, la escena se cierra
- * automaticamente y regresa a {@code MainScene} para permitir una nueva conexion.
+ * Esta escena monitorea constantemente el estado de conexion del usuario. Si se
+ * detecta una desconexion, la escena se cierra
+ * automaticamente y regresa a {@code MainScene} para permitir una nueva
+ * conexion.
  * <p>
- * El metodo {@link GameScene#render()} es particularmente complejo en esta escena, ya que maneja el renderizado de multiples
+ * El metodo {@link GameScene#render()} es particularmente complejo en esta
+ * escena, ya que maneja el renderizado de multiples
  * capas en orden especifico para lograr el efecto visual correcto del mundo.
  *
  * @see Scene
@@ -88,20 +94,22 @@ public final class GameScene extends Scene {
         // MODO EDITOR: Check de desconexión deshabilitado
         // si el usuario se desconecta debe regresar al menu principal.
         /*
-        if (!user.isUserConected()) {
-            frmMain.close();
-            this.close();
-        }
-        */
+         * if (!user.isUserConected()) {
+         * frmMain.close();
+         * this.close();
+         * }
+         */
 
-        if (!visible) return;
+        if (!visible)
+            return;
 
         weather.update();
         intervalToUpdatePos.update();
 
         if (user.isUserMoving()) {
             if (user.getAddToUserPos().getX() != 0) {
-                offSetCounterX -= charList[user.getUserCharIndex()].getWalkingSpeed() * user.getAddToUserPos().getX() * timerTicksPerFrame;
+                offSetCounterX -= charList[user.getUserCharIndex()].getWalkingSpeed() * user.getAddToUserPos().getX()
+                        * timerTicksPerFrame;
                 if (Math.abs(offSetCounterX) >= Math.abs(TILE_PIXEL_SIZE * user.getAddToUserPos().getX())) {
                     offSetCounterX = 0;
                     user.getAddToUserPos().setX(0);
@@ -110,7 +118,8 @@ public final class GameScene extends Scene {
             }
 
             if (user.getAddToUserPos().getY() != 0) {
-                offSetCounterY -= charList[user.getUserCharIndex()].getWalkingSpeed() * user.getAddToUserPos().getY() * timerTicksPerFrame;
+                offSetCounterY -= charList[user.getUserCharIndex()].getWalkingSpeed() * user.getAddToUserPos().getY()
+                        * timerTicksPerFrame;
                 if (Math.abs(offSetCounterY) >= Math.abs(TILE_PIXEL_SIZE * user.getAddToUserPos().getY())) {
                     offSetCounterY = 0;
                     user.getAddToUserPos().setY(0);
@@ -129,7 +138,9 @@ public final class GameScene extends Scene {
      */
     @Override
     public void mouseEvents() {
-        if (!ImGUISystem.INSTANCE.isMainLast()) return;
+        if (!ImGUISystem.INSTANCE.isMainLast() && !ImGUISystem.INSTANCE.isFormVisible("FSurfaceEditor")
+                && !ImGUISystem.INSTANCE.isFormVisible("FBlockEditor"))
+            return;
 
         // Estamos haciendo click en el render?
         if (inGameArea()) {
@@ -168,19 +179,25 @@ public final class GameScene extends Scene {
      * Chequea y ejecuta la tecla que fue bindeada.
      */
     private void checkBindedKeys() {
-        if (user.isUserComerciando() || !ImGUISystem.INSTANCE.isMainLast()) return;
+        if (user.isUserComerciando()
+                || (!ImGUISystem.INSTANCE.isMainLast() && !ImGUISystem.INSTANCE.isFormVisible("FSurfaceEditor")
+                        && !ImGUISystem.INSTANCE.isFormVisible("FBlockEditor")))
+            return;
 
         // Usando el metodo estatico de Key para obtener la tecla desde el codigo
         final Key key = Key.getKey(KeyHandler.getLastKeyPressed());
 
         checkWalkKeys();
 
-        if (key == null) return; // ni me gasto si la tecla presionada no existe en nuestro bind.
+        if (key == null)
+            return; // ni me gasto si la tecla presionada no existe en nuestro bind.
 
         if (KeyHandler.isActionKeyJustPressed(key)) {
 
-            // Para que al hablar no ejecute teclas bindeadas y solo permita cerrar nuevamente el sendText
-            if (user.isTalking() && key != TALK) return;
+            // Para que al hablar no ejecute teclas bindeadas y solo permita cerrar
+            // nuevamente el sendText
+            if (user.isTalking() && key != TALK)
+                return;
 
             switch (key) {
                 case USE_OBJECT:
@@ -217,24 +234,34 @@ public final class GameScene extends Scene {
             if (!autoMove) {
                 if (KeyHandler.getEffectiveMovementKey() != -1) {
                     int keyCode = KeyHandler.getEffectiveMovementKey();
-                    if (keyCode == Key.UP.getKeyCode()) user.moveTo(Direction.UP);
-                    else if (keyCode == Key.DOWN.getKeyCode()) user.moveTo(Direction.DOWN);
-                    else if (keyCode == Key.LEFT.getKeyCode()) user.moveTo(Direction.LEFT);
-                    else if (keyCode == Key.RIGHT.getKeyCode()) user.moveTo(Direction.RIGHT);
+                    if (keyCode == Key.UP.getKeyCode())
+                        user.moveTo(Direction.UP);
+                    else if (keyCode == Key.DOWN.getKeyCode())
+                        user.moveTo(Direction.DOWN);
+                    else if (keyCode == Key.LEFT.getKeyCode())
+                        user.moveTo(Direction.LEFT);
+                    else if (keyCode == Key.RIGHT.getKeyCode())
+                        user.moveTo(Direction.RIGHT);
                 }
-            } else autoWalk();
+            } else
+                autoWalk();
         }
     }
 
     /**
-     * Gestiona el movimiento automatico del usuario en una direccion dependiendo de la ultima tecla de direccion presionada.
+     * Gestiona el movimiento automatico del usuario en una direccion dependiendo de
+     * la ultima tecla de direccion presionada.
      */
     private void autoWalk() {
         int keyCode = KeyHandler.getLastMovementKeyPressed();
-        if (keyCode == Key.UP.getKeyCode()) user.moveTo(Direction.UP);
-        else if (keyCode == Key.DOWN.getKeyCode()) user.moveTo(Direction.DOWN);
-        else if (keyCode == Key.LEFT.getKeyCode()) user.moveTo(Direction.LEFT);
-        else if (keyCode == Key.RIGHT.getKeyCode()) user.moveTo(Direction.RIGHT);
+        if (keyCode == Key.UP.getKeyCode())
+            user.moveTo(Direction.UP);
+        else if (keyCode == Key.DOWN.getKeyCode())
+            user.moveTo(Direction.DOWN);
+        else if (keyCode == Key.LEFT.getKeyCode())
+            user.moveTo(Direction.LEFT);
+        else if (keyCode == Key.RIGHT.getKeyCode())
+            user.moveTo(Direction.RIGHT);
     }
 
     /**
@@ -269,7 +296,6 @@ public final class GameScene extends Scene {
         Rain.INSTANCE.render(weather.getWeatherColor());
     }
 
-
     private void renderFirstLayer(final int pixelOffsetX, final int pixelOffsetY) {
         for (int y = camera.getScreenminY(); y <= camera.getScreenmaxY(); y++) {
             int x;
@@ -280,7 +306,6 @@ public final class GameScene extends Scene {
                             POS_SCREEN_Y + (camera.getScreenY() - 1) * TILE_PIXEL_SIZE + pixelOffsetY,
                             true, true, false, 1.0f, weather.getWeatherColor());
                 }
-
 
                 camera.incrementScreenX();
             }
@@ -333,13 +358,13 @@ public final class GameScene extends Scene {
                     }
                 }
 
-                //TODO: Reutilizar para modo caminata
+                // TODO: Reutilizar para modo caminata
                 if (mapData[x][y].getCharIndex() != 0) {
                     drawCharacter(mapData[x][y].getCharIndex(),
                             POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX,
-                            POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY, weather.getWeatherColor());
+                            POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY,
+                            weather.getWeatherColor());
                 }
-
 
                 if (mapData[x][y].getLayer(3).getGrhIndex() != 0) {
                     drawTexture(mapData[x][y].getLayer(3),
@@ -377,13 +402,16 @@ public final class GameScene extends Scene {
     }
 
     /**
-     * Detecta si el usuario esta debajo del techo. Si es asi, se desvanecera y en caso contrario re aparece.
+     * Detecta si el usuario esta debajo del techo. Si es asi, se desvanecera y en
+     * caso contrario re aparece.
      */
     private void checkEffectCeiling() {
         if (user.isUnderCeiling()) {
-            if (alphaCeiling > 0.0f) alphaCeiling -= 0.5f * deltaTime;
+            if (alphaCeiling > 0.0f)
+                alphaCeiling -= 0.5f * deltaTime;
         } else {
-            if (alphaCeiling < 1.0f) alphaCeiling += 0.5f * deltaTime;
+            if (alphaCeiling < 1.0f)
+                alphaCeiling += 0.5f * deltaTime;
         }
     }
 
@@ -391,15 +419,18 @@ public final class GameScene extends Scene {
      * Detecta si tenemos el mouse adentro del "render MainViewPic".
      */
     private boolean inGameArea() {
-        if (MouseListener.getX() < POS_SCREEN_X || MouseListener.getX() > POS_SCREEN_X + SCREEN_SIZE_X) return false;
-        if (MouseListener.getY() < POS_SCREEN_Y || MouseListener.getY() > POS_SCREEN_Y + SCREEN_SIZE_Y) return false;
+        if (MouseListener.getX() < POS_SCREEN_X || MouseListener.getX() > POS_SCREEN_X + SCREEN_SIZE_X)
+            return false;
+        if (MouseListener.getY() < POS_SCREEN_Y || MouseListener.getY() > POS_SCREEN_Y + SCREEN_SIZE_Y)
+            return false;
         return true;
     }
 
     /**
      * @param mouseX: Posicion X del mouse en la pantalla
-     * @return: Devuelve la posicion en tile del eje X del mouse. Se utiliza al hacer click izquierdo por el mapa, para
-     * interactuar con NPCs, etc.
+     * @return: Devuelve la posicion en tile del eje X del mouse. Se utiliza al
+     *          hacer click izquierdo por el mapa, para
+     *          interactuar con NPCs, etc.
      */
     private byte getTileMouseX(int mouseX) {
         return (byte) (user.getUserPos().getX() + mouseX / TILE_PIXEL_SIZE - HALF_WINDOW_TILE_WIDTH);
@@ -407,15 +438,17 @@ public final class GameScene extends Scene {
 
     /**
      * @param mouseY: Posicion X del mouse en la pantalla
-     * @return: Devuelve la posicion en tile del eje Y del mouse. Se utiliza al hacer click izquierdo por el mapa, para
-     * interactuar con NPCs, etc.
+     * @return: Devuelve la posicion en tile del eje Y del mouse. Se utiliza al
+     *          hacer click izquierdo por el mapa, para
+     *          interactuar con NPCs, etc.
      */
     private byte getTileMouseY(int mouseY) {
         return (byte) (user.getUserPos().getY() + mouseY / TILE_PIXEL_SIZE - HALF_WINDOW_TILE_HEIGHT);
     }
 
     /**
-     * Renderiza overlays rojos semi-transparentes sobre los tiles bloqueados del mapa.
+     * Renderiza overlays rojos semi-transparentes sobre los tiles bloqueados del
+     * mapa.
      * Solo se renderiza cuando el modo de visualización de bloqueos está activado.
      */
     private void renderBlockOverlays(final int pixelOffsetX, final int pixelOffsetY) {
@@ -423,19 +456,15 @@ public final class GameScene extends Scene {
         for (int y = camera.getMinY(); y <= camera.getMaxY(); y++) {
             camera.setScreenX(camera.getMinXOffset() - TILE_BUFFER_SIZE);
             for (int x = camera.getMinX(); x <= camera.getMaxX(); x++) {
-                
-                // Si el tile está bloqueado, dibujamos un overlay rojo
+
+                // Si el tile está bloqueado, dibujamos el Grh 4
                 if (mapData[x][y].getBlocked()) {
-                    drawColoredRect(
+                    drawGrhIndex(4,
                             POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX,
                             POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY,
-                            TILE_PIXEL_SIZE,
-                            TILE_PIXEL_SIZE,
-                            new org.argentumforge.engine.renderer.RGBColor(1.0f, 0.0f, 0.0f), // Rojo
-                            0.4f // Alpha semi-transparente
-                    );
+                            null);
                 }
-                
+
                 camera.incrementScreenX();
             }
             camera.incrementScreenY();
