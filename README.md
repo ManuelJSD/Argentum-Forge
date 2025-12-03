@@ -48,7 +48,7 @@ git clone https://github.com/gasti-jm/argentum-online-lwjgl3.git
    - Using Gradle directly: `./gradlew build`
 
 4. Run the project:
-   - Locate the main class `org.argentumforge.engine.Main`
+   - Locate the main class `[org.argentumforge.engine.Main](https://github.com/Lorwik/Argentum-Forge.git)`
    - Right click and select 'Run' or press Shift+F10
 
 # Development Notes
@@ -60,9 +60,6 @@ git clone https://github.com/gasti-jm/argentum-online-lwjgl3.git
 
 
 # Image
-![Screenshot 2023-08-21 044542](https://github.com/gasti-jm/argentum-online-lwjgl3/assets/82490615/8f4c7864-feee-4ac6-b957-651a6b03a627)
-#
-![VirtualBox_Linux_09_03_2024_04_13_54](https://github.com/gasti-jm/argentum-online-lwjgl3/assets/82490615/8f54e716-3824-48ac-92ca-f22bfcfe74d5)
 
 <h1>Thanks to:</h1>
 <br/>
