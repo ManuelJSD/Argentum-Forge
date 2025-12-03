@@ -2,14 +2,13 @@
 <div align='center'>
     <br/>
     <p align='right'><a href="README_ES.md">🇪🇸 Leer en Español</a></p>
-    <img src="https://github.com/user-attachments/assets/3f6d8658-ea84-4ff3-b3d2-cb2fb1eeabd2" width="500px"> <br/> <br/>
+    <img width="1024" height="1024" alt="ChatGPT Image 3 dic 2025, 01_55_12" src="https://github.com/user-attachments/assets/77ae11ca-8b34-489d-bf8b-010889771a25" />
     <a target="_blank"><img src="https://img.shields.io/badge/Built%20in-Java_17-43ca1f.svg?style=flat-square"></img></a>
     <a target="_blank"><img src="https://img.shields.io/badge/Made%20in-IntelliJ%20Community-be27e9.svg?style=flat-square"></img></a>
     <a target="_blank"><img src="https://img.shields.io/badge/License-GNU%20General%20Public%20License%20-e98227.svg?style=flat-square"></img></a>
 </div>
-<br/>
 
-<h1>Argentum Online Java LWJGL3</h1>
+<h1>Argentum Forge - World Editor for Argentum Online</h1>
 
 <p>
   <a target="_blank" href="https://es.wikipedia.org/wiki/Argentum_Online">Argentum Online</a> is a MMORPG Video Game of the year 1999 created in Visual Basic 6.0 by Pablo Marquez (Morgolock), this game is open source. <br/> <br/>
