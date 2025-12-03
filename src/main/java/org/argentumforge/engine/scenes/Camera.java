@@ -1,24 +1,32 @@
 package org.argentumforge.engine.scenes;
 
+import org.argentumforge.engine.Window;
+
 /**
- * La clase Camera gestiona la visualizacion del juego y el campo de vision del usuario.
+ * La clase Camera gestiona la visualizacion del juego y el campo de vision del
+ * usuario.
  * <p>
- * Esta clase contiene variables relacionadas con el campo de vision del juego, incluyendo la distancia de dibujado, el tamano del
- * render en pantalla, el tamano de los tiles (32x32), y los bordes del mapa. Su funcion principal es determinar que elementos del
- * mapa son visibles en la pantalla y calcular las coordenadas necesarias para renderizar correctamente el mundo.
+ * Esta clase contiene variables relacionadas con el campo de vision del juego,
+ * incluyendo la distancia de dibujado, el tamano del
+ * render en pantalla, el tamano de los tiles (32x32), y los bordes del mapa. Su
+ * funcion principal es determinar que elementos del
+ * mapa son visibles en la pantalla y calcular las coordenadas necesarias para
+ * renderizar correctamente el mundo.
  * <p>
- * Ademas, proporciona el metodo update() que actualiza las variables relacionadas con la distancia de dibujado segun la posicion
- * del usuario, permitiendo una visualizacion correcta mientras el personaje se desplaza por el mapa. Esto es fundamental para
- * optimizar el rendimiento, ya que solo se renderizan los elementos que son visibles para el jugador.
+ * Ademas, proporciona el metodo update() que actualiza las variables
+ * relacionadas con la distancia de dibujado segun la posicion
+ * del usuario, permitiendo una visualizacion correcta mientras el personaje se
+ * desplaza por el mapa. Esto es fundamental para
+ * optimizar el rendimiento, ya que solo se renderizan los elementos que son
+ * visibles para el jugador.
  * <p>
- * La camara tambien es utilizada en otras escenas para calcular correctamente las posiciones de renderizado y controlar que
+ * La camara tambien es utilizada en otras escenas para calcular correctamente
+ * las posiciones de renderizado y controlar que
  * sectores del mapa se deben dibujar en cada momento.
  */
 
 public final class Camera {
 
-    public static final int SCREEN_SIZE_X = 800;
-    public static final int SCREEN_SIZE_Y = 600;
     public static final int POS_SCREEN_X = 0; // 11
     public static final int POS_SCREEN_Y = 0; // 147
 
@@ -31,15 +39,29 @@ public final class Camera {
     public static final int YMaxMapSize = 100;
     public static final int YMinMapSize = 1;
 
-    // Tiles visibles segun la pantalla
-    public static final int HALF_WINDOW_TILE_WIDTH = (SCREEN_SIZE_X / TILE_PIXEL_SIZE) / 2;
-    public static final int HALF_WINDOW_TILE_HEIGHT = (SCREEN_SIZE_Y / TILE_PIXEL_SIZE) / 2;
+    // Variables de pantalla dinámicas
+    public static int HALF_WINDOW_TILE_WIDTH;
+    public static int HALF_WINDOW_TILE_HEIGHT;
 
     // limites del mapa
-    public static final int minXBorder = XMinMapSize + ((SCREEN_SIZE_X / TILE_PIXEL_SIZE) / 2);
-    public static final int maxXBorder = XMaxMapSize - ((SCREEN_SIZE_X / TILE_PIXEL_SIZE) / 2);
-    public static final int minYBorder = YMinMapSize + ((SCREEN_SIZE_Y / TILE_PIXEL_SIZE) / 2);
-    public static final int maxYBorder = YMaxMapSize - ((SCREEN_SIZE_Y / TILE_PIXEL_SIZE) / 2);
+    public static int minXBorder;
+    public static int maxXBorder;
+    public static int minYBorder;
+    public static int maxYBorder;
+
+    static {
+        updateConstants();
+    }
+
+    public static void updateConstants() {
+        HALF_WINDOW_TILE_WIDTH = (Window.SCREEN_WIDTH / TILE_PIXEL_SIZE) / 2;
+        HALF_WINDOW_TILE_HEIGHT = (Window.SCREEN_HEIGHT / TILE_PIXEL_SIZE) / 2;
+
+        minXBorder = XMinMapSize + ((Window.SCREEN_WIDTH / TILE_PIXEL_SIZE) / 2);
+        maxXBorder = XMaxMapSize - ((Window.SCREEN_WIDTH / TILE_PIXEL_SIZE) / 2);
+        minYBorder = YMinMapSize + ((Window.SCREEN_HEIGHT / TILE_PIXEL_SIZE) / 2);
+        maxYBorder = YMaxMapSize - ((Window.SCREEN_HEIGHT / TILE_PIXEL_SIZE) / 2);
+    }
 
     private int screenminY, screenmaxY;
     private int screenminX, screenmaxX;
@@ -55,9 +77,11 @@ public final class Camera {
     /**
      * @param tileX: Posicion X donde este parado nuestro usuario.
      * @param tileY: Posicion Y donde este parado nuestro usuario.
-     *  Esta es toda la logica que se encontraba al principio del "RenderScreen", permite actualizar la distancia de
-     * dibujado segun la posicion en la que se encuentre el usuario. Esto sirve para el recorrido de la matriz del MapData, cada
-     * uno tiene distinto rango segun la capa que se va a dibujar.
+     *               Esta es toda la logica que se encontraba al principio del
+     *               "RenderScreen", permite actualizar la distancia de
+     *               dibujado segun la posicion en la que se encuentre el usuario.
+     *               Esto sirve para el recorrido de la matriz del MapData, cada
+     *               uno tiene distinto rango segun la capa que se va a dibujar.
      */
     public void update(int tileX, int tileY) {
         screenX = 0;
@@ -82,30 +106,36 @@ public final class Camera {
             minY = YMinMapSize;
         }
 
-        if (maxY > YMaxMapSize) maxY = YMaxMapSize;
+        if (maxY > YMaxMapSize)
+            maxY = YMaxMapSize;
 
         if (minX < XMinMapSize) {
             minXOffset = XMinMapSize - minX;
             minX = XMinMapSize;
         }
 
-        if (maxX > XMaxMapSize) maxX = XMaxMapSize;
+        if (maxX > XMaxMapSize)
+            maxX = XMaxMapSize;
 
-        if (screenminY > YMinMapSize) screenminY--;
+        if (screenminY > YMinMapSize)
+            screenminY--;
         else {
             screenminY = 1;
             screenY = 1;
         }
 
-        if (screenmaxY < YMaxMapSize) screenmaxY++;
+        if (screenmaxY < YMaxMapSize)
+            screenmaxY++;
 
-        if (screenminX > XMinMapSize) screenminX--;
+        if (screenminX > XMinMapSize)
+            screenminX--;
         else {
             screenminX = 1;
             screenX = 1;
         }
 
-        if (screenmaxX < XMaxMapSize) screenmaxX++;
+        if (screenmaxX < XMaxMapSize)
+            screenmaxX++;
     }
 
     public int getScreenminY() {

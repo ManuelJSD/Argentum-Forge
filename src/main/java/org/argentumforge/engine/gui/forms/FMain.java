@@ -59,7 +59,7 @@ public final class FMain extends Form {
 
     @Override
     public void render() {
-        ImGui.setNextWindowSize(Window.INSTANCE.getWidth() + 10, Window.INSTANCE.getHeight() + 5, ImGuiCond.Once);
+        ImGui.setNextWindowSize(Window.INSTANCE.getWidth() + 10, Window.INSTANCE.getHeight() + 5, ImGuiCond.Always);
         ImGui.setNextWindowPos(-5, -1, ImGuiCond.Once);
 
         ImGui.begin(this.getClass().getSimpleName(), ImGuiWindowFlags.NoTitleBar |
@@ -145,6 +145,13 @@ public final class FMain extends Form {
             } else {
                 ImGUISystem.INSTANCE.show(blockEditor);
             }
+        }
+
+        ImGui.sameLine();
+
+        // Botón Opciones
+        if (ImGui.button("Opciones", 100, 25)) {
+            ImGUISystem.INSTANCE.show(new FOptions());
         }
     }
 

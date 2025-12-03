@@ -10,19 +10,24 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_ENTER;
 
 /**
  * <p>
- * {@code IntroScene} es la primera escena que se muestra al jugador y esta diseñada para presentar los logos, creditos iniciales
+ * {@code IntroScene} es la primera escena que se muestra al jugador y esta
+ * diseñada para presentar los logos, creditos iniciales
  * y elementos visuales de introduccion antes de llegar al menu principal.
  * <p>
- * Esta escena maneja un temporizador que controla la duracion de su visualizacion y los efectos de fade-in/fade-out para las
- * imagenes mostradas. La secuencia incluye varios elementos visuales en el siguiente orden:
+ * Esta escena maneja un temporizador que controla la duracion de su
+ * visualizacion y los efectos de fade-in/fade-out para las
+ * imagenes mostradas. La secuencia incluye varios elementos visuales en el
+ * siguiente orden:
  * <ul>
  * <li>Logo de ArgentumForge con efecto de aparicion gradual
  * <li>Serie de imagenes de presentacion que se muestran secuencialmente
  * <li>Efecto de transicion hacia la {@code MainScene} al finalizar la secuencia
  * </ul>
  * <p>
- * El usuario puede saltar esta escena en cualquier momento presionando la tecla {@code Enter}, lo que provoca una transicion
- * inmediata hacia {@code MainScene}. Esta funcionalidad se implementa en el metodo {@link IntroScene#keyEvents()}.
+ * El usuario puede saltar esta escena en cualquier momento presionando la tecla
+ * {@code Enter}, lo que provoca una transicion
+ * inmediata hacia {@code MainScene}. Esta funcionalidad se implementa en el
+ * metodo {@link IntroScene#keyEvents()}.
  *
  * @see Scene
  * @see MainScene
@@ -53,7 +58,8 @@ public final class IntroScene extends Scene {
      */
     @Override
     public void keyEvents() {
-        if (KeyHandler.isKeyPressed(GLFW_KEY_ENTER)) close();
+        if (KeyHandler.isKeyPressed(GLFW_KEY_ENTER))
+            close();
     }
 
     /**
@@ -61,7 +67,9 @@ public final class IntroScene extends Scene {
      */
     @Override
     public void render() {
-        if (!visible) return; // Si no dejamos esto, es posible que al cerrarse la escena genere un NullPointerException.
+        if (!visible)
+            return; // Si no dejamos esto, es posible que al cerrarse la escena genere un
+                    // NullPointerException.
         effectArgentumForge();
         checkEndScene();
     }
@@ -79,7 +87,8 @@ public final class IntroScene extends Scene {
      */
     private void checkEndScene() {
         timeScene -= deltaTime;
-        if (timeScene <= 0) close();
+        if (timeScene <= 0)
+            close();
     }
 
     /**
@@ -87,7 +96,16 @@ public final class IntroScene extends Scene {
      */
     private void effectArgentumForge() {
         alphaInterface += 0.3f * deltaTime;
-        geometryBoxRenderGUI(ArgentumForgeLogo, 0, 0, alphaInterface);
+
+        // Mantener tamaño original de la textura (1024x1024)
+        int imageWidth = ArgentumForgeLogo.getTex_width();
+        int imageHeight = ArgentumForgeLogo.getTex_height();
+
+        // Centrar en la pantalla
+        int x = (org.argentumforge.engine.Window.INSTANCE.getWidth() - imageWidth) / 2;
+        int y = (org.argentumforge.engine.Window.INSTANCE.getHeight() - imageHeight) / 2;
+
+        geometryBoxRenderGUI(ArgentumForgeLogo, x, y, imageWidth, imageHeight, alphaInterface);
     }
 
 }

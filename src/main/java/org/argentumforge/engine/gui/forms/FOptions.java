@@ -14,15 +14,21 @@ import static org.argentumforge.engine.utils.GameData.options;
 
 /**
  * <p>
- * Proporciona una interfaz grafica completa para que el usuario pueda ver y modificar las diferentes opciones de configuracion.
- * Permite gestionar ajustes como la pantalla completa, sincronizacion vertical, activacion/desactivacion de musica y sonidos.
+ * Proporciona una interfaz grafica completa para que el usuario pueda ver y
+ * modificar las diferentes opciones de configuracion.
+ * Permite gestionar ajustes como la pantalla completa, sincronizacion vertical,
+ * activacion/desactivacion de musica y sonidos.
  * <p>
- * Incluye tambien una serie de botones que dan acceso a otras funcionalidades relacionadas con la configuracion, como la
- * configuracion de teclas, visualizacion del mapa, acceso al manual, soporte, mensajes personalizados, cambio de contrasena,
+ * Incluye tambien una serie de botones que dan acceso a otras funcionalidades
+ * relacionadas con la configuracion, como la
+ * configuracion de teclas, visualizacion del mapa, acceso al manual, soporte,
+ * mensajes personalizados, cambio de contrasena,
  * radio y tutorial.
  * <p>
- * El formulario se encarga de aplicar los cambios de configuracion inmediatamente cuando el usuario modifica las opciones, y
- * guarda los ajustes en un archivo de configuracion cuando se cierra. Mantiene una interfaz cohesiva y uniforme con el resto de
+ * El formulario se encarga de aplicar los cambios de configuracion
+ * inmediatamente cuando el usuario modifica las opciones, y
+ * guarda los ajustes en un archivo de configuracion cuando se cierra. Mantiene
+ * una interfaz cohesiva y uniforme con el resto de
  * elementos.
  */
 
@@ -49,6 +55,38 @@ public final class FOptions extends Form {
             Window.INSTANCE.toggleWindow();
         }
 
+        // Selector de Resolucion
+        String[] resolutions = { "800x600", "1024x768", "1024x1024", "1280x720", "1366x768", "1920x1080" };
+        int currentResIndex = 0;
+        String currentResString = options.getScreenWidth() + "x" + options.getScreenHeight();
+
+        for (int i = 0; i < resolutions.length; i++) {
+            if (resolutions[i].equals(currentResString)) {
+                currentResIndex = i;
+                break;
+            }
+        }
+
+        if (ImGui.beginCombo("Resolucion", resolutions[currentResIndex])) {
+            for (int i = 0; i < resolutions.length; i++) {
+                boolean isSelected = (currentResIndex == i);
+                if (ImGui.selectable(resolutions[i], isSelected)) {
+                    String[] parts = resolutions[i].split("x");
+                    int newWidth = Integer.parseInt(parts[0]);
+                    int newHeight = Integer.parseInt(parts[1]);
+
+                    options.setScreenWidth(newWidth);
+                    options.setScreenHeight(newHeight);
+                    Window.INSTANCE.updateResolution(newWidth, newHeight);
+                    options.save();
+                }
+                if (isSelected) {
+                    ImGui.setItemDefaultFocus();
+                }
+            }
+            ImGui.endCombo();
+        }
+
         if (ImGui.checkbox("Sincronizacion Vertical", options.isVsync())) {
             options.setVsync(!options.isVsync());
             Window.INSTANCE.toggleWindow();
@@ -72,7 +110,6 @@ public final class FOptions extends Form {
             options.setCursorGraphic(!options.isCursorGraphic());
         }
 
-
         this.drawButtons();
 
         ImGui.end();
@@ -92,13 +129,16 @@ public final class FOptions extends Form {
         }
 
         ImGui.setCursorPos(6, 392);
-        if (ImGui.button("Manual", 170, 20)) playSound(SND_CLICK);
+        if (ImGui.button("Manual", 170, 20))
+            playSound(SND_CLICK);
 
         ImGui.setCursorPos(6, 416);
-        if (ImGui.button("Soporte", 170, 20)) playSound(SND_CLICK);
+        if (ImGui.button("Soporte", 170, 20))
+            playSound(SND_CLICK);
 
         ImGui.setCursorPos(180, 344);
-        if (ImGui.button("Mensajes Personalizados", 170, 20)) playSound(SND_CLICK);
+        if (ImGui.button("Mensajes Personalizados", 170, 20))
+            playSound(SND_CLICK);
 
         ImGui.setCursorPos(180, 368);
         if (ImGui.button(new String("Cambiar Contraseña".getBytes(), StandardCharsets.UTF_8), 170, 20)) {
@@ -107,7 +147,8 @@ public final class FOptions extends Form {
         }
 
         ImGui.setCursorPos(180, 392);
-        if (ImGui.button("Radio", 170, 20)) playSound(SND_CLICK);
+        if (ImGui.button("Radio", 170, 20))
+            playSound(SND_CLICK);
 
         ImGui.setCursorPos(180, 416);
         if (ImGui.button("Tutorial", 170, 20)) {

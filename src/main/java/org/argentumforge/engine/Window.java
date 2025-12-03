@@ -25,19 +25,26 @@ import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 /**
- * Clase encargada de gestionar la ventana principal del juego y sus contextos graficos.
+ * Clase encargada de gestionar la ventana principal del juego y sus contextos
+ * graficos.
  * <p>
- * Esta clase implementa el patron singleton para proporcionar una unica instancia que maneja la ventana GLFW del juego,
- * inicializando y administrando tanto el contexto grafico (OpenGL) como el de audio (OpenAL).
+ * Esta clase implementa el patron singleton para proporcionar una unica
+ * instancia que maneja la ventana GLFW del juego,
+ * inicializando y administrando tanto el contexto grafico (OpenGL) como el de
+ * audio (OpenAL).
  * <p>
- * Se encarga de configurar las propiedades de la ventana como resolucion, modo de pantalla completa, sincronizacion vertical, asi
+ * Se encarga de configurar las propiedades de la ventana como resolucion, modo
+ * de pantalla completa, sincronizacion vertical, asi
  * como de establecer los callbacks para eventos del teclado y raton.
  * <p>
- * Proporciona funcionalidades para alternar entre modo ventana y pantalla completa, minimizar la ventana, y verificar su estado
- * actual. Al cerrar la aplicacion, esta clase se encarga de liberar correctamente todos los recursos asociados a los contextos de
+ * Proporciona funcionalidades para alternar entre modo ventana y pantalla
+ * completa, minimizar la ventana, y verificar su estado
+ * actual. Al cerrar la aplicacion, esta clase se encarga de liberar
+ * correctamente todos los recursos asociados a los contextos de
  * OpenGL y OpenAL.
  * <p>
- * La clase mantiene las dimensiones constantes de la ventana (800x600) y gestiona el posicionamiento centrado en la pantalla del
+ * La clase mantiene las dimensiones constantes de la ventana (800x600) y
+ * gestiona el posicionamiento centrado en la pantalla del
  * usuario.
  */
 
@@ -45,11 +52,11 @@ public enum Window {
 
     INSTANCE;
 
-    public static final int SCREEN_WIDTH = 800;
-    public static final int SCREEN_HEIGHT = 600;
+    public static int SCREEN_WIDTH = 1024;
+    public static int SCREEN_HEIGHT = 1024;
 
     private final String title;
-    private final int width, height;
+    private int width, height;
     private long window;
     private long audioContext;
     private long audioDevice;
@@ -60,29 +67,42 @@ public enum Window {
 
     Window() {
         this.title = "Argentum Forge";
-        this.width = SCREEN_WIDTH;
-        this.height = SCREEN_HEIGHT;
+        this.width = options.getScreenWidth();
+        this.height = options.getScreenHeight();
         this.cursorCrosshair = false;
     }
 
     /**
-     * Inicializamos nuestro contexto GLFW (ventana) con sus sistemas (OpenGL y OpenAL)
+     * Inicializamos nuestro contexto GLFW (ventana) con sus sistemas (OpenGL y
+     * OpenAL)
      */
     public void init() {
+        // Recargar opciones por si cambiaron desde el constructor (GameData.init se
+        // llama antes de Window.init pero despues de Window constructor)
+        this.width = options.getScreenWidth();
+        this.height = options.getScreenHeight();
+
+        // Actualizar las constantes estáticas con los valores de las opciones
+        SCREEN_WIDTH = this.width;
+        SCREEN_HEIGHT = this.height;
+        org.argentumforge.engine.scenes.Camera.updateConstants();
+
         // Setup an error callback
         GLFWErrorCallback.createPrint(System.err).set();
 
         // Initialize GLFW
-        if (!glfwInit()) throw new IllegalStateException("Unable to initialize GLFW.");
+        if (!glfwInit())
+            throw new IllegalStateException("Unable to initialize GLFW.");
 
         // Configure GLFW
         glfwDefaultWindowHints();
 
-        // Sacamos esto por ahora, sino no va a ser compatible con linux. Habria que testiar en MacOS
-//        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-//        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
-//        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-//        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+        // Sacamos esto por ahora, sino no va a ser compatible con linux. Habria que
+        // testiar en MacOS
+        // glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        // glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
+        // glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        // glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
@@ -90,9 +110,11 @@ public enum Window {
         glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
 
         // Create the window
-        window = glfwCreateWindow(this.width, this.height, this.title, options.isFullscreen() ? glfwGetPrimaryMonitor() : NULL, NULL);
+        window = glfwCreateWindow(this.width, this.height, this.title,
+                options.isFullscreen() ? glfwGetPrimaryMonitor() : NULL, NULL);
 
-        if (window == NULL) throw new IllegalStateException("Failed to create the GLFW window.");
+        if (window == NULL)
+            throw new IllegalStateException("Failed to create the GLFW window.");
 
         loadIcon();
 
@@ -116,11 +138,8 @@ public enum Window {
             glfwSetWindowPos(
                     window,
                     (vidmode.width() - pWidth.get(0)) / 2,
-                    (vidmode.height() - pHeight.get(0)) / 2
-            );
+                    (vidmode.height() - pHeight.get(0)) / 2);
         } // the stack frame is popped automatically
-
-
 
         // ========================================================================
         // Inicializacion de audio (OpenAL)
@@ -150,7 +169,7 @@ public enum Window {
 
         // Solo crea el contexto si tenemos un dispositivo valido
         if (audioDevice != NULL) {
-            int[] attributes = {0};
+            int[] attributes = { 0 };
             audioContext = alcCreateContext(audioDevice, attributes);
 
             if (audioContext == NULL) {
@@ -171,7 +190,8 @@ public enum Window {
                     audioContext = NULL;
                 }
             }
-        } else System.out.println("Client running without audio!");
+        } else
+            System.out.println("Client running without audio!");
 
         // ========================================================================
         // Inicializacion de OpenGL
@@ -180,18 +200,20 @@ public enum Window {
         // Make the OpenGL context current
         glfwMakeContextCurrent(window);
 
-        if (options.isVsync()) glfwSwapInterval(1);
-        else glfwSwapInterval(0);
+        if (options.isVsync())
+            glfwSwapInterval(1);
+        else
+            glfwSwapInterval(0);
 
         // Make the window visible
         glfwShowWindow(window);
 
         // cargamos los cursores graficos!
-        cursorMainID        = loadCursor("MAIN");
-        cursorCrosshairID   = loadCursor("CAST");
+        cursorMainID = loadCursor("MAIN");
+        cursorCrosshairID = loadCursor("CAST");
 
         // set current cursor
-        if(options.isCursorGraphic()) {
+        if (options.isCursorGraphic()) {
             glfwSetCursor(window, cursorMainID);
         }
 
@@ -201,7 +223,14 @@ public enum Window {
         glEnable(GL_TEXTURE_2D);
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-        glViewport(0, 0, width, height);
+        // Usar framebuffer size para viewport correcto en HiDPI
+        try (MemoryStack stack = stackPush()) {
+            IntBuffer fWidth = stack.mallocInt(1);
+            IntBuffer fHeight = stack.mallocInt(1);
+            glfwGetFramebufferSize(window, fWidth, fHeight);
+            glViewport(0, 0, fWidth.get(0), fHeight.get(0));
+        }
+
         glOrtho(0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 1, -1);
 
         glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
@@ -213,7 +242,7 @@ public enum Window {
     }
 
     public void setCursorGraphic(boolean cast) {
-        if(!cast) {
+        if (!cast) {
             glfwSetCursor(window, cursorMainID);
         } else {
             glfwSetCursor(window, cursorCrosshairID);
@@ -225,8 +254,10 @@ public enum Window {
      */
     public void close() {
         // Destroy the audio context solo si se inicializó
-        if (audioContext != NULL) alcDestroyContext(audioContext);
-        if (audioDevice != NULL) alcCloseDevice(audioDevice);
+        if (audioContext != NULL)
+            alcDestroyContext(audioContext);
+        if (audioDevice != NULL)
+            alcCloseDevice(audioDevice);
 
         // Free the window callbacks and destroy the window
         glfwFreeCallbacks(window);
@@ -237,8 +268,65 @@ public enum Window {
         glfwSetErrorCallback(null).free();
     }
 
+    public void updateResolution(int width, int height) {
+        this.width = width;
+        this.height = height;
+        SCREEN_WIDTH = width;
+        SCREEN_HEIGHT = height;
+
+        // Actualizar constantes de camara
+        org.argentumforge.engine.scenes.Camera.updateConstants();
+
+        // Actualizar ventana GLFW
+        glfwSetWindowSize(window, width, height);
+
+        // Centrar ventana si no es fullscreen
+        if (!options.isFullscreen()) {
+            try (MemoryStack stack = stackPush()) {
+                IntBuffer pWidth = stack.mallocInt(1);
+                IntBuffer pHeight = stack.mallocInt(1);
+                glfwGetWindowSize(window, pWidth, pHeight);
+                GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+                glfwSetWindowPos(
+                        window,
+                        (vidmode.width() - pWidth.get(0)) / 2,
+                        (vidmode.height() - pHeight.get(0)) / 2);
+            }
+        }
+
+        // Actualizar Viewport OpenGL usando Framebuffer Size
+        try (MemoryStack stack = stackPush()) {
+            IntBuffer fWidth = stack.mallocInt(1);
+            IntBuffer fHeight = stack.mallocInt(1);
+            glfwGetFramebufferSize(window, fWidth, fHeight);
+            glViewport(0, 0, fWidth.get(0), fHeight.get(0));
+        }
+
+        setupGameProjection();
+    }
+
+    public void setupGameProjection() {
+        // Restaurar Viewport
+        try (MemoryStack stack = stackPush()) {
+            IntBuffer fWidth = stack.mallocInt(1);
+            IntBuffer fHeight = stack.mallocInt(1);
+            glfwGetFramebufferSize(window, fWidth, fHeight);
+            glViewport(0, 0, fWidth.get(0), fHeight.get(0));
+        }
+
+        // Configurar matriz de proyección
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        glOrtho(0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 1, -1);
+
+        // Resetear matriz de modelo-vista
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+    }
+
     public void toggleWindow() {
-        if (options.isFullscreen()) glfwSetWindowMonitor(window, glfwGetPrimaryMonitor(), 0, 0, width, height, GLFW_DONT_CARE);
+        if (options.isFullscreen())
+            glfwSetWindowMonitor(window, glfwGetPrimaryMonitor(), 0, 0, width, height, GLFW_DONT_CARE);
         else {
             glfwSetWindowMonitor(window, NULL,
                     0,
@@ -259,13 +347,14 @@ public enum Window {
                 glfwSetWindowPos(
                         window,
                         (vidmode.width() - pWidth.get(0)) / 2,
-                        (vidmode.height() - pHeight.get(0)) / 2
-                );
+                        (vidmode.height() - pHeight.get(0)) / 2);
             } // the stack frame is popped automatically
         }
 
-        if (options.isVsync()) glfwSwapInterval(1);
-        else glfwSwapInterval(0);
+        if (options.isVsync())
+            glfwSwapInterval(1);
+        else
+            glfwSwapInterval(0);
 
     }
 
@@ -306,7 +395,8 @@ public enum Window {
     /**
      * Verifica si el audio esta disponible en el contexto actual.
      *
-     * @return true si el dispositivo de audio y el contexto de audio no son nulos, false en caso contrario
+     * @return true si el dispositivo de audio y el contexto de audio no son nulos,
+     *         false en caso contrario
      */
     public boolean isAudioAvailable() {
         return audioDevice != NULL && audioContext != NULL;
@@ -320,7 +410,8 @@ public enum Window {
             final IntBuffer ch = stack.mallocInt(1), w = stack.mallocInt(1), h = stack.mallocInt(1);
             final ByteBuffer imgBuff = STBImage.stbi_load("./resources/icon.png", w, h, ch, 4);
 
-            if (imgBuff == null) return;
+            if (imgBuff == null)
+                return;
 
             GLFWImage image = GLFWImage.malloc();
             GLFWImage.Buffer imageBf = GLFWImage.malloc(1);
@@ -339,7 +430,8 @@ public enum Window {
             final IntBuffer ch = stack.mallocInt(1), w = stack.mallocInt(1), h = stack.mallocInt(1);
             final ByteBuffer imgBuff = STBImage.stbi_load("./resources/" + fileName + ".png", w, h, ch, 4);
 
-            if (imgBuff == null) return 0;
+            if (imgBuff == null)
+                return 0;
 
             GLFWImage image = GLFWImage.malloc();
             GLFWImage.Buffer imageBf = GLFWImage.malloc(1);
