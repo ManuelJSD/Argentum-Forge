@@ -36,7 +36,7 @@ The project uses the following main dependencies (managed by Gradle):
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/gasti-jm/argentum-online-lwjgl3.git
+https://github.com/Lorwik/Argentum-Forge.git
 ```
 
 2. Open the project:
@@ -48,7 +48,7 @@ git clone https://github.com/gasti-jm/argentum-online-lwjgl3.git
    - Using Gradle directly: `./gradlew build`
 
 4. Run the project:
-   - Locate the main class `[org.argentumforge.engine.Main](https://github.com/Lorwik/Argentum-Forge.git)`
+   - Locate the main class `org.argentumforge.engine.Main`
    - Right click and select 'Run' or press Shift+F10
 
 # Development Notes
