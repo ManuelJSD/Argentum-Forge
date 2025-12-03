@@ -61,6 +61,8 @@ git clone https://github.com/gasti-jm/argentum-online-lwjgl3.git
 
 # Image
 
+Coming soon
+
 <h1>Thanks to:</h1>
 <br/>
 
