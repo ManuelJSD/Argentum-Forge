@@ -35,7 +35,7 @@ El proyecto utiliza las siguientes dependencias principales (gestionadas por Gra
 
 1. Clonar el repositorio:
 ```bash
-[git clone https://github.com/gasti-jm/argentum-online-lwjgl3.git](https://github.com/Lorwik/Argentum-Forge.git)
+https://github.com/Lorwik/Argentum-Forge.git
 ```
 
 2. Abrir el proyecto:
