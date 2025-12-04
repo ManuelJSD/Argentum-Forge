@@ -10,8 +10,10 @@ import static org.argentumforge.engine.game.models.Key.EXIT_GAME;
 
 /**
  * <p>
- * {@code MainScene} es la escena donde se muestra el formulario de conexion ({@code FConnect}) que permite al usuario ingresar
- * sus credenciales para acceder al juego o elegir crear un nuevo personaje. Esta escena sirve como punto de entrada principal a
+ * {@code MainScene} es la escena donde se muestra el formulario de conexion
+ * ({@code FConnect}) que permite al usuario ingresar
+ * sus credenciales para acceder al juego o elegir crear un nuevo personaje.
+ * Esta escena sirve como punto de entrada principal a
  * la experiencia de juego.
  * <p>
  * Desde esta escena, el usuario puede:
@@ -21,9 +23,12 @@ import static org.argentumforge.engine.game.models.Key.EXIT_GAME;
  * <li>Salir
  * </ul>
  * <p>
- * La escena se mantiene activa hasta que el usuario establece una conexion exitosa con el servidor, momento en el cual se realiza
- * una transicion automatica hacia {@code GameScene}. La escena monitorea constantemente el estado de conexion del usuario
- * mediante la clase {@code User} para determinar cuando realizar esta transicion.
+ * La escena se mantiene activa hasta que el usuario establece una conexion
+ * exitosa con el servidor, momento en el cual se realiza
+ * una transicion automatica hacia {@code GameScene}. La escena monitorea
+ * constantemente el estado de conexion del usuario
+ * mediante la clase {@code User} para determinar cuando realizar esta
+ * transicion.
  *
  * @see Scene
  * @see GameScene
@@ -68,6 +73,16 @@ public final class MainScene extends Scene {
             this.close();
             ImGUISystem.INSTANCE.closeAllFrms();
         }
+    }
+
+    @Override
+    public int getPreferredWidth() {
+        return 1024;
+    }
+
+    @Override
+    public int getPreferredHeight() {
+        return 1024;
     }
 
 }

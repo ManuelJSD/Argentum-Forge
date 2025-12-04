@@ -189,6 +189,15 @@ public final class Engine {
             case MAIN_SCENE -> currentScene = new MainScene();
         }
         currentScene.init();
+
+        // Ajustar la resolución de la ventana según las preferencias de la escena
+        int preferredWidth = currentScene.getPreferredWidth();
+        int preferredHeight = currentScene.getPreferredHeight();
+
+        // Solo actualizar si la resolución es diferente a la actual
+        if (preferredWidth != Window.INSTANCE.getWidth() || preferredHeight != Window.INSTANCE.getHeight()) {
+            Window.INSTANCE.updateResolution(preferredWidth, preferredHeight);
+        }
     }
 
     /**

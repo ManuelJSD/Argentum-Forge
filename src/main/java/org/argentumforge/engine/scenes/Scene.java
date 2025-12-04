@@ -5,12 +5,16 @@ import org.argentumforge.engine.renderer.RGBColor;
 /**
  * Clase abstracta que define la estructura base para las escenas del juego.
  * <p>
- * En Argentum Online, una escena representa una pantalla o estado especifico del juego como la introduccion, menu principal o la
- * pantalla de juego principal. Esta clase proporciona la infraestructura compartida para todas las escenas, mientras que cada
+ * En Argentum Online, una escena representa una pantalla o estado especifico
+ * del juego como la introduccion, menu principal o la
+ * pantalla de juego principal. Esta clase proporciona la infraestructura
+ * compartida para todas las escenas, mientras que cada
  * escena concreta implementa su comportamiento especifico.
  * <p>
- * El sistema de escenas permite la transicion fluida entre diferentes estados del juego, donde cada escena maneja su propio ciclo
- * de vida, incluyendo inicializacion, eventos de entrada, renderizado y cierre. Las escenas pueden indicar a cual otra escena
+ * El sistema de escenas permite la transicion fluida entre diferentes estados
+ * del juego, donde cada escena maneja su propio ciclo
+ * de vida, incluyendo inicializacion, eventos de entrada, renderizado y cierre.
+ * Las escenas pueden indicar a cual otra escena
  * pueden cambiar, facilitando el flujo de navegacion del usuario.
  * <p>
  * Escenas principales implementadas:
@@ -34,7 +38,8 @@ public abstract class Scene {
     protected SceneType canChangeTo; // posible cambio de escena.
 
     /**
-     * Inicializa la escena. No se crea un constructor ya que cada escena distinta puede estar compuesta por distintos
+     * Inicializa la escena. No se crea un constructor ya que cada escena distinta
+     * puede estar compuesta por distintos
      * atributos...
      */
     public void init() {
@@ -67,6 +72,24 @@ public abstract class Scene {
 
     public SceneType getChangeScene() {
         return canChangeTo;
+    }
+
+    /**
+     * Devuelve el ancho preferido para esta escena.
+     * Por defecto, usa la resolución configurada por el usuario.
+     * Las escenas pueden sobrescribir este método para usar una resolución fija.
+     */
+    public int getPreferredWidth() {
+        return org.argentumforge.engine.game.Options.INSTANCE.getScreenWidth();
+    }
+
+    /**
+     * Devuelve la altura preferida para esta escena.
+     * Por defecto, usa la resolución configurada por el usuario.
+     * Las escenas pueden sobrescribir este método para usar una resolución fija.
+     */
+    public int getPreferredHeight() {
+        return org.argentumforge.engine.game.Options.INSTANCE.getScreenHeight();
     }
 
 }

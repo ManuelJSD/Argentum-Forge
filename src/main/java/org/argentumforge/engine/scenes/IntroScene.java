@@ -97,7 +97,7 @@ public final class IntroScene extends Scene {
     private void effectArgentumForge() {
         alphaInterface += 0.3f * deltaTime;
 
-        // Mantener tamaño original de la textura (1024x1024)
+        // Mantener tamaño original de la textura
         int imageWidth = ArgentumForgeLogo.getTex_width();
         int imageHeight = ArgentumForgeLogo.getTex_height();
 
@@ -106,6 +106,16 @@ public final class IntroScene extends Scene {
         int y = (org.argentumforge.engine.Window.INSTANCE.getHeight() - imageHeight) / 2;
 
         geometryBoxRenderGUI(ArgentumForgeLogo, x, y, imageWidth, imageHeight, alphaInterface);
+    }
+
+    @Override
+    public int getPreferredWidth() {
+        return 640;
+    }
+
+    @Override
+    public int getPreferredHeight() {
+        return 640;
     }
 
 }
