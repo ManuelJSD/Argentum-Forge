@@ -21,7 +21,6 @@ import static org.argentumforge.engine.scenes.Camera.*;
 import static org.argentumforge.engine.utils.GameData.*;
 import static org.argentumforge.engine.utils.Time.deltaTime;
 import static org.argentumforge.engine.utils.Time.timerTicksPerFrame;
-import static org.argentumforge.network.protocol.Protocol.*;
 import static org.lwjgl.glfw.GLFW.*;
 
 /**
@@ -222,7 +221,6 @@ public final class GameScene extends Scene {
                 case REQUEST_REFRESH:
                     break;
                 case EXIT_GAME:
-                    quit();
                     break;
             }
         }

@@ -1,56 +1,19 @@
 package org.argentumforge.engine.gui.forms;
 
 import imgui.ImGui;
-import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiCond;
-import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiWindowFlags;
-import imgui.type.ImString;
 import org.argentumforge.engine.Engine;
 import org.argentumforge.engine.Window;
-import org.argentumforge.engine.game.Messages;
 import org.argentumforge.engine.game.User;
 import org.argentumforge.engine.game.models.Direction;
-import org.argentumforge.engine.gui.ImGUISystem;
 import org.argentumforge.engine.gui.widgets.ImageButton3State;
 import org.argentumforge.engine.utils.GameData;
 
 import java.io.IOException;
 
-import static org.argentumforge.engine.audio.Sound.playMusic;
-import static org.argentumforge.engine.game.Messages.MessageKey.ENTER_USER_PASS;
 import static org.argentumforge.engine.utils.GameData.charList;
-import static org.argentumforge.engine.utils.GameData.options;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ENTER;
-
-/**
- * Formulario de conexion al servidor.
- * <p>
- * La clase {@code FConnect} implementa la interfaz grafica que se muestra al
- * usuario cuando inicia el cliente y necesita
- * conectarse al servidor. Este formulario es la puerta de entrada principal a
- * la experiencia de juego, permitiendo a los usuarios
- * autenticarse con sus cuentas existentes.
- * <p>
- * El formulario proporciona las siguientes funcionalidades:
- * <ul>
- * <li>Campos para ingresar la direccion IP y puerto del servidor
- * <li>Campos para ingresar nombre de usuario y contraseña
- * <li>Boton para iniciar la conexion al servidor con las credenciales
- * proporcionadas
- * <li>Boton para crear un nuevo personaje, dirigiendo al usuario a
- * {@link FCreateCharacter}
- * <li>Botones adicionales para acceder a opciones como recuperacion de cuenta,
- * manual del juego, reglas, codigo fuente y salida
- * del programa
- * </ul>
- * <p>
- * Esta clase maneja la validacion basica de campos y establece la comunicacion
- * inicial con el servidor, enviando las credenciales
- * del usuario y procesando la respuesta para determinar si se permite el
- * acceso. En caso de conexion exitosa, la aplicacion
- * avanzara a la pantalla principal.
- */
 
 public final class FConnect extends Form {
 

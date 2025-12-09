@@ -122,40 +122,6 @@ public final class FOptions extends Form {
             IM_GUI_SYSTEM.show(new FBindKeys());
         }
 
-        ImGui.setCursorPos(6, 368);
-        if (ImGui.button("Mapa", 170, 20)) {
-            playSound(SND_CLICK);
-            IM_GUI_SYSTEM.show(new FMapa());
-        }
-
-        ImGui.setCursorPos(6, 392);
-        if (ImGui.button("Manual", 170, 20))
-            playSound(SND_CLICK);
-
-        ImGui.setCursorPos(6, 416);
-        if (ImGui.button("Soporte", 170, 20))
-            playSound(SND_CLICK);
-
-        ImGui.setCursorPos(180, 344);
-        if (ImGui.button("Mensajes Personalizados", 170, 20))
-            playSound(SND_CLICK);
-
-        ImGui.setCursorPos(180, 368);
-        if (ImGui.button(new String("Cambiar Contraseña".getBytes(), StandardCharsets.UTF_8), 170, 20)) {
-            playSound(SND_CLICK);
-            IM_GUI_SYSTEM.show(new FNewPassword());
-        }
-
-        ImGui.setCursorPos(180, 392);
-        if (ImGui.button("Radio", 170, 20))
-            playSound(SND_CLICK);
-
-        ImGui.setCursorPos(180, 416);
-        if (ImGui.button("Tutorial", 170, 20)) {
-            playSound(SND_CLICK);
-            IM_GUI_SYSTEM.show(new FTutorial());
-        }
-
         ImGui.setCursorPos(134, 440);
         if (ImGui.button("Salir", 170, 20)) {
             options.save();

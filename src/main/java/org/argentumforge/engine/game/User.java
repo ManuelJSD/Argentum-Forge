@@ -1,7 +1,5 @@
 package org.argentumforge.engine.game;
 
-import org.argentumforge.engine.game.inventory.InventorySpells;
-import org.argentumforge.engine.game.inventory.UserInventory;
 import org.argentumforge.engine.game.models.*;
 
 import static org.argentumforge.engine.audio.Sound.*;
@@ -9,8 +7,6 @@ import static org.argentumforge.engine.game.models.Character.*;
 import static org.argentumforge.engine.game.models.Direction.*;
 import static org.argentumforge.engine.scenes.Camera.*;
 import static org.argentumforge.engine.utils.GameData.*;
-import static org.argentumforge.network.protocol.Protocol.changeHeading;
-import static org.argentumforge.network.protocol.Protocol.walk;
 
 /**
  * <p>
@@ -39,8 +35,6 @@ public enum User {
 
     INSTANCE;
 
-    private final UserInventory userInventory;
-    private final InventorySpells inventorySpells;
     private final Position userPos;
     private final Position addToUserPos;
     private boolean underCeiling;
@@ -107,8 +101,6 @@ public enum User {
     User() {
         this.userPos = new Position();
         this.addToUserPos = new Position();
-        this.userInventory = new UserInventory();
-        this.inventorySpells = new InventorySpells();
         this.talking = false;
         this.userNavegando = false;
         this.userComerciando = false;
@@ -412,14 +404,6 @@ public enum User {
 
     public boolean isDead() {
         return charList[userCharIndex].isDead();
-    }
-
-    public UserInventory getUserInventory() {
-        return userInventory;
-    }
-
-    public InventorySpells getInventorySpells() {
-        return inventorySpells;
     }
 
     public String getUserName() {

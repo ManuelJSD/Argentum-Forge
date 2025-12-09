@@ -2,12 +2,10 @@ package org.argentumforge.engine.gui.forms;
 
 import imgui.ImGui;
 import imgui.flag.*;
-import imgui.type.ImString;
 import org.argentumforge.engine.Window;
 import org.argentumforge.engine.game.console.Console;
 import org.argentumforge.engine.gui.ImGUISystem;
 
-import static org.argentumforge.engine.gui.forms.FCreateCharacter.sendCreate;
 import static org.argentumforge.engine.utils.Time.FPS;
 
 /**
@@ -73,7 +71,6 @@ public final class FMain extends Form {
 
         this.renderFPS();
         this.drawButtons();
-        USER.getUserInventory().updateTimers();
         Console.INSTANCE.drawConsole();
         ImGui.end();
     }
