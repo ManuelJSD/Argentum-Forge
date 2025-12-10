@@ -57,6 +57,7 @@ public final class FMain extends Form {
 
     @Override
     public void render() {
+        drawMenuBar();
         ImGui.setNextWindowSize(Window.INSTANCE.getWidth() + 10, Window.INSTANCE.getHeight() + 5, ImGuiCond.Always);
         ImGui.setNextWindowPos(-5, -1, ImGuiCond.Once);
 
@@ -87,7 +88,7 @@ public final class FMain extends Form {
     // FPS
     private void renderFPS() {
         final String txtFPS = String.valueOf(FPS);
-        ImGui.setCursorPos(448, 4);
+        ImGui.setCursorPos(448, 30);
         ImGui.pushStyleVar(ImGuiStyleVar.SelectableTextAlign, 0.5f, 0.5f);
         ImGui.pushStyleColor(ImGuiCol.HeaderHovered, TRANSPARENT_COLOR);
         ImGui.pushStyleColor(ImGuiCol.HeaderActive, TRANSPARENT_COLOR);
@@ -122,7 +123,7 @@ public final class FMain extends Form {
      * bloqueos.
      */
     private void drawEditorButtons() {
-        ImGui.setCursorPos(10, 10);
+        ImGui.setCursorPos(10, 30);
 
         // Botón Superficies
         if (ImGui.button("Superficies", 100, 25)) {
@@ -149,6 +150,44 @@ public final class FMain extends Form {
         // Botón Opciones
         if (ImGui.button("Opciones", 100, 25)) {
             ImGUISystem.INSTANCE.show(new FOptions());
+        }
+    }
+
+    private void drawMenuBar() {
+        if (ImGui.beginMainMenuBar()) {
+            if (ImGui.beginMenu("Archivo")) {
+                if (ImGui.menuItem("Salir")) {
+                    org.argentumforge.engine.Engine.closeClient();
+                }
+                ImGui.endMenu();
+            }
+
+            /*if (ImGui.beginMenu("Editores")) {
+                if (ImGui.menuItem("Superficies", "", ImGUISystem.INSTANCE.isFormVisible("FSurfaceEditor"))) {
+                    if (ImGUISystem.INSTANCE.isFormVisible("FSurfaceEditor")) {
+                        ImGUISystem.INSTANCE.deleteFrmArray(surfaceEditor);
+                    } else {
+                        ImGUISystem.INSTANCE.show(surfaceEditor);
+                    }
+                }
+                if (ImGui.menuItem("Bloqueos", "", ImGUISystem.INSTANCE.isFormVisible("FBlockEditor"))) {
+                    if (ImGUISystem.INSTANCE.isFormVisible("FBlockEditor")) {
+                        ImGUISystem.INSTANCE.deleteFrmArray(blockEditor);
+                    } else {
+                        ImGUISystem.INSTANCE.show(blockEditor);
+                    }
+                }
+                ImGui.endMenu();
+            }*/
+
+            if (ImGui.beginMenu("Ver")) {
+                if (ImGui.menuItem("Opciones")) {
+                    ImGUISystem.INSTANCE.show(new FOptions());
+                }
+                ImGui.endMenu();
+            }
+
+            ImGui.endMainMenuBar();
         }
     }
 
