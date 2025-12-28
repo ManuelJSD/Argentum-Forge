@@ -10,8 +10,7 @@
 <h1>Argentum Forge - World Editor for Argentum Online</h1>
 
 <p>
-  <a target="_blank" href="https://es.wikipedia.org/wiki/Argentum_Online">Argentum Online</a> es un videojuego MMORPG del año 1999 creado en Visual Basic 6.0 por Pablo Marquez (Morgolock), este juego es de código abierto. <br/> <br/>
-  Lo he traducido a Java con LWJGL3, este sería el cliente base, la conexión al servidor se está implementando con sockets Java. El servidor en Java aún no ha sido desarrollado, pero puedes usar el <a target="_blank" href="https://www.gs-zone.org/temas/cliente-servidor-v0-13-0-completos-y-funcionales.36521/">servidor Argentum Online Alkon v13.0 de Visual Basic 6.0</a>.
+  <b>Argentum Forge</b> es un editor de mundos y cliente para Argentum Online portado a Java utilizando LWJGL3.<br/><br/>
 </p>
 
 # Discord
@@ -58,7 +57,7 @@ https://github.com/Lorwik/Argentum-Forge.git
 - Asegúrate de tener los drivers gráficos actualizados para un rendimiento óptimo de OpenGL
 
 # Imágenes
-Muy pronto
+<img width="100%" alt="Screenshot" src="https://github.com/user-attachments/assets/790c491d-a595-4645-9ce4-24b82f59c276" />
 
 <h1>Agradecimientos:</h1>
 <br/>
@@ -76,7 +75,7 @@ Muy pronto
 <br/>
 
 1. Haz un Fork del Repositorio: Haz clic en "Fork" en la esquina superior derecha de la página para crear tu propia copia.
-2. Clona tu Repositorio: Clona tu fork a tu computadora usando git clone https://github.com/TU_USUARIO/argentum-online-lwjgl3.git.
+2. Clona tu Repositorio: Clona tu fork a tu computadora usando git clone https://github.com/TU_USUARIO/Argentum-Forge.git
 3. Crea una Rama: Crea una rama con git checkout -b nombre-rama para tus cambios.
 4. Realiza Cambios: Haz tus mejoras o correcciones y confírmalas.
 5. Envía un Pull Request: Desde tu fork, crea un pull request para que revisemos tus cambios.
