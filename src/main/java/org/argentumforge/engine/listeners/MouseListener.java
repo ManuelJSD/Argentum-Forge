@@ -27,7 +27,6 @@ public enum MouseListener {
     INSTANCE;
 
     private static final double DOUBLE_CLICK_TIME = 0.2;
-    private static final ImGuiIO IM_GUI_IO = ImGui.getIO();
     private static final boolean[] MOUSE_BUTTON_PRESSED = new boolean[3];
     private static final boolean[] MOUSE_BUTTON_DOBLE_CLICK_PRESSED = new boolean[3];
     private static final boolean[] MOUSE_BUTTON_RELEASED = new boolean[3];
@@ -61,9 +60,10 @@ public enum MouseListener {
         mouseDown[3] = button == GLFW_MOUSE_BUTTON_4 && action != GLFW_RELEASE;
         mouseDown[4] = button == GLFW_MOUSE_BUTTON_5 && action != GLFW_RELEASE;
 
-        IM_GUI_IO.setMouseDown(mouseDown);
+        final ImGuiIO io = ImGui.getIO();
+        io.setMouseDown(mouseDown);
 
-        if (!IM_GUI_IO.getWantCaptureMouse() && mouseDown[1]) ImGui.setWindowFocus(null);
+        if (!io.getWantCaptureMouse() && mouseDown[1]) ImGui.setWindowFocus(null);
 
         if (action == GLFW_PRESS) {
             if (button < MOUSE_BUTTON_PRESSED.length) {
@@ -90,8 +90,9 @@ public enum MouseListener {
      *  Funcion callBack para detectar el desplazamiento del mouse de una posicion a otra.
      */
     public static void mouseScrollCallback(long window, double xOffset, double yOffset) {
-        IM_GUI_IO.setMouseWheelH(IM_GUI_IO.getMouseWheelH() + (float) xOffset);
-        IM_GUI_IO.setMouseWheel(IM_GUI_IO.getMouseWheel() + (float) yOffset);
+        final ImGuiIO io = ImGui.getIO();
+        io.setMouseWheelH(io.getMouseWheelH() + (float) xOffset);
+        io.setMouseWheel(io.getMouseWheel() + (float) yOffset);
         scrollX = xOffset;
         scrollY = yOffset;
     }

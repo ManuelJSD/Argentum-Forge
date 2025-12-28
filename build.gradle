@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
 group = 'org.argentumforge'
@@ -88,3 +89,17 @@ test {
     useJUnitPlatform()
 }
 
+jar {
+    manifest {
+        attributes 'Main-Class': 'org.argentumforge.Main'
+    }
+}
+
+shadowJar {
+    archiveBaseName.set('ArgentumForge')
+    archiveClassifier.set('') // Esto hace que el jar final no se llame "-all.jar"
+    archiveVersion.set('1.0-SNAPSHOT')
+
+    // Esto es crucial para librerias que usan ServiceLoader (como quizas tinylog o algunas de audio)
+    mergeServiceFiles()
+}

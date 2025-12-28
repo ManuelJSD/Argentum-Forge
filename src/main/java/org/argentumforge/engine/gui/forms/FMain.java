@@ -49,10 +49,12 @@ public final class FMain extends Form {
 
     private FSurfaceEditor surfaceEditor;
     private FBlockEditor blockEditor;
+    private FNpcEditor npcEditor;
 
     public FMain() {
         surfaceEditor = new FSurfaceEditor();
         blockEditor = new FBlockEditor();
+        npcEditor = new FNpcEditor();
     }
 
     @Override
@@ -142,6 +144,17 @@ public final class FMain extends Form {
                 ImGUISystem.INSTANCE.deleteFrmArray(blockEditor);
             } else {
                 ImGUISystem.INSTANCE.show(blockEditor);
+            }
+        }
+
+        ImGui.sameLine();
+
+        // Botón NPCs
+        if (ImGui.button("NPCs", 100, 25)) {
+            if (ImGUISystem.INSTANCE.isFormVisible("FNpcEditor")) {
+                ImGUISystem.INSTANCE.deleteFrmArray(npcEditor);
+            } else {
+                ImGUISystem.INSTANCE.show(npcEditor);
             }
         }
 

@@ -25,6 +25,7 @@ public enum Options {
     private String ipServer = "127.0.0.1";
     private String portServer = "7666";
     private String language = "es";
+    private String npcsPath = "resources/NPCs.dat";
     private int screenWidth = 1024;
     private int screenHeight = 1024;
 
@@ -66,6 +67,7 @@ public enum Options {
             write(writer, "Name", nick);
             write(writer, "IP", ipServer);
             write(writer, "PORT", portServer);
+            write(writer, "NPCsPath", npcsPath);
             write(writer, "Fullscreen", fullscreen);
             write(writer, "VSYNC", vsync);
             write(writer, "CursorGraphic", cursorGraphic);
@@ -157,6 +159,14 @@ public enum Options {
         this.language = language;
     }
 
+    public String getNpcsPath() {
+        return npcsPath;
+    }
+
+    public void setNpcsPath(String npcsPath) {
+        this.npcsPath = npcsPath;
+    }
+
     public int getScreenWidth() {
         return screenWidth;
     }
@@ -200,6 +210,7 @@ public enum Options {
             case "Name" -> nick = value;
             case "IP" -> ipServer = value;
             case "PORT" -> portServer = value;
+            case "NPCsPath" -> npcsPath = value;
             case "Fullscreen" -> fullscreen = Boolean.parseBoolean(value);
             case "VSYNC" -> vsync = Boolean.parseBoolean(value);
             case "CursorGraphic" -> cursorGraphic = Boolean.parseBoolean(value);

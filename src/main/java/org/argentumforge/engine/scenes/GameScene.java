@@ -10,6 +10,7 @@ import org.argentumforge.engine.listeners.KeyHandler;
 import org.argentumforge.engine.listeners.MouseListener;
 import org.argentumforge.engine.utils.editor.Surface;
 import org.argentumforge.engine.utils.editor.Block;
+import org.argentumforge.engine.utils.editor.Npc;
 import org.argentumforge.engine.utils.inits.GrhInfo;
 
 import static org.argentumforge.engine.game.IntervalTimer.INT_SENTRPU;
@@ -71,6 +72,7 @@ public final class GameScene extends Scene {
     private FMain frmMain;
     private Surface surface;
     private Block block;
+    private Npc npc;
 
     private boolean DeleteLayer;
 
@@ -83,6 +85,7 @@ public final class GameScene extends Scene {
         frmMain = new FMain();
         surface = Surface.getInstance();
         block = Block.getInstance();
+        npc = Npc.getInstance();
 
         ImGUISystem.INSTANCE.addFrm(frmMain);
 
@@ -138,7 +141,8 @@ public final class GameScene extends Scene {
     @Override
     public void mouseEvents() {
         if (!ImGUISystem.INSTANCE.isMainLast() && !ImGUISystem.INSTANCE.isFormVisible("FSurfaceEditor")
-                && !ImGUISystem.INSTANCE.isFormVisible("FBlockEditor"))
+                && !ImGUISystem.INSTANCE.isFormVisible("FBlockEditor")
+                && !ImGUISystem.INSTANCE.isFormVisible("FNpcEditor"))
             return;
 
         // Estamos haciendo click en el render?
@@ -151,6 +155,7 @@ public final class GameScene extends Scene {
                 // Editar superficies o bloqueos según el modo activo
                 surface.surface_edit(x, y);
                 block.block_edit(x, y);
+                npc.npc_edit(x, y);
 
             }
 
@@ -180,7 +185,8 @@ public final class GameScene extends Scene {
     private void checkBindedKeys() {
         if (user.isUserComerciando()
                 || (!ImGUISystem.INSTANCE.isMainLast() && !ImGUISystem.INSTANCE.isFormVisible("FSurfaceEditor")
-                        && !ImGUISystem.INSTANCE.isFormVisible("FBlockEditor")))
+                        && !ImGUISystem.INSTANCE.isFormVisible("FBlockEditor")
+                        && !ImGUISystem.INSTANCE.isFormVisible("FNpcEditor")))
             return;
 
         // Usando el metodo estatico de Key para obtener la tecla desde el codigo

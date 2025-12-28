@@ -3,14 +3,12 @@ package org.argentumforge.engine.gui;
 import imgui.*;
 import imgui.callback.ImStrConsumer;
 import imgui.callback.ImStrSupplier;
-import imgui.flag.ImGuiBackendFlags;
-import imgui.flag.ImGuiConfigFlags;
-import imgui.flag.ImGuiKey;
-import imgui.flag.ImGuiMouseCursor;
+import imgui.flag.*;
 import imgui.gl3.ImGuiImplGl3;
 import org.argentumforge.engine.Window;
 import org.argentumforge.engine.game.console.ImGuiFonts;
 import org.argentumforge.engine.gui.forms.Form;
+import org.argentumforge.engine.listeners.MouseListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -184,8 +182,9 @@ public enum ImGUISystem {
     }
 
     public void renderGUI() {
+        if (deltaTime <= 0) return;
+
         final ImGuiIO io = ImGui.getIO();
-        if (io.getDeltaTime() <= 0) return;
 
         // Get window size properties and mouse position
         glfwGetWindowSize(window.getWindow(), winWidth, winHeight);
@@ -196,6 +195,15 @@ public enum ImGUISystem {
         io.setDisplayFramebufferScale((float) fbWidth[0] / winWidth[0], (float) fbHeight[0] / winHeight[0]);
         io.setMousePos((float) mousePosX[0], (float) mousePosY[0]);
         io.setDeltaTime(deltaTime);
+
+        final boolean[] mouseDown = new boolean[5];
+        mouseDown[0] = glfwGetMouseButton(window.getWindow(), GLFW_MOUSE_BUTTON_1) == GLFW_PRESS;
+        mouseDown[1] = glfwGetMouseButton(window.getWindow(), GLFW_MOUSE_BUTTON_2) == GLFW_PRESS;
+        mouseDown[2] = glfwGetMouseButton(window.getWindow(), GLFW_MOUSE_BUTTON_3) == GLFW_PRESS;
+        io.setMouseDown(mouseDown);
+
+        io.setMouseWheelH(MouseListener.getScrollX());
+        io.setMouseWheel(MouseListener.getScrollY());
 
         // ACA HAY QUE LABURAR CON LOS CURSORES.
         if (window.isCursorCrosshair())
@@ -216,12 +224,25 @@ public enum ImGUISystem {
         // IMPORTANT!!
         // Any Dear ImGui code SHOULD go between NewFrame()/Render() methods
         ImGui.newFrame();
+
+       /* ImGui.setNextWindowPos(5, 25, ImGuiCond.Always);
+        ImGui.begin("InputDebug", ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize |
+                ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav | ImGuiWindowFlags.NoInputs);
+        ImGui.text("dt=" + deltaTime);
+        ImGui.text("io.WantCaptureMouse=" + io.getWantCaptureMouse());
+        ImGui.text("ImGui.isMouseDown(0)=" + ImGui.isMouseDown(0) + " clicked=" + ImGui.isMouseClicked(0));
+        ImGui.text("glfw L=" + (glfwGetMouseButton(window.getWindow(), GLFW_MOUSE_BUTTON_1) == GLFW_PRESS));
+        ImGui.text(String.format("mousePos=%.1f, %.1f", io.getMousePosX(), io.getMousePosY()));
+        ImGui.end();
+*/
         renderFrms();
         ImGui.render();
 
         // After ImGui#render call we provide draw data into LWJGL3 renderer.
         // At that moment ImGui will be rendered to the current OpenGL context.
         imGuiGl3.renderDrawData(ImGui.getDrawData());
+
+        MouseListener.endFrame();
     }
 
     private void renderFrms() {

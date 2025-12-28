@@ -4,8 +4,15 @@ import org.argentumforge.engine.game.Options;
 import org.argentumforge.engine.game.models.Character;
 import org.argentumforge.engine.renderer.Surface;
 import org.argentumforge.engine.utils.inits.*;
+import org.tinylog.Logger;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.argentumforge.engine.game.Messages.loadMessages;
 import static org.argentumforge.engine.game.models.Character.eraseAllChars;
@@ -45,6 +52,7 @@ public final class GameData {
     public static MapData[][] mapData;
     public static boolean[] bLluvia;
     public static Character[] charList = new Character[10000 + 1]; // se agrega aca porque hay mapas que tienen NPCs.
+    public static Map<Integer, NpcData> npcs;
     public static Options options = Options.INSTANCE;
     private static BinaryDataReader reader;
 
@@ -57,6 +65,7 @@ public final class GameData {
         reader = new BinaryDataReader();
         options.load();
 
+        loadNpcs();
         loadGrhData();
         loadHeads();
         loadHelmets();
@@ -67,6 +76,79 @@ public final class GameData {
         loadFK();
         loadFonts();
         loadMessages(options.getLanguage());
+    }
+
+    private static void loadNpcs() {
+        final String npcsPathValue = options.getNpcsPath();
+        if (npcsPathValue == null || npcsPathValue.isBlank()) {
+            Logger.error("NPCsPath is not configured in options.ini");
+            npcs = new HashMap<>();
+            return;
+        }
+
+        final Path npcsPath = Path.of(npcsPathValue);
+        if (!Files.exists(npcsPath)) {
+            Logger.error("NPCs.dat not found at path: {}", npcsPath.toAbsolutePath());
+            npcs = new HashMap<>();
+            return;
+        }
+
+        final Map<Integer, NpcData> result = new HashMap<>();
+        NpcData currentNpc = null;
+
+        try (BufferedReader br = Files.newBufferedReader(npcsPath, StandardCharsets.ISO_8859_1)) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String trimmed = line.trim();
+                if (trimmed.isEmpty()) continue;
+                if (trimmed.startsWith("'")) continue;
+                if (trimmed.startsWith("#")) continue;
+                if (trimmed.startsWith(";")) continue;
+
+                if (trimmed.startsWith("[") && trimmed.contains("]")) {
+                    String section = trimmed.substring(1, trimmed.indexOf(']')).trim();
+                    if (section.regionMatches(true, 0, "NPC", 0, 3)) {
+                        String numPart = section.substring(3).trim();
+                        try {
+                            int npcNumber = Integer.parseInt(numPart);
+                            currentNpc = new NpcData(npcNumber);
+                            result.put(npcNumber, currentNpc);
+                        } catch (NumberFormatException e) {
+                            currentNpc = null;
+                        }
+                    } else {
+                        currentNpc = null;
+                    }
+                    continue;
+                }
+
+                if (currentNpc == null) continue;
+                int eq = trimmed.indexOf('=');
+                if (eq <= 0) continue;
+
+                String key = trimmed.substring(0, eq).trim();
+                String value = trimmed.substring(eq + 1).trim();
+
+                if (key.equalsIgnoreCase("Name")) {
+                    currentNpc.setName(value);
+                } else if (key.equalsIgnoreCase("Head")) {
+                    try {
+                        currentNpc.setHead(Integer.parseInt(value));
+                    } catch (NumberFormatException ignored) {
+                    }
+                } else if (key.equalsIgnoreCase("Body")) {
+                    try {
+                        currentNpc.setBody(Integer.parseInt(value));
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+            }
+        } catch (IOException e) {
+            Logger.error(e, "Could not read NPCs.dat from path: {}", npcsPath.toAbsolutePath());
+        }
+
+        npcs = result;
+        Logger.info("Loaded {} NPC definitions from {}", npcs.size(), npcsPath.toAbsolutePath());
     }
 
     /**
