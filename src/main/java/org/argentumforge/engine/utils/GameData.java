@@ -4,6 +4,7 @@ import org.argentumforge.engine.game.Options;
 import org.argentumforge.engine.game.models.Character;
 import org.argentumforge.engine.renderer.Surface;
 import org.argentumforge.engine.utils.inits.*;
+import org.argentumforge.engine.utils.inits.MapProperties;
 import org.tinylog.Logger;
 
 import java.io.BufferedReader;
@@ -69,6 +70,8 @@ public final class GameData {
     public static Character[] charList = new Character[10000 + 1];
     /** Mapa de definiciones de NPCs cargadas desde el archivo de datos. */
     public static Map<Integer, NpcData> npcs;
+    /** Propiedades generales del mapa actual (.dat). */
+    public static MapProperties mapProperties = new MapProperties();
     /** Instancia de configuración del usuario. */
     public static Options options = Options.INSTANCE;
     /** Lector de datos binarios persistente para la carga de recursos. */
@@ -449,17 +452,112 @@ public final class GameData {
     /**
      * Carga los datos de un mapa desde una ruta de archivo específica.
      * Útil para el modo editor cuando se cargan archivos .map externos.
+     * Al seleccionar un .map, intenta cargar automáticamente archivos .dat e .inf
+     * asociados.
      *
      * @param filePath Ruta absoluta al archivo .map
      */
     public static void loadMap(String filePath) {
         try {
+            // Cargar archivo principal de capas (.map)
             byte[] data = Files.readAllBytes(Path.of(filePath));
             initMap(data);
+
+            // Preparar para buscar archivos compañeros (.inf y .dat)
+            String basePath = filePath.substring(0, filePath.lastIndexOf('.'));
+            String datPath = basePath + ".dat";
+            String infPath = basePath + ".inf";
+
+            // Intentar cargar propiedades del mapa (.dat)
+            if (Files.exists(Path.of(datPath))) {
+                loadMapProperties(datPath);
+            } else {
+                mapProperties = new MapProperties(); // Reset a valores por defecto si no existe
+                Logger.info("Archivo .dat no encontrado en {}, usando valores por defecto.", datPath);
+            }
+
+            // Intentar cargar información de entidades (.inf)
+            if (Files.exists(Path.of(infPath))) {
+                loadMapInfo(infPath);
+            } else {
+                Logger.info("Archivo .inf no encontrado en {}, saltando la carga de entidades.", infPath);
+            }
+
         } catch (IOException e) {
             System.err.println("Could not load map from path: " + filePath);
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Carga las propiedades generales del mapa desde un archivo .dat.
+     * 
+     * @param filePath Ruta absoluta al archivo .dat
+     */
+    private static void loadMapProperties(String filePath) {
+        Logger.info("Cargando propiedades del mapa desde: {}", filePath);
+        MapProperties props = new MapProperties();
+
+        try (BufferedReader br = Files.newBufferedReader(Path.of(filePath), StandardCharsets.ISO_8859_1)) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String trimmed = line.trim();
+                if (trimmed.isEmpty() || trimmed.startsWith("'") || trimmed.startsWith("#") || trimmed.startsWith(";"))
+                    continue;
+
+                // Saltamos las cabeceras de sección [MAPA1]
+                if (trimmed.startsWith("[") && trimmed.contains("]"))
+                    continue;
+
+                int eq = trimmed.indexOf('=');
+                if (eq <= 0)
+                    continue;
+
+                String key = trimmed.substring(0, eq).trim();
+                String value = trimmed.substring(eq + 1).trim();
+
+                try {
+                    if (key.equalsIgnoreCase("Name")) {
+                        props.setName(value);
+                    } else if (key.equalsIgnoreCase("MusicNum")) {
+                        props.setMusicIndex(Integer.parseInt(value));
+                    } else if (key.equalsIgnoreCase("MagiaSinefecto")) {
+                        props.setMagiaSinEfecto(Integer.parseInt(value));
+                    } else if (key.equalsIgnoreCase("NoEncriptarMP")) {
+                        props.setNoEncriptarMP(Integer.parseInt(value));
+                    } else if (key.equalsIgnoreCase("Terreno")) {
+                        props.setTerreno(value);
+                    } else if (key.equalsIgnoreCase("Zona")) {
+                        props.setZona(value);
+                    } else if (key.equalsIgnoreCase("Restringir")) {
+                        props.setRestringir(value.equalsIgnoreCase("No") ? 0 : Integer.parseInt(value));
+                    } else if (key.equalsIgnoreCase("BackUp")) {
+                        props.setBackup(Integer.parseInt(value));
+                    } else if (key.equalsIgnoreCase("Pk")) {
+                        props.setPlayerKiller(Integer.parseInt(value));
+                    }
+                } catch (NumberFormatException e) {
+                    Logger.warn("Error parseando valor '{}' para la clave '{}' en el mapa.", value, key);
+                }
+            }
+        } catch (IOException e) {
+            Logger.error(e, "Error leyendo el archivo .dat del mapa: {}", filePath);
+        }
+
+        mapProperties = props;
+        Logger.info("Propiedades cargadas: Name={}, Music={}, Zona={}", props.getName(), props.getMusicIndex(),
+                props.getZona());
+    }
+
+    /**
+     * Carga la información de entidades (NPCs, Objetos, Triggers) desde un archivo
+     * .inf.
+     * 
+     * @param filePath Ruta absoluta al archivo .inf
+     */
+    private static void loadMapInfo(String filePath) {
+        Logger.info("Cargando información de entidades desde: {}", filePath);
+        // TODO: Implementar parser de .inf para poblar mapData
     }
 
     /**
@@ -650,9 +748,6 @@ public final class GameData {
 
     }
 
-    /**
-     * Inicializa los graficos, ya sean animaciones o no.
-     */
     /**
      * Inicializa una estructura GrhInfo asociándola al índice de gráfico
      * correspondiente.
