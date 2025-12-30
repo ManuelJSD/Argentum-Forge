@@ -11,11 +11,9 @@ import org.argentumforge.engine.listeners.MouseListener;
 import org.argentumforge.engine.utils.editor.Surface;
 import org.argentumforge.engine.utils.editor.Block;
 import org.argentumforge.engine.utils.editor.Npc;
-import org.argentumforge.engine.utils.inits.GrhInfo;
 
 import static org.argentumforge.engine.game.IntervalTimer.INT_SENTRPU;
 import static org.argentumforge.engine.game.models.Character.drawCharacter;
-import static org.argentumforge.engine.game.models.Key.TALK;
 import static org.argentumforge.engine.renderer.Drawn.drawTexture;
 import static org.argentumforge.engine.renderer.Drawn.drawGrhIndex;
 import static org.argentumforge.engine.scenes.Camera.*;
@@ -199,32 +197,9 @@ public final class GameScene extends Scene {
 
         if (KeyHandler.isActionKeyJustPressed(key)) {
 
-            // Para que al hablar no ejecute teclas bindeadas y solo permita cerrar
-            // nuevamente el sendText
-            if (user.isTalking() && key != TALK)
-                return;
-
             switch (key) {
-                case USE_OBJECT:
-                    break;
-                case GET_OBJECT:
-                    break;
-                case ATTACK:
-                    break;
-                case EQUIP_OBJECT:
-                    break;
                 case AUTO_MOVE:
                     autoMove = !autoMove;
-                    break;
-                case DROP_OBJECT:
-                    break;
-                case TALK:
-                    break;
-                case HIDE:
-                    break;
-                case STEAL:
-                    break;
-                case REQUEST_REFRESH:
                     break;
                 case EXIT_GAME:
                     break;
