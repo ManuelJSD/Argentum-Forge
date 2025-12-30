@@ -7,10 +7,10 @@
     <a target="_blank"><img src="https://img.shields.io/badge/License-GNU%20General%20Public%20License%20-e98227.svg?style=flat-square"></img></a>
 </div>
 
-<h1>Argentum Forge - World Editor for Argentum Online</h1>
+<h1>Argentum Forge - Editor de Mapas para Argentum Online</h1>
 
 <p>
-  <b>Argentum Forge</b> es un editor de mundos y cliente para Argentum Online portado a Java utilizando LWJGL3.<br/><br/>
+  <b>Argentum Forge</b> es un editor de mapas y cliente para Argentum Online portado a Java utilizando LWJGL3.<br/><br/>
 </p>
 
 # Discord
