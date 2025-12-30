@@ -161,9 +161,9 @@ public final class FMain extends Form {
         ImGui.sameLine();
 
         // Botón Opciones
-        if (ImGui.button("Opciones", 100, 25)) {
+        /*if (ImGui.button("Opciones", 100, 25)) {
             ImGUISystem.INSTANCE.show(new FOptions());
-        }
+        }*/
     }
 
     private void drawMenuBar() {
