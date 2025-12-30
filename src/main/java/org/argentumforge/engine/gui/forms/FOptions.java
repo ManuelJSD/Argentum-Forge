@@ -5,10 +5,6 @@ import imgui.flag.ImGuiCond;
 import imgui.flag.ImGuiWindowFlags;
 import org.argentumforge.engine.Window;
 import org.argentumforge.engine.game.Rain;
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-
 import static org.argentumforge.engine.audio.Sound.*;
 import static org.argentumforge.engine.utils.GameData.options;
 
@@ -35,20 +31,13 @@ import static org.argentumforge.engine.utils.GameData.options;
 public final class FOptions extends Form {
 
     public FOptions() {
-        try {
-            this.backgroundImage = loadTexture("VentanaOpciones");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+
     }
 
     @Override
     public void render() {
-        ImGui.setNextWindowSize(355, 480, ImGuiCond.Always);
-        ImGui.begin(this.getClass().getSimpleName(), ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoResize);
-
-        ImGui.text("Opciones:");
-        ImGui.separator();
+        ImGui.setNextWindowSize(400, 320, ImGuiCond.Always);
+        ImGui.begin("Configuración", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize);
 
         if (ImGui.checkbox("Pantalla Completa", options.isFullscreen())) {
             options.setFullscreen(!options.isFullscreen());
@@ -67,6 +56,7 @@ public final class FOptions extends Form {
             }
         }
 
+        ImGui.setNextItemWidth(200);
         if (ImGui.beginCombo("Resolucion", resolutions[currentResIndex])) {
             for (int i = 0; i < resolutions.length; i++) {
                 boolean isSelected = (currentResIndex == i);
@@ -110,20 +100,31 @@ public final class FOptions extends Form {
             options.setCursorGraphic(!options.isCursorGraphic());
         }
 
+        // Add some spacing before buttons
+        ImGui.dummy(0, 20);
+
         this.drawButtons();
 
         ImGui.end();
     }
 
     private void drawButtons() {
-        ImGui.setCursorPos(6, 344);
-        if (ImGui.button("Configurar Teclas", 170, 20)) {
+        // Center buttons
+        float buttonWidth = 160;
+        float spacing = 20;
+        // Total width of 2 buttons + spacing
+        float totalWidth = (buttonWidth * 2) + spacing;
+
+        ImGui.setCursorPosX((ImGui.getWindowWidth() - totalWidth) / 2);
+
+        if (ImGui.button("Configurar Teclas", buttonWidth, 25)) {
             playSound(SND_CLICK);
             IM_GUI_SYSTEM.show(new FBindKeys());
         }
 
-        ImGui.setCursorPos(134, 440);
-        if (ImGui.button("Salir", 170, 20)) {
+        ImGui.sameLine(0, spacing);
+
+        if (ImGui.button("Salir", buttonWidth, 25)) {
             options.save();
             this.close();
         }

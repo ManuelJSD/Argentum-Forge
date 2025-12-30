@@ -1,76 +1,27 @@
 package org.argentumforge.engine.gui.forms;
 
 import imgui.ImGui;
-import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiCond;
-import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiWindowFlags;
 import org.argentumforge.engine.game.models.Key;
-import org.argentumforge.engine.gui.widgets.ImageButton3State;
 import org.argentumforge.engine.listeners.KeyHandler;
-
-import java.io.IOException;
 
 import static org.argentumforge.engine.audio.Sound.SND_CLICK;
 import static org.argentumforge.engine.audio.Sound.playSound;
 import static org.lwjgl.glfw.GLFW.*;
 
 public class FBindKeys extends Form {
-    // apa las papas.
-    private ImageButton3State btnSave;
-    private ImageButton3State btnDefaultKeys;
 
     public FBindKeys() {
-        try {
-            this.backgroundImage = loadTexture("VentanaConfigurarTeclas");
-
-
-            btnSave = new ImageButton3State(
-                    loadTexture("BotonGuardarConfigKey"),
-                    loadTexture("BotonGuardarRolloverConfigKey"),
-                    loadTexture("BotonGuardarClickConfigKey"),
-                    312, 448, 177, 25
-            );
-
-            btnDefaultKeys = new ImageButton3State(
-                    loadTexture("BotonDefaultKeys"),
-                    loadTexture("BotonDefaultKeysRollover"),
-                    loadTexture("BotonDefaultKeysClick"),
-                    64, 448, 177, 25
-            );
-
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        // No background image needed anymore
     }
 
-
-    /**
-     * Checkeo de teclas que no se pueden asignar en nuestro guardado. <br>
-     * por ejemplo: No se puede bindear la tecla de windows. <br> <br>
-     *
-     * True = Tecla permitida <br>
-     * False = Tecla no asignable
-     */
-    private boolean checkKeysPermited(int key) {
-        return switch (key) {
-            case GLFW_KEY_HOME,
-                 GLFW_KEY_F12 -> false;
-            default -> true;
-        };
-    }
-
-    /**
-     * Segun la tecla que presionemos, nos devolvera el nombre.
-     */
     private String getKeyName(int key) {
         int scancode = glfwGetKeyScancode(key);
         String keyName = glfwGetKeyName(key, scancode);
 
         if (keyName == null) {
-            // GLFW no devuelve el nombre de las teclas especiales.
-
-            return switch (key){
+            return switch (key) {
                 // Teclas especiales.
                 case GLFW_KEY_SPACE -> "ESPACIO";
                 case GLFW_KEY_ENTER -> "ENTER";
@@ -104,109 +55,103 @@ public class FBindKeys extends Form {
             };
         }
 
-        // Devuelve el nombre de la tecla presionada gracias a GLFW.
         return keyName;
     }
 
     @Override
     public void render() {
-        ImGui.setNextWindowFocus(); // dale foco solo a este FRM
+        ImGui.setNextWindowFocus();
+        ImGui.setNextWindowSize(400, 400, ImGuiCond.Always);
 
-        ImGui.setNextWindowSize(560, 500, ImGuiCond.Always);
-        ImGui.begin(this.getClass().getSimpleName(), ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoDecoration |
-                ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoMove);
+        if (ImGui.begin("Configuración de Teclas", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize)) {
 
-        this.checkMoveFrm();
+            // Use columns to separate Labels (Left) and Buttons (Right)
+            ImGui.columns(2, "BindKeysCols", false); // false = no border resize
 
-        ImGui.setCursorPos(5, 0);
-        ImGui.image(backgroundImage, 548, 500);
+            // Set fixed width for the second column (Buttons) roughly 140px
+            // The first column takes the remaining space
+            float windowWidth = ImGui.getWindowWidth();
+            ImGui.setColumnWidth(0, windowWidth - 140);
 
-        if(btnDefaultKeys.render()) buttonDefault();
-        if(btnSave.render()) buttonSave();
+            renderGroupHeader("Movimiento");
+            renderKeyBindRow("Arriba", Key.UP);
+            renderKeyBindRow("Abajo", Key.DOWN);
+            renderKeyBindRow("Izquierda", Key.LEFT);
+            renderKeyBindRow("Derecha", Key.RIGHT);
+            ImGui.dummy(0, 10);
 
-        showKeysBinded();
+            renderGroupHeader("Opciones Personales");
+            renderKeyBindRow("Musica", Key.TOGGLE_MUSIC);
+            renderKeyBindRow("Sonido", Key.TOGGLE_SOUND);
+            ImGui.dummy(0, 10);
 
-        ImGui.end();
+            renderGroupHeader("Otras Teclas");
+            renderKeyBindRow("Capturar Pantalla", Key.TAKE_SCREENSHOT);
+            renderKeyBindRow("Mostrar Opciones", Key.SHOW_OPTIONS);
+            renderKeyBindRow("Salir", Key.EXIT_GAME);
+
+            ImGui.columns(1); // End columns
+
+            ImGui.separator();
+            ImGui.dummy(0, 10);
+
+            // Bottom buttons centered
+            float buttonWidth = 140;
+            float spacing = 20;
+            float totalWidth = (buttonWidth * 2) + spacing;
+
+            ImGui.setCursorPosX((windowWidth - totalWidth) / 2);
+
+            if (ImGui.button("Cargar Default", buttonWidth, 30)) {
+                buttonDefault();
+            }
+
+            ImGui.sameLine();
+
+            if (ImGui.button("Guardar y Salir", buttonWidth, 30)) {
+                buttonSave();
+            }
+
+            ImGui.end();
+        }
     }
 
-    /**
-     * Muestra todos los botones que existan en nuestro frm para el cambio de tecla.
-     */
-    private void showKeysBinded() {
-        // Movimiento
-        buttonToChangeKey(Key.UP, 143, 34);
-        buttonToChangeKey(Key.DOWN, 143, 58);
-        buttonToChangeKey(Key.LEFT, 143, 82);
-        buttonToChangeKey(Key.RIGHT, 143, 106);
-
-        // Acciones
-        buttonToChangeKey(Key.GET_OBJECT, 143, 155);
-        buttonToChangeKey(Key.EQUIP_OBJECT, 143, 179);
-        buttonToChangeKey(Key.TAME_ANIMAL, 143, 203);
-        buttonToChangeKey(Key.STEAL, 143, 227);
-        buttonToChangeKey(Key.HIDE, 143, 251);
-        buttonToChangeKey(Key.DROP_OBJECT, 143, 275);
-        buttonToChangeKey(Key.USE_OBJECT, 143, 299);
-        buttonToChangeKey(Key.ATTACK, 143, 323);
-
-        // Hablar
-        buttonToChangeKey(Key.TALK, 143, 371);
-        buttonToChangeKey(Key.TALK_WITH_GUILD, 143, 395);
-
-        // Opciones personales
-        buttonToChangeKey(Key.TOGGLE_MUSIC, 423, 35);
-        buttonToChangeKey(Key.REQUEST_REFRESH, 423, 59);
-        buttonToChangeKey(Key.TOGGLE_NAMES, 423, 83);
-        buttonToChangeKey(Key.TOGGLE_SOUND, 423, 108);
-        buttonToChangeKey(Key.TOGGLE_FXS, 423, 132);
-
-        // Otras teclas
-        buttonToChangeKey(Key.TAKE_SCREENSHOT, 423, 189);
-        buttonToChangeKey(Key.SHOW_OPTIONS, 423, 216);
-        buttonToChangeKey(Key.MEDITATE, 423, 244);
-        buttonToChangeKey(Key.CAST_SPELL_MACRO, 423, 272);
-        buttonToChangeKey(Key.WORK_MACRO, 423, 299);
-        buttonToChangeKey(Key.EXIT_GAME, 423, 326);
-        buttonToChangeKey(Key.TOGGLE_SAFE_MODE, 423, 352);
-        buttonToChangeKey(Key.TOGGLE_RESUSCITATION_SAFE, 423, 379);
+    private void renderGroupHeader(String title) {
+        ImGui.textColored(1.0f, 0.84f, 0.0f, 1.0f, title); // Gold color
+        ImGui.separator();
     }
 
-    /**
-     * Dibuja nuestro boton para cambiar su tecla
-     */
-    private void buttonToChangeKey(Key key, int x, int y) {
+    private void renderKeyBindRow(String label, Key key) {
+        ImGui.pushID(label);
+
+        // Column 0: Label
+        ImGui.alignTextToFramePadding();
+        ImGui.text(label);
+
+        ImGui.nextColumn();
+
+        // Column 1: Button
+        float buttonWidth = ImGui.getColumnWidth() - 10; // Fill column with small padding
+
         String actual = getKeyName(key.getKeyCode()).toUpperCase();
 
-        // chekeamos que si esta en cambio de tecla se le asigna "Presione una tecla."
         if (key.getPreparedToBind()) {
-            actual = "PRES.UNA TECLA";
+            actual = "PRES. TECLA";
         }
 
-        ImGui.setCursorPos(x, y);
-
-        // imgui styles
-        ImGui.pushStyleVar(ImGuiStyleVar.FramePadding, 0f, 0f);
-        ImGui.pushStyleColor(ImGuiCol.Button, 0f, 0f, 0f, 0.6f);
-        ImGui.pushStyleColor(ImGuiCol.ButtonActive, 0f, 0f, 0f, 0.0f);
-        ImGui.pushStyleColor(ImGuiCol.ButtonHovered, 0f, 0f, 0f, 0.4f);
-
-        // Lo dibujamos con la tecla que tiene asignada
-        if(ImGui.button(actual, 108, 15)) {
-            // si hacemos click estamos preparados para cambiar de tecla
-            if(key.getPreparedToBind()) {
-                key.setPreparedToBind(false); // cancelamos el proceso de bindeado.
+        if (ImGui.button(actual, buttonWidth, 0)) {
+            if (key.getPreparedToBind()) {
+                key.setPreparedToBind(false);
             } else {
-                if(!Key.checkIsBinding()) { // para que no nos permita hacer lo mismo en varios botones
+                if (!Key.checkIsBinding()) {
                     key.setPreparedToBind(true);
                 }
             }
-
         }
 
-        ImGui.popStyleColor();
-        ImGui.popStyleColor();
-        ImGui.popStyleColor();
-        ImGui.popStyleVar();
+        ImGui.nextColumn(); // Go back to column 0 for next row
+
+        ImGui.popID();
     }
 
     private void buttonDefault() {
@@ -214,9 +159,6 @@ public class FBindKeys extends Form {
 
         Key.loadDefaultKeys();
         KeyHandler.updateMovementKeys();
-
-        btnDefaultKeys.delete();
-        btnSave.delete();
         close();
     }
 
@@ -224,9 +166,6 @@ public class FBindKeys extends Form {
         playSound(SND_CLICK);
 
         Key.saveKeys();
-
-        btnDefaultKeys.delete();
-        btnSave.delete();
         close();
     }
 }
