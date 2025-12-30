@@ -85,8 +85,10 @@ public final class FConnect extends Form {
         // Botones gráficos de 3 estados
         if (btnNuevoMapa.render(centerX, yNuevo) || ImGui.isKeyPressed(GLFW_KEY_ENTER))
             this.buttonConnect();
+
         if (btnCargarMapa.render(centerX, yCargar))
-            ; // TODO: ACCCION!
+            this.buttonLoadMapAction();
+
         if (btnExit.render(centerX, ySalir))
             this.buttonExitGame();
 
@@ -94,18 +96,27 @@ public final class FConnect extends Form {
     }
 
     private void buttonConnect() {
-
         User.INSTANCE.setUserName("Editor");
-        // Simular conexión exitosa
-        simulateEditorConnection();
+        // Simular conexión exitosa (cargar mapa por defecto si no se cargó otro)
+        simulateEditorConnection(true);
+    }
 
+    private void buttonLoadMapAction() {
+        if (org.argentumforge.engine.utils.MapFileUtils.openAndLoadMap()) {
+            User.INSTANCE.setUserName("Editor");
+            // Proceed to game, skipping default map load
+            simulateEditorConnection(false);
+        }
     }
 
     /**
      * Simula una conexión exitosa para modo editor (sin servidor).
      * Inicializa todos los datos necesarios para que GameScene funcione localmente.
+     * 
+     * @param loadDefaultMap Si es true, carga el mapa 1 por defecto. Si es false,
+     *                       asume que ya se cargó un mapa.
      */
-    private void simulateEditorConnection() {
+    private void simulateEditorConnection(boolean loadDefaultMap) {
         User user = User.INSTANCE;
 
         // 1. Configurar posición inicial del usuario
@@ -120,7 +131,9 @@ public final class FConnect extends Form {
 
         // 2. Cargar mapa inicial (DEBE hacerse ANTES de configurar el personaje en
         // mapData)
-        GameData.loadMap(1);
+        if (loadDefaultMap) {
+            GameData.loadMap(1);
+        }
 
         // 3. Configurar el personaje en charList
         charList[charIndex].getPos().setX(startX);
@@ -133,7 +146,10 @@ public final class FConnect extends Form {
         charList[charIndex].setActive(true); // Marcar como activo
 
         // 4. Registrar el personaje en el mapa (CRÍTICO)
-        GameData.mapData[startX][startY].setCharIndex(charIndex);
+        // Check bounds just in case the loaded map is small
+        if (startX >= 1 && startX <= 100 && startY >= 1 && startY <= 100) {
+            GameData.mapData[startX][startY].setCharIndex(charIndex);
+        }
 
         // 5. Actualizar áreas de visión
         user.areaChange(startX, startY);

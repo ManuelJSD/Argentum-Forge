@@ -21,22 +21,27 @@ import static org.argentumforge.scripts.Compressor.readResource;
 
 /**
  * <p>
- * Clase central de almacenamiento y gestion de datos del juego. {@code GameData} contiene las referencias a todos los recursos,
+ * Clase central de almacenamiento y gestion de datos del juego.
+ * {@code GameData} contiene las referencias a todos los recursos,
  * estados y configuraciones necesarios para el funcionamiento del cliente.
  * <p>
- * Esta clase es de tipo utilidad (utility class) y no debe ser instanciada. Provee metodos estaticos para cargar, inicializar y
- * acceder a los diferentes elementos del juego como graficos, sonidos, personajes, mapas y configuraciones.
+ * Esta clase es de tipo utilidad (utility class) y no debe ser instanciada.
+ * Provee metodos estaticos para cargar, inicializar y
+ * acceder a los diferentes elementos del juego como graficos, sonidos,
+ * personajes, mapas y configuraciones.
  * <p>
  * Entre sus responsabilidades principales se encuentran:
  * <ul>
- * <li>Gestionar los arrays estaticos de datos del juego (cuerpos, cabezas, graficos, etc.)
+ * <li>Gestionar los arrays estaticos de datos del juego (cuerpos, cabezas,
+ * graficos, etc.)
  * <li>Cargar los recursos desde archivos comprimidos
  * <li>Inicializar los datos necesarios al inicio del juego
  * <li>Proporcionar metodos de acceso a los datos del juego
  * <li>Mantener el estado global de elementos como personajes, mapas y efectos
  * </ul>
  * <p>
- * La clase implementa un sistema de carga secuencial de recursos durante la inicializacion, garantizando que todos los datos
+ * La clase implementa un sistema de carga secuencial de recursos durante la
+ * inicializacion, garantizando que todos los datos
  * necesarios esten disponibles antes de que el juego comience a ejecutarse.
  */
 
@@ -60,7 +65,8 @@ public final class GameData {
      * Inicializamos todos los datos almacenados en archivos.
      */
     public static void init() {
-        for (int i = 0; i < charList.length; i++) charList[i] = new Character();
+        for (int i = 0; i < charList.length; i++)
+            charList[i] = new Character();
 
         reader = new BinaryDataReader();
         options.load();
@@ -100,10 +106,14 @@ public final class GameData {
             String line;
             while ((line = br.readLine()) != null) {
                 String trimmed = line.trim();
-                if (trimmed.isEmpty()) continue;
-                if (trimmed.startsWith("'")) continue;
-                if (trimmed.startsWith("#")) continue;
-                if (trimmed.startsWith(";")) continue;
+                if (trimmed.isEmpty())
+                    continue;
+                if (trimmed.startsWith("'"))
+                    continue;
+                if (trimmed.startsWith("#"))
+                    continue;
+                if (trimmed.startsWith(";"))
+                    continue;
 
                 if (trimmed.startsWith("[") && trimmed.contains("]")) {
                     String section = trimmed.substring(1, trimmed.indexOf(']')).trim();
@@ -122,9 +132,11 @@ public final class GameData {
                     continue;
                 }
 
-                if (currentNpc == null) continue;
+                if (currentNpc == null)
+                    continue;
                 int eq = trimmed.indexOf('=');
-                if (eq <= 0) continue;
+                if (eq <= 0)
+                    continue;
 
                 String key = trimmed.substring(0, eq).trim();
                 String value = trimmed.substring(eq + 1).trim();
@@ -179,48 +191,59 @@ public final class GameData {
                 grhData[grh] = new GrhData();
                 grhData[grh].setNumFrames(reader.readShort());
 
-                if (grhData[grh].getNumFrames() <= 0) throw new IOException("getFrame(frame) ERROR IN THE GRHINDEX: " + grh);
+                if (grhData[grh].getNumFrames() <= 0)
+                    throw new IOException("getFrame(frame) ERROR IN THE GRHINDEX: " + grh);
 
                 grhData[grh].setFrames(new int[grhData[grh].getNumFrames() + 1]);
 
                 if (grhData[grh].getNumFrames() > 1) {
                     for (int i = 1; i <= grhData[grh].getNumFrames(); i++) {
                         grhData[grh].setFrame(i, reader.readInt());
-                        if (grhData[grh].getFrame(i) <= 0) throw new IOException("getFrame(frame) ERROR IN THE GRHINDEX: " + grh);
+                        if (grhData[grh].getFrame(i) <= 0)
+                            throw new IOException("getFrame(frame) ERROR IN THE GRHINDEX: " + grh);
                     }
 
                     grhData[grh].setSpeed(reader.readFloat());
-                    if (grhData[grh].getSpeed() <= 0) throw new IOException("getSpeed ERROR IN THE GRHINDEX: " + grh);
+                    if (grhData[grh].getSpeed() <= 0)
+                        throw new IOException("getSpeed ERROR IN THE GRHINDEX: " + grh);
 
                     grhData[grh].setPixelHeight(grhData[grhData[grh].getFrame(1)].getPixelHeight());
 
-                    if (grhData[grh].getPixelHeight() <= 0) throw new IOException("getPixelHeight ERROR IN THE GRHINDEX: " + grh);
-
+                    if (grhData[grh].getPixelHeight() <= 0)
+                        throw new IOException("getPixelHeight ERROR IN THE GRHINDEX: " + grh);
 
                     grhData[grh].setPixelWidth(grhData[grhData[grh].getFrame(1)].getPixelWidth());
-                    if (grhData[grh].getPixelWidth() <= 0) throw new IOException("getPixelWidth ERROR IN THE GRHINDEX: " + grh);
+                    if (grhData[grh].getPixelWidth() <= 0)
+                        throw new IOException("getPixelWidth ERROR IN THE GRHINDEX: " + grh);
 
                     grhData[grh].setTileWidth(grhData[grhData[grh].getFrame(1)].getTileWidth());
-                    if (grhData[grh].getTileWidth() <= 0) throw new IOException("getTileWidth ERROR IN THE GRHINDEX: " + grh);
+                    if (grhData[grh].getTileWidth() <= 0)
+                        throw new IOException("getTileWidth ERROR IN THE GRHINDEX: " + grh);
 
                     grhData[grh].setTileHeight(grhData[grhData[grh].getFrame(1)].getTileHeight());
-                    if (grhData[grh].getTileHeight() <= 0) throw new IOException("getTileHeight ERROR IN THE GRHINDEX: " + grh);
+                    if (grhData[grh].getTileHeight() <= 0)
+                        throw new IOException("getTileHeight ERROR IN THE GRHINDEX: " + grh);
 
                 } else {
                     grhData[grh].setFileNum(reader.readInt());
-                    if (grhData[grh].getFileNum() <= 0) throw new IOException("getFileNum ERROR IN THE GRHINDEX: " + grh);
+                    if (grhData[grh].getFileNum() <= 0)
+                        throw new IOException("getFileNum ERROR IN THE GRHINDEX: " + grh);
 
                     grhData[grh].setsX(reader.readShort());
-                    if (grhData[grh].getsX() < 0) throw new IOException("getsX ERROR IN THE GRHINDEX: " + grh);
+                    if (grhData[grh].getsX() < 0)
+                        throw new IOException("getsX ERROR IN THE GRHINDEX: " + grh);
 
                     grhData[grh].setsY(reader.readShort());
-                    if (grhData[grh].getsY() < 0) throw new IOException("getsY ERROR IN THE GRHINDEX: " + grh);
+                    if (grhData[grh].getsY() < 0)
+                        throw new IOException("getsY ERROR IN THE GRHINDEX: " + grh);
 
                     grhData[grh].setPixelWidth(reader.readShort());
-                    if (grhData[grh].getPixelWidth() <= 0) throw new IOException("getPixelWidth ERROR IN THE GRHINDEX: " + grh);
+                    if (grhData[grh].getPixelWidth() <= 0)
+                        throw new IOException("getPixelWidth ERROR IN THE GRHINDEX: " + grh);
 
                     grhData[grh].setPixelHeight(reader.readShort());
-                    if (grhData[grh].getPixelHeight() <= 0) throw new IOException("getPixelHeight ERROR IN THE GRHINDEX: " + grh);
+                    if (grhData[grh].getPixelHeight() <= 0)
+                        throw new IOException("getPixelHeight ERROR IN THE GRHINDEX: " + grh);
 
                     grhData[grh].setTileWidth((float) grhData[grh].getPixelWidth() / 32);
                     grhData[grh].setTileHeight((float) grhData[grh].getPixelHeight() / 32);
@@ -405,6 +428,19 @@ public final class GameData {
     }
 
     /**
+     * Cargamos el mapa desde un archivo especifico.
+     */
+    public static void loadMap(String filePath) {
+        try {
+            byte[] data = Files.readAllBytes(Path.of(filePath));
+            initMap(data);
+        } catch (IOException e) {
+            System.err.println("Could not load map from path: " + filePath);
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * Cargamos el mapa.
      */
     public static void loadMap(int numMap) {
@@ -413,7 +449,10 @@ public final class GameData {
             System.err.println("Could not load mapa" + numMap + " data!");
             return;
         }
+        initMap(data);
+    }
 
+    private static void initMap(byte[] data) {
         reader.init(data);
 
         mapData = new MapData[101][101];
@@ -442,26 +481,35 @@ public final class GameData {
                 mapData[x][y].setBlocked(bloq == 1);
 
                 mapData[x][y].getLayer(1).setGrhIndex(reader.readShort());
-                mapData[x][y].setLayer(1, initGrh(mapData[x][y].getLayer(1), mapData[x][y].getLayer(1).getGrhIndex(), true));
+                mapData[x][y].setLayer(1,
+                        initGrh(mapData[x][y].getLayer(1), mapData[x][y].getLayer(1).getGrhIndex(), true));
 
                 if ((byte) (byflags & 2) != 0) {
                     mapData[x][y].getLayer(2).setGrhIndex(reader.readShort());
-                    mapData[x][y].setLayer(2, initGrh(mapData[x][y].getLayer(2), mapData[x][y].getLayer(2).getGrhIndex(), true));
+                    mapData[x][y].setLayer(2,
+                            initGrh(mapData[x][y].getLayer(2), mapData[x][y].getLayer(2).getGrhIndex(), true));
 
-                } else mapData[x][y].getLayer(2).setGrhIndex(0);
+                } else
+                    mapData[x][y].getLayer(2).setGrhIndex(0);
 
                 if ((byte) (byflags & 4) != 0) {
                     mapData[x][y].getLayer(3).setGrhIndex(reader.readShort());
-                    mapData[x][y].setLayer(3, initGrh(mapData[x][y].getLayer(3), mapData[x][y].getLayer(3).getGrhIndex(), true));
-                } else mapData[x][y].getLayer(3).setGrhIndex(0);
+                    mapData[x][y].setLayer(3,
+                            initGrh(mapData[x][y].getLayer(3), mapData[x][y].getLayer(3).getGrhIndex(), true));
+                } else
+                    mapData[x][y].getLayer(3).setGrhIndex(0);
 
                 if ((byte) (byflags & 8) != 0) {
                     mapData[x][y].getLayer(4).setGrhIndex(reader.readShort());
-                    mapData[x][y].setLayer(4, initGrh(mapData[x][y].getLayer(4), mapData[x][y].getLayer(4).getGrhIndex(), true));
-                } else mapData[x][y].getLayer(4).setGrhIndex(0);
+                    mapData[x][y].setLayer(4,
+                            initGrh(mapData[x][y].getLayer(4), mapData[x][y].getLayer(4).getGrhIndex(), true));
+                } else
+                    mapData[x][y].getLayer(4).setGrhIndex(0);
 
-                if ((byte) (byflags & 16) != 0) mapData[x][y].setTrigger(reader.readShort());
-                else mapData[x][y].setTrigger(0);
+                if ((byte) (byflags & 16) != 0)
+                    mapData[x][y].setTrigger(reader.readShort());
+                else
+                    mapData[x][y].setTrigger(0);
 
                 mapData[x][y].getObjGrh().setGrhIndex(0);
             }
@@ -497,7 +545,8 @@ public final class GameData {
     }
 
     /**
-     * Cargamos los indices de mapas donde se puede visualizar la lluvia en el archivo "fk.ind"
+     * Cargamos los indices de mapas donde se puede visualizar la lluvia en el
+     * archivo "fk.ind"
      */
     private static void loadFK() {
         byte[] data = readResource("resources/inits.ao", "fk");
@@ -522,18 +571,21 @@ public final class GameData {
      * Inicializa los graficos, ya sean animaciones o no.
      */
     public static GrhInfo initGrh(GrhInfo grh, short grhIndex, boolean started) {
-        if (grh == null) throw new NullPointerException("Se esta intentando incializar un GrhInfo nulo...");
+        if (grh == null)
+            throw new NullPointerException("Se esta intentando incializar un GrhInfo nulo...");
 
         grh.setGrhIndex(grhIndex);
         grh.setStarted(false);
         grh.setLoops(0);
 
-        if (started) grh.setStarted(grhData[grh.getGrhIndex()].getNumFrames() > 1);
+        if (started)
+            grh.setStarted(grhData[grh.getGrhIndex()].getNumFrames() > 1);
 
-        if (grh.isStarted()) grh.setLoops(-1);
+        if (grh.isStarted())
+            grh.setLoops(-1);
 
         grh.setFrameCounter(1);
-        //grh.setSpeed( grhData[grhIndex].getSpeed() );
+        // grh.setSpeed( grhData[grhIndex].getSpeed() );
         grh.setSpeed(0.4f);
 
         return grh;

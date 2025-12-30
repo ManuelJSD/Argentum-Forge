@@ -5,6 +5,7 @@ import imgui.flag.*;
 import org.argentumforge.engine.Window;
 import org.argentumforge.engine.game.console.Console;
 import org.argentumforge.engine.gui.ImGUISystem;
+import org.argentumforge.engine.utils.GameData;
 
 import static org.argentumforge.engine.utils.Time.FPS;
 
@@ -161,37 +162,47 @@ public final class FMain extends Form {
         ImGui.sameLine();
 
         // Botón Opciones
-        /*if (ImGui.button("Opciones", 100, 25)) {
-            ImGUISystem.INSTANCE.show(new FOptions());
-        }*/
+        /*
+         * if (ImGui.button("Opciones", 100, 25)) {
+         * ImGUISystem.INSTANCE.show(new FOptions());
+         * }
+         */
     }
 
     private void drawMenuBar() {
         if (ImGui.beginMainMenuBar()) {
             if (ImGui.beginMenu("Archivo")) {
+                if (ImGui.menuItem("Cargar Mapa")) {
+                    this.loadMapAction();
+                }
+
                 if (ImGui.menuItem("Salir")) {
                     org.argentumforge.engine.Engine.closeClient();
                 }
                 ImGui.endMenu();
             }
 
-            /*if (ImGui.beginMenu("Editores")) {
-                if (ImGui.menuItem("Superficies", "", ImGUISystem.INSTANCE.isFormVisible("FSurfaceEditor"))) {
-                    if (ImGUISystem.INSTANCE.isFormVisible("FSurfaceEditor")) {
-                        ImGUISystem.INSTANCE.deleteFrmArray(surfaceEditor);
-                    } else {
-                        ImGUISystem.INSTANCE.show(surfaceEditor);
-                    }
-                }
-                if (ImGui.menuItem("Bloqueos", "", ImGUISystem.INSTANCE.isFormVisible("FBlockEditor"))) {
-                    if (ImGUISystem.INSTANCE.isFormVisible("FBlockEditor")) {
-                        ImGUISystem.INSTANCE.deleteFrmArray(blockEditor);
-                    } else {
-                        ImGUISystem.INSTANCE.show(blockEditor);
-                    }
-                }
-                ImGui.endMenu();
-            }*/
+            /*
+             * if (ImGui.beginMenu("Editores")) {
+             * if (ImGui.menuItem("Superficies", "",
+             * ImGUISystem.INSTANCE.isFormVisible("FSurfaceEditor"))) {
+             * if (ImGUISystem.INSTANCE.isFormVisible("FSurfaceEditor")) {
+             * ImGUISystem.INSTANCE.deleteFrmArray(surfaceEditor);
+             * } else {
+             * ImGUISystem.INSTANCE.show(surfaceEditor);
+             * }
+             * }
+             * if (ImGui.menuItem("Bloqueos", "",
+             * ImGUISystem.INSTANCE.isFormVisible("FBlockEditor"))) {
+             * if (ImGUISystem.INSTANCE.isFormVisible("FBlockEditor")) {
+             * ImGUISystem.INSTANCE.deleteFrmArray(blockEditor);
+             * } else {
+             * ImGUISystem.INSTANCE.show(blockEditor);
+             * }
+             * }
+             * ImGui.endMenu();
+             * }
+             */
 
             if (ImGui.beginMenu("Ver")) {
                 if (ImGui.menuItem("Opciones")) {
@@ -202,6 +213,10 @@ public final class FMain extends Form {
 
             ImGui.endMainMenuBar();
         }
+    }
+
+    private void loadMapAction() {
+        org.argentumforge.engine.utils.MapFileUtils.openAndLoadMap();
     }
 
 }
