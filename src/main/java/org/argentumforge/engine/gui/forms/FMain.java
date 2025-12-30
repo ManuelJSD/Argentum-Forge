@@ -161,6 +161,18 @@ public final class FMain extends Form {
 
         ImGui.sameLine();
 
+        // Botón Info Mapa
+        if (ImGui.button("Info Mapa", 100, 25)) {
+            if (ImGUISystem.INSTANCE.isFormVisible("FInfoMap")) {
+                // If already visible, just refocus or show again
+                ImGUISystem.INSTANCE.show(new FInfoMap());
+            } else {
+                ImGUISystem.INSTANCE.show(new FInfoMap());
+            }
+        }
+
+        ImGui.sameLine();
+
         // Botón Opciones
         /*
          * if (ImGui.button("Opciones", 100, 25)) {
@@ -208,6 +220,9 @@ public final class FMain extends Form {
                 if (ImGui.menuItem("Modo Caminata", "", org.argentumforge.engine.game.User.INSTANCE.isWalkingmode())) {
                     org.argentumforge.engine.game.User.INSTANCE
                             .setWalkingmode(!org.argentumforge.engine.game.User.INSTANCE.isWalkingmode());
+                }
+                if (ImGui.menuItem("Información del Mapa")) {
+                    ImGUISystem.INSTANCE.show(new FInfoMap());
                 }
                 if (ImGui.menuItem("Opciones")) {
                     ImGUISystem.INSTANCE.show(new FOptions());
