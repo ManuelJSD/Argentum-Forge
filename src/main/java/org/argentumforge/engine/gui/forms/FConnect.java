@@ -113,10 +113,10 @@ public final class FConnect extends Form {
      * Simula una conexión exitosa para modo editor (sin servidor).
      * Inicializa todos los datos necesarios para que GameScene funcione localmente.
      * 
-     * @param loadDefaultMap Si es true, carga el mapa 1 por defecto. Si es false,
+     * @param newMap Si es true, inicia un nuevo mapa. Si es false,
      *                       asume que ya se cargó un mapa.
      */
-    private void simulateEditorConnection(boolean loadDefaultMap) {
+    private void simulateEditorConnection(boolean newMap) {
         User user = User.INSTANCE;
 
         // 1. Configurar posición inicial del usuario
@@ -131,8 +131,8 @@ public final class FConnect extends Form {
 
         // 2. Cargar mapa inicial (DEBE hacerse ANTES de configurar el personaje en
         // mapData)
-        if (loadDefaultMap) {
-            GameData.loadMap(1);
+        if (newMap) {
+            GameData.createEmptyMap();
         }
 
         // 3. Configurar el personaje en charList
@@ -156,9 +156,7 @@ public final class FConnect extends Form {
 
         // 6. Inicializar estados
         user.setUserMoving(false);
-        user.setUserNavegando(false);
-        user.setUserComerciando(false);
-
+        
         // 7. Marcar como conectado (esto activa la transición a GameScene)
         user.setUserConected(true);
     }

@@ -452,6 +452,50 @@ public final class GameData {
         initMap(data);
     }
 
+    public static void createEmptyMap() {
+        createEmptyMap((short) 1);
+    }
+
+    public static void createEmptyMap(short baseLayer1GrhIndex) {
+        mapData = new MapData[101][101];
+        mapData[0][0] = new MapData();
+
+        for (int y = 1; y <= 100; y++) {
+            for (int x = 1; x <= 100; x++) {
+                MapData cell = new MapData();
+                cell.setBlocked(false);
+                cell.setTrigger(0);
+                cell.setCharIndex(0);
+                cell.setNpcIndex((short) 0);
+                cell.setObjInfo(null);
+
+                initGrhOrReset(cell.getLayer(1), baseLayer1GrhIndex, true);
+                initGrhOrReset(cell.getLayer(2), (short) 0, true);
+                initGrhOrReset(cell.getLayer(3), (short) 0, true);
+                initGrhOrReset(cell.getLayer(4), (short) 0, true);
+                initGrhOrReset(cell.getObjGrh(), (short) 0, false);
+
+                mapData[x][y] = cell;
+            }
+        }
+
+        Surface.INSTANCE.deleteAllTextures();
+        eraseAllChars();
+    }
+
+    private static void initGrhOrReset(GrhInfo grh, short grhIndex, boolean started) {
+        if (grhData != null && grhIndex >= 0 && grhIndex < grhData.length && grhData[grhIndex] != null) {
+            initGrh(grh, grhIndex, started);
+            return;
+        }
+
+        grh.setGrhIndex(grhIndex);
+        grh.setStarted(false);
+        grh.setLoops(0);
+        grh.setFrameCounter(1);
+        grh.setSpeed(0.4f);
+    }
+
     private static void initMap(byte[] data) {
         reader.init(data);
 

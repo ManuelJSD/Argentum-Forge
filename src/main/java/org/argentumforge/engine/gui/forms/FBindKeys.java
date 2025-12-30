@@ -89,6 +89,7 @@ public class FBindKeys extends Form {
             renderKeyBindRow("Capturar Pantalla", Key.TAKE_SCREENSHOT);
             renderKeyBindRow("Mostrar Opciones", Key.SHOW_OPTIONS);
             renderKeyBindRow("Mostrar Debug", Key.DEBUG_SHOW);
+            renderKeyBindRow("Modo Caminata", Key.TOGGLE_WALKING_MODE);
             renderKeyBindRow("Salir", Key.EXIT_GAME);
 
             ImGui.columns(1); // End columns

@@ -10,11 +10,14 @@ import static org.argentumforge.engine.utils.GameData.*;
 
 /**
  * <p>
- * Representa el usuario controlado por el jugador. Centraliza toda la informacion, logica de movimiento y estados del personaje
+ * Representa el usuario controlado por el jugador. Centraliza toda la
+ * informacion, logica de movimiento y estados del personaje
  * principal.
  * <p>
- * Esta clase maneja aspectos fundamentales como la posicion del usuario en el mapa, direccion de movimiento, atributos y
- * estadisticas, inventario, hechizos y todas las interacciones con el entorno de juego. Actua como una entidad central que
+ * Esta clase maneja aspectos fundamentales como la posicion del usuario en el
+ * mapa, direccion de movimiento, atributos y
+ * estadisticas, inventario, hechizos y todas las interacciones con el entorno
+ * de juego. Actua como una entidad central que
  * coordina las acciones del jugador con el resto del mundo virtual.
  * <p>
  * Entre sus responsabilidades principales se encuentran:
@@ -23,11 +26,13 @@ import static org.argentumforge.engine.utils.GameData.*;
  * <li>Gestion de estadisticas (vida, mana, stamina, experiencia, etc.)</li>
  * <li>Manejo del inventario y equipamiento</li>
  * <li>Administracion de hechizos disponibles</li>
- * <li>Control de estados especiales (navegando, bajo techo, hablando, etc.)</li>
+ * <li>Control de estados especiales (navegando, bajo techo, hablando,
+ * etc.)</li>
  * <li>Interaccion con el entorno y otros personajes</li>
  * </ul>
  * <p>
- * La clase representa el nucleo de la experiencia de juego, siendo el punto de conexion entre las acciones del jugador y su
+ * La clase representa el nucleo de la experiencia de juego, siendo el punto de
+ * conexion entre las acciones del jugador y su
  * representacion en el mundo virtual.
  */
 
@@ -39,8 +44,7 @@ public enum User {
     private final Position addToUserPos;
     private boolean underCeiling;
     private boolean userMoving;
-    private boolean userNavegando;
-    private boolean userComerciando;
+    private boolean walkingmode;
     // mapa
     private short userMap;
     private short userCharIndex;
@@ -54,56 +58,10 @@ public enum User {
 
     // stats del usuario
     private String userName;
-    private short userMaxHP;
-    private short userMinHP;
-    private short userMaxMAN;
-    private short userMinMAN;
-    private short userMaxSTA;
-    private short userMinSTA;
-    private int userPasarNivel;
-    private int userExp;
-    private int userGLD;
-    private int userLvl;
-    private int userDext;
-    private int userStrg;
-    private int userMaxAGU;
-    private int userMinAGU;
-    private int userMaxHAM;
-    private int userMinHAM;
-    private int freeSkillPoints;
-    private int[] skills = new int[Skill.values().length];
-    private int[] attributes = new int[Attribute.values().length];
-    private int[] reputations = new int[Reputation.values().length];
-    private int[] killCounters = new int[KillCounter.values().length];
-
-    private String userWeaponEqpHit = "0/0";
-    private String userArmourEqpDef = "0/0";
-    private String userHelmEqpDef = "0/0";
-    private String userShieldEqpDef = "0/0";
-
-    private int userWeaponEqpSlot;
-    private int userArmourEqpSlot;
-    private int userHelmEqpSlot;
-    private int userShieldEqpSlot;
-
-    private boolean talking;
-    private boolean criminal;
-
-    private int usingSkill;
-
-    private int role;
-    private int jailTime;
-
-    private int privilege;
-
-    private boolean walkingmode;
 
     User() {
         this.userPos = new Position();
         this.addToUserPos = new Position();
-        this.talking = false;
-        this.userNavegando = false;
-        this.userComerciando = false;
         this.walkingmode = false;
     }
 
@@ -114,7 +72,8 @@ public enum User {
     }
 
     /**
-     * @param nDirection direccion pasada por parametro Mueve la camara hacia una direccion.
+     * @param nDirection direccion pasada por parametro Mueve la camara hacia una
+     *                   direccion.
      */
     public void moveScreen(Direction nDirection) {
         int x = 0, y = 0;
@@ -133,6 +92,11 @@ public enum User {
                 break;
         }
 
+        // In free camera mode, move 2 tiles at a time (50% faster)
+        int multiplier = walkingmode ? 1 : 2;
+        x *= multiplier;
+        y *= multiplier;
+
         final int tX = userPos.getX() + x;
         final int tY = userPos.getY() + y;
 
@@ -148,7 +112,8 @@ public enum User {
     }
 
     /**
-     * Checkea si estamos bajo techo segun el trigger en donde esta parado el usuario.
+     * Checkea si estamos bajo techo segun el trigger en donde esta parado el
+     * usuario.
      */
     public boolean checkUnderCeiling() {
         return mapData[userPos.getX()][userPos.getY()].getTrigger() == 1 ||
@@ -158,7 +123,8 @@ public enum User {
 
     /**
      * @param charIndex  Numero de identificador de personaje
-     * @param nDirection Direccion del personaje Mueve el personaje segun la direccion establecida en "nHeading".
+     * @param nDirection Direccion del personaje Mueve el personaje segun la
+     *                   direccion establecida en "nHeading".
      */
     public void moveCharbyHead(short charIndex, Direction nDirection) {
         int addX = 0, addY = 0;
@@ -182,6 +148,11 @@ public enum User {
         final int nX = x + addX;
         final int nY = y + addY;
 
+        // Validate bounds before accessing mapData
+        if (nX < 1 || nX > 100 || nY < 1 || nY > 100) {
+            return;
+        }
+
         mapData[nX][nY].setCharIndex(charIndex);
         charList[charIndex].getPos().setX(nX);
         charList[charIndex].getPos().setY(nY);
@@ -196,11 +167,10 @@ public enum User {
         charList[charIndex].setScrollDirectionX(addX);
         charList[charIndex].setScrollDirectionY(addY);
 
-        doPasosFx(charIndex);
-
         // areas viejos
         if ((nY < minLimiteY) || (nY > maxLimiteY) || (nX < minLimiteX) || (nX > maxLimiteX))
-            if (charIndex != userCharIndex) eraseChar(charIndex);
+            if (charIndex != userCharIndex)
+                eraseChar(charIndex);
 
     }
 
@@ -232,10 +202,12 @@ public enum User {
     /**
      * @param x Posicion X del usuario.
      * @param y Posicion Y del usuario.
-     * @return True si se encuentra dentro del limite del mapa, false en caso contrario.
+     * @return True si se encuentra dentro del limite del mapa, false en caso
+     *         contrario.
      */
     public boolean inMapBounds(int x, int y) {
-        return x < TILE_BUFFER_SIZE || x > XMaxMapSize - TILE_BUFFER_SIZE || y < TILE_BUFFER_SIZE || y > YMaxMapSize - TILE_BUFFER_SIZE;
+        return x < TILE_BUFFER_SIZE || x > XMaxMapSize - TILE_BUFFER_SIZE || y < TILE_BUFFER_SIZE
+                || y > YMaxMapSize - TILE_BUFFER_SIZE;
     }
 
     public boolean estaPCarea(int charIndex) {
@@ -248,14 +220,16 @@ public enum User {
     public boolean hayAgua(int x, int y) {
         return ((mapData[x][y].getLayer(1).getGrhIndex() >= 1505 && mapData[x][y].getLayer(1).getGrhIndex() <= 1520) ||
                 (mapData[x][y].getLayer(1).getGrhIndex() >= 5665 && mapData[x][y].getLayer(1).getGrhIndex() <= 5680) ||
-                (mapData[x][y].getLayer(1).getGrhIndex() >= 13547 && mapData[x][y].getLayer(1).getGrhIndex() <= 13562)) &&
+                (mapData[x][y].getLayer(1).getGrhIndex() >= 13547 && mapData[x][y].getLayer(1).getGrhIndex() <= 13562))
+                &&
                 mapData[x][y].getLayer(2).getGrhIndex() == 0;
     }
 
     /**
      * @param charIndex Numero de identificador de personaje.
      * @param fx        Numero de efecto FX.
-     * @param loops     Tiempo del efecto FX. Establece un efecto FX en un personaje.
+     * @param loops     Tiempo del efecto FX. Establece un efecto FX en un
+     *                  personaje.
      */
     public void setCharacterFx(int charIndex, int fx, int loops) {
         charList[charIndex].setFxIndex(fx);
@@ -268,7 +242,8 @@ public enum User {
     /**
      * @param charIndex Numero de identificador de personaje
      * @param nX        Posicion X a actualizar
-     * @param nY        Posicion Y a actualizar Mueve el personaje segun la direccion establecida en "nX" y "nY".
+     * @param nY        Posicion Y a actualizar Mueve el personaje segun la
+     *                  direccion establecida en "nX" y "nY".
      */
     public void moveCharbyPos(short charIndex, int nX, int nY) {
         final int x = charList[charIndex].getPos().getX();
@@ -277,10 +252,14 @@ public enum User {
         final int addX = nX - x;
         final int addY = nY - y;
 
-        if (sgn((short) addX) == 1) charList[charIndex].setHeading(RIGHT);
-        else if (sgn((short) addX) == -1) charList[charIndex].setHeading(LEFT);
-        else if (sgn((short) addY) == -1) charList[charIndex].setHeading(UP);
-        else if (sgn((short) addY) == 1) charList[charIndex].setHeading(DOWN);
+        if (sgn((short) addX) == 1)
+            charList[charIndex].setHeading(RIGHT);
+        else if (sgn((short) addX) == -1)
+            charList[charIndex].setHeading(LEFT);
+        else if (sgn((short) addY) == -1)
+            charList[charIndex].setHeading(UP);
+        else if (sgn((short) addY) == 1)
+            charList[charIndex].setHeading(DOWN);
 
         mapData[nX][nY].setCharIndex(charIndex);
         charList[charIndex].getPos().setX(nX);
@@ -296,23 +275,28 @@ public enum User {
         charList[charIndex].setScrollDirectionY(sgn((short) addY));
 
         /*
-            'parche para que no medite cuando camina
-            If .FxIndex = FxMeditar.CHICO Or .FxIndex = FxMeditar.GRANDE Or .FxIndex = FxMeditar.MEDIANO Or .FxIndex = FxMeditar.XGRANDE Or .FxIndex = FxMeditar.XXGRANDE Then
-                .FxIndex = 0
-            End If
+         * 'parche para que no medite cuando camina
+         * If .FxIndex = FxMeditar.CHICO Or .FxIndex = FxMeditar.GRANDE Or .FxIndex =
+         * FxMeditar.MEDIANO Or .FxIndex = FxMeditar.XGRANDE Or .FxIndex =
+         * FxMeditar.XXGRANDE Then
+         * .FxIndex = 0
+         * End If
          */
 
-        if (!estaPCarea(charIndex)) Dialogs.removeDialog(charIndex);
+        if (!estaPCarea(charIndex))
+            Dialogs.removeDialog(charIndex);
 
         // If Not EstaPCarea(CharIndex) Then Call Dialogos.RemoveDialog(CharIndex)
 
         if ((nY < minLimiteY) || (nY > maxLimiteY) || (nX < minLimiteX) || (nX > maxLimiteX))
-            if (charIndex != userCharIndex) eraseChar(charIndex);
+            if (charIndex != userCharIndex)
+                eraseChar(charIndex);
 
     }
 
     /**
-     * @param direction Mueve nuestro personaje a una cierta direccion si es posible.
+     * @param direction Mueve nuestro personaje a una cierta direccion si es
+     *                  posible.
      */
     public void moveTo(Direction direction) {
         boolean legalOk = switch (direction) {
@@ -321,41 +305,19 @@ public enum User {
             case DOWN -> moveToLegalPos(userPos.getX(), userPos.getY() + 1);
             case LEFT -> moveToLegalPos(userPos.getX() - 1, userPos.getY());
         };
+
         if (legalOk && !charList[userCharIndex].isParalizado()) {
-            // MODO EDITOR: Deshabilitado envío al servidor
-            // walk(direction);
             moveScreen(direction);
-            moveCharbyHead(userCharIndex, direction);
-        } else if (charList[userCharIndex].getHeading() != direction) {
-            // MODO EDITOR: Deshabilitado envío al servidor
-            // changeHeading(direction);
+
+            // Only move character if walking mode is active
+            if (walkingmode) {
+                moveCharbyHead(userCharIndex, direction);
+            }
+        } else if (walkingmode && charList[userCharIndex].getHeading() != direction) {
+            // Only change heading in walking mode
             charList[userCharIndex].setHeading(direction);
         }
 
-    }
-
-    /**
-     * @param charIndex Numero de identificador de personaje Realiza sonidos de caminata segun el estado del personaje
-     *                  <p>
-     *                  EN PROGRESO....
-     */
-    public void doPasosFx(int charIndex) {
-        if (walkingmode) {
-            if (!userNavegando) {
-                if (!charList[charIndex].isDead()
-                        && estaPCarea(charIndex)
-                        && (charList[charIndex].getPriv() == 0 || charList[charIndex].getPriv() > 5)) {
-                    if (charList[charIndex].isPie()) {
-                        playSound(SND_PASOS1);
-                        charList[charIndex].setPie(false);
-                    } else {
-                        playSound(SND_PASOS2);
-                        charList[charIndex].setPie(true);
-                    }
-                }
-
-            }
-        }
     }
 
     public boolean isUserMoving() {
@@ -390,10 +352,6 @@ public enum User {
         this.userConected = userConected;
     }
 
-    public boolean isGM() {
-        return PlayerType.isGM(privilege);
-    }
-
     public short getUserCharIndex() {
         return userCharIndex;
     }
@@ -414,206 +372,6 @@ public enum User {
         this.userName = userName;
     }
 
-    public short getUserMaxHP() {
-        return userMaxHP;
-    }
-
-    public void setUserMaxHP(short userMaxHP) {
-        this.userMaxHP = userMaxHP;
-    }
-
-    public short getUserMinHP() {
-        return userMinHP;
-    }
-
-    public void setUserMinHP(short userMinHP) {
-        this.userMinHP = userMinHP;
-    }
-
-    public short getUserMaxMAN() {
-        return userMaxMAN;
-    }
-
-    public void setUserMaxMAN(short userMaxMAN) {
-        this.userMaxMAN = userMaxMAN;
-    }
-
-    public short getUserMinMAN() {
-        return userMinMAN;
-    }
-
-    public void setUserMinMAN(short userMinMAN) {
-        this.userMinMAN = userMinMAN;
-    }
-
-    public short getUserMaxSTA() {
-        return userMaxSTA;
-    }
-
-    public void setUserMaxSTA(short userMaxSTA) {
-        this.userMaxSTA = userMaxSTA;
-    }
-
-    public short getUserMinSTA() {
-        return userMinSTA;
-    }
-
-    public void setUserMinSTA(short userMinSTA) {
-        this.userMinSTA = userMinSTA;
-    }
-
-    public int getUserPasarNivel() {
-        return userPasarNivel;
-    }
-
-    public void setUserPasarNivel(int userPasarNivel) {
-        this.userPasarNivel = userPasarNivel;
-    }
-
-    public int getUserExp() {
-        return userExp;
-    }
-
-    public void setUserExp(int userExp) {
-        this.userExp = userExp;
-    }
-
-    public int getUserGLD() {
-        return userGLD;
-    }
-
-    public void setUserGLD(int userGLD) {
-        this.userGLD = userGLD;
-    }
-
-    public int getUserLvl() {
-        return userLvl;
-    }
-
-    public void setUserLvl(int userLvl) {
-        this.userLvl = userLvl;
-    }
-
-    public int getUserDext() {
-        return userDext;
-    }
-
-    public void setUserDext(int userDext) {
-        this.userDext = userDext;
-    }
-
-    public int getUserStrg() {
-        return userStrg;
-    }
-
-    public void setUserStrg(int userStrg) {
-        this.userStrg = userStrg;
-    }
-
-    public int getUserMaxAGU() {
-        return userMaxAGU;
-    }
-
-    public void setUserMaxAGU(int userMaxAGU) {
-        this.userMaxAGU = userMaxAGU;
-    }
-
-    public int getUserMinAGU() {
-        return userMinAGU;
-    }
-
-    public void setUserMinAGU(int userMinAGU) {
-        this.userMinAGU = userMinAGU;
-    }
-
-    public int getUserMaxHAM() {
-        return userMaxHAM;
-    }
-
-    public void setUserMaxHAM(int userMaxHAM) {
-        this.userMaxHAM = userMaxHAM;
-    }
-
-    public int getUserMinHAM() {
-        return userMinHAM;
-    }
-
-    public void setUserMinHAM(int userMinHAM) {
-        this.userMinHAM = userMinHAM;
-    }
-
-    public String getUserWeaponEqpHit() {
-        return userWeaponEqpHit;
-    }
-
-    public void setUserWeaponEqpHit(String userWeaponEqpHit) {
-        this.userWeaponEqpHit = userWeaponEqpHit;
-    }
-
-    public String getUserArmourEqpDef() {
-        return userArmourEqpDef;
-    }
-
-    public void setUserArmourEqpDef(String userArmourEqpDef) {
-        this.userArmourEqpDef = userArmourEqpDef;
-    }
-
-    public String getUserHelmEqpDef() {
-        return userHelmEqpDef;
-    }
-
-    public void setUserHelmEqpDef(String userHelmEqpDef) {
-        this.userHelmEqpDef = userHelmEqpDef;
-    }
-
-    public String getUserShieldEqpDef() {
-        return userShieldEqpDef;
-    }
-
-    public void setUserShieldEqpDef(String userShieldEqpDef) {
-        this.userShieldEqpDef = userShieldEqpDef;
-    }
-
-    public int getUserWeaponEqpSlot() {
-        return userWeaponEqpSlot;
-    }
-
-    public void setUserWeaponEqpSlot(int userWeaponEqpSlot) {
-        this.userWeaponEqpSlot = userWeaponEqpSlot;
-    }
-
-    public int getUserArmourEqpSlot() {
-        return userArmourEqpSlot;
-    }
-
-    public void setUserArmourEqpSlot(int userArmourEqpSlot) {
-        this.userArmourEqpSlot = userArmourEqpSlot;
-    }
-
-    public int getUserHelmEqpSlot() {
-        return userHelmEqpSlot;
-    }
-
-    public void setUserHelmEqpSlot(int userHelmEqpSlot) {
-        this.userHelmEqpSlot = userHelmEqpSlot;
-    }
-
-    public int getUserShieldEqpSlot() {
-        return userShieldEqpSlot;
-    }
-
-    public void setUserShieldEqpSlot(int userShieldEqpSlot) {
-        this.userShieldEqpSlot = userShieldEqpSlot;
-    }
-
-    public boolean isTalking() {
-        return talking;
-    }
-
-    public void setTalking(boolean talking) {
-        this.talking = talking;
-    }
-
     public short getUserMap() {
         return userMap;
     }
@@ -622,154 +380,67 @@ public enum User {
         this.userMap = userMap;
     }
 
-    public boolean isUserNavegando() {
-        return userNavegando;
-    }
-
-    public void setUserNavegando(boolean userNavegando) {
-        this.userNavegando = userNavegando;
-    }
-
-    public int getUsingSkill() {
-        return usingSkill;
-    }
-
-    public void setUsingSkill(int usingSkill) {
-        this.usingSkill = usingSkill;
-    }
-
-    public boolean isUserComerciando() {
-        return userComerciando;
-    }
-
-    public void setUserComerciando(boolean userComerciando) {
-        this.userComerciando = userComerciando;
-    }
-
-    public int getFreeSkillPoints() {
-        return freeSkillPoints;
-    }
-
-    public void setFreeSkillPoints(int freeSkillPoints) {
-        this.freeSkillPoints = freeSkillPoints;
-    }
-
-    public int getSkill(int skill) {
-        return skills[skill - 1];
-    }
-
-    public void setSkill(int skill, int value) {
-        skills[skill - 1] = value;
-    }
-
-    public int[] getSkills() {
-        return skills;
-    }
-
-    public void setSkills(int[] skills) {
-        this.skills = skills;
-    }
-
-    public int[] getAttributes() {
-        return attributes;
-    }
-
-    public void setAttributes(int[] attributes) {
-        this.attributes = attributes;
-    }
-
-    public int[] getReputations() {
-        return reputations;
-    }
-
-    public void setReputations(int[] reputations) {
-        this.reputations = reputations;
-    }
-
-    public boolean isCriminal() {
-        return criminal;
-    }
-
-    public void setCriminal(boolean criminal) {
-        this.criminal = criminal;
-    }
-
-    public int getKillCounter(int index) {
-        return killCounters[index];
-    }
-
-    public void setKillCounter(int index, int value) {
-        killCounters[index] = value;
-    }
-
-    public int getRole() {
-        return role;
-    }
-
-    public void setRole(int role) {
-        this.role = role;
-    }
-
-    public int getJailTime() {
-        return jailTime;
-    }
-
-    public void setJailTime(int jailTime) {
-        this.jailTime = jailTime;
-    }
-
-    public void setPrivilege(int privilege) {
-        this.privilege = privilege;
-    }
-
     private void resetState() {
         this.setUserConected(false);
-        this.setUserNavegando(false);
-        this.setUserComerciando(false);
-        this.setFreeSkillPoints(0);
+    }
+
+    public boolean isWalkingmode() {
+        return walkingmode;
+    }
+
+    public void setWalkingmode(boolean walkingmode) {
+        this.walkingmode = walkingmode;
     }
 
     /**
      * @param x Posicion X del usuario.
      * @param y Posicion Y del usuario.
-     * @return True si el usuario puede caminar hacia cierta posicion, false caso contrario.
+     * @return True si el usuario puede caminar hacia cierta posicion, false caso
+     *         contrario.
      */
     private boolean moveToLegalPos(int x, int y) {
         // Limite del mapa
-        if (x < minXBorder || x > maxXBorder || y < minYBorder || y > maxYBorder) return false;
+        if (x < minXBorder || x > maxXBorder || y < minYBorder || y > maxYBorder)
+            return false;
 
-        //Modo caminata activo??
-        if (walkingmode) {
+        // Modo caminata activo??
+        if (!walkingmode) {
+            // Free camera mode - no restrictions
+            return true;
+        }
 
-            // Tile Bloqueado?
-            if (mapData[x][y].getBlocked()) return false;
+        // Walking mode - apply restrictions
+        // Tile Bloqueado?
+        if (mapData[x][y].getBlocked())
+            return false;
 
-            final int charIndex = mapData[x][y].getCharIndex();
+        final int charIndex = mapData[x][y].getCharIndex();
 
-            // ¿Hay un personaje?
-            if (charIndex > 0) {
-                if (mapData[userPos.getX()][userPos.getY()].getBlocked()) return false;
-                if (charList[charIndex].getiHead() != CASPER_HEAD && charList[charIndex].getiBody() != FRAGATA_FANTASMAL) {
-                    return false;
+        // ¿Hay un personaje?
+        if (charIndex > 0) {
+            if (mapData[userPos.getX()][userPos.getY()].getBlocked())
+                return false;
+            if (charList[charIndex].getiHead() != CASPER_HEAD && charList[charIndex].getiBody() != FRAGATA_FANTASMAL) {
+                return false;
+            } else {
+                // No puedo intercambiar con un casper que este en la orilla (Lado tierra)
+                if (hayAgua(userPos.getX(), userPos.getY())) {
+                    if (!hayAgua(x, y))
+                        return false;
                 } else {
-                    // No puedo intercambiar con un casper que este en la orilla (Lado tierra)
-                    if (hayAgua(userPos.getX(), userPos.getY())) {
-                        if (!hayAgua(x, y)) return false;
-                    } else {
-                        // No puedo intercambiar con un casper que este en la orilla (Lado agua)
-                        if (hayAgua(x, y)) return false;
-                    }
-                    // Los admins no pueden intercambiar pos con caspers cuando estan invisibles
-                    if (charList[userCharIndex].getPriv() > 0 && charList[userCharIndex].getPriv() < 6) {
-                        if (charList[userCharIndex].isInvisible()) return false;
-                    }
-
+                    // No puedo intercambiar con un casper que este en la orilla (Lado agua)
+                    if (hayAgua(x, y))
+                        return false;
+                }
+                // Los admins no pueden intercambiar pos con caspers cuando estan invisibles
+                if (charList[userCharIndex].getPriv() > 0 && charList[userCharIndex].getPriv() < 6) {
+                    if (charList[userCharIndex].isInvisible())
+                        return false;
                 }
 
             }
-        }
 
-        if (userNavegando != hayAgua(x, y)) return false;
+        }
 
         return true;
     }

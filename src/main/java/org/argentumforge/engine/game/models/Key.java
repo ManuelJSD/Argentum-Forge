@@ -14,7 +14,8 @@ import java.util.logging.Logger;
 import static org.lwjgl.glfw.GLFW.*;
 
 /**
- * Represents keys associated with game actions with customizable configuration. Keys can be loaded from file, saved and reset to
+ * Represents keys associated with game actions with customizable configuration.
+ * Keys can be loaded from file, saved and reset to
  * default values.
  */
 
@@ -33,19 +34,26 @@ public enum Key {
     TAKE_SCREENSHOT(GLFW_KEY_F2),
     SHOW_OPTIONS(GLFW_KEY_F5),
     DEBUG_SHOW(GLFW_KEY_F1),
-    AUTO_MOVE(GLFW_KEY_TAB),
+    TOGGLE_WALKING_MODE(GLFW_KEY_F3),
     EXIT_GAME(GLFW_KEY_ESCAPE);
 
     private static final String KEYS_CONFIG_FILE = "resources/keys.properties";
     private static final Logger LOGGER = Logger.getLogger(Key.class.getName());
 
-    /** Mapa que almacena la correspondencia entre las teclas del enum y sus codigos asociados. */
+    /**
+     * Mapa que almacena la correspondencia entre las teclas del enum y sus codigos
+     * asociados.
+     */
     private static final Map<Key, Integer> keyCodeMap = new EnumMap<>(Key.class);
-    /** Mapa que almacena la correspondencia entre codigos de tecla y sus acciones asociadas. */
+    /**
+     * Mapa que almacena la correspondencia entre codigos de tecla y sus acciones
+     * asociadas.
+     */
     private static final Map<Integer, Key> codeToKeyMap = new HashMap<>();
 
     static {
-        // Inicializa los valores predeterminados despues de que se crean las constantes de enum
+        // Inicializa los valores predeterminados despues de que se crean las constantes
+        // de enum
         for (Key key : values())
             keyCodeMap.put(key, key.defaultKeyCode);
         loadKeys();
@@ -71,20 +79,28 @@ public enum Key {
     /**
      * Carga la configuracion de teclas desde un archivo de propiedades.
      * <p>
-     * Este metodo verifica si el archivo de configuracion definido por {@code KEYS_CONFIG_FILE} existe. Si no existe, se cargan
-     * los valores predeterminados llamando a {@code loadDefaultKeys()} y se registra un mensaje informativo.
+     * Este metodo verifica si el archivo de configuracion definido por
+     * {@code KEYS_CONFIG_FILE} existe. Si no existe, se cargan
+     * los valores predeterminados llamando a {@code loadDefaultKeys()} y se
+     * registra un mensaje informativo.
      * <p>
-     * Si el archivo existe, intenta leerlo utilizando un {@code FileInputStream}, cargando las propiedades definidas en el mismo.
-     * Recorre cada tecla definida en el enum y busca su codigo asociado en las propiedades cargadas.
+     * Si el archivo existe, intenta leerlo utilizando un {@code FileInputStream},
+     * cargando las propiedades definidas en el mismo.
+     * Recorre cada tecla definida en el enum y busca su codigo asociado en las
+     * propiedades cargadas.
      * <ul>
-     * <li>Si encuentra un valor valido para una tecla, lo asigna al mapa de codigos {@code keyCodeMap}.
-     * <li>Si el valor es invalido (por ejemplo, formato incorrecto o codigo no permitido), asigna el codigo predeterminado
+     * <li>Si encuentra un valor valido para una tecla, lo asigna al mapa de codigos
+     * {@code keyCodeMap}.
+     * <li>Si el valor es invalido (por ejemplo, formato incorrecto o codigo no
+     * permitido), asigna el codigo predeterminado
      * de la tecla y registra una advertencia.
      * </ul>
-     * Si ocurre un error durante el proceso de lectura del archivo, se registra el error y se cargan las teclas predeterminadas
+     * Si ocurre un error durante el proceso de lectura del archivo, se registra el
+     * error y se cargan las teclas predeterminadas
      * como resguardo.
      * <p>
-     * Al finalizar, actualiza los mapas relacionados llamando al metodo {@code updateMaps()}.
+     * Al finalizar, actualiza los mapas relacionados llamando al metodo
+     * {@code updateMaps()}.
      */
     public static void loadKeys() {
         if (!Files.exists(Paths.get(KEYS_CONFIG_FILE))) {
@@ -101,7 +117,8 @@ public enum Key {
                 if (keyCodeStr != null) {
                     try {
                         int keyCode = Integer.parseInt(keyCodeStr);
-                        if (isValidKeyCode(keyCode)) keyCodeMap.put(key, keyCode);
+                        if (isValidKeyCode(keyCode))
+                            keyCodeMap.put(key, keyCode);
                         else {
                             LOGGER.warning("Invalid key code for " + key.name() + ": " + keyCode);
                             keyCodeMap.put(key, key.defaultKeyCode);
@@ -110,7 +127,8 @@ public enum Key {
                         LOGGER.warning("Error parsing key code for " + key.name() + ": " + keyCodeStr);
                         keyCodeMap.put(key, key.defaultKeyCode);
                     }
-                } else keyCodeMap.put(key, key.defaultKeyCode);
+                } else
+                    keyCodeMap.put(key, key.defaultKeyCode);
             }
             updateMaps();
         } catch (IOException e) {
@@ -121,11 +139,12 @@ public enum Key {
 
     /**
      * Checkea si ya hay alguna tecla en proceso de bindeado.
-     * Esto es para que no creemos varios procesos de bindeado en varias teclas a la vez.
+     * Esto es para que no creemos varios procesos de bindeado en varias teclas a la
+     * vez.
      */
     public static boolean checkIsBinding() {
-        for(Key key: values()) {
-            if(key.getPreparedToBind()) {
+        for (Key key : values()) {
+            if (key.getPreparedToBind()) {
                 return true;
             }
         }
@@ -134,8 +153,8 @@ public enum Key {
     }
 
     public static Key getKeyBinding() {
-        for(Key key: values()) {
-            if(key.getPreparedToBind()) {
+        for (Key key : values()) {
+            if (key.getPreparedToBind()) {
                 return key;
             }
         }
@@ -145,15 +164,17 @@ public enum Key {
     /**
      * Guarda la configuracion actual de las teclas en un archivo de propiedades.
      * <p>
-     * Este metodo toma las teclas y sus codigos asociados definidos actualmente en {@code keyCodeMap}, los convierte en pares
-     * clave-valor y los almacena en un archivo de propiedades definido por la constante {@code KEYS_CONFIG_FILE}.
+     * Este metodo toma las teclas y sus codigos asociados definidos actualmente en
+     * {@code keyCodeMap}, los convierte en pares
+     * clave-valor y los almacena en un archivo de propiedades definido por la
+     * constante {@code KEYS_CONFIG_FILE}.
      * <p>
-     * Si ocurre un error durante el proceso de guardado, se registra un mensaje en el logger para notificar al usuario.
+     * Si ocurre un error durante el proceso de guardado, se registra un mensaje en
+     * el logger para notificar al usuario.
      */
     public static void saveKeys() {
         Properties properties = new Properties();
-        keyCodeMap.forEach((key, code) ->
-                properties.setProperty(key.name(), String.valueOf(code)));
+        keyCodeMap.forEach((key, code) -> properties.setProperty(key.name(), String.valueOf(code)));
         try (FileOutputStream fos = new FileOutputStream(KEYS_CONFIG_FILE)) {
             properties.store(fos, "Key Configuration for Argentum Online LWJGL3\nMapping actions to GLFW keycodes");
         } catch (IOException e) {
@@ -164,9 +185,12 @@ public enum Key {
     /**
      * Carga las teclas predeterminadas y actualiza los mapas de mapeo.
      * <p>
-     * Este metodo asigna a cada tecla definida en el enum su codigo de tecla predeterminado, colocando estas asociaciones en el
-     * mapa {@code keyCodeMap}. Posteriormente, actualiza el resto de los mapas relacionados llamando al metodo
-     * {@code updateMaps()} y almacena la configuracion actual utilizando {@code saveKeys()}.
+     * Este metodo asigna a cada tecla definida en el enum su codigo de tecla
+     * predeterminado, colocando estas asociaciones en el
+     * mapa {@code keyCodeMap}. Posteriormente, actualiza el resto de los mapas
+     * relacionados llamando al metodo
+     * {@code updateMaps()} y almacena la configuracion actual utilizando
+     * {@code saveKeys()}.
      */
     public static void loadDefaultKeys() {
         for (Key key : values())
@@ -178,8 +202,10 @@ public enum Key {
     /**
      * Actualiza los mapas de mapeo de teclas.
      * <p>
-     * Este metodo borra completamente el contenido del mapa {@code codeToKeyMap} y lo reconstruye utilizando los valores actuales
-     * del mapa {@code keyCodeMap}. Itera sobre las entradas de {@code keyCodeMap}, invirtiendo las claves y valores para
+     * Este metodo borra completamente el contenido del mapa {@code codeToKeyMap} y
+     * lo reconstruye utilizando los valores actuales
+     * del mapa {@code keyCodeMap}. Itera sobre las entradas de {@code keyCodeMap},
+     * invirtiendo las claves y valores para
      * almacenarlos en {@code codeToKeyMap}.
      */
     private static void updateMaps() {
@@ -199,11 +225,13 @@ public enum Key {
     }
 
     public boolean setKeyCode(int newKeyCode) {
-        if (!isValidKeyCode(newKeyCode)) return false;
+        if (!isValidKeyCode(newKeyCode))
+            return false;
 
         // Verifica conflictos
         Key existingKey = codeToKeyMap.get(newKeyCode);
-        if (existingKey != null && existingKey != this) return false;
+        if (existingKey != null && existingKey != this)
+            return false;
 
         keyCodeMap.put(this, newKeyCode);
         updateMaps();

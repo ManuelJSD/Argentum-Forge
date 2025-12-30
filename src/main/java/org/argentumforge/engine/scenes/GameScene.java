@@ -61,20 +61,47 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public final class GameScene extends Scene {
 
+    /** Temporizador para controlar el intervalo de actualización de posición. */
     private final IntervalTimer intervalToUpdatePos = new IntervalTimer(INT_SENTRPU);
+
+    /** Instancia del usuario actual (singleton). */
     private final User user = User.INSTANCE;
-    private Weather weather;// color de ambiente.
+
+    /** Sistema de clima y color de ambiente. */
+    private Weather weather;
+
+    /** Acumulador de desplazamiento en X para animaciones suaves de movimiento. */
     private float offSetCounterX = 0;
+
+    /** Acumulador de desplazamiento en Y para animaciones suaves de movimiento. */
     private float offSetCounterY = 0;
+
+    /** Nivel de transparencia de la capa de techos (0.0f a 1.0f). */
     private float alphaCeiling = 1.0f;
+
+    /** Indica si el movimiento automático está activo. */
     private boolean autoMove = false;
+
+    /** Formulario principal de la interfaz de usuario. */
     private FMain frmMain;
+
+    /** Editor de superficies. */
     private Surface surface;
+
+    /** Editor de bloqueos. */
     private Block block;
+
+    /** Editor de NPCs. */
     private Npc npc;
 
+    /** Flag auxiliar para el borrado de capas (uso interno del editor). */
     private boolean DeleteLayer;
 
+    /**
+     * Inicializa los componentes de la escena del juego.
+     * Configura el tipo de escena de retorno, el clima, los editores y añade el
+     * formulario principal a ImGui.
+     */
     @Override
     public void init() {
         super.init();
@@ -89,6 +116,12 @@ public final class GameScene extends Scene {
         ImGUISystem.INSTANCE.addFrm(frmMain);
     }
 
+    /**
+     * Actualiza la lógica y renderiza la escena.
+     * Maneja la actualización del clima, los temporizadores, el desplazamiento
+     * suave del personaje
+     * y delega el renderizado del mapa a {@link #renderScreen}.
+     */
     @Override
     public void render() {
         // MODO EDITOR: Check de desconexión deshabilitado
@@ -178,13 +211,15 @@ public final class GameScene extends Scene {
     }
 
     /**
-     * Chequea y ejecuta la tecla que fue bindeada.
+     * Verifica las teclas especiales bindeadas (Debug, Opciones, Modo Caminata,
+     * etc).
+     * También delega la verificación de teclas de movimiento a
+     * {@link #checkWalkKeys}.
      */
     private void checkBindedKeys() {
-        if (user.isUserComerciando()
-                || (!ImGUISystem.INSTANCE.isMainLast() && !ImGUISystem.INSTANCE.isFormVisible("FSurfaceEditor")
-                        && !ImGUISystem.INSTANCE.isFormVisible("FBlockEditor")
-                        && !ImGUISystem.INSTANCE.isFormVisible("FNpcEditor")))
+        if ((!ImGUISystem.INSTANCE.isMainLast() && !ImGUISystem.INSTANCE.isFormVisible("FSurfaceEditor")
+                && !ImGUISystem.INSTANCE.isFormVisible("FBlockEditor")
+                && !ImGUISystem.INSTANCE.isFormVisible("FNpcEditor")))
             return;
 
         // Usando el metodo estatico de Key para obtener la tecla desde el codigo
@@ -204,8 +239,8 @@ public final class GameScene extends Scene {
                 case SHOW_OPTIONS:
                     ImGUISystem.INSTANCE.show(new FOptions());
                     break;
-                case AUTO_MOVE:
-                    autoMove = !autoMove;
+                case TOGGLE_WALKING_MODE:
+                    user.setWalkingmode(!user.isWalkingmode());
                     break;
                 case EXIT_GAME:
                     break;
@@ -214,43 +249,39 @@ public final class GameScene extends Scene {
 
     }
 
+    /**
+     * Verifica las teclas de movimiento presionadas y mueve al usuario en la
+     * dirección correspondiente.
+     * Solo procesa el movimiento si el usuario no se está moviendo actualmente.
+     */
     private void checkWalkKeys() {
         if (!user.isUserMoving()) {
-            if (!autoMove) {
-                if (KeyHandler.getEffectiveMovementKey() != -1) {
-                    int keyCode = KeyHandler.getEffectiveMovementKey();
-                    if (keyCode == Key.UP.getKeyCode())
-                        user.moveTo(Direction.UP);
-                    else if (keyCode == Key.DOWN.getKeyCode())
-                        user.moveTo(Direction.DOWN);
-                    else if (keyCode == Key.LEFT.getKeyCode())
-                        user.moveTo(Direction.LEFT);
-                    else if (keyCode == Key.RIGHT.getKeyCode())
-                        user.moveTo(Direction.RIGHT);
-                }
-            } else
-                autoWalk();
+
+            if (KeyHandler.getEffectiveMovementKey() != -1) {
+                int keyCode = KeyHandler.getEffectiveMovementKey();
+                if (keyCode == Key.UP.getKeyCode())
+                    user.moveTo(Direction.UP);
+                else if (keyCode == Key.DOWN.getKeyCode())
+                    user.moveTo(Direction.DOWN);
+                else if (keyCode == Key.LEFT.getKeyCode())
+                    user.moveTo(Direction.LEFT);
+                else if (keyCode == Key.RIGHT.getKeyCode())
+                    user.moveTo(Direction.RIGHT);
+            }
+
         }
     }
 
     /**
-     * Gestiona el movimiento automatico del usuario en una direccion dependiendo de
-     * la ultima tecla de direccion presionada.
-     */
-    private void autoWalk() {
-        int keyCode = KeyHandler.getLastMovementKeyPressed();
-        if (keyCode == Key.UP.getKeyCode())
-            user.moveTo(Direction.UP);
-        else if (keyCode == Key.DOWN.getKeyCode())
-            user.moveTo(Direction.DOWN);
-        else if (keyCode == Key.LEFT.getKeyCode())
-            user.moveTo(Direction.LEFT);
-        else if (keyCode == Key.RIGHT.getKeyCode())
-            user.moveTo(Direction.RIGHT);
-    }
-
-    /**
-     * Dibuja cada capa y objeto del mapa, el personaje, la interfaz y demas.
+     * Coordina el proceso completo de renderizado de la pantalla.
+     * Actualiza la cámara y renderiza todas las capas del mapa en orden, seguido de
+     * los diálogos,
+     * techos, overlays de bloqueos y efectos climáticos.
+     *
+     * @param tileX        Posición X en tiles (epicentro de la cámara)
+     * @param tileY        Posición Y en tiles (epicentro de la cámara)
+     * @param pixelOffsetX Desplazamiento fino en X (píxeles)
+     * @param pixelOffsetY Desplazamiento fino en Y (píxeles)
      */
     private void renderScreen(int tileX, int tileY, int pixelOffsetX, int pixelOffsetY) {
         camera.update(tileX, tileY);
@@ -281,6 +312,15 @@ public final class GameScene extends Scene {
         Rain.INSTANCE.render(weather.getWeatherColor());
     }
 
+    /**
+     * Renderiza la primera capa del mapa (capa base/suelo).
+     * Esta es la capa más baja y contiene los gráficos del terreno base.
+     *
+     * @param pixelOffsetX Desplazamiento en píxeles en el eje X para animaciones de
+     *                     movimiento
+     * @param pixelOffsetY Desplazamiento en píxeles en el eje Y para animaciones de
+     *                     movimiento
+     */
     private void renderFirstLayer(final int pixelOffsetX, final int pixelOffsetY) {
         for (int y = camera.getScreenminY(); y <= camera.getScreenmaxY(); y++) {
             int x;
@@ -299,6 +339,15 @@ public final class GameScene extends Scene {
         }
     }
 
+    /**
+     * Renderiza la segunda capa del mapa.
+     * Incluye elementos decorativos y objetos de tamaño 32x32 píxeles.
+     *
+     * @param pixelOffsetX Desplazamiento en píxeles en el eje X para animaciones de
+     *                     movimiento
+     * @param pixelOffsetY Desplazamiento en píxeles en el eje Y para animaciones de
+     *                     movimiento
+     */
     private void renderSecondLayer(final int pixelOffsetX, final int pixelOffsetY) {
         camera.setScreenY(camera.getMinYOffset() - TILE_BUFFER_SIZE);
         for (int y = camera.getMinY(); y <= camera.getMaxY(); y++) {
@@ -325,6 +374,17 @@ public final class GameScene extends Scene {
         }
     }
 
+    /**
+     * Renderiza la tercera capa del mapa.
+     * Incluye personajes, NPCs y objetos de tamaño mayor a 32x32 píxeles.
+     * En modo cámara libre, oculta el personaje del usuario pero mantiene visibles
+     * los NPCs.
+     *
+     * @param pixelOffsetX Desplazamiento en píxeles en el eje X para animaciones de
+     *                     movimiento
+     * @param pixelOffsetY Desplazamiento en píxeles en el eje Y para animaciones de
+     *                     movimiento
+     */
     private void renderThirdLayer(final int pixelOffsetX, final int pixelOffsetY) {
         // LAYER 3, CHARACTERS & OBJECTS > 32x32
         camera.setScreenY(camera.getMinYOffset() - TILE_BUFFER_SIZE);
@@ -343,12 +403,15 @@ public final class GameScene extends Scene {
                     }
                 }
 
-                // TODO: Reutilizar para modo caminata
+                // Only render characters when walking mode is active, or render NPCs always
                 if (mapData[x][y].getCharIndex() != 0) {
-                    drawCharacter(mapData[x][y].getCharIndex(),
-                            POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX,
-                            POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY,
-                            weather.getWeatherColor());
+                    // Only show user character in walking mode, always show NPCs
+                    if (user.isWalkingmode() || mapData[x][y].getCharIndex() != user.getUserCharIndex()) {
+                        drawCharacter(mapData[x][y].getCharIndex(),
+                                POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX,
+                                POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY,
+                                weather.getWeatherColor());
+                    }
                 }
 
                 if (mapData[x][y].getLayer(3).getGrhIndex() != 0) {
@@ -364,6 +427,17 @@ public final class GameScene extends Scene {
         }
     }
 
+    /**
+     * Renderiza la cuarta capa del mapa (techos).
+     * Esta capa se desvanece cuando el usuario está debajo de un techo para mejorar
+     * la visibilidad.
+     * El nivel de transparencia es controlado por {@code alphaCeiling}.
+     *
+     * @param pixelOffsetX Desplazamiento en píxeles en el eje X para animaciones de
+     *                     movimiento
+     * @param pixelOffsetY Desplazamiento en píxeles en el eje Y para animaciones de
+     *                     movimiento
+     */
     private void renderFourthLayer(final int pixelOffsetX, final int pixelOffsetY) {
         this.checkEffectCeiling();
         if (alphaCeiling > 0.0f) {

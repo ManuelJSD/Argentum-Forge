@@ -205,6 +205,10 @@ public final class FMain extends Form {
              */
 
             if (ImGui.beginMenu("Ver")) {
+                if (ImGui.menuItem("Modo Caminata", "", org.argentumforge.engine.game.User.INSTANCE.isWalkingmode())) {
+                    org.argentumforge.engine.game.User.INSTANCE
+                            .setWalkingmode(!org.argentumforge.engine.game.User.INSTANCE.isWalkingmode());
+                }
                 if (ImGui.menuItem("Opciones")) {
                     ImGUISystem.INSTANCE.show(new FOptions());
                 }
