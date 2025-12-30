@@ -47,18 +47,31 @@ import static org.argentumforge.scripts.Compressor.readResource;
 
 public final class GameData {
 
+    /** Datos de los cuerpos (animaciones de movimiento, offsets, etc). */
     public static BodyData[] bodyData;
+    /** Datos de las cabezas. */
     public static HeadData[] headData;
+    /** Datos de los cascos. */
     public static HeadData[] helmetsData;
+    /** Datos de las armas. */
     public static WeaponData[] weaponData;
+    /** Datos de los escudos. */
     public static ShieldData[] shieldData;
+    /** Datos de los efectos visuales (FXs). */
     public static FxData[] fxData;
+    /** Datos de los gráficos (definiciones de GRH, frames, velocidades, etc). */
     public static GrhData[] grhData;
+    /** Datos de la rejilla del mapa actual. */
     public static MapData[][] mapData;
+    /** Indica si llueve en cada mapa. */
     public static boolean[] bLluvia;
-    public static Character[] charList = new Character[10000 + 1]; // se agrega aca porque hay mapas que tienen NPCs.
+    /** Lista global de personajes activos en el mundo. */
+    public static Character[] charList = new Character[10000 + 1];
+    /** Mapa de definiciones de NPCs cargadas desde el archivo de datos. */
     public static Map<Integer, NpcData> npcs;
+    /** Instancia de configuración del usuario. */
     public static Options options = Options.INSTANCE;
+    /** Lector de datos binarios persistente para la carga de recursos. */
     private static BinaryDataReader reader;
 
     /**
@@ -84,6 +97,11 @@ public final class GameData {
         loadMessages(options.getLanguage());
     }
 
+    /**
+     * Carga las definiciones de NPCs desde el archivo externo especificado en las
+     * opciones.
+     * Parsea el archivo .dat (estilo INI) para extraer nombres, cuerpos y cabezas.
+     */
     private static void loadNpcs() {
         final String npcsPathValue = options.getNpcsPath();
         if (npcsPathValue == null || npcsPathValue.isBlank()) {
@@ -164,7 +182,8 @@ public final class GameData {
     }
 
     /**
-     * Cargamos y almacenamos los datos del archivo "graphics.ind".
+     * Carga y parsea el archivo de índices de gráficos (graphics.ind).
+     * Reconstruye la jerarquía de animaciones y frames de GRH.
      */
     private static void loadGrhData() {
 
@@ -259,7 +278,7 @@ public final class GameData {
     }
 
     /**
-     * Cargamos y almacenamos los datos del archivo "heads.ind".
+     * Carga y almacena los datos de las cabezas desde el archivo "heads.ind".
      */
     private static void loadHeads() {
         byte[] data = readResource("resources/inits.ao", "heads");
@@ -296,7 +315,7 @@ public final class GameData {
     }
 
     /**
-     * Cargamos y almacenamos los datos del archivo "helmets.ind".
+     * Carga y almacena los datos de los cascos desde el archivo "helmets.ind".
      */
     private static void loadHelmets() {
         byte[] data = readResource("resources/inits.ao", "helmets");
@@ -333,7 +352,7 @@ public final class GameData {
     }
 
     /**
-     * Cargamos y almacenamos los datos del archivo "bodys.ind".
+     * Carga y almacena los datos de los cuerpos desde el archivo "bodys.ind".
      */
     private static void loadBodys() {
         byte[] data = readResource("resources/inits.ao", "bodys");
@@ -376,7 +395,7 @@ public final class GameData {
     }
 
     /**
-     * Cargamos y almacenamos los datos del archivo "arms.ind".
+     * Carga y almacena los datos de las armas desde el archivo "arms.ind".
      */
     private static void loadWeapons() {
         byte[] data = readResource("resources/inits.ao", "weapons");
@@ -402,7 +421,7 @@ public final class GameData {
     }
 
     /**
-     * Cargamos y almacenamos los datos del archivo "shields.ind".
+     * Carga y almacena los datos de los escudos desde el archivo "shields.ind".
      */
     private static void loadShields() {
         byte[] data = readResource("resources/inits.ao", "shields");
@@ -428,7 +447,10 @@ public final class GameData {
     }
 
     /**
-     * Cargamos el mapa desde un archivo especifico.
+     * Carga los datos de un mapa desde una ruta de archivo específica.
+     * Útil para el modo editor cuando se cargan archivos .map externos.
+     *
+     * @param filePath Ruta absoluta al archivo .map
      */
     public static void loadMap(String filePath) {
         try {
@@ -441,7 +463,9 @@ public final class GameData {
     }
 
     /**
-     * Cargamos el mapa.
+     * Carga un mapa por su número desde los recursos empaquetados.
+     *
+     * @param numMap Número del mapa a cargar.
      */
     public static void loadMap(int numMap) {
         byte[] data = readResource("resources/maps.ao", "mapa" + numMap);
@@ -452,10 +476,20 @@ public final class GameData {
         initMap(data);
     }
 
+    /**
+     * Crea un mapa vacío de 100x100 tiles con un tile de base predeterminado (GRH
+     * 1).
+     */
     public static void createEmptyMap() {
         createEmptyMap((short) 1);
     }
 
+    /**
+     * Crea un mapa vacío de 100x100 tiles utilizando el GRH especificado para la
+     * primera capa.
+     *
+     * @param baseLayer1GrhIndex Índice del GRH a usar como suelo base.
+     */
     public static void createEmptyMap(short baseLayer1GrhIndex) {
         mapData = new MapData[101][101];
         mapData[0][0] = new MapData();
@@ -496,6 +530,12 @@ public final class GameData {
         grh.setSpeed(0.4f);
     }
 
+    /**
+     * Método interno para procesar el parseo de los datos binarios de un mapa.
+     * Lee cabeceras, flags, capas, bloqueos y triggers.
+     *
+     * @param data Datos binarios del mapa.
+     */
     private static void initMap(byte[] data) {
         reader.init(data);
 
@@ -565,7 +605,7 @@ public final class GameData {
     }
 
     /**
-     * Cargamos los indices de animaciones FXs del archivo "fxs.ind"
+     * Carga los efectos visuales (FXs) desde el archivo "fxs.ind".
      */
     private static void loadFxs() {
         byte[] data = readResource("resources/inits.ao", "fxs");
@@ -589,8 +629,7 @@ public final class GameData {
     }
 
     /**
-     * Cargamos los indices de mapas donde se puede visualizar la lluvia en el
-     * archivo "fk.ind"
+     * Carga los indicadores de lluvia por mapa desde el archivo "fk.ind".
      */
     private static void loadFK() {
         byte[] data = readResource("resources/inits.ao", "fk");
@@ -613,6 +652,17 @@ public final class GameData {
 
     /**
      * Inicializa los graficos, ya sean animaciones o no.
+     */
+    /**
+     * Inicializa una estructura GrhInfo asociándola al índice de gráfico
+     * correspondiente.
+     * Configura si la animación debe comenzar iniciada y resetea contadores.
+     *
+     * @param grh      Estructura a inicializar.
+     * @param grhIndex Índice del gráfico en grhData.
+     * @param started  Si la animación (si tiene >1 frame) debe comenzar
+     *                 reproduciéndose.
+     * @return La estructura GrhInfo inicializada.
      */
     public static GrhInfo initGrh(GrhInfo grh, short grhIndex, boolean started) {
         if (grh == null)
