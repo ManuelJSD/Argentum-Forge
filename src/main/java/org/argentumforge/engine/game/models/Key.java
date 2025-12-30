@@ -32,7 +32,7 @@ public enum Key {
     // Sistemas
     TAKE_SCREENSHOT(GLFW_KEY_F2),
     SHOW_OPTIONS(GLFW_KEY_F5),
-
+    DEBUG_SHOW(GLFW_KEY_F1),
     AUTO_MOVE(GLFW_KEY_TAB),
     EXIT_GAME(GLFW_KEY_ESCAPE);
 

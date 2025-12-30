@@ -57,6 +57,16 @@ public enum ImGUISystem {
     
     private final Window window = Window.INSTANCE;
 
+    private boolean showDebug = false;
+
+    public boolean isShowDebug() {
+        return showDebug;
+    }
+
+    public void setShowDebug(boolean showDebug) {
+        this.showDebug = showDebug;
+    }
+
     public void init() {
         ImGui.createContext();
 
@@ -223,19 +233,21 @@ public enum ImGUISystem {
 
         // IMPORTANT!!
         // Any Dear ImGui code SHOULD go between NewFrame()/Render() methods
+
         ImGui.newFrame();
-
-        ImGui.setNextWindowPos(5, 25, ImGuiCond.Always);
-        ImGui.begin("InputDebug", ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize |
-                ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav | ImGuiWindowFlags.NoInputs);
-        ImGui.text("dt=" + deltaTime);
-        ImGui.text("io.WantCaptureMouse=" + io.getWantCaptureMouse());
-        ImGui.text("ImGui.isMouseDown(0)=" + ImGui.isMouseDown(0) + " clicked=" + ImGui.isMouseClicked(0));
-        ImGui.text("glfw L=" + (glfwGetMouseButton(window.getWindow(), GLFW_MOUSE_BUTTON_1) == GLFW_PRESS));
-        ImGui.text(String.format("mousePos=%.1f, %.1f", io.getMousePosX(), io.getMousePosY()));
-        ImGui.end();
-
+        if (showDebug) {
+            ImGui.setNextWindowPos(5, 25, ImGuiCond.Always);
+            ImGui.begin("InputDebug", ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize |
+                    ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav | ImGuiWindowFlags.NoInputs);
+            ImGui.text("dt=" + deltaTime);
+            ImGui.text("io.WantCaptureMouse=" + io.getWantCaptureMouse());
+            ImGui.text("ImGui.isMouseDown(0)=" + ImGui.isMouseDown(0) + " clicked=" + ImGui.isMouseClicked(0));
+            ImGui.text("glfw L=" + (glfwGetMouseButton(window.getWindow(), GLFW_MOUSE_BUTTON_1) == GLFW_PRESS));
+            ImGui.text(String.format("mousePos=%.1f, %.1f", io.getMousePosX(), io.getMousePosY()));
+            ImGui.end();
+        }
         renderFrms();
+
         ImGui.render();
 
         // After ImGui#render call we provide draw data into LWJGL3 renderer.

@@ -6,6 +6,7 @@ import org.argentumforge.engine.game.models.Direction;
 import org.argentumforge.engine.game.models.Key;
 import org.argentumforge.engine.gui.ImGUISystem;
 import org.argentumforge.engine.gui.forms.FMain;
+import org.argentumforge.engine.gui.forms.FOptions;
 import org.argentumforge.engine.listeners.KeyHandler;
 import org.argentumforge.engine.listeners.MouseListener;
 import org.argentumforge.engine.utils.editor.Surface;
@@ -86,7 +87,6 @@ public final class GameScene extends Scene {
         npc = Npc.getInstance();
 
         ImGUISystem.INSTANCE.addFrm(frmMain);
-
     }
 
     @Override
@@ -198,6 +198,12 @@ public final class GameScene extends Scene {
         if (KeyHandler.isActionKeyJustPressed(key)) {
 
             switch (key) {
+                case DEBUG_SHOW:
+                    ImGUISystem.INSTANCE.setShowDebug(!ImGUISystem.INSTANCE.isShowDebug());
+                    break;
+                case SHOW_OPTIONS:
+                    ImGUISystem.INSTANCE.show(new FOptions());
+                    break;
                 case AUTO_MOVE:
                     autoMove = !autoMove;
                     break;
