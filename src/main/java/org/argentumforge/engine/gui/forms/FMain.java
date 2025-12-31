@@ -92,12 +92,14 @@ public final class FMain extends Form {
 
     // FPS
     private void renderFPS() {
-        final String txtFPS = String.valueOf(FPS);
-        ImGui.setCursorPos(448, 30);
-        ImGui.pushStyleVar(ImGuiStyleVar.SelectableTextAlign, 0.5f, 0.5f);
+        final String txtFPS = String.valueOf(FPS) + " FPS";
+        float widgetWidth = 100;
+        ImGui.setCursorPos(Window.INSTANCE.getWidth() - widgetWidth - 10, 20);
+
+        ImGui.pushStyleVar(ImGuiStyleVar.SelectableTextAlign, 1.0f, 0.5f);
         ImGui.pushStyleColor(ImGuiCol.HeaderHovered, TRANSPARENT_COLOR);
         ImGui.pushStyleColor(ImGuiCol.HeaderActive, TRANSPARENT_COLOR);
-        ImGui.selectable(txtFPS, false, ImGuiSelectableFlags.None, 28, 10);
+        ImGui.selectable(txtFPS, false, ImGuiSelectableFlags.None, widgetWidth, 15);
         ImGui.popStyleColor();
         ImGui.popStyleColor();
         ImGui.popStyleVar();
