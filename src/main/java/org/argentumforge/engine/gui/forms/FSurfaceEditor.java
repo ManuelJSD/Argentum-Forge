@@ -37,7 +37,7 @@ public class FSurfaceEditor extends Form {
 
     @Override
     public void render() {
-        ImGui.setNextWindowSize(210, 260, ImGuiCond.Always);
+        ImGui.setNextWindowSize(210, 400, ImGuiCond.Always);
         ImGui.begin(this.getClass().getSimpleName(),
                 ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoResize);
 
@@ -45,6 +45,15 @@ public class FSurfaceEditor extends Form {
         ImGui.separator();
 
         drawGrhList();
+        ImGui.separator();
+
+        // Preview
+        ImGui.text("Previsualizacion:");
+        ImGui.beginChild("PreviewChild", 0, 100, true);
+        if (selectedGrhIndex > 0) {
+            org.argentumforge.engine.gui.PreviewUtils.drawGrh(selectedGrhIndex, 1.0f);
+        }
+        ImGui.endChild();
         ImGui.separator();
 
         drawCapasCombo();

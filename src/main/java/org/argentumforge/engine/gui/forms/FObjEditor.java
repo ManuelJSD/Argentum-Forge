@@ -32,7 +32,7 @@ public final class FObjEditor extends Form {
 
     @Override
     public void render() {
-        ImGui.setNextWindowSize(260, 360, ImGuiCond.Always);
+        ImGui.setNextWindowSize(260, 560, ImGuiCond.Always);
         ImGui.begin(this.getClass().getSimpleName(), ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoResize);
 
         ImGui.text("Objetos:");
@@ -44,13 +44,25 @@ public final class FObjEditor extends Form {
         drawObjList();
         ImGui.separator();
 
+        // Preview Area
+        ImGui.text("Previsualizacion:");
+        ImGui.beginChild("ObjPreviewChild", 0, 100, true);
+        if (selectedObjNumber > 0 && objs != null) {
+            ObjData data = objs.get(selectedObjNumber);
+            if (data != null && data.getGrhIndex() > 0) {
+                org.argentumforge.engine.gui.PreviewUtils.drawGrh(data.getGrhIndex(), 1.0f);
+            }
+        }
+        ImGui.endChild();
+        ImGui.separator();
+
         drawButtons();
 
         ImGui.end();
     }
 
     private void drawObjList() {
-        ImGui.beginChild("ObjListChild", 0, 220, true);
+        ImGui.beginChild("ObjListChild", 0, 180, true);
 
         if (objs == null || objs.isEmpty()) {
             ImGui.textDisabled("Objetos no cargados");
