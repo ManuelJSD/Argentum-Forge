@@ -52,12 +52,14 @@ public final class FMain extends Form {
     private FBlockEditor blockEditor;
     private FNpcEditor npcEditor;
     private FObjEditor objEditor;
+    private FMinimap minimap;
 
     public FMain() {
         surfaceEditor = new FSurfaceEditor();
         blockEditor = new FBlockEditor();
         npcEditor = new FNpcEditor();
         objEditor = new FObjEditor();
+        minimap = new FMinimap();
     }
 
     @Override
@@ -171,6 +173,17 @@ public final class FMain extends Form {
                 ImGUISystem.INSTANCE.deleteFrmArray(objEditor);
             } else {
                 ImGUISystem.INSTANCE.show(objEditor);
+            }
+        }
+
+        ImGui.sameLine();
+
+        // Botón Minimapa
+        if (ImGui.button("Minimapa", 100, 25)) {
+            if (ImGUISystem.INSTANCE.isFormVisible("FMinimap")) {
+                ImGUISystem.INSTANCE.deleteFrmArray(minimap);
+            } else {
+                ImGUISystem.INSTANCE.show(minimap);
             }
         }
 

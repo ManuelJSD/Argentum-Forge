@@ -179,7 +179,8 @@ public final class GameScene extends Scene {
         if (!ImGUISystem.INSTANCE.isMainLast() && !ImGUISystem.INSTANCE.isFormVisible("FSurfaceEditor")
                 && !ImGUISystem.INSTANCE.isFormVisible("FBlockEditor")
                 && !ImGUISystem.INSTANCE.isFormVisible("FNpcEditor")
-                && !ImGUISystem.INSTANCE.isFormVisible("FObjEditor"))
+                && !ImGUISystem.INSTANCE.isFormVisible("FObjEditor")
+                && !ImGUISystem.INSTANCE.isFormVisible("FMinimap"))
             return;
 
         // Estamos haciendo click en el render?
@@ -227,7 +228,8 @@ public final class GameScene extends Scene {
         if ((!ImGUISystem.INSTANCE.isMainLast() && !ImGUISystem.INSTANCE.isFormVisible("FSurfaceEditor")
                 && !ImGUISystem.INSTANCE.isFormVisible("FBlockEditor")
                 && !ImGUISystem.INSTANCE.isFormVisible("FNpcEditor")
-                && !ImGUISystem.INSTANCE.isFormVisible("FObjEditor")))
+                && !ImGUISystem.INSTANCE.isFormVisible("FObjEditor")
+                && !ImGUISystem.INSTANCE.isFormVisible("FMinimap")))
             return;
 
         // Usando el metodo estatico de Key para obtener la tecla desde el codigo
