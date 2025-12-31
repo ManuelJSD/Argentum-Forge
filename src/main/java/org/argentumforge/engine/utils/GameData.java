@@ -87,17 +87,35 @@ public final class GameData {
         reader = new BinaryDataReader();
         options.load();
 
-        loadNpcs();
-        loadGrhData();
-        loadHeads();
-        loadHelmets();
-        loadBodys();
-        loadWeapons();
-        loadShields();
-        loadFxs();
-        loadFK();
-        loadFonts();
-        loadMessages(options.getLanguage());
+        if (checkResources()) {
+            loadNpcs();
+            loadGrhData();
+            loadHeads();
+            loadHelmets();
+            loadBodys();
+            //loadWeapons();
+            //loadShields();
+            loadFxs();
+            loadFK();
+            loadFonts();
+            loadMessages(options.getLanguage());
+        }
+    }
+
+    /**
+     * Verifica si existen los archivos esenciales para el funcionamiento del motor.
+     * 
+     * @return true si los archivos existen, false si falta alguno.
+     */
+    public static boolean checkResources() {
+        // Graficos.ind en InitPath
+        if (!Files.exists(Path.of(options.getInitPath(), "Graficos.ind")))
+            return false;
+        // NPCs.dat en DatsPath
+        if (!Files.exists(Path.of(options.getDatsPath(), "NPCs.dat")))
+            return false;
+
+        return true;
     }
 
     /**
@@ -106,16 +124,15 @@ public final class GameData {
      * Parsea el archivo .dat (estilo INI) para extraer nombres, cuerpos y cabezas.
      */
     private static void loadNpcs() {
-        final String npcsPathValue = options.getNpcsPath();
-        if (npcsPathValue == null || npcsPathValue.isBlank()) {
-            Logger.error("NPCsPath is not configured in options.ini");
-            npcs = new HashMap<>();
-            return;
-        }
+        final Path npcsPath = Path.of(options.getDatsPath(), "NPCs.dat");
 
-        final Path npcsPath = Path.of(npcsPathValue);
         if (!Files.exists(npcsPath)) {
             Logger.error("NPCs.dat not found at path: {}", npcsPath.toAbsolutePath());
+            javax.swing.JOptionPane.showMessageDialog(null,
+                    "No se encontró el archivo NPCs.dat en:\n" + npcsPath.toAbsolutePath() +
+                            "\n\nPor favor, configure la ruta de Dats correctamente.",
+                    "Error al cargar NPCs",
+                    javax.swing.JOptionPane.ERROR_MESSAGE);
             npcs = new HashMap<>();
             return;
         }
@@ -189,12 +206,9 @@ public final class GameData {
      * Reconstruye la jerarquía de animaciones y frames de GRH.
      */
     private static void loadGrhData() {
-
-        byte[] data = readResource("resources/inits.ao", "graphics");
-        if (data == null) {
-            System.err.println("Could not load graphics data!");
+        byte[] data = loadLocalInitFile("Graficos.ind", "Gráficos", true);
+        if (data == null)
             return;
-        }
 
         try {
             reader.init(data);
@@ -284,11 +298,9 @@ public final class GameData {
      * Carga y almacena los datos de las cabezas desde el archivo "heads.ind".
      */
     private static void loadHeads() {
-        byte[] data = readResource("resources/inits.ao", "heads");
-        if (data == null) {
-            System.err.println("Could not load heads data!");
+        byte[] data = loadLocalInitFile("Cabezas.ind", "Cabezas", true);
+        if (data == null)
             return;
-        }
 
         reader.init(data);
         reader.skipBytes(263);
@@ -321,11 +333,9 @@ public final class GameData {
      * Carga y almacena los datos de los cascos desde el archivo "helmets.ind".
      */
     private static void loadHelmets() {
-        byte[] data = readResource("resources/inits.ao", "helmets");
-        if (data == null) {
-            System.err.println("Could not load helmets data!");
+        byte[] data = loadLocalInitFile("Cascos.ind", "Cascos", true);
+        if (data == null)
             return;
-        }
 
         reader.init(data);
         reader.skipBytes(263);
@@ -358,11 +368,14 @@ public final class GameData {
      * Carga y almacena los datos de los cuerpos desde el archivo "bodys.ind".
      */
     private static void loadBodys() {
-        byte[] data = readResource("resources/inits.ao", "bodys");
+        // Intentamos cargar Personajes.ind primero sin mostrar error, si no existe
+        // probamos Cuerpos.ind con error
+        byte[] data = loadLocalInitFile("Personajes.ind", "Personajes", false);
         if (data == null) {
-            System.err.println("Could not load bodys data!");
-            return;
+            data = loadLocalInitFile("Cuerpos.ind", "Cuerpos", true);
         }
+        if (data == null)
+            return;
 
         reader.init(data);
         reader.skipBytes(263);
@@ -401,11 +414,9 @@ public final class GameData {
      * Carga y almacena los datos de las armas desde el archivo "arms.ind".
      */
     private static void loadWeapons() {
-        byte[] data = readResource("resources/inits.ao", "weapons");
-        if (data == null) {
-            System.err.println("Could not load weapons data!");
+        byte[] data = loadLocalInitFile("Armas.ind", "Armas", true);
+        if (data == null)
             return;
-        }
 
         reader.init(data);
 
@@ -427,11 +438,9 @@ public final class GameData {
      * Carga y almacena los datos de los escudos desde el archivo "shields.ind".
      */
     private static void loadShields() {
-        byte[] data = readResource("resources/inits.ao", "shields");
-        if (data == null) {
-            System.err.println("Could not load shields data!");
+        byte[] data = loadLocalInitFile("Escudos.ind", "Escudos", true);
+        if (data == null)
             return;
-        }
 
         reader.init(data);
 
@@ -706,11 +715,9 @@ public final class GameData {
      * Carga los efectos visuales (FXs) desde el archivo "fxs.ind".
      */
     private static void loadFxs() {
-        byte[] data = readResource("resources/inits.ao", "fxs");
-        if (data == null) {
-            System.err.println("Could not load fxs data!");
+        byte[] data = loadLocalInitFile("Fxs.ind", "Fxs", true);
+        if (data == null)
             return;
-        }
 
         reader.init(data);
         reader.skipBytes(263);
@@ -730,11 +737,9 @@ public final class GameData {
      * Carga los indicadores de lluvia por mapa desde el archivo "fk.ind".
      */
     private static void loadFK() {
-        byte[] data = readResource("resources/inits.ao", "fk");
-        if (data == null) {
-            System.err.println("Could not load fk data!");
+        byte[] data = loadLocalInitFile("Fk.ind", "Lluvia (Fk)", true);
+        if (data == null)
             return;
-        }
 
         reader.init(data);
         reader.skipBytes(263);
@@ -778,6 +783,37 @@ public final class GameData {
         grh.setSpeed(0.4f);
 
         return grh;
+    }
+
+    /**
+     * Carga un archivo de inicialización desde la ruta local configurada.
+     * Muestra un mensaje de error si el archivo no existe.
+     *
+     * @param fileName     Nombre del archivo (ej: "Graficos.ind")
+     * @param friendlyName Nombre amigable para el mensaje de error (ej: "Gráficos")
+     * @return El contenido del archivo en bytes o null si falla.
+     */
+    private static byte[] loadLocalInitFile(String fileName, String friendlyName, boolean showError) {
+        final Path filePath = Path.of(options.getInitPath(), fileName);
+
+        if (!Files.exists(filePath)) {
+            if (showError) {
+                Logger.error("{} no encontrado en la ruta: {}", fileName, filePath.toAbsolutePath());
+                javax.swing.JOptionPane.showMessageDialog(null,
+                        "No se encontró el archivo " + fileName + " en:\n" + filePath.toAbsolutePath() +
+                                "\n\nPor favor, configure la ruta de Inits correctamente.",
+                        "Error al cargar " + friendlyName,
+                        javax.swing.JOptionPane.ERROR_MESSAGE);
+            }
+            return null;
+        }
+
+        try {
+            return Files.readAllBytes(filePath);
+        } catch (IOException e) {
+            Logger.error(e, "Error al leer {}", fileName);
+            return null;
+        }
     }
 
 }

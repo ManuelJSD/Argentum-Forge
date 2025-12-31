@@ -1,6 +1,7 @@
 package org.argentumforge.engine.renderer;
 
 import org.lwjgl.BufferUtils;
+import org.tinylog.Logger;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -12,15 +13,22 @@ import java.nio.ByteBuffer;
 
 import static org.argentumforge.scripts.Compressor.readResource;
 import static org.lwjgl.opengl.GL11.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import org.argentumforge.engine.game.Options;
 
 /**
- * La clase {@code Texture} representa una textura en OpenGL para el renderizado grafico.
+ * La clase {@code Texture} representa una textura en OpenGL para el renderizado
+ * grafico.
  * <p>
- * OpenGL guarda las texturas creadas con un identificador numerico (ID), que esta clase almacena junto con informacion sobre el
- * tamaño de la textura. Proporciona funcionalidad para cargar texturas desde archivos comprimidos, y metodos para vincular y
+ * OpenGL guarda las texturas creadas con un identificador numerico (ID), que
+ * esta clase almacena junto con informacion sobre el
+ * tamaño de la textura. Proporciona funcionalidad para cargar texturas desde
+ * archivos comprimidos, y metodos para vincular y
  * desvincular texturas durante el proceso de renderizado.
  * <p>
- * Esta clase es fundamental en el sistema de renderizado, ya que permite que las texturas sean cargadas en memoria grafica y se
+ * Esta clase es fundamental en el sistema de renderizado, ya que permite que
+ * las texturas sean cargadas en memoria grafica y se
  * puedan dibujar en pantalla de manera eficiente a traves de OpenGL.
  */
 
@@ -43,16 +51,20 @@ public class Texture {
             this.id = glGenTextures();
             glBindTexture(GL_TEXTURE_2D, id);
 
-            // Lee los datos del recurso desde el archivo comprimido
-            final byte[] resourceData = readResource("resources/" + compressedFile, file);
-            /* if (resourceData == null) {
-            System.err.println("No se pudieron cargar los datos de " + file);
-            return -1;
-            } */
+            // Lee los datos del recurso
+            final byte[] resourceData;
+            if (compressedFile.equals("graphics.ao")) {
+                resourceData = loadLocalGraphic(file);
+            } else {
+                resourceData = readResource("resources/" + compressedFile, file);
+            }
+
+            if (resourceData == null) {
+                Logger.error("No se pudieron cargar los datos de: " + file);
+                return;
+            }
 
             final InputStream is = new ByteArrayInputStream(resourceData);
-
-            //File fil = new File(file);
             final BufferedImage image = ImageIO.read(is);
 
             refTexture.tex_width = image.getWidth();
@@ -74,7 +86,8 @@ public class Texture {
                         data[j * 4 + 1] = -1;
                         data[j * 4 + 2] = -1;
                         data[j * 4 + 3] = 0;
-                    } else data[j * 4 + 3] = -1;
+                    } else
+                        data[j * 4 + 3] = -1;
                 }
             }
 
@@ -115,6 +128,34 @@ public class Texture {
 
     public int getTex_height() {
         return tex_height;
+    }
+
+    private byte[] loadLocalGraphic(String fileNum) {
+        String graphicsPath = Options.INSTANCE.getGraphicsPath();
+
+        // Try PNG first
+        Path pngPath = Path.of(graphicsPath, fileNum + ".png");
+        if (Files.exists(pngPath)) {
+            try {
+                return Files.readAllBytes(pngPath);
+            } catch (IOException ignored) {
+            }
+        }
+
+        // Try BMP second
+        Path bmpPath = Path.of(graphicsPath, fileNum + ".bmp");
+        if (Files.exists(bmpPath)) {
+            try {
+                return Files.readAllBytes(bmpPath);
+            } catch (IOException ignored) {
+            }
+        }
+
+        // Final fallback to original resource if needed?
+        // User said "want them to load from the selected folder",
+        // but maybe keeping readResource as a last resort is safer?
+        // Let's stick to what the user asked.
+        return null;
     }
 
 }
