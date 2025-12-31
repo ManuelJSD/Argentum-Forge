@@ -7,7 +7,6 @@ package org.argentumforge.engine.utils.inits;
  * graficas, personajes, objetos y propiedades de interaccion.
  *
  * @see GrhInfo
- * @see Obj
  */
 
 public final class MapData {
@@ -16,7 +15,6 @@ public final class MapData {
     private short charIndex;
     private GrhInfo objGrh;
     private short npcIndex;
-    private Obj objInfo;
     private boolean blocked;
     private short trigger;
 
@@ -58,14 +56,6 @@ public final class MapData {
 
     public void setNpcIndex(short npcIndex) {
         this.npcIndex = npcIndex;
-    }
-
-    public Obj getObjInfo() {
-        return objInfo;
-    }
-
-    public void setObjInfo(Obj objInfo) {
-        this.objInfo = objInfo;
     }
 
     public boolean getBlocked() {

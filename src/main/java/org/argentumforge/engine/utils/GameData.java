@@ -70,6 +70,8 @@ public final class GameData {
     public static Character[] charList = new Character[10000 + 1];
     /** Mapa de definiciones de NPCs cargadas desde el archivo de datos. */
     public static Map<Integer, NpcData> npcs;
+    /** Mapa de definiciones de Objetos cargadas desde el archivo de datos. */
+    public static Map<Integer, ObjData> objs;
     /** Propiedades generales del mapa actual (.dat). */
     public static MapProperties mapProperties = new MapProperties();
     /** Instancia de configuración del usuario. */
@@ -89,12 +91,13 @@ public final class GameData {
 
         if (checkResources()) {
             loadNpcs();
+            loadObjs();
             loadGrhData();
             loadHeads();
             loadHelmets();
             loadBodys();
-            //loadWeapons();
-            //loadShields();
+            // loadWeapons();
+            // loadShields();
             loadFxs();
             loadFK();
             loadFonts();
@@ -113,6 +116,9 @@ public final class GameData {
             return false;
         // NPCs.dat en DatsPath
         if (!Files.exists(Path.of(options.getDatsPath(), "NPCs.dat")))
+            return false;
+        // OBJ.dat en DatsPath
+        if (!Files.exists(Path.of(options.getDatsPath(), "OBJ.dat")))
             return false;
 
         return true;
@@ -199,6 +205,78 @@ public final class GameData {
 
         npcs = result;
         Logger.info("Loaded {} NPC definitions from {}", npcs.size(), npcsPath.toAbsolutePath());
+    }
+
+    /**
+     * Carga las definiciones de Objetos desde el archivo externo especificado en
+     * las opciones.
+     * Parsea el archivo .dat (estilo INI) para extraer nombre y grhIndex.
+     */
+    private static void loadObjs() {
+        final Path objsPath = Path.of(options.getDatsPath(), "OBJ.dat");
+
+        if (!Files.exists(objsPath)) {
+            Logger.error("OBJ.dat not found at path: {}", objsPath.toAbsolutePath());
+            javax.swing.JOptionPane.showMessageDialog(null,
+                    "No se encontró el archivo OBJ.dat en:\n" + objsPath.toAbsolutePath() +
+                            "\n\nPor favor, configure la ruta de Dats correctamente.",
+                    "Error al cargar Objetos",
+                    javax.swing.JOptionPane.ERROR_MESSAGE);
+            objs = new HashMap<>();
+            return;
+        }
+
+        final Map<Integer, ObjData> result = new HashMap<>();
+        ObjData currentObj = null;
+
+        try (BufferedReader br = Files.newBufferedReader(objsPath, StandardCharsets.ISO_8859_1)) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String trimmed = line.trim();
+                if (trimmed.isEmpty() || trimmed.startsWith("'") || trimmed.startsWith("#") || trimmed.startsWith(";"))
+                    continue;
+
+                if (trimmed.startsWith("[") && trimmed.contains("]")) {
+                    String section = trimmed.substring(1, trimmed.indexOf(']')).trim();
+                    if (section.regionMatches(true, 0, "OBJ", 0, 3)) {
+                        String numPart = section.substring(3).trim();
+                        try {
+                            int objNumber = Integer.parseInt(numPart);
+                            currentObj = new ObjData(objNumber);
+                            result.put(objNumber, currentObj);
+                        } catch (NumberFormatException e) {
+                            currentObj = null;
+                        }
+                    } else {
+                        currentObj = null;
+                    }
+                    continue;
+                }
+
+                if (currentObj == null)
+                    continue;
+                int eq = trimmed.indexOf('=');
+                if (eq <= 0)
+                    continue;
+
+                String key = trimmed.substring(0, eq).trim();
+                String value = trimmed.substring(eq + 1).trim();
+
+                if (key.equalsIgnoreCase("Name")) {
+                    currentObj.setName(value);
+                } else if (key.equalsIgnoreCase("GrhIndex")) {
+                    try {
+                        currentObj.setGrhIndex(Integer.parseInt(value));
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+            }
+        } catch (IOException e) {
+            Logger.error(e, "Could not read OBJ.dat from path: {}", objsPath.toAbsolutePath());
+        }
+
+        objs = result;
+        Logger.info("Loaded {} OBJ definitions from {}", objs.size(), objsPath.toAbsolutePath());
     }
 
     /**
@@ -608,7 +686,6 @@ public final class GameData {
                 cell.setTrigger(0);
                 cell.setCharIndex(0);
                 cell.setNpcIndex((short) 0);
-                cell.setObjInfo(null);
 
                 initGrhOrReset(cell.getLayer(1), baseLayer1GrhIndex, true);
                 initGrhOrReset(cell.getLayer(2), (short) 0, true);
