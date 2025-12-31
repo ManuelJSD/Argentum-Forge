@@ -8,12 +8,12 @@ import org.argentumforge.engine.utils.inits.MapProperties;
 import org.tinylog.Logger;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static org.argentumforge.engine.game.Messages.loadMessages;
 import static org.argentumforge.engine.game.models.Character.eraseAllChars;
@@ -72,6 +72,7 @@ public final class GameData {
     public static Map<Integer, NpcData> npcs;
     /** Mapa de definiciones de Objetos cargadas desde el archivo de datos. */
     public static Map<Integer, ObjData> objs;
+    public static Map<Integer, Integer> minimapColors = new HashMap<>();
     /** Propiedades generales del mapa actual (.dat). */
     public static MapProperties mapProperties = new MapProperties();
     /** Instancia de configuración del usuario. */
@@ -92,6 +93,7 @@ public final class GameData {
         if (checkResources()) {
             loadNpcs();
             loadObjs();
+            loadMiniMapColors();
             loadGrhData();
             loadHeads();
             loadHelmets();
@@ -277,6 +279,78 @@ public final class GameData {
 
         objs = result;
         Logger.info("Loaded {} OBJ definitions from {}", objs.size(), objsPath.toAbsolutePath());
+    }
+
+    /**
+     * Carga los colores del minimapa desde MiniMap.dat si existe.
+     * Formato: [GrhX] o [X] seguido de R, G, B.
+     */
+    private static void loadMiniMapColors() {
+        final Path minimapPath = Path.of(options.getInitPath(), "MiniMap.dat");
+
+        if (!Files.exists(minimapPath)) {
+            Logger.info("MiniMap.dat no encontrado en {}. Se usará la heurística por defecto.",
+                    minimapPath.toAbsolutePath());
+            return;
+        }
+
+        try (BufferedReader br = Files.newBufferedReader(minimapPath, StandardCharsets.ISO_8859_1)) {
+            String line;
+            int currentGrh = -1;
+            int r = 0, g = 0, b = 0;
+
+            while ((line = br.readLine()) != null) {
+                String trimmed = line.trim();
+                if (trimmed.isEmpty() || trimmed.startsWith("'") || trimmed.startsWith("#") || trimmed.startsWith(";"))
+                    continue;
+
+                if (trimmed.startsWith("[") && trimmed.contains("]")) {
+                    // Guardar el anterior antes de empezar uno nuevo
+                    if (currentGrh != -1) {
+                        minimapColors.put(currentGrh, imgui.ImGui.getColorU32(r / 255f, g / 255f, b / 255f, 1.0f));
+                    }
+
+                    String section = trimmed.substring(1, trimmed.indexOf(']')).trim();
+                    String numPart = section.replace("Grh", "");
+                    try {
+                        currentGrh = Integer.parseInt(numPart);
+                        r = 0;
+                        g = 0;
+                        b = 0; // Reset
+                    } catch (NumberFormatException e) {
+                        currentGrh = -1;
+                    }
+                    continue;
+                }
+
+                if (currentGrh == -1)
+                    continue;
+
+                int eq = trimmed.indexOf('=');
+                if (eq <= 0)
+                    continue;
+
+                String key = trimmed.substring(0, eq).trim();
+                String value = trimmed.substring(eq + 1).trim();
+
+                try {
+                    if (key.equalsIgnoreCase("R"))
+                        r = Integer.parseInt(value);
+                    else if (key.equalsIgnoreCase("G"))
+                        g = Integer.parseInt(value);
+                    else if (key.equalsIgnoreCase("B"))
+                        b = Integer.parseInt(value);
+                } catch (NumberFormatException ignored) {
+                }
+            }
+            // Guardar el último
+            if (currentGrh != -1) {
+                minimapColors.put(currentGrh, imgui.ImGui.getColorU32(r / 255f, g / 255f, b / 255f, 1.0f));
+            }
+            Logger.info("Cargados {} colores para el minimapa desde {}", minimapColors.size(), minimapPath);
+        } catch (IOException e) {
+            Logger.error(e, "Error al leer MiniMap.dat");
+        }
     }
 
     /**

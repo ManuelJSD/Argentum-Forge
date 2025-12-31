@@ -11,21 +11,53 @@ public final class FMinimap extends Form {
 
     private static final int MINIMAP_SIZE = 200; // 2 pixels per tile (100x100)
     private static final int TILE_SIZE = 2;
+    private final boolean[] visibleLayers = { true, false, false, false };
 
     public FMinimap() {
     }
 
     @Override
     public void render() {
-        ImGui.setNextWindowSize(MINIMAP_SIZE + 20, MINIMAP_SIZE + 40, ImGuiCond.FirstUseEver);
+        ImGui.setNextWindowSize(MINIMAP_SIZE + 20, MINIMAP_SIZE + 80, ImGuiCond.Always);
         if (ImGui.begin("Minimapa", ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse)) {
+
+            // Capas selector
+            if (ImGui.beginMenuBar()) {
+                if (ImGui.beginMenu("Capas")) {
+                    for (int i = 0; i < 4; i++) {
+                        if (ImGui.menuItem("Capa " + (i + 1), "", visibleLayers[i])) {
+                            visibleLayers[i] = !visibleLayers[i];
+                        }
+                    }
+                    ImGui.endMenu();
+                }
+                ImGui.endMenuBar();
+            }
+
+            // O simplemente botones para mayor comodidad si no queremos menu bar
+            // (ImGuiWindowFlags.MenuBar)
+            ImGui.text("Ver capas:");
+            for (int i = 0; i < 4; i++) {
+                if (i > 0)
+                    ImGui.sameLine();
+                boolean active = visibleLayers[i];
+                if (active)
+                    ImGui.pushStyleColor(imgui.flag.ImGuiCol.Button, 0xFF00FF00);
+                if (ImGui.button(String.valueOf(i + 1), 40, 20)) {
+                    visibleLayers[i] = !visibleLayers[i];
+                }
+                if (active)
+                    ImGui.popStyleColor();
+            }
+
+            ImGui.separator();
 
             float mouseX = ImGui.getMousePosX();
             float mouseY = ImGui.getMousePosY();
             float windowX = ImGui.getWindowPosX();
             float windowY = ImGui.getWindowPosY();
             float contentX = windowX + 10;
-            float contentY = windowY + 30;
+            float contentY = windowY + 70; // Ajustado por el selector de capas
 
             ImDrawList drawList = ImGui.getWindowDrawList();
 
@@ -36,18 +68,24 @@ public final class FMinimap extends Form {
             if (GameData.mapData != null) {
                 for (int y = 1; y <= 100; y++) {
                     for (int x = 1; x <= 100; x++) {
-                        int grh = GameData.mapData[x][y].getLayer(1).getGrhIndex();
-                        if (grh > 0) {
-                            int color = getTileColor(grh);
-                            drawList.addRectFilled(
-                                    contentX + (x - 1) * TILE_SIZE,
-                                    contentY + (y - 1) * TILE_SIZE,
-                                    contentX + x * TILE_SIZE,
-                                    contentY + y * TILE_SIZE,
-                                    color);
+                        // Dibujar capas seleccionadas
+                        for (int layer = 1; layer <= 4; layer++) {
+                            if (!visibleLayers[layer - 1])
+                                continue;
+
+                            int grh = GameData.mapData[x][y].getLayer(layer).getGrhIndex();
+                            if (grh > 0) {
+                                int color = getTileColor(grh);
+                                drawList.addRectFilled(
+                                        contentX + (x - 1) * TILE_SIZE,
+                                        contentY + (y - 1) * TILE_SIZE,
+                                        contentX + x * TILE_SIZE,
+                                        contentY + y * TILE_SIZE,
+                                        color);
+                            }
                         }
 
-                        // Bloqueos (opcional, en rojo tenue)
+                        // Bloqueos (siempre en la parte superior si está en capa 1?)
                         if (GameData.mapData[x][y].getBlocked()) {
                             drawList.addRectFilled(
                                     contentX + (x - 1) * TILE_SIZE,
@@ -97,16 +135,52 @@ public final class FMinimap extends Form {
     }
 
     private int getTileColor(int grh) {
-        // Heurística básica de colores para AO
-        // Estos son ejemplos típicos, pueden variar según el servidor
-        if (grh >= 1 && grh <= 100)
-            return ImGui.getColorU32(0.1f, 0.6f, 0.1f, 1.0f); // Pasto
-        if (grh >= 1500 && grh <= 1600)
-            return ImGui.getColorU32(0.0f, 0.4f, 0.8f, 1.0f); // Agua
-        if (grh >= 500 && grh <= 600)
-            return ImGui.getColorU32(0.8f, 0.7f, 0.4f, 1.0f); // Arena
+        // Primero intentamos usar MiniMap.dat
+        if (GameData.minimapColors.containsKey(grh)) {
+            return GameData.minimapColors.get(grh);
+        }
 
-        // Color por defecto (verde suave)
-        return ImGui.getColorU32(0.2f, 0.5f, 0.2f, 1.0f);
+        // Si es animado, probamos con el primer frame para MiniMap.dat también
+        if (GameData.grhData[grh].getNumFrames() > 1) {
+            int firstFrame = GameData.grhData[grh].getFrame(0);
+            if (GameData.minimapColors.containsKey(firstFrame)) {
+                return GameData.minimapColors.get(firstFrame);
+            }
+            grh = firstFrame;
+        }
+
+        // Heurística de colores típica de Argentum Online
+        // Pasto / Llanura
+        if (grh <= 600 || (grh >= 1000 && grh <= 1100))
+            return ImGui.getColorU32(0.14f, 0.45f, 0.05f, 1.0f); // Verde oscuro
+        if (grh >= 601 && grh <= 1000)
+            return ImGui.getColorU32(0.20f, 0.55f, 0.10f, 1.0f); // Verde claro
+
+        // Agua / Mar / Ríos
+        if ((grh >= 1500 && grh <= 1650) || (grh >= 5665 && grh <= 5680) || (grh >= 13547 && grh <= 13562))
+            return ImGui.getColorU32(0.05f, 0.15f, 0.60f, 1.0f); // Azul profundo
+
+        // Arena / Desierto
+        if (grh >= 3500 && grh <= 3800)
+            return ImGui.getColorU32(0.85f, 0.75f, 0.45f, 1.0f); // Arena clara
+
+        // Nieve / Hielo
+        if (grh >= 4000 && grh <= 4300)
+            return ImGui.getColorU32(0.90f, 0.95f, 1.0f, 1.0f); // Blanco/Cian mudo
+
+        // Lava / Infierno
+        if (grh >= 5800 && grh <= 5900)
+            return ImGui.getColorU32(0.80f, 0.10f, 0.0f, 1.0f); // Rojo lava
+
+        // Dungeon / Cueva / Piedra
+        if (grh >= 5000 && grh <= 5500)
+            return ImGui.getColorU32(0.30f, 0.30f, 0.35f, 1.0f); // Gris piedra
+
+        // Bosque denso
+        if (grh >= 10000 && grh <= 10500)
+            return ImGui.getColorU32(0.05f, 0.30f, 0.05f, 1.0f); // Verde bosque
+
+        // Color por defecto (verde intermedio)
+        return ImGui.getColorU32(0.20f, 0.50f, 0.20f, 1.0f);
     }
 }
