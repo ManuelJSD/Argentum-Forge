@@ -6,6 +6,7 @@ import imgui.flag.ImGuiCond;
 import imgui.flag.ImGuiWindowFlags;
 import org.argentumforge.engine.utils.editor.Npc;
 import org.argentumforge.engine.utils.inits.NpcData;
+import imgui.type.ImString;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -17,22 +18,27 @@ public final class FNpcEditor extends Form {
 
     private int selectedNpcNumber = -1;
     private final Npc npcEditor;
+    private final ImString searchFilter = new ImString(100);
 
     public FNpcEditor() {
         npcEditor = Npc.getInstance();
 
         if (npcs != null && !npcs.isEmpty()) {
             selectedNpcNumber = npcs.keySet().stream().min(Integer::compareTo).orElse(-1);
-            if (selectedNpcNumber > 0) npcEditor.setNpcNumber(selectedNpcNumber);
+            if (selectedNpcNumber > 0)
+                npcEditor.setNpcNumber(selectedNpcNumber);
         }
     }
 
     @Override
     public void render() {
-        ImGui.setNextWindowSize(260, 320, ImGuiCond.Always);
+        ImGui.setNextWindowSize(260, 360, ImGuiCond.Always);
         ImGui.begin(this.getClass().getSimpleName(), ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoResize);
 
         ImGui.text("NPCs:");
+        ImGui.separator();
+
+        ImGui.inputText("Buscar", searchFilter);
         ImGui.separator();
 
         drawNpcList();
@@ -57,9 +63,14 @@ public final class FNpcEditor extends Form {
 
         for (Integer npcNumber : keys) {
             NpcData data = npcs.get(npcNumber);
-            if (data == null) continue;
+            if (data == null)
+                continue;
 
             String label = "NPC " + npcNumber + " - " + data.getName();
+            if (!searchFilter.get().isEmpty() && !label.toLowerCase().contains(searchFilter.get().toLowerCase())) {
+                continue;
+            }
+
             if (ImGui.selectable(label, selectedNpcNumber == npcNumber)) {
                 selectedNpcNumber = npcNumber;
                 npcEditor.setNpcNumber(npcNumber);
@@ -89,7 +100,8 @@ public final class FNpcEditor extends Form {
                 npcEditor.setMode(2);
             }
         }
-        if (pushQuitar) ImGui.popStyleColor();
+        if (pushQuitar)
+            ImGui.popStyleColor();
 
         ImGui.sameLine();
 
@@ -99,7 +111,8 @@ public final class FNpcEditor extends Form {
             ImGui.pushStyleColor(ImGuiCol.Button, activeColor);
             pushColocar = true;
         }
-        if (!placeEnabled) ImGui.pushStyleColor(ImGuiCol.Button, 0x88888888);
+        if (!placeEnabled)
+            ImGui.pushStyleColor(ImGuiCol.Button, 0x88888888);
         if (ImGui.button("Colocar", 110, 30)) {
             if (!placeEnabled) {
                 // no hacer nada
@@ -110,8 +123,10 @@ public final class FNpcEditor extends Form {
                 npcEditor.setNpcNumber(selectedNpcNumber);
             }
         }
-        if (!placeEnabled) ImGui.popStyleColor();
-        if (pushColocar) ImGui.popStyleColor();
+        if (!placeEnabled)
+            ImGui.popStyleColor();
+        if (pushColocar)
+            ImGui.popStyleColor();
 
         if (selectedNpcNumber > 0 && npcs != null) {
             NpcData selected = npcs.get(selectedNpcNumber);

@@ -6,6 +6,7 @@ import imgui.flag.ImGuiCond;
 import imgui.flag.ImGuiWindowFlags;
 import org.argentumforge.engine.utils.editor.Obj;
 import org.argentumforge.engine.utils.inits.ObjData;
+import imgui.type.ImString;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -17,6 +18,7 @@ public final class FObjEditor extends Form {
 
     private int selectedObjNumber = -1;
     private final Obj objEditor;
+    private final ImString searchFilter = new ImString(100);
 
     public FObjEditor() {
         objEditor = Obj.getInstance();
@@ -30,10 +32,13 @@ public final class FObjEditor extends Form {
 
     @Override
     public void render() {
-        ImGui.setNextWindowSize(260, 320, ImGuiCond.Always);
+        ImGui.setNextWindowSize(260, 360, ImGuiCond.Always);
         ImGui.begin(this.getClass().getSimpleName(), ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoResize);
 
         ImGui.text("Objetos:");
+        ImGui.separator();
+
+        ImGui.inputText("Buscar", searchFilter);
         ImGui.separator();
 
         drawObjList();
@@ -62,6 +67,10 @@ public final class FObjEditor extends Form {
                 continue;
 
             String label = "OBJ " + objNumber + " - " + data.getName();
+            if (!searchFilter.get().isEmpty() && !label.toLowerCase().contains(searchFilter.get().toLowerCase())) {
+                continue;
+            }
+
             if (ImGui.selectable(label, selectedObjNumber == objNumber)) {
                 selectedObjNumber = objNumber;
                 objEditor.setObjNumber(objNumber);
