@@ -25,7 +25,10 @@ public enum Options {
     private String ipServer = "127.0.0.1";
     private String portServer = "7666";
     private String language = "es";
-    private String npcsPath = "resources/NPCs.dat";
+    private String graphicsPath = "resources/graficos";
+    private String datsPath = "resources/dats";
+    private String initPath = "resources/inits";
+    private String musicPath = "resources/musica";
     private int screenWidth = 1024;
     private int screenHeight = 1024;
 
@@ -65,9 +68,11 @@ public enum Options {
             write(writer, "Sound", sound);
             write(writer, "ShowName", showName);
             write(writer, "Name", nick);
-            write(writer, "IP", ipServer);
             write(writer, "PORT", portServer);
-            write(writer, "NPCsPath", npcsPath);
+            write(writer, "GraphicsPath", graphicsPath);
+            write(writer, "DatsPath", datsPath);
+            write(writer, "InitPath", initPath);
+            write(writer, "MusicPath", musicPath);
             write(writer, "Fullscreen", fullscreen);
             write(writer, "VSYNC", vsync);
             write(writer, "CursorGraphic", cursorGraphic);
@@ -159,12 +164,36 @@ public enum Options {
         this.language = language;
     }
 
-    public String getNpcsPath() {
-        return npcsPath;
+    public String getGraphicsPath() {
+        return graphicsPath;
     }
 
-    public void setNpcsPath(String npcsPath) {
-        this.npcsPath = npcsPath;
+    public void setGraphicsPath(String graphicsPath) {
+        this.graphicsPath = graphicsPath;
+    }
+
+    public String getDatsPath() {
+        return datsPath;
+    }
+
+    public void setDatsPath(String datsPath) {
+        this.datsPath = datsPath;
+    }
+
+    public String getInitPath() {
+        return initPath;
+    }
+
+    public void setInitPath(String initPath) {
+        this.initPath = initPath;
+    }
+
+    public String getMusicPath() {
+        return musicPath;
+    }
+
+    public void setMusicPath(String musicPath) {
+        this.musicPath = musicPath;
     }
 
     public int getScreenWidth() {
@@ -210,7 +239,10 @@ public enum Options {
             case "Name" -> nick = value;
             case "IP" -> ipServer = value;
             case "PORT" -> portServer = value;
-            case "NPCsPath" -> npcsPath = value;
+            case "GraphicsPath" -> graphicsPath = value;
+            case "DatsPath", "MapsPath" -> datsPath = value;
+            case "InitPath" -> initPath = value;
+            case "MusicPath" -> musicPath = value;
             case "Fullscreen" -> fullscreen = Boolean.parseBoolean(value);
             case "VSYNC" -> vsync = Boolean.parseBoolean(value);
             case "CursorGraphic" -> cursorGraphic = Boolean.parseBoolean(value);

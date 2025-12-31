@@ -109,22 +109,25 @@ public final class FOptions extends Form {
     }
 
     private void drawButtons() {
-        // Center buttons
-        float buttonWidth = 160;
-        float spacing = 20;
-        // Total width of 2 buttons + spacing
-        float totalWidth = (buttonWidth * 2) + spacing;
+        float buttonWidth = 200;
+        float centerX = (ImGui.getWindowWidth() - buttonWidth) / 2;
 
-        ImGui.setCursorPosX((ImGui.getWindowWidth() - totalWidth) / 2);
-
+        ImGui.setCursorPosX(centerX);
         if (ImGui.button("Configurar Teclas", buttonWidth, 25)) {
             playSound(SND_CLICK);
             IM_GUI_SYSTEM.show(new FBindKeys());
         }
 
-        ImGui.sameLine(0, spacing);
+        ImGui.setCursorPosX(centerX);
+        if (ImGui.button("Editar Rutas", buttonWidth, 25)) {
+            playSound(SND_CLICK);
+            IM_GUI_SYSTEM.show(new FRoutes());
+        }
 
-        if (ImGui.button("Salir", buttonWidth, 25)) {
+        ImGui.separator();
+
+        ImGui.setCursorPosX(centerX);
+        if (ImGui.button("Cerrar", buttonWidth, 25)) {
             options.save();
             this.close();
         }

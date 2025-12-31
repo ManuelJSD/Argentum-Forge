@@ -188,6 +188,14 @@ public final class FMain extends Form {
                     this.loadMapAction();
                 }
 
+                ImGui.separator();
+
+                if (ImGui.menuItem("Opciones")) {
+                    ImGUISystem.INSTANCE.show(new FOptions());
+                }
+
+                ImGui.separator();
+
                 if (ImGui.menuItem("Salir")) {
                     org.argentumforge.engine.Engine.closeClient();
                 }
@@ -223,9 +231,6 @@ public final class FMain extends Form {
                 }
                 if (ImGui.menuItem("Información del Mapa")) {
                     ImGUISystem.INSTANCE.show(new FInfoMap());
-                }
-                if (ImGui.menuItem("Opciones")) {
-                    ImGUISystem.INSTANCE.show(new FOptions());
                 }
                 ImGui.endMenu();
             }

@@ -75,6 +75,10 @@ public final class Engine {
         Surface.INSTANCE.init();
         batch = new BatchRenderer();
 
+        if (!GameData.checkResources()) {
+            ImGUISystem.INSTANCE.show(new org.argentumforge.engine.gui.forms.FRoutes());
+        }
+
         changeScene(INTRO_SCENE);
         // playMusic("intro.ogg");
     }
