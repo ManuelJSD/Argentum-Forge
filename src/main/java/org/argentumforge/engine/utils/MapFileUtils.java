@@ -1,5 +1,7 @@
 package org.argentumforge.engine.utils;
 
+import org.argentumforge.engine.game.Options;
+
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.File;
@@ -16,12 +18,15 @@ public class MapFileUtils {
         fileChooser.setDialogTitle("Seleccionar Mapa");
         fileChooser.setFileFilter(new FileNameExtensionFilter("Archivos de Mapa (*.map)", "map"));
 
-        fileChooser.setCurrentDirectory(new File("."));
+        fileChooser.setCurrentDirectory(new File(Options.INSTANCE.getLastMapPath()));
 
         int result = fileChooser.showOpenDialog(null);
 
         if (result == JFileChooser.APPROVE_OPTION) {
             File selectedFile = fileChooser.getSelectedFile();
+            // Save the last directory
+            Options.INSTANCE.setLastMapPath(selectedFile.getParent());
+            Options.INSTANCE.save();
             // Load the map
             GameData.loadMap(selectedFile.getAbsolutePath());
             return true;

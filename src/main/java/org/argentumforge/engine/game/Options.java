@@ -31,6 +31,7 @@ public enum Options {
     private String musicPath = "resources/musica";
     private int screenWidth = 1024;
     private int screenHeight = 1024;
+    private String lastMapPath = ".";
 
     /**
      * Carga las opciones.
@@ -79,6 +80,7 @@ public enum Options {
             write(writer, "Language", language);
             write(writer, "ScreenWidth", screenWidth);
             write(writer, "ScreenHeight", screenHeight);
+            write(writer, "LastMapPath", lastMapPath);
         } catch (IOException e) {
             Logger.error("Could not write to options.ini file!");
         }
@@ -212,6 +214,14 @@ public enum Options {
         this.screenHeight = screenHeight;
     }
 
+    public String getLastMapPath() {
+        return lastMapPath;
+    }
+
+    public void setLastMapPath(String lastMapPath) {
+        this.lastMapPath = lastMapPath;
+    }
+
     /**
      * Escribe una opcion con su valor asociado en un objeto {@code BufferedWriter}.
      *
@@ -249,6 +259,7 @@ public enum Options {
             case "Language" -> language = value;
             case "ScreenWidth" -> screenWidth = Integer.parseInt(value);
             case "ScreenHeight" -> screenHeight = Integer.parseInt(value);
+            case "LastMapPath" -> lastMapPath = value;
             default -> Logger.warn("Unknown option ignored: {}", option);
         }
     }
