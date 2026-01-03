@@ -6,6 +6,7 @@ public final class NpcData {
     private String name = "";
     private int head;
     private int body;
+    private int heading;
 
     public NpcData() {
     }
@@ -45,4 +46,8 @@ public final class NpcData {
     public void setBody(int body) {
         this.body = body;
     }
+
+    public int getHeading() { return heading; }
+
+    public void setHeading(int heading) { this.heading = heading; }
 }

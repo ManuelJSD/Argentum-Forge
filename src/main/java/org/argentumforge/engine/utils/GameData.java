@@ -77,6 +77,13 @@ public final class GameData {
     public static MapProperties mapProperties = new MapProperties();
     /** Instancia de configuración del usuario. */
     public static Options options = Options.INSTANCE;
+
+    /** Tamaño del mapa*/
+    public static final int X_MIN_MAP_SIZE = 1;
+    public static final int X_MAX_MAP_SIZE = 100;
+    public static final int Y_MIN_MAP_SIZE = 1;
+    public static final int Y_MAX_MAP_SIZE = 100;
+
     /** Lector de datos binarios persistente para la carga de recursos. */
     private static BinaryDataReader reader;
 
@@ -717,8 +724,18 @@ public final class GameData {
      * @param filePath Ruta absoluta al archivo .inf
      */
     private static void loadMapInfo(String filePath) {
-        Logger.info("Cargando información de entidades desde: {}", filePath);
-        // TODO: Implementar parser de .inf para poblar mapData
+
+        reader.readShort();
+        reader.readShort();
+        reader.readShort();
+        reader.readShort();
+        reader.readShort();
+
+        for (int y = 1; y <= 100; y++) {
+            for (int x = 1; x <= 100; x++) {
+
+            }
+        }
     }
 
     /**
@@ -750,11 +767,10 @@ public final class GameData {
      * @param baseLayer1GrhIndex Índice del GRH a usar como suelo base.
      */
     public static void createEmptyMap(short baseLayer1GrhIndex) {
-        mapData = new MapData[101][101];
-        mapData[0][0] = new MapData();
+        mapData = new MapData[X_MAX_MAP_SIZE + 1][Y_MAX_MAP_SIZE + 1];
 
-        for (int y = 1; y <= 100; y++) {
-            for (int x = 1; x <= 100; x++) {
+        for (int y = Y_MIN_MAP_SIZE; y <= Y_MAX_MAP_SIZE; y++) {
+            for (int x = X_MIN_MAP_SIZE; x <= X_MAX_MAP_SIZE; x++) {
                 MapData cell = new MapData();
                 cell.setBlocked(false);
                 cell.setTrigger(0);
@@ -797,14 +813,13 @@ public final class GameData {
     private static void initMap(byte[] data) {
         reader.init(data);
 
-        mapData = new MapData[101][101];
+        mapData = new MapData[X_MAX_MAP_SIZE + 1][Y_MAX_MAP_SIZE + 1];
 
         final short mapversion = reader.readShort();
         reader.skipBytes(263); // cabecera.
 
         byte byflags;
 
-        // Falta implementar el mapInfo xd....
         reader.readShort();
         reader.readShort();
         reader.readShort();

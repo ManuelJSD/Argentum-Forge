@@ -1,9 +1,11 @@
 package org.argentumforge.engine.utils.inits;
 
 /**
- * Simula el "Type" o la estructura de {@code MapData}, representando los datos de una celda individual en el mapa.
+ * Simula el "Type" o la estructura de {@code MapData}, representando los datos
+ * de una celda individual en el mapa.
  * <p>
- * Esta clase almacena toda la informacion necesaria para representar una celda especifica del mapa, incluyendo sus capas
+ * Esta clase almacena toda la informacion necesaria para representar una celda
+ * especifica del mapa, incluyendo sus capas
  * graficas, personajes, objetos y propiedades de interaccion.
  *
  * @see GrhInfo
@@ -17,6 +19,15 @@ public final class MapData {
     private short npcIndex;
     private boolean blocked;
     private short trigger;
+
+    // Tile Exit
+    private short exitMap;
+    private short exitX;
+    private short exitY;
+
+    // Object Info
+    private int objIndex;
+    private int objAmount;
 
     public MapData() {
         layer[1] = new GrhInfo();
@@ -72,6 +83,30 @@ public final class MapData {
 
     public void setTrigger(int trigger) {
         this.trigger = (short) trigger;
+    }
+
+    public short getExitMap() {
+        return exitMap;
+    }
+
+    public void setExitMap(int exitMap) {
+        this.exitMap = (short) exitMap;
+    }
+
+    public short getExitX() {
+        return exitX;
+    }
+
+    public void setExitX(int exitX) {
+        this.exitX = (short) exitX;
+    }
+
+    public short getExitY() {
+        return exitY;
+    }
+
+    public void setExitY(int exitY) {
+        this.exitY = (short) exitY;
     }
 
 }
