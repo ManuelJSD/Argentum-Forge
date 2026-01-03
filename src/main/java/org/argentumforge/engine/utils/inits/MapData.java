@@ -109,4 +109,20 @@ public final class MapData {
         this.exitY = (short) exitY;
     }
 
+    public int getObjIndex() {
+        return objIndex;
+    }
+
+    public void setObjIndex(int objIndex) {
+        this.objIndex = objIndex;
+    }
+
+    public int getObjAmount() {
+        return objAmount;
+    }
+
+    public void setObjAmount(int objAmount) {
+        this.objAmount = objAmount;
+    }
+
 }

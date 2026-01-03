@@ -2,6 +2,7 @@ package org.argentumforge.engine.utils;
 
 import org.argentumforge.engine.game.Options;
 import org.argentumforge.engine.game.models.Character;
+import org.argentumforge.engine.game.models.Direction;
 import org.argentumforge.engine.renderer.Surface;
 import org.argentumforge.engine.utils.inits.*;
 import org.argentumforge.engine.utils.inits.MapProperties;
@@ -78,7 +79,7 @@ public final class GameData {
     /** Instancia de configuración del usuario. */
     public static Options options = Options.INSTANCE;
 
-    /** Tamaño del mapa*/
+    /** Tamaño del mapa */
     public static final int X_MIN_MAP_SIZE = 1;
     public static final int X_MAX_MAP_SIZE = 100;
     public static final int Y_MIN_MAP_SIZE = 1;
@@ -105,8 +106,8 @@ public final class GameData {
             loadHeads();
             loadHelmets();
             loadBodys();
-            // loadWeapons();
-            // loadShields();
+            loadWeapons();
+            loadShields();
             loadFxs();
             loadFK();
             loadFonts();
@@ -720,22 +721,86 @@ public final class GameData {
     /**
      * Carga la información de entidades (NPCs, Objetos, Triggers) desde un archivo
      * .inf.
-     * 
+     *
      * @param filePath Ruta absoluta al archivo .inf
      */
     private static void loadMapInfo(String filePath) {
+        try {
+            byte[] data = Files.readAllBytes(Path.of(filePath));
+            reader.init(data);
 
-        reader.readShort();
-        reader.readShort();
-        reader.readShort();
-        reader.readShort();
-        reader.readShort();
+            // Cabecera inf (5 integers in VB6 = 10 bytes)
+            reader.readShort();
+            reader.readShort();
+            reader.readShort();
+            reader.readShort();
+            reader.readShort();
 
-        for (int y = 1; y <= 100; y++) {
-            for (int x = 1; x <= 100; x++) {
+            // Load arrays
+            for (int y = Y_MIN_MAP_SIZE; y <= Y_MAX_MAP_SIZE; y++) {
+                for (int x = X_MIN_MAP_SIZE; x <= X_MAX_MAP_SIZE; x++) {
+                    if (!reader.hasRemaining())
+                        break;
 
+                    // .inf file
+                    byte flags = reader.readByte();
+
+                    // If ByFlags And 1 Then (Exits)
+                    if ((flags & 1) != 0) {
+                        mapData[x][y].setExitMap(reader.readShort());
+                        mapData[x][y].setExitX(reader.readShort());
+                        mapData[x][y].setExitY(reader.readShort());
+                    }
+
+                    // If ByFlags And 2 Then (NPCs)
+                    if ((flags & 2) != 0) {
+                        short npcIndex = reader.readShort();
+                        if (npcIndex < 0)
+                            npcIndex = 0;
+
+                        if (npcIndex > 0) {
+                            mapData[x][y].setNpcIndex(npcIndex);
+                            NpcData npc = npcs.get((int) npcIndex);
+                            if (npc != null) {
+                                Character.makeChar(nextOpenChar(), npc.getBody(), npc.getHead(),
+                                        Direction.fromID(npc.getHeading()), x, y, 0, 0, 0);
+                            }
+                        }
+                    }
+
+                    // If ByFlags And 4 Then (Objects)
+                    if ((flags & 4) != 0) {
+                        int objIndex = reader.readShort();
+                        int amount = reader.readShort();
+
+                        mapData[x][y].setObjIndex(objIndex);
+                        mapData[x][y].setObjAmount(amount);
+
+                        if (objIndex > 0) {
+                            ObjData obj = objs.get(objIndex);
+                            if (obj != null) {
+                                initGrh(mapData[x][y].getObjGrh(), (short) obj.getGrhIndex(), false);
+                            } else {
+                                Logger.warn("Object definition not found for index: {}", objIndex);
+                            }
+                        }
+                    }
+
+                }
+            }
+
+        } catch (IOException e) {
+            Logger.error(e, "Error loading map info from: {}", filePath);
+        }
+    }
+
+    private static short nextOpenChar() {
+        for (short i = 1; i < charList.length; i++) {
+            if (!charList[i].isActive()) {
+                return i;
             }
         }
+        return -1;
     }
 
     /**

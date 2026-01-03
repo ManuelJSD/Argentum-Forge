@@ -27,4 +27,12 @@ public enum Direction {
         return id;
     }
 
+    public static Direction fromID(int id) {
+        for (Direction d : values()) {
+            if (d.getId() == id)
+                return d;
+        }
+        return DOWN;
+    }
+
 }

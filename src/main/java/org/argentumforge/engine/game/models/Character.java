@@ -12,7 +12,8 @@ import static org.argentumforge.engine.utils.Time.timerTicksPerFrame;
 /**
  * Clase que representa a un personaje dentro del mundo de Argentum Online.
  * <p>
- * Esta clase implementa toda la funcionalidad relacionada con los personajes, incluyendo jugadores controlados por usuarios, NPCs
+ * Esta clase implementa toda la funcionalidad relacionada con los personajes,
+ * incluyendo jugadores controlados por usuarios, NPCs
  * y criaturas.
  * <p>
  * Gestiona los siguientes aspectos:
@@ -26,10 +27,13 @@ import static org.argentumforge.engine.utils.Time.timerTicksPerFrame;
  * <li>Faccion, clan y nombre del personaje
  * </ul>
  * <p>
- * La clase contiene numerosas constantes que definen los rangos de indices de cabezas y cuerpos para diferentes razas y generos,
- * asi como metodos estaticos para operaciones como crear, eliminar o redibujar personajes en el mapa.
+ * La clase contiene numerosas constantes que definen los rangos de indices de
+ * cabezas y cuerpos para diferentes razas y generos,
+ * asi como metodos estaticos para operaciones como crear, eliminar o redibujar
+ * personajes en el mapa.
  * <p>
- * Character es una pieza central del motor grafico, gestionando tanto la representacion visual como la logica de estado de todas
+ * Character es una pieza central del motor grafico, gestionando tanto la
+ * representacion visual como la logica de estado de todas
  * las entidades animadas que pueblan el mundo.
  */
 
@@ -39,7 +43,8 @@ public final class Character {
     public static final int FRAGATA_FANTASMAL = 87;
 
     public static final int HUMANO_H_PRIMER_CABEZA = 1;
-    public static final int HUMANO_H_ULTIMA_CABEZA = 40; //En verdad es hasta la 51, pero como son muchas estas las dejamos no seleccionables
+    public static final int HUMANO_H_ULTIMA_CABEZA = 40; // En verdad es hasta la 51, pero como son muchas estas las
+                                                         // dejamos no seleccionables
     public static final int HUMANO_H_CUERPO_DESNUDO = 21;
 
     public static final int ELFO_H_PRIMER_CABEZA = 101;
@@ -160,19 +165,25 @@ public final class Character {
     }
 
     /**
-     *  Crea un nuevo personaje segun los parametros establecidos.
+     * Crea un nuevo personaje segun los parametros establecidos.
      */
-    public static void makeChar(short charIndex, int body, int head, Direction direction, int x, int y, int weapon, int shield, int helmet) {
+    public static void makeChar(short charIndex, int body, int head, Direction direction, int x, int y, int weapon,
+            int shield, int helmet) {
         // apuntamos al ultimo char
-        if (charIndex > lastChar) lastChar = charIndex;
+        if (charIndex > lastChar)
+            lastChar = charIndex;
 
-        if (weapon == 0) weapon = 2;
-        if (shield == 0) shield = 2;
-        if (helmet == 0) helmet = 2;
+        if (weapon == 0)
+            weapon = 2;
+        if (shield == 0)
+            shield = 2;
+        if (helmet == 0)
+            helmet = 2;
 
         char f = '<', u = '>';
 
-        if (charList[charIndex].priv != 0) charList[charIndex].setClanName(f + "Game Master" + u);
+        if (charList[charIndex].priv != 0)
+            charList[charIndex].setClanName(f + "Game Master" + u);
 
         charList[charIndex].setDead(head == CASPER_HEAD);
         charList[charIndex].setiHead(head);
@@ -181,10 +192,20 @@ public final class Character {
         charList[charIndex].setHead(new HeadData(headData[head]));
         charList[charIndex].setBody(new BodyData(bodyData[body]));
 
-        charList[charIndex].setWeapon(new WeaponData(weaponData[weapon]));
+        if (weaponData != null && weapon < weaponData.length && weaponData[weapon] != null)
+            charList[charIndex].setWeapon(new WeaponData(weaponData[weapon]));
+        else
+            charList[charIndex].setWeapon(new WeaponData(new WeaponData()));
 
-        charList[charIndex].setShield(new ShieldData(shieldData[shield]));
-        charList[charIndex].setHelmet(new HeadData(helmetsData[helmet]));
+        if (shieldData != null && shield < shieldData.length && shieldData[shield] != null)
+            charList[charIndex].setShield(new ShieldData(shieldData[shield]));
+        else
+            charList[charIndex].setShield(new ShieldData(new ShieldData()));
+
+        if (helmetsData != null && helmet < helmetsData.length && helmetsData[helmet] != null)
+            charList[charIndex].setHelmet(new HeadData(helmetsData[helmet]));
+        else
+            charList[charIndex].setHelmet(new HeadData(new HeadData()));
 
         charList[charIndex].setHeading(direction);
 
@@ -206,7 +227,7 @@ public final class Character {
 
     /**
      * @param charIndex Numero de identificador de personaje
-     *  Elimina un personaje del array de personajes.
+     *                  Elimina un personaje del array de personajes.
      */
     public static void eraseChar(short charIndex) {
         charList[charIndex].setActive(false);
@@ -214,22 +235,23 @@ public final class Character {
         if (charIndex == lastChar) {
             while (!charList[lastChar].isActive()) {
                 lastChar--;
-                if (lastChar == 0) break;
+                if (lastChar == 0)
+                    break;
             }
         }
 
         mapData[charList[charIndex].getPos().getX()][charList[charIndex].getPos().getY()].setCharIndex(0);
 
         /*
-            'Remove char's dialog
-            Call Dialogos.RemoveDialog(CharIndex)
+         * 'Remove char's dialog
+         * Call Dialogos.RemoveDialog(CharIndex)
          */
 
         resetCharInfo(charIndex);
     }
 
     /**
-     *  elimina todos los personajes de nuestro array charList.
+     * elimina todos los personajes de nuestro array charList.
      */
     public static void eraseAllChars() {
         for (short i = 1; i < charList.length; i++) {
@@ -241,14 +263,15 @@ public final class Character {
 
     /**
      * @param charIndex Numero de identificador del personaje
-     *  Resetea los atributos del personaje.
+     *                  Resetea los atributos del personaje.
      */
     private static void resetCharInfo(short charIndex) {
-        charList[charIndex] = new Character(); // al crear un obj nuevo, el viejo sera eliminado por el recolector de basura de java.
+        charList[charIndex] = new Character(); // al crear un obj nuevo, el viejo sera eliminado por el recolector de
+                                               // basura de java.
     }
 
     /**
-     *  Actualiza todos los personajes visibles.
+     * Actualiza todos los personajes visibles.
      */
     public static void refreshAllChars() {
         for (int loopC = 1; loopC <= lastChar; loopC++)
@@ -257,7 +280,7 @@ public final class Character {
     }
 
     /**
-     *  Dibuja nuestro personaje!
+     * Dibuja nuestro personaje!
      */
     public static void drawCharacter(int charIndex, int PixelOffsetX, int PixelOffsetY, RGBColor ambientcolor) {
         boolean moved = false;
@@ -267,19 +290,24 @@ public final class Character {
             if (charList[charIndex].getScrollDirectionX() != 0) {
 
                 charList[charIndex].setMoveOffsetX(charList[charIndex].getMoveOffsetX() +
-                        charList[charIndex].getWalkingSpeed() * sgn(charList[charIndex].getScrollDirectionX()) * timerTicksPerFrame);
+                        charList[charIndex].getWalkingSpeed() * sgn(charList[charIndex].getScrollDirectionX())
+                                * timerTicksPerFrame);
 
                 if (charList[charIndex].getBody().getWalk(charList[charIndex].getHeading().getId()).getSpeed() > 0.0f) {
                     charList[charIndex].getBody().getWalk(charList[charIndex].getHeading().getId()).setStarted(true);
                 }
 
-                charList[charIndex].getWeapon().getWeaponWalk(charList[charIndex].getHeading().getId()).setStarted(true);
-                charList[charIndex].getShield().getShieldWalk(charList[charIndex].getHeading().getId()).setStarted(true);
+                charList[charIndex].getWeapon().getWeaponWalk(charList[charIndex].getHeading().getId())
+                        .setStarted(true);
+                charList[charIndex].getShield().getShieldWalk(charList[charIndex].getHeading().getId())
+                        .setStarted(true);
 
                 moved = true;
 
-                if ((sgn(charList[charIndex].getScrollDirectionX()) == 1 && charList[charIndex].getMoveOffsetX() >= 0) ||
-                        (sgn(charList[charIndex].getScrollDirectionX()) == -1 && charList[charIndex].getMoveOffsetX() <= 0)) {
+                if ((sgn(charList[charIndex].getScrollDirectionX()) == 1 && charList[charIndex].getMoveOffsetX() >= 0)
+                        ||
+                        (sgn(charList[charIndex].getScrollDirectionX()) == -1
+                                && charList[charIndex].getMoveOffsetX() <= 0)) {
 
                     charList[charIndex].setMoveOffsetX(0);
                     charList[charIndex].setScrollDirectionX(0);
@@ -288,20 +316,23 @@ public final class Character {
 
             if (charList[charIndex].getScrollDirectionY() != 0) {
                 charList[charIndex].setMoveOffsetY(charList[charIndex].getMoveOffsetY()
-                        + charList[charIndex].getWalkingSpeed() * sgn(charList[charIndex].getScrollDirectionY()) * timerTicksPerFrame);
-
+                        + charList[charIndex].getWalkingSpeed() * sgn(charList[charIndex].getScrollDirectionY())
+                                * timerTicksPerFrame);
 
                 if (charList[charIndex].getBody().getWalk(charList[charIndex].getHeading().getId()).getSpeed() > 0.0f) {
                     charList[charIndex].getBody().getWalk(charList[charIndex].getHeading().getId()).setStarted(true);
                 }
 
-                charList[charIndex].getWeapon().getWeaponWalk(charList[charIndex].getHeading().getId()).setStarted(true);
-                charList[charIndex].getShield().getShieldWalk(charList[charIndex].getHeading().getId()).setStarted(true);
+                charList[charIndex].getWeapon().getWeaponWalk(charList[charIndex].getHeading().getId())
+                        .setStarted(true);
+                charList[charIndex].getShield().getShieldWalk(charList[charIndex].getHeading().getId())
+                        .setStarted(true);
 
                 moved = true;
 
                 if ((sgn(charList[charIndex].getScrollDirectionY()) == 1 && charList[charIndex].getMoveOffsetY() >= 0)
-                        || (sgn(charList[charIndex].getScrollDirectionY()) == -1 && charList[charIndex].getMoveOffsetY() <= 0)) {
+                        || (sgn(charList[charIndex].getScrollDirectionY()) == -1
+                                && charList[charIndex].getMoveOffsetY() <= 0)) {
                     charList[charIndex].setMoveOffsetY(0);
                     charList[charIndex].setScrollDirectionY(0);
                 }
@@ -327,32 +358,38 @@ public final class Character {
         if (charList[charIndex].getHead().getHead(charList[charIndex].getHeading().getId()).getGrhIndex() != 0) {
             if (!charList[charIndex].isInvisible()) {
 
-                if (charList[charIndex].getBody().getWalk(charList[charIndex].getHeading().getId()).getGrhIndex() != 0) {
+                if (charList[charIndex].getBody().getWalk(charList[charIndex].getHeading().getId())
+                        .getGrhIndex() != 0) {
                     drawTexture(charList[charIndex].getBody().getWalk(charList[charIndex].getHeading().getId()),
                             PixelOffsetX, PixelOffsetY, true, true, false, 1.0f, ambientcolor);
                 }
 
-                if (charList[charIndex].getHead().getHead(charList[charIndex].getHeading().getId()).getGrhIndex() != 0) {
+                if (charList[charIndex].getHead().getHead(charList[charIndex].getHeading().getId())
+                        .getGrhIndex() != 0) {
                     drawTexture(charList[charIndex].getHead().getHead(charList[charIndex].getHeading().getId()),
                             PixelOffsetX + charList[charIndex].getBody().getHeadOffset().getX(),
                             PixelOffsetY + charList[charIndex].getBody().getHeadOffset().getY(),
                             true, false, false, 1.0f, ambientcolor);
 
-
-                    if (charList[charIndex].getHelmet().getHead(charList[charIndex].getHeading().getId()).getGrhIndex() != 0) {
+                    if (charList[charIndex].getHelmet().getHead(charList[charIndex].getHeading().getId())
+                            .getGrhIndex() != 0) {
                         drawTexture(charList[charIndex].getHelmet().getHead(charList[charIndex].getHeading().getId()),
                                 PixelOffsetX + charList[charIndex].getBody().getHeadOffset().getX(),
                                 PixelOffsetY + charList[charIndex].getBody().getHeadOffset().getY() - 34,
                                 true, false, false, 1.0f, ambientcolor);
                     }
 
-                    if (charList[charIndex].getWeapon().getWeaponWalk(charList[charIndex].getHeading().getId()).getGrhIndex() != 0) {
-                        drawTexture(charList[charIndex].getWeapon().getWeaponWalk(charList[charIndex].getHeading().getId()),
+                    if (charList[charIndex].getWeapon().getWeaponWalk(charList[charIndex].getHeading().getId())
+                            .getGrhIndex() != 0) {
+                        drawTexture(
+                                charList[charIndex].getWeapon().getWeaponWalk(charList[charIndex].getHeading().getId()),
                                 PixelOffsetX, PixelOffsetY, true, true, false, 1.0f, ambientcolor);
                     }
 
-                    if (charList[charIndex].getShield().getShieldWalk(charList[charIndex].getHeading().getId()).getGrhIndex() != 0) {
-                        drawTexture(charList[charIndex].getShield().getShieldWalk(charList[charIndex].getHeading().getId()),
+                    if (charList[charIndex].getShield().getShieldWalk(charList[charIndex].getHeading().getId())
+                            .getGrhIndex() != 0) {
+                        drawTexture(
+                                charList[charIndex].getShield().getShieldWalk(charList[charIndex].getHeading().getId()),
                                 PixelOffsetX, PixelOffsetY, true, true, false, 1.0f, ambientcolor);
                     }
 
@@ -386,7 +423,6 @@ public final class Character {
                                     PixelOffsetX + 16 - getTextWidth(line, false) / 2,
                                     PixelOffsetY + 30, color, NORMAL_FONT, false);
 
-
                             line = charList[charIndex].clanName;
                             if (!line.isEmpty()) {
                                 drawText(line,
@@ -397,7 +433,6 @@ public final class Character {
                     }
                 }
             }
-
 
         } else {
             if (charList[charIndex].getBody().getWalk(charList[charIndex].getHeading().getId()).getGrhIndex() > 0) {
@@ -420,7 +455,8 @@ public final class Character {
     }
 
     public static int sgn(short number) {
-        if (number == 0) return 0;
+        if (number == 0)
+            return 0;
         return (number / Math.abs(number));
     }
 
