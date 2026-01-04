@@ -57,7 +57,7 @@ https://github.com/Lorwik/Argentum-Forge.git
 - Asegúrate de tener los drivers gráficos actualizados para un rendimiento óptimo de OpenGL
 
 # Imágenes
-<img width="100%" alt="Screenshot" src="https://github.com/user-attachments/assets/790c491d-a595-4645-9ce4-24b82f59c276" />
+<img width="1914" height="1080" alt="image" src="https://github.com/user-attachments/assets/d37b9bbb-20ac-4401-b742-f3a5653954fa" />
 
 <h1>Agradecimientos:</h1>
 <br/>
