@@ -574,9 +574,11 @@ public final class GameData {
      * Carga y almacena los datos de las armas desde el archivo "arms.ind".
      */
     private static void loadWeapons() {
-        byte[] data = loadLocalInitFile("Armas.ind", "Armas", true);
-        if (data == null)
+        byte[] data = loadLocalInitFile("Armas.ind", "Armas", false);
+        if (data == null) {
+            loadWeaponsFromDat();
             return;
+        }
 
         reader.init(data);
 
@@ -595,12 +597,143 @@ public final class GameData {
     }
 
     /**
+     * Carga las definiciones de Armas desde Armas.dat (formato INI) si no se
+     * encuentra la versión binaria.
+     */
+    private static void loadWeaponsFromDat() {
+        Path weaponsPath = Path.of(options.getDatsPath(), "Armas.dat");
+        if (!Files.exists(weaponsPath)) {
+            // Intentar en InitPath como fallback
+            weaponsPath = Path.of(options.getInitPath(), "Armas.dat");
+            if (!Files.exists(weaponsPath)) {
+                Logger.error("Armas.ind y Armas.dat no encontrados.");
+                javax.swing.JOptionPane.showMessageDialog(null,
+                        "No se encontró el archivo de armas (Armas.ind o Armas.dat).\n" +
+                                "Por favor, configure las rutas correctamente.",
+                        "Error al cargar Armas",
+                        javax.swing.JOptionPane.ERROR_MESSAGE);
+                weaponData = new WeaponData[1];
+                weaponData[0] = new WeaponData();
+                return;
+            }
+        }
+
+        // Estructura temporal para almacenar las armas mientras leemos
+        Map<Integer, WeaponData> tempWeapons = new HashMap<>();
+        int maxWeaponId = 0;
+        int numArmsFromInit = 0;
+
+        try (BufferedReader br = Files.newBufferedReader(weaponsPath, StandardCharsets.ISO_8859_1)) {
+            String line;
+            WeaponData currentWeapon = null;
+            int currentWeaponId = -1;
+
+            while ((line = br.readLine()) != null) {
+                String trimmed = line.trim();
+                if (trimmed.isEmpty() || trimmed.startsWith("'") || trimmed.startsWith("#") || trimmed.startsWith(";"))
+                    continue;
+
+                if (trimmed.startsWith("[") && trimmed.contains("]")) {
+                    String section = trimmed.substring(1, trimmed.indexOf(']')).trim();
+
+                    if (section.equalsIgnoreCase("INIT")) {
+                        currentWeapon = null; // No estamos en un arma
+                        continue;
+                    }
+
+                    if (section.regionMatches(true, 0, "ARMA", 0, 4)) {
+                        String numPart = section.substring(4).trim();
+                        try {
+                            currentWeaponId = Integer.parseInt(numPart);
+                            currentWeapon = new WeaponData();
+                            tempWeapons.put(currentWeaponId, currentWeapon);
+                            if (currentWeaponId > maxWeaponId)
+                                maxWeaponId = currentWeaponId;
+                        } catch (NumberFormatException e) {
+                            currentWeapon = null;
+                        }
+                    } else {
+                        currentWeapon = null;
+                    }
+                    continue;
+                }
+
+                int eq = trimmed.indexOf('=');
+                if (eq <= 0)
+                    continue;
+
+                String key = trimmed.substring(0, eq).trim();
+                String value = trimmed.substring(eq + 1).trim();
+                // Remover comentarios inline si los hay (ej: 4719 'norte)
+                if (value.contains("'")) {
+                    value = value.substring(0, value.indexOf('\'')).trim();
+                }
+
+                if (key.equalsIgnoreCase("NumArmas")) {
+                    try {
+                        numArmsFromInit = Integer.parseInt(value);
+                    } catch (NumberFormatException ignored) {
+                    }
+                    continue;
+                }
+
+                if (currentWeapon == null)
+                    continue;
+
+                try {
+                    short grhIndex = Short.parseShort(value);
+                    if (key.equalsIgnoreCase("Dir1")) {
+                        // Dir1 -> Norte (Index 1)
+                        initGrh(currentWeapon.getWeaponWalk(1), grhIndex, false);
+                    } else if (key.equalsIgnoreCase("Dir2")) {
+                        // Dir2 -> Este (Index 2)
+                        initGrh(currentWeapon.getWeaponWalk(2), grhIndex, false);
+                    } else if (key.equalsIgnoreCase("Dir3")) {
+                        // Dir3 -> Oeste (Index 4) - Asumiendo mapping para llenar slots
+                        initGrh(currentWeapon.getWeaponWalk(4), grhIndex, false);
+                    } else if (key.equalsIgnoreCase("Dir4")) {
+                        // Dir4 -> Sur (Index 3) - Según comentario user 'sur'
+                        initGrh(currentWeapon.getWeaponWalk(3), grhIndex, false);
+                    }
+                } catch (NumberFormatException ignored) {
+                }
+            }
+
+        } catch (IOException e) {
+            Logger.error(e, "Error al leer Armas.dat desde: {}", weaponsPath.toAbsolutePath());
+        }
+
+        // Inicializar array final
+        int finalSize = Math.max(numArmsFromInit, maxWeaponId);
+        weaponData = new WeaponData[finalSize + 1];
+        weaponData[0] = new WeaponData();
+
+        for (Map.Entry<Integer, WeaponData> entry : tempWeapons.entrySet()) {
+            int id = entry.getKey();
+            if (id <= finalSize) {
+                weaponData[id] = entry.getValue();
+            }
+        }
+
+        // Llenar huecos con armas vacías para evitar nulls
+        for (int i = 1; i <= finalSize; i++) {
+            if (weaponData[i] == null) {
+                weaponData[i] = new WeaponData();
+            }
+        }
+
+        Logger.info("Cargadas {} armas desde {}", tempWeapons.size(), weaponsPath.toAbsolutePath());
+    }
+
+    /**
      * Carga y almacena los datos de los escudos desde el archivo "shields.ind".
      */
     private static void loadShields() {
-        byte[] data = loadLocalInitFile("Escudos.ind", "Escudos", true);
-        if (data == null)
+        byte[] data = loadLocalInitFile("Escudos.ind", "Escudos", false);
+        if (data == null) {
+            loadShieldsFromDat();
             return;
+        }
 
         reader.init(data);
 
@@ -616,6 +749,126 @@ public final class GameData {
             shieldData[loopc].setShieldWalk(4, initGrh(shieldData[loopc].getShieldWalk(4), reader.readShort(), false));
         }
 
+    }
+
+    /**
+     * Carga las definiciones de Escudos desde Escudos.dat (formato INI) si no se
+     * encuentra la versión binaria.
+     */
+    private static void loadShieldsFromDat() {
+        Path shieldsPath = Path.of(options.getDatsPath(), "Escudos.dat");
+        if (!Files.exists(shieldsPath)) {
+            shieldsPath = Path.of(options.getInitPath(), "Escudos.dat");
+            if (!Files.exists(shieldsPath)) {
+                Logger.error("Escudos.ind y Escudos.dat no encontrados.");
+                javax.swing.JOptionPane.showMessageDialog(null,
+                        "No se encontró el archivo de escudos (Escudos.ind o Escudos.dat).\n" +
+                                "Por favor, configure las rutas correctamente.",
+                        "Error al cargar Escudos",
+                        javax.swing.JOptionPane.ERROR_MESSAGE);
+                shieldData = new ShieldData[1];
+                shieldData[0] = new ShieldData();
+                return;
+            }
+        }
+
+        Map<Integer, ShieldData> tempShields = new HashMap<>();
+        int maxShieldId = 0;
+        int numShieldsFromInit = 0;
+
+        try (BufferedReader br = Files.newBufferedReader(shieldsPath, StandardCharsets.ISO_8859_1)) {
+            String line;
+            ShieldData currentShield = null;
+            int currentShieldId = -1;
+
+            while ((line = br.readLine()) != null) {
+                String trimmed = line.trim();
+                if (trimmed.isEmpty() || trimmed.startsWith("'") || trimmed.startsWith("#") || trimmed.startsWith(";"))
+                    continue;
+
+                if (trimmed.startsWith("[") && trimmed.contains("]")) {
+                    String section = trimmed.substring(1, trimmed.indexOf(']')).trim();
+
+                    if (section.equalsIgnoreCase("INIT")) {
+                        currentShield = null;
+                        continue;
+                    }
+
+                    if (section.regionMatches(true, 0, "ESC", 0, 3)) {
+                        String numPart = section.substring(3).trim();
+                        try {
+                            currentShieldId = Integer.parseInt(numPart);
+                            currentShield = new ShieldData();
+                            tempShields.put(currentShieldId, currentShield);
+                            if (currentShieldId > maxShieldId)
+                                maxShieldId = currentShieldId;
+                        } catch (NumberFormatException e) {
+                            currentShield = null;
+                        }
+                    } else {
+                        currentShield = null;
+                    }
+                    continue;
+                }
+
+                int eq = trimmed.indexOf('=');
+                if (eq <= 0)
+                    continue;
+
+                String key = trimmed.substring(0, eq).trim();
+                String value = trimmed.substring(eq + 1).trim();
+                if (value.contains("'")) {
+                    value = value.substring(0, value.indexOf('\'')).trim();
+                }
+
+                if (key.equalsIgnoreCase("NumEscudos")) {
+                    try {
+                        numShieldsFromInit = Integer.parseInt(value);
+                    } catch (NumberFormatException ignored) {
+                    }
+                    continue;
+                }
+
+                if (currentShield == null)
+                    continue;
+
+                try {
+                    short grhIndex = Short.parseShort(value);
+                    if (key.equalsIgnoreCase("Dir1")) {
+                        initGrh(currentShield.getShieldWalk(1), grhIndex, false);
+                    } else if (key.equalsIgnoreCase("Dir2")) {
+                        initGrh(currentShield.getShieldWalk(2), grhIndex, false);
+                    } else if (key.equalsIgnoreCase("Dir3")) {
+                        initGrh(currentShield.getShieldWalk(4), grhIndex, false);
+                    } else if (key.equalsIgnoreCase("Dir4")) {
+                        initGrh(currentShield.getShieldWalk(3), grhIndex, false);
+                    }
+                } catch (NumberFormatException ignored) {
+                }
+            }
+
+        } catch (IOException e) {
+            Logger.error(e, "Error al leer Escudos.dat desde: {}", shieldsPath.toAbsolutePath());
+        }
+
+        int finalSize = Math.max(numShieldsFromInit, maxShieldId);
+        shieldData = new ShieldData[finalSize + 1];
+        shieldData[0] = new ShieldData();
+
+        for (Map.Entry<Integer, ShieldData> entry : tempShields.entrySet()) {
+            int id = entry.getKey();
+            if (id <= finalSize) {
+                shieldData[id] = entry.getValue();
+            }
+        }
+
+        for (int i = 1; i <= finalSize; i++) {
+            if (shieldData[i] == null) {
+                shieldData[i] = new ShieldData();
+            }
+        }
+
+        Logger.info("Cargados {} escudos desde {}", tempShields.size(), shieldsPath.toAbsolutePath());
     }
 
     /**
