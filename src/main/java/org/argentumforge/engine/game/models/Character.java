@@ -255,7 +255,9 @@ public final class Character {
      */
     public static void eraseAllChars() {
         for (short i = 1; i < charList.length; i++) {
-            mapData[charList[i].getPos().getX()][charList[i].getPos().getY()].setCharIndex(0);
+            if (charList[i].isActive()) {
+                mapData[charList[i].getPos().getX()][charList[i].getPos().getY()].setCharIndex(0);
+            }
             resetCharInfo(i);
         }
         lastChar = 0;
