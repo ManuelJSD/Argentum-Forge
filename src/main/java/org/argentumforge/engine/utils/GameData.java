@@ -8,9 +8,7 @@ import org.argentumforge.engine.utils.inits.*;
 import org.argentumforge.engine.utils.inits.MapProperties;
 import org.tinylog.Logger;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -908,6 +906,160 @@ public final class GameData {
         } catch (IOException e) {
             System.err.println("Could not load map from path: " + filePath);
             e.printStackTrace();
+        }
+    }
+
+    /**
+     * Guarda el mapa actual en la ruta especificada.
+     * Genera los archivos .map, .inf y .dat.
+     *
+     * @param filePath Ruta absoluta al fichero .map de destino.
+     */
+    public static void saveMap(String filePath) {
+        try {
+            // Guardar .map
+            saveMapData(filePath);
+
+            String basePath = filePath.substring(0, filePath.lastIndexOf('.'));
+            String datPath = basePath + ".dat";
+            String infPath = basePath + ".inf";
+
+            // Guardar .dat
+            saveMapProperties(datPath);
+
+            // Guardar .inf
+            saveMapInfo(infPath);
+
+            Logger.info("Mapa guardado exitosamente en: {}", filePath);
+            javax.swing.JOptionPane.showMessageDialog(null, "Mapa guardado correctamente.");
+
+        } catch (IOException e) {
+            Logger.error(e, "Error al guardar el mapa: {}", filePath);
+            javax.swing.JOptionPane.showMessageDialog(null, "Error al guardar el mapa:\n" + e.getMessage(), "Error",
+                    javax.swing.JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private static void saveMapData(String filePath) throws IOException {
+        try (FileOutputStream fos = new FileOutputStream(filePath)) {
+            java.nio.channels.FileChannel channel = fos.getChannel();
+
+            // 1. Header
+            java.nio.ByteBuffer headerBuf = java.nio.ByteBuffer.allocate(273);
+            headerBuf.order(java.nio.ByteOrder.LITTLE_ENDIAN);
+
+            headerBuf.putShort((short) 1); // Map Version
+            headerBuf.put(new byte[263]); // Cabecera vacia
+            headerBuf.putShort((short) 0);
+            headerBuf.putShort((short) 0);
+            headerBuf.putShort((short) 0);
+            headerBuf.putShort((short) 0);
+
+            headerBuf.flip();
+            channel.write(headerBuf);
+
+            // 2. Map Data
+            java.nio.ByteBuffer bodyBuf = java.nio.ByteBuffer.allocate(110000);
+            bodyBuf.order(java.nio.ByteOrder.LITTLE_ENDIAN);
+
+            for (int y = Y_MIN_MAP_SIZE; y <= Y_MAX_MAP_SIZE; y++) {
+                for (int x = X_MIN_MAP_SIZE; x <= X_MAX_MAP_SIZE; x++) {
+                    byte flags = 0;
+                    if (mapData[x][y].getBlocked())
+                        flags |= 1;
+                    if (mapData[x][y].getLayer(2).getGrhIndex() > 0)
+                        flags |= 2;
+                    if (mapData[x][y].getLayer(3).getGrhIndex() > 0)
+                        flags |= 4;
+                    if (mapData[x][y].getLayer(4).getGrhIndex() > 0)
+                        flags |= 8;
+                    if (mapData[x][y].getTrigger() > 0)
+                        flags |= 16;
+
+                    bodyBuf.put(flags);
+                    bodyBuf.putShort((short) mapData[x][y].getLayer(1).getGrhIndex());
+
+                    if ((flags & 2) != 0)
+                        bodyBuf.putShort((short) mapData[x][y].getLayer(2).getGrhIndex());
+                    if ((flags & 4) != 0)
+                        bodyBuf.putShort((short) mapData[x][y].getLayer(3).getGrhIndex());
+                    if ((flags & 8) != 0)
+                        bodyBuf.putShort((short) mapData[x][y].getLayer(4).getGrhIndex());
+                    if ((flags & 16) != 0)
+                        bodyBuf.putShort(mapData[x][y].getTrigger());
+                }
+            }
+
+            bodyBuf.flip();
+            channel.write(bodyBuf);
+        }
+    }
+
+    private static void saveMapProperties(String filePath) throws IOException {
+        try (PrintWriter writer = new PrintWriter(
+                Files.newBufferedWriter(Path.of(filePath), StandardCharsets.ISO_8859_1))) {
+            writer.println("[MAPA1]");
+            writer.println("Name=" + mapProperties.getName());
+            writer.println("MusicNum=" + mapProperties.getMusicIndex());
+            writer.println("MagiaSinefecto=" + mapProperties.getMagiaSinEfecto());
+            writer.println("NoEncriptarMP=" + mapProperties.getNoEncriptarMP());
+            writer.println("Pk=" + mapProperties.getPlayerKiller());
+            writer.println("Restringir=" + (mapProperties.getRestringir() == 0 ? "No" : mapProperties.getRestringir()));
+            writer.println("BackUp=" + mapProperties.getBackup());
+            writer.println("Zona=" + mapProperties.getZona());
+            writer.println("Terreno=" + mapProperties.getTerreno());
+        }
+    }
+
+    private static void saveMapInfo(String filePath) throws IOException {
+        try (FileOutputStream fos = new FileOutputStream(filePath)) {
+            java.nio.channels.FileChannel channel = fos.getChannel();
+
+            // Header: 5 shorts = 10 bytes
+            java.nio.ByteBuffer headerBuf = java.nio.ByteBuffer.allocate(10);
+            headerBuf.order(java.nio.ByteOrder.LITTLE_ENDIAN);
+            headerBuf.putShort((short) 0);
+            headerBuf.putShort((short) 0);
+            headerBuf.putShort((short) 0);
+            headerBuf.putShort((short) 0);
+            headerBuf.putShort((short) 0);
+            headerBuf.flip();
+            channel.write(headerBuf);
+
+            // Body
+            // Max size per cell unknown but bounded.
+            // Flag (1) + Exit(2+2+2) + NPC(2) + Obj(2+2) = 13 bytes max
+            java.nio.ByteBuffer bodyBuf = java.nio.ByteBuffer.allocate(130000);
+            bodyBuf.order(java.nio.ByteOrder.LITTLE_ENDIAN);
+
+            for (int y = Y_MIN_MAP_SIZE; y <= Y_MAX_MAP_SIZE; y++) {
+                for (int x = X_MIN_MAP_SIZE; x <= X_MAX_MAP_SIZE; x++) {
+                    byte flags = 0;
+                    if (mapData[x][y].getExitMap() > 0)
+                        flags |= 1; // Exit
+                    if (mapData[x][y].getNpcIndex() > 0)
+                        flags |= 2; // NPC
+                    if (mapData[x][y].getObjIndex() > 0)
+                        flags |= 4; // Obj
+
+                    bodyBuf.put(flags);
+
+                    if ((flags & 1) != 0) {
+                        bodyBuf.putShort(mapData[x][y].getExitMap());
+                        bodyBuf.putShort(mapData[x][y].getExitX());
+                        bodyBuf.putShort(mapData[x][y].getExitY());
+                    }
+                    if ((flags & 2) != 0) {
+                        bodyBuf.putShort(mapData[x][y].getNpcIndex());
+                    }
+                    if ((flags & 4) != 0) {
+                        bodyBuf.putShort((short) mapData[x][y].getObjIndex());
+                        bodyBuf.putShort((short) mapData[x][y].getObjAmount());
+                    }
+                }
+            }
+            bodyBuf.flip();
+            channel.write(bodyBuf);
         }
     }
 

@@ -34,4 +34,37 @@ public class MapFileUtils {
 
         return false;
     }
+
+    /**
+     * Opens a file chooser dialog to save the current map.
+     */
+    public static void saveMap() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Guardar Mapa");
+        fileChooser.setFileFilter(new FileNameExtensionFilter("Archivos de Mapa (*.map)", "map"));
+
+        String lastPath = Options.INSTANCE.getLastMapPath();
+        if (lastPath != null && !lastPath.isEmpty()) {
+            fileChooser.setCurrentDirectory(new File(lastPath));
+        }
+
+        int result = fileChooser.showSaveDialog(null);
+
+        if (result == JFileChooser.APPROVE_OPTION) {
+            File selectedFile = fileChooser.getSelectedFile();
+            String path = selectedFile.getAbsolutePath();
+
+            // Ensure extension
+            if (!path.toLowerCase().endsWith(".map")) {
+                path += ".map";
+            }
+
+            // Save the last directory
+            Options.INSTANCE.setLastMapPath(selectedFile.getParent());
+            Options.INSTANCE.save();
+
+            // Save the map
+            GameData.saveMap(path);
+        }
+    }
 }

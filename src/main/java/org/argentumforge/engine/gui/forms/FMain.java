@@ -210,7 +210,7 @@ public final class FMain extends Form {
                 }
 
                 if (ImGui.menuItem("Guardar Mapa")) {
-                    System.out.println("TODO: por desarrollar");
+                    org.argentumforge.engine.utils.MapFileUtils.saveMap();
                 }
 
                 ImGui.separator();
