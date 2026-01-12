@@ -51,7 +51,7 @@ public final class Character {
     private HeadData helmet;
     private WeaponData weapon;
     private ShieldData shield;
-    private boolean usingArm;
+
     private int walkingSpeed;
 
     // FX
@@ -64,16 +64,6 @@ public final class Character {
     private boolean moving;
     private float moveOffsetX;
     private float moveOffsetY;
-
-    private boolean pie;
-
-    // dialogs
-    private String dialog;
-    private RGBColor dialog_color;
-    private int dialog_life;
-    private int dialog_font_index;
-    private float dialog_offset_counter_y;
-    private boolean dialog_scroll;
 
     public Character() {
         body = new BodyData();
@@ -88,18 +78,10 @@ public final class Character {
         this.active = false;
         this.fxIndex = 0;
         this.moving = false;
-        this.pie = false;
         this.pos.setX(0);
         this.pos.setY(0);
 
-        this.usingArm = false;
         this.walkingSpeed = 8;
-
-        this.dialog = "";
-        this.dialog_scroll = false;
-        this.dialog_font_index = 0;
-        this.dialog_color = new RGBColor(1f, 1f, 1f);
-        this.dialog_offset_counter_y = 0;
     }
 
     /**
@@ -291,43 +273,42 @@ public final class Character {
 
         if (charList[charIndex].getHead().getHead(charList[charIndex].getHeading().getId()).getGrhIndex() != 0) {
 
+            if (charList[charIndex].getBody().getWalk(charList[charIndex].getHeading().getId())
+                    .getGrhIndex() != 0) {
+                drawTexture(charList[charIndex].getBody().getWalk(charList[charIndex].getHeading().getId()),
+                        PixelOffsetX, PixelOffsetY, true, true, false, 1.0f, ambientcolor);
+            }
 
-                if (charList[charIndex].getBody().getWalk(charList[charIndex].getHeading().getId())
+            if (charList[charIndex].getHead().getHead(charList[charIndex].getHeading().getId())
+                    .getGrhIndex() != 0) {
+                drawTexture(charList[charIndex].getHead().getHead(charList[charIndex].getHeading().getId()),
+                        PixelOffsetX + charList[charIndex].getBody().getHeadOffset().getX(),
+                        PixelOffsetY + charList[charIndex].getBody().getHeadOffset().getY(),
+                        true, false, false, 1.0f, ambientcolor);
+
+                if (charList[charIndex].getHelmet().getHead(charList[charIndex].getHeading().getId())
                         .getGrhIndex() != 0) {
-                    drawTexture(charList[charIndex].getBody().getWalk(charList[charIndex].getHeading().getId()),
+                    drawTexture(charList[charIndex].getHelmet().getHead(charList[charIndex].getHeading().getId()),
+                            PixelOffsetX + charList[charIndex].getBody().getHeadOffset().getX(),
+                            PixelOffsetY + charList[charIndex].getBody().getHeadOffset().getY() - 34,
+                            true, false, false, 1.0f, ambientcolor);
+                }
+
+                if (charList[charIndex].getWeapon().getWeaponWalk(charList[charIndex].getHeading().getId())
+                        .getGrhIndex() != 0) {
+                    drawTexture(
+                            charList[charIndex].getWeapon().getWeaponWalk(charList[charIndex].getHeading().getId()),
                             PixelOffsetX, PixelOffsetY, true, true, false, 1.0f, ambientcolor);
                 }
 
-                if (charList[charIndex].getHead().getHead(charList[charIndex].getHeading().getId())
+                if (charList[charIndex].getShield().getShieldWalk(charList[charIndex].getHeading().getId())
                         .getGrhIndex() != 0) {
-                    drawTexture(charList[charIndex].getHead().getHead(charList[charIndex].getHeading().getId()),
-                            PixelOffsetX + charList[charIndex].getBody().getHeadOffset().getX(),
-                            PixelOffsetY + charList[charIndex].getBody().getHeadOffset().getY(),
-                            true, false, false, 1.0f, ambientcolor);
-
-                    if (charList[charIndex].getHelmet().getHead(charList[charIndex].getHeading().getId())
-                            .getGrhIndex() != 0) {
-                        drawTexture(charList[charIndex].getHelmet().getHead(charList[charIndex].getHeading().getId()),
-                                PixelOffsetX + charList[charIndex].getBody().getHeadOffset().getX(),
-                                PixelOffsetY + charList[charIndex].getBody().getHeadOffset().getY() - 34,
-                                true, false, false, 1.0f, ambientcolor);
-                    }
-
-                    if (charList[charIndex].getWeapon().getWeaponWalk(charList[charIndex].getHeading().getId())
-                            .getGrhIndex() != 0) {
-                        drawTexture(
-                                charList[charIndex].getWeapon().getWeaponWalk(charList[charIndex].getHeading().getId()),
-                                PixelOffsetX, PixelOffsetY, true, true, false, 1.0f, ambientcolor);
-                    }
-
-                    if (charList[charIndex].getShield().getShieldWalk(charList[charIndex].getHeading().getId())
-                            .getGrhIndex() != 0) {
-                        drawTexture(
-                                charList[charIndex].getShield().getShieldWalk(charList[charIndex].getHeading().getId()),
-                                PixelOffsetX, PixelOffsetY, true, true, false, 1.0f, ambientcolor);
-                    }
-
+                    drawTexture(
+                            charList[charIndex].getShield().getShieldWalk(charList[charIndex].getHeading().getId()),
+                            PixelOffsetX, PixelOffsetY, true, true, false, 1.0f, ambientcolor);
                 }
+
+            }
 
         } else {
             if (charList[charIndex].getBody().getWalk(charList[charIndex].getHeading().getId()).getGrhIndex() > 0) {
@@ -435,14 +416,6 @@ public final class Character {
         this.shield = shield;
     }
 
-    public boolean isUsingArm() {
-        return usingArm;
-    }
-
-    public void setUsingArm(boolean usingArm) {
-        this.usingArm = usingArm;
-    }
-
     public GrhInfo getfX() {
         return fX;
     }
@@ -497,62 +470,6 @@ public final class Character {
 
     public void setMoveOffsetY(float moveOffsetY) {
         this.moveOffsetY = moveOffsetY;
-    }
-
-    public boolean isPie() {
-        return pie;
-    }
-
-    public void setPie(boolean pie) {
-        this.pie = pie;
-    }
-
-    public String getDialog() {
-        return dialog;
-    }
-
-    public void setDialog(String dialog) {
-        this.dialog = dialog;
-    }
-
-    public RGBColor getDialog_color() {
-        return dialog_color;
-    }
-
-    public void setDialog_color(RGBColor dialog_color) {
-        this.dialog_color = dialog_color;
-    }
-
-    public int getDialog_life() {
-        return dialog_life;
-    }
-
-    public void setDialog_life(int dialog_life) {
-        this.dialog_life = dialog_life;
-    }
-
-    public int getDialog_font_index() {
-        return dialog_font_index;
-    }
-
-    public void setDialog_font_index(int dialog_font_index) {
-        this.dialog_font_index = dialog_font_index;
-    }
-
-    public float getDialog_offset_counter_y() {
-        return dialog_offset_counter_y;
-    }
-
-    public void setDialog_offset_counter_y(float dialog_offset_counter_y) {
-        this.dialog_offset_counter_y = dialog_offset_counter_y;
-    }
-
-    public boolean isDialog_scroll() {
-        return dialog_scroll;
-    }
-
-    public void setDialog_scroll(boolean dialog_scroll) {
-        this.dialog_scroll = dialog_scroll;
     }
 
 }

@@ -3,7 +3,6 @@ package org.argentumforge.engine.game;
 import org.argentumforge.engine.renderer.RGBColor;
 
 import static org.argentumforge.engine.game.Weather.TypeWeather.*;
-import static org.argentumforge.engine.utils.GameData.bLluvia;
 import static org.argentumforge.engine.utils.Time.deltaTime;
 
 public enum Weather {
@@ -16,6 +15,7 @@ public enum Weather {
         INVATION(1f, 0.2f, 0.2f);
 
         private final float r, g, b;
+
         TypeWeather(float r, float g, float b) {
             this.r = r;
             this.g = g;
@@ -29,7 +29,8 @@ public enum Weather {
     private RGBColor renderColor;
 
     Weather() {
-        this.actual = DAY; // por ahora, la idea es que lo setee el server y que el GM tenga comandos de tiempo.
+        this.actual = DAY; // por ahora, la idea es que lo setee el server y que el GM tenga comandos de
+                           // tiempo.
         this.renderColor = new RGBColor(actual.r, actual.g, actual.b);
         this.colorEvent = false;
     }
@@ -52,17 +53,20 @@ public enum Weather {
     }
 
     /**
-     * Cambiamos el tiempo. <br><br>
+     * Cambiamos el tiempo. <br>
+     * <br>
      * Si "type" es null se cambia automaticamente por la hora
-     * Si type no es null se setea un color que querramos y desactiva el cambio de clima por hora.
+     * Si type no es null se setea un color que querramos y desactiva el cambio de
+     * clima por hora.
      */
     private void changeWeather(TypeWeather type) {
-        if (colorEvent) return; // no actualizamos por hora en caso de que estemos en evento.
+        if (colorEvent)
+            return; // no actualizamos por hora en caso de que estemos en evento.
 
-        if(type == null) {
+        if (type == null) {
             switch (actual) {
                 case NIGHT -> actual = MORNING;
-                case MORNING  -> actual = DAY;
+                case MORNING -> actual = DAY;
                 case DAY -> actual = NIGHT;
             }
         } else {
@@ -72,32 +76,32 @@ public enum Weather {
     }
 
     /**
-     * Genera el cambio progresivo de color al cambiar el tiempo (dia, noche, etc)...
+     * Genera el cambio progresivo de color al cambiar el tiempo (dia, noche,
+     * etc)...
      */
     private void checkEffect() {
         final float speed = 0.5f;
 
         // red
-        if(renderColor.getRed() < actual.r) {
+        if (renderColor.getRed() < actual.r) {
             renderColor.incR(speed, actual.r);
         } else {
             renderColor.decR(speed, actual.r);
         }
 
         // green
-        if(renderColor.getGreen() < actual.g) {
+        if (renderColor.getGreen() < actual.g) {
             renderColor.incG(speed, actual.g);
         } else {
             renderColor.decG(speed, actual.g);
         }
 
         // blue
-        if(renderColor.getBlue() < actual.b) {
+        if (renderColor.getBlue() < actual.b) {
             renderColor.incB(speed, actual.b);
         } else {
             renderColor.decB(speed, actual.b);
         }
-
 
     }
 
@@ -105,14 +109,6 @@ public enum Weather {
      * Devuelve el color del clima para ser dibujado en el render.\
      */
     public RGBColor getWeatherColor() {
-        // No entiendo pq no esta seteado desde el mapInfo...
-        // Basicamente en las dungeons siempre (o en este caso, los mapas que no llueve) tendran el color de DIA.
-        if(!bLluvia[User.INSTANCE.getUserMap()]) {
-            renderColor.setRed(1f);
-            renderColor.setBlue(1f);
-            renderColor.setGreen(1f);
-        }
-
         return renderColor;
     }
 

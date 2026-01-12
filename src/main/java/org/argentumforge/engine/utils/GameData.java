@@ -14,7 +14,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
-import static org.argentumforge.engine.game.Messages.loadMessages;
 import static org.argentumforge.engine.game.models.Character.eraseAllChars;
 import static org.argentumforge.engine.renderer.FontRenderer.loadFonts;
 import static org.argentumforge.scripts.Compressor.readResource;
@@ -63,8 +62,7 @@ public final class GameData {
     public static GrhData[] grhData;
     /** Datos de la rejilla del mapa actual. */
     public static MapData[][] mapData;
-    /** Indica si llueve en cada mapa. */
-    public static boolean[] bLluvia;
+
     /** Lista global de personajes activos en el mundo. */
     public static Character[] charList = new Character[10000 + 1];
     /** Mapa de definiciones de NPCs cargadas desde el archivo de datos. */
@@ -107,9 +105,8 @@ public final class GameData {
             loadWeapons();
             loadShields();
             loadFxs();
-            loadFK();
             loadFonts();
-            loadMessages(options.getLanguage());
+            // loadMessages(options.getLanguage()); -> Removed as Messages system is deleted
         }
     }
 
@@ -1367,26 +1364,6 @@ public final class GameData {
             fxData[i].setOffsetX(reader.readShort());
             fxData[i].setOffsetY(reader.readShort());
         }
-    }
-
-    /**
-     * Carga los indicadores de lluvia por mapa desde el archivo "fk.ind".
-     */
-    private static void loadFK() {
-        byte[] data = loadLocalInitFile("Fk.ind", "Lluvia (Fk)", true);
-        if (data == null)
-            return;
-
-        reader.init(data);
-        reader.skipBytes(263);
-
-        final short Nu = reader.readShort();
-        bLluvia = new boolean[Nu + 1];
-
-        bLluvia[0] = false;
-        for (int i = 1; i <= Nu; i++)
-            bLluvia[i] = reader.readByte() == 1;
-
     }
 
     /**

@@ -49,13 +49,6 @@ public enum User {
     private short userMap;
     private short userCharIndex;
 
-    // conexion
-    private boolean userConected;
-
-    // areas
-    private int minLimiteX, maxLimiteX;
-    private int minLimiteY, maxLimiteY;
-
     // stats del usuario
     private String userName;
 
@@ -167,36 +160,6 @@ public enum User {
         charList[charIndex].setScrollDirectionX(addX);
         charList[charIndex].setScrollDirectionY(addY);
 
-        // areas viejos
-        if ((nY < minLimiteY) || (nY > maxLimiteY) || (nX < minLimiteX) || (nX > maxLimiteX))
-            if (charIndex != userCharIndex)
-                eraseChar(charIndex);
-
-    }
-
-    /**
-     * Actualiza las areas de vision de objetos y personajes.
-     */
-    public void areaChange(int x, int y) {
-        minLimiteX = (x / 9 - 1) * 9;
-        maxLimiteX = minLimiteX + 26;
-        minLimiteY = (y / 9 - 1) * 9;
-        maxLimiteY = minLimiteY + 26;
-
-        for (int loopX = 1; loopX <= 100; loopX++) {
-            for (int loopY = 1; loopY <= 100; loopY++) {
-                if ((loopY < minLimiteY) || (loopY > maxLimiteY) || (loopX < minLimiteX) || (loopX > maxLimiteX)) {
-                    // Erase NPCs
-                    if (mapData[loopX][loopY].getCharIndex() > 0)
-                        if (mapData[loopX][loopY].getCharIndex() != userCharIndex)
-                            eraseChar(mapData[loopX][loopY].getCharIndex());
-                    // Erase Objs
-                    mapData[loopX][loopY].getObjGrh().setGrhIndex(0);
-                }
-            }
-        }
-
-        refreshAllChars();
     }
 
     /**
@@ -267,11 +230,6 @@ public enum User {
         charList[charIndex].setScrollDirectionX(sgn((short) addX));
         charList[charIndex].setScrollDirectionY(sgn((short) addY));
 
-
-        if ((nY < minLimiteY) || (nY > maxLimiteY) || (nX < minLimiteX) || (nX > maxLimiteX))
-            if (charIndex != userCharIndex)
-                eraseChar(charIndex);
-
     }
 
     /**
@@ -324,14 +282,6 @@ public enum User {
         this.underCeiling = underCeiling;
     }
 
-    public boolean isUserConected() {
-        return userConected;
-    }
-
-    public void setUserConected(boolean userConected) {
-        this.userConected = userConected;
-    }
-
     public short getUserCharIndex() {
         return userCharIndex;
     }
@@ -349,7 +299,6 @@ public enum User {
     }
 
     private void resetState() {
-        this.setUserConected(false);
     }
 
     public boolean isWalkingmode() {
