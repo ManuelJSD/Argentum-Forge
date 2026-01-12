@@ -69,7 +69,7 @@ public final class MainScene extends Scene {
 
     @Override
     public void render() {
-        if (User.INSTANCE.isUserConected()) {
+        if (frmConnect.isConnectPressed()) {
             this.close();
             ImGUISystem.INSTANCE.closeAllFrms();
         }

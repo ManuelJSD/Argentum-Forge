@@ -21,6 +21,7 @@ public final class FConnect extends Form {
     private ImageButton3State btnNuevoMapa;
     private ImageButton3State btnCargarMapa;
     private ImageButton3State btnExit;
+    private boolean connectPressed = false;
 
     public FConnect() {
         try {
@@ -112,7 +113,7 @@ public final class FConnect extends Form {
      * Inicializa todos los datos necesarios para que GameScene funcione localmente.
      * 
      * @param newMap Si es true, inicia un nuevo mapa. Si es false,
-     *                       asume que ya se cargó un mapa.
+     *               asume que ya se cargó un mapa.
      */
     private void simulateEditorConnection(boolean newMap) {
         User user = User.INSTANCE;
@@ -147,14 +148,12 @@ public final class FConnect extends Form {
             GameData.mapData[startX][startY].setCharIndex(charIndex);
         }
 
-        // 5. Actualizar áreas de visión
-        user.areaChange(startX, startY);
+        // 5. Marcar para cambiar de escena
+        this.connectPressed = true;
+    }
 
-        // 6. Inicializar estados
-        user.setUserMoving(false);
-        
-        // 7. Marcar como conectado (esto activa la transición a GameScene)
-        user.setUserConected(true);
+    public boolean isConnectPressed() {
+        return connectPressed;
     }
 
     private void buttonExitGame() {

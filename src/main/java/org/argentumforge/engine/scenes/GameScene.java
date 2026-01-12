@@ -130,14 +130,6 @@ public final class GameScene extends Scene {
      */
     @Override
     public void render() {
-        // MODO EDITOR: Check de desconexión deshabilitado
-        // si el usuario se desconecta debe regresar al menu principal.
-        /*
-         * if (!user.isUserConected()) {
-         * frmMain.close();
-         * this.close();
-         * }
-         */
 
         if (!visible)
             return;
@@ -303,8 +295,8 @@ public final class GameScene extends Scene {
         renderSecondLayer(renderSettings, pixelOffsetX, pixelOffsetY);
         renderThirdLayer(renderSettings, pixelOffsetX, pixelOffsetY);
         renderFourthLayer(renderSettings, pixelOffsetX, pixelOffsetY);
-        renderBlockOverlays(renderSettings,pixelOffsetX, pixelOffsetY);
-        renderTranslationOverlays(renderSettings,pixelOffsetX, pixelOffsetY);
+        renderBlockOverlays(renderSettings, pixelOffsetX, pixelOffsetY);
+        renderTranslationOverlays(renderSettings, pixelOffsetX, pixelOffsetY);
 
         Rain.INSTANCE.render(weather.getWeatherColor());
     }
@@ -519,7 +511,8 @@ public final class GameScene extends Scene {
      * Renderiza overlays rojos sobre los tiles de traslado del mapa
      * Solo se renderiza cuando el modo de visualización de traslados está activado.
      */
-    private void renderTranslationOverlays(RenderSettings renderSettings, final int pixelOffsetX, final int pixelOffsetY) {
+    private void renderTranslationOverlays(RenderSettings renderSettings, final int pixelOffsetX,
+            final int pixelOffsetY) {
         if (renderSettings.getShowMapTransfer()) {
             // Grafico que vamos a utilizar para representar los traslados
             int grhTrans = 3;
