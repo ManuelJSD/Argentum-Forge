@@ -18,7 +18,6 @@ public enum Options {
 
     private boolean music = true;
     private boolean sound = true;
-    private boolean showName = true;
     private boolean fullscreen = true;
     private boolean vsync = true;
     private boolean cursorGraphic = true;
@@ -67,7 +66,6 @@ public enum Options {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(OPTIONS_FILE_PATH))) {
             write(writer, "Music", music);
             write(writer, "Sound", sound);
-            write(writer, "ShowName", showName);
             write(writer, "GraphicsPath", graphicsPath);
             write(writer, "DatsPath", datsPath);
             write(writer, "InitPath", initPath);
@@ -112,14 +110,6 @@ public enum Options {
 
     public void setSound(boolean sound) {
         this.sound = sound;
-    }
-
-    public boolean isShowName() {
-        return showName;
-    }
-
-    public void setShowName(boolean showName) {
-        this.showName = showName;
     }
 
     public boolean isFullscreen() {
@@ -233,7 +223,6 @@ public enum Options {
         switch (option) {
             case "Music" -> music = Boolean.parseBoolean(value);
             case "Sound" -> sound = Boolean.parseBoolean(value);
-            case "ShowName" -> showName = Boolean.parseBoolean(value);
             case "GraphicsPath" -> graphicsPath = value;
             case "DatsPath", "MapsPath" -> datsPath = value;
             case "InitPath" -> initPath = value;

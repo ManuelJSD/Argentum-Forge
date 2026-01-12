@@ -210,13 +210,6 @@ public enum User {
                 || y > YMaxMapSize - TILE_BUFFER_SIZE;
     }
 
-    public boolean estaPCarea(int charIndex) {
-        return charList[charIndex].getPos().getX() > userPos.getX() - minXBorder &&
-                charList[charIndex].getPos().getX() < userPos.getX() + minXBorder &&
-                charList[charIndex].getPos().getY() > userPos.getY() - minYBorder &&
-                charList[charIndex].getPos().getY() < userPos.getY() + minYBorder;
-    }
-
     public boolean hayAgua(int x, int y) {
         return ((mapData[x][y].getLayer(1).getGrhIndex() >= 1505 && mapData[x][y].getLayer(1).getGrhIndex() <= 1520) ||
                 (mapData[x][y].getLayer(1).getGrhIndex() >= 5665 && mapData[x][y].getLayer(1).getGrhIndex() <= 5680) ||
@@ -274,19 +267,6 @@ public enum User {
         charList[charIndex].setScrollDirectionX(sgn((short) addX));
         charList[charIndex].setScrollDirectionY(sgn((short) addY));
 
-        /*
-         * 'parche para que no medite cuando camina
-         * If .FxIndex = FxMeditar.CHICO Or .FxIndex = FxMeditar.GRANDE Or .FxIndex =
-         * FxMeditar.MEDIANO Or .FxIndex = FxMeditar.XGRANDE Or .FxIndex =
-         * FxMeditar.XXGRANDE Then
-         * .FxIndex = 0
-         * End If
-         */
-
-        if (!estaPCarea(charIndex))
-            Dialogs.removeDialog(charIndex);
-
-        // If Not EstaPCarea(CharIndex) Then Call Dialogos.RemoveDialog(CharIndex)
 
         if ((nY < minLimiteY) || (nY > maxLimiteY) || (nX < minLimiteX) || (nX > maxLimiteX))
             if (charIndex != userCharIndex)
@@ -306,7 +286,7 @@ public enum User {
             case LEFT -> moveToLegalPos(userPos.getX() - 1, userPos.getY());
         };
 
-        if (legalOk && !charList[userCharIndex].isParalizado()) {
+        if (legalOk) {
             moveScreen(direction);
 
             // Only move character if walking mode is active
@@ -360,18 +340,6 @@ public enum User {
         this.userCharIndex = userCharIndex;
     }
 
-    public boolean isDead() {
-        return charList[userCharIndex].isDead();
-    }
-
-    public String getUserName() {
-        return userName.toUpperCase();
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
     public short getUserMap() {
         return userMap;
     }
@@ -420,25 +388,6 @@ public enum User {
         if (charIndex > 0) {
             if (mapData[userPos.getX()][userPos.getY()].getBlocked())
                 return false;
-            if (charList[charIndex].getiHead() != CASPER_HEAD && charList[charIndex].getiBody() != FRAGATA_FANTASMAL) {
-                return false;
-            } else {
-                // No puedo intercambiar con un casper que este en la orilla (Lado tierra)
-                if (hayAgua(userPos.getX(), userPos.getY())) {
-                    if (!hayAgua(x, y))
-                        return false;
-                } else {
-                    // No puedo intercambiar con un casper que este en la orilla (Lado agua)
-                    if (hayAgua(x, y))
-                        return false;
-                }
-                // Los admins no pueden intercambiar pos con caspers cuando estan invisibles
-                if (charList[userCharIndex].getPriv() > 0 && charList[userCharIndex].getPriv() < 6) {
-                    if (charList[userCharIndex].isInvisible())
-                        return false;
-                }
-
-            }
 
         }
 

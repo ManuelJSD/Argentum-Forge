@@ -96,14 +96,12 @@ public final class FConnect extends Form {
     }
 
     private void buttonConnect() {
-        User.INSTANCE.setUserName("Editor");
         // Simular conexión exitosa (cargar mapa por defecto si no se cargó otro)
         simulateEditorConnection(true);
     }
 
     private void buttonLoadMapAction() {
         if (org.argentumforge.engine.utils.MapFileUtils.openAndLoadMap()) {
-            User.INSTANCE.setUserName("Editor");
             // Proceed to game, skipping default map load
             simulateEditorConnection(false);
         }
@@ -141,8 +139,6 @@ public final class FConnect extends Form {
         charList[charIndex].setHeading(Direction.DOWN);
         charList[charIndex].setiBody(1); // ID del cuerpo gráfico
         charList[charIndex].setiHead(1); // ID de la cabeza gráfica
-        charList[charIndex].setDead(false);
-        charList[charIndex].setPriv(25); // Privilegios de administrador
         charList[charIndex].setActive(true); // Marcar como activo
 
         // 4. Registrar el personaje en el mapa (CRÍTICO)
