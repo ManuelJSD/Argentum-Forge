@@ -60,7 +60,7 @@ https://github.com/Lorwik/Argentum-Forge.git
 
 # Image
 
-<img width="1914" height="1080" alt="image" src="https://github.com/user-attachments/assets/70480b0c-5460-4005-9eeb-7ecb4823a738" />
+<img width="1918" height="1078" alt="image" src="https://github.com/user-attachments/assets/5969ffba-cfed-4ac1-81de-481484381ff2" />
 
 <h1>How to Contribute:</h1>
 <br/>
