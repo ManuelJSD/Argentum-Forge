@@ -13,38 +13,29 @@ import static org.argentumforge.engine.utils.GameData.options;
 import static org.argentumforge.engine.utils.Time.FPS;
 
 /**
- * Formulario principal que proporciona la interfaz de usuario durante la
- * partida activa.
+ * Formulario principal que proporciona la interfaz de usuario del editor de
+ * mapas.
  * <p>
- * La clase {@code FMain} representa la pantalla principal que se muestra una
- * vez que el usuario ha iniciado sesión correctamente
- * y está jugando activamente. Esta clase extiende {@link Form} y actúa como el
- * núcleo de la interfaz gráfica durante el gameplay.
+ * La clase {@code FMain} representa la pantalla principal del editor.
+ * Esta clase extiende {@link Form} y actúa como el núcleo de la interfaz
+ * gráfica de la herramienta.
  * <p>
  * Funcionalidades principales:
  * <ul>
- * <li>Muestra estadísticas del personaje (vida, maná, energía, hambre, sed,
- * etc.).</li>
- * <li>Permite la gestión del inventario y hechizos, alternando entre ambas
- * vistas.</li>
- * <li>Visualiza oro, experiencia y nivel del personaje.</li>
- * <li>Integra una consola de mensajes del sistema y un chat para comunicación
- * con otros jugadores.</li>
- * <li>Incluye botones para acceder a habilidades, estadísticas, clanes,
- * opciones y manejo de oro.</li>
- * <li>Permite el cierre y minimizado de la ventana principal del cliente.</li>
- * <li>Gestiona la entrada de texto para comandos y chat, y procesa las
- * interacciones del usuario.</li>
- * <li>Comunica acciones relevantes con el servidor mediante el sistema de
- * protocolos de red.</li>
+ * <li>Visualización y gestión del viewport del mapa.</li>
+ * <li>Acceso a herramientas de edición de superficies, bloqueos, NPCs y
+ * objetos.</li>
+ * <li>Integración de la consola de mensajes del sistema para logs del
+ * editor.</li>
+ * <li>Menú principal para carga, guardado y configuración ambiental.</li>
+ * <li>Visualización de FPS para monitoreo de performance.</li>
  * </ul>
  * <p>
  * La clase está organizada en métodos privados que separan la lógica de
  * renderizado en secciones específicas para mejorar la legibilidad y el
  * mantenimiento.
  * <p>
- * <b>Nota:</b> Todos los elementos gráficos se dibujan usando ImGui y se
- * posicionan manualmente según el layout de la interfaz.
+ * <b>Nota:</b> Todos los elementos gráficos se dibujan usando ImGui.
  */
 
 public final class FMain extends Form {
@@ -312,7 +303,6 @@ public final class FMain extends Form {
 
                 ImGui.endMenu();
             }
-
 
             if (ImGui.beginMenu("Miscelánea")) {
                 if (ImGui.menuItem("Modo Caminata", "", org.argentumforge.engine.game.User.INSTANCE.isWalkingmode())) {
