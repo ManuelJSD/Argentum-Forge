@@ -39,50 +39,6 @@ import static org.argentumforge.engine.utils.Time.timerTicksPerFrame;
 
 public final class Character {
 
-    public static final int CASPER_HEAD = 500;
-    public static final int FRAGATA_FANTASMAL = 87;
-
-    public static final int HUMANO_H_PRIMER_CABEZA = 1;
-    public static final int HUMANO_H_ULTIMA_CABEZA = 40; // En verdad es hasta la 51, pero como son muchas estas las
-                                                         // dejamos no seleccionables
-    public static final int HUMANO_H_CUERPO_DESNUDO = 21;
-
-    public static final int ELFO_H_PRIMER_CABEZA = 101;
-    public static final int ELFO_H_ULTIMA_CABEZA = 122;
-    public static final int ELFO_H_CUERPO_DESNUDO = 210;
-
-    public static final int DROW_H_PRIMER_CABEZA = 201;
-    public static final int DROW_H_ULTIMA_CABEZA = 221;
-    public static final int DROW_H_CUERPO_DESNUDO = 32;
-
-    public static final int ENANO_H_PRIMER_CABEZA = 301;
-    public static final int ENANO_H_ULTIMA_CABEZA = 319;
-    public static final int ENANO_H_CUERPO_DESNUDO = 53;
-
-    public static final int GNOMO_H_PRIMER_CABEZA = 401;
-    public static final int GNOMO_H_ULTIMA_CABEZA = 416;
-    public static final int GNOMO_H_CUERPO_DESNUDO = 222;
-
-    public static final int HUMANO_M_PRIMER_CABEZA = 70;
-    public static final int HUMANO_M_ULTIMA_CABEZA = 89;
-    public static final int HUMANO_M_CUERPO_DESNUDO = 39;
-
-    public static final int ELFO_M_PRIMER_CABEZA = 170;
-    public static final int ELFO_M_ULTIMA_CABEZA = 188;
-    public static final int ELFO_M_CUERPO_DESNUDO = 259;
-
-    public static final int DROW_M_PRIMER_CABEZA = 270;
-    public static final int DROW_M_ULTIMA_CABEZA = 288;
-    public static final int DROW_M_CUERPO_DESNUDO = 40;
-
-    public static final int ENANO_M_PRIMER_CABEZA = 370;
-    public static final int ENANO_M_ULTIMA_CABEZA = 384;
-    public static final int ENANO_M_CUERPO_DESNUDO = 60;
-
-    public static final int GNOMO_M_PRIMER_CABEZA = 470;
-    public static final int GNOMO_M_ULTIMA_CABEZA = 484;
-    public static final int GNOMO_M_CUERPO_DESNUDO = 260;
-
     // ultimo personaje del array
     public static short lastChar = 0;
     private boolean active;
@@ -102,13 +58,6 @@ public final class Character {
     private GrhInfo fX;
     private int fxIndex;
 
-    private boolean criminal;
-    private boolean attackable;
-
-    // Nicknames
-    private String name;
-    private String clanName;
-
     private short scrollDirectionX;
     private short scrollDirectionY;
 
@@ -117,10 +66,6 @@ public final class Character {
     private float moveOffsetY;
 
     private boolean pie;
-    private boolean dead;
-    private boolean invisible;
-    private boolean paralizado;
-    private byte priv;
 
     // dialogs
     private String dialog;
@@ -141,20 +86,13 @@ public final class Character {
 
         this.direction = DOWN;
         this.active = false;
-        this.criminal = false;
-        this.attackable = false;
         this.fxIndex = 0;
-        this.invisible = false;
-        this.paralizado = false;
         this.moving = false;
-        this.dead = false;
-        this.name = "";
         this.pie = false;
         this.pos.setX(0);
         this.pos.setY(0);
 
         this.usingArm = false;
-        this.clanName = "";
         this.walkingSpeed = 8;
 
         this.dialog = "";
@@ -180,12 +118,6 @@ public final class Character {
         if (helmet == 0)
             helmet = 2;
 
-        char f = '<', u = '>';
-
-        if (charList[charIndex].priv != 0)
-            charList[charIndex].setClanName(f + "Game Master" + u);
-
-        charList[charIndex].setDead(head == CASPER_HEAD);
         charList[charIndex].setiHead(head);
         charList[charIndex].setiBody(body);
 
@@ -358,7 +290,7 @@ public final class Character {
         PixelOffsetY += (int) charList[charIndex].getMoveOffsetY();
 
         if (charList[charIndex].getHead().getHead(charList[charIndex].getHeading().getId()).getGrhIndex() != 0) {
-            if (!charList[charIndex].isInvisible()) {
+
 
                 if (charList[charIndex].getBody().getWalk(charList[charIndex].getHeading().getId())
                         .getGrhIndex() != 0) {
@@ -395,46 +327,7 @@ public final class Character {
                                 PixelOffsetX, PixelOffsetY, true, true, false, 1.0f, ambientcolor);
                     }
 
-                    if (options.isShowName()) {
-                        if (charList[charIndex].name.length() > 0) {
-
-                            if (charList[charIndex].priv == 0) {
-                                if (charList[charIndex].attackable) {
-                                    color.setRed(0.54f);
-                                    color.setGreen(0.0f);
-                                    color.setBlue(1.0f);
-                                } else {
-                                    if (charList[charIndex].criminal) {
-                                        color.setRed(1.0f);
-                                        color.setGreen(0.0f);
-                                        color.setBlue(0.0f);
-                                    } else {
-                                        color.setRed(0.0f);
-                                        color.setGreen(0.5f);
-                                        color.setBlue(1.0f);
-                                    }
-                                }
-                            } else {
-                                color.setRed(0.13f);
-                                color.setGreen(0.7f);
-                                color.setBlue(0.3f);
-                            }
-
-                            String line = charList[charIndex].name;
-                            drawText(line,
-                                    PixelOffsetX + 16 - getTextWidth(line, false) / 2,
-                                    PixelOffsetY + 30, color, NORMAL_FONT, false);
-
-                            line = charList[charIndex].clanName;
-                            if (!line.isEmpty()) {
-                                drawText(line,
-                                        PixelOffsetX + 16 - getTextWidth(line, false) / 2,
-                                        PixelOffsetY + 45, color, NORMAL_FONT, false);
-                            }
-                        }
-                    }
                 }
-            }
 
         } else {
             if (charList[charIndex].getBody().getWalk(charList[charIndex].getHeading().getId()).getGrhIndex() > 0) {
@@ -566,38 +459,6 @@ public final class Character {
         this.fxIndex = fxIndex;
     }
 
-    public boolean getCriminal() {
-        return criminal;
-    }
-
-    public void setCriminal(boolean criminal) {
-        this.criminal = criminal;
-    }
-
-    public boolean isAttackable() {
-        return attackable;
-    }
-
-    public void setAttackable(boolean attackable) {
-        this.attackable = attackable;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getClanName() {
-        return clanName;
-    }
-
-    public void setClanName(String clanName) {
-        this.clanName = clanName;
-    }
-
     public short getScrollDirectionX() {
         return scrollDirectionX;
     }
@@ -644,38 +505,6 @@ public final class Character {
 
     public void setPie(boolean pie) {
         this.pie = pie;
-    }
-
-    public boolean isDead() {
-        return dead;
-    }
-
-    public void setDead(boolean dead) {
-        this.dead = dead;
-    }
-
-    public boolean isInvisible() {
-        return invisible;
-    }
-
-    public void setInvisible(boolean invisible) {
-        this.invisible = invisible;
-    }
-
-    public boolean isParalizado() {
-        return paralizado;
-    }
-
-    public void setParalizado(boolean paralizado) {
-        this.paralizado = paralizado;
-    }
-
-    public byte getPriv() {
-        return priv;
-    }
-
-    public void setPriv(int priv) {
-        this.priv = (byte) priv;
     }
 
     public String getDialog() {

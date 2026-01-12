@@ -302,23 +302,10 @@ public final class GameScene extends Scene {
         renderFirstLayer(renderSettings, pixelOffsetX, pixelOffsetY);
         renderSecondLayer(renderSettings, pixelOffsetX, pixelOffsetY);
         renderThirdLayer(renderSettings, pixelOffsetX, pixelOffsetY);
-
-        // Dialogs
-        camera.setScreenY(camera.getMinYOffset() - TILE_BUFFER_SIZE);
-        for (int y = camera.getMinY(); y <= camera.getMaxY(); y++) {
-            camera.setScreenX(camera.getMinXOffset() - TILE_BUFFER_SIZE);
-            for (int x = camera.getMinX(); x <= camera.getMaxX(); x++) {
-                Dialogs.renderDialogs(camera, x, y, pixelOffsetX, pixelOffsetY);
-                camera.incrementScreenX();
-            }
-            camera.incrementScreenY();
-        }
-
         renderFourthLayer(renderSettings, pixelOffsetX, pixelOffsetY);
         renderBlockOverlays(renderSettings,pixelOffsetX, pixelOffsetY);
         renderTranslationOverlays(renderSettings,pixelOffsetX, pixelOffsetY);
 
-        Dialogs.updateDialogs();
         Rain.INSTANCE.render(weather.getWeatherColor());
     }
 
