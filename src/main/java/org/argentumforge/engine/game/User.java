@@ -58,12 +58,6 @@ public enum User {
         this.walkingmode = false;
     }
 
-    public void resetGameState() {
-        resetState();
-        Rain.INSTANCE.setRainValue(false);
-        Rain.INSTANCE.stopRainingSoundLoop();
-    }
-
     /**
      * @param nDirection direccion pasada por parametro Mueve la camara hacia una
      *                   direccion.

@@ -4,7 +4,6 @@ import imgui.ImGui;
 import imgui.flag.ImGuiCond;
 import imgui.flag.ImGuiWindowFlags;
 import org.argentumforge.engine.Window;
-import org.argentumforge.engine.game.Rain;
 import static org.argentumforge.engine.audio.Sound.*;
 import static org.argentumforge.engine.utils.GameData.options;
 
@@ -91,7 +90,6 @@ public final class FOptions extends Form {
 
         if (ImGui.checkbox("Audio", options.isSound())) {
             options.setSound(!options.isSound());
-            Rain.INSTANCE.stopSounds();
         }
 
         ImGui.separator();
