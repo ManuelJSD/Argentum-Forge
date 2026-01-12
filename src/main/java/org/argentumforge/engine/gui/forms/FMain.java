@@ -1,5 +1,7 @@
 package org.argentumforge.engine.gui.forms;
 
+import imgui.type.ImFloat;
+
 import imgui.ImGui;
 import imgui.flag.*;
 import org.argentumforge.engine.Window;
@@ -54,8 +56,14 @@ public final class FMain extends Form {
     private FNpcEditor npcEditor;
     private FObjEditor objEditor;
     private FMinimap minimap;
+    private float[] ambientColorArr;
 
     public FMain() {
+        ambientColorArr = new float[] {
+                org.argentumforge.engine.game.Weather.INSTANCE.getWeatherColor().getRed(),
+                org.argentumforge.engine.game.Weather.INSTANCE.getWeatherColor().getGreen(),
+                org.argentumforge.engine.game.Weather.INSTANCE.getWeatherColor().getBlue()
+        };
         surfaceEditor = new FSurfaceEditor();
         blockEditor = new FBlockEditor();
         npcEditor = new FNpcEditor();
@@ -305,11 +313,44 @@ public final class FMain extends Form {
                 ImGui.endMenu();
             }
 
+
             if (ImGui.beginMenu("Miscelánea")) {
                 if (ImGui.menuItem("Modo Caminata", "", org.argentumforge.engine.game.User.INSTANCE.isWalkingmode())) {
                     org.argentumforge.engine.game.User.INSTANCE
                             .setWalkingmode(!org.argentumforge.engine.game.User.INSTANCE.isWalkingmode());
                 }
+
+                if (ImGui.beginMenu("Ambiente")) {
+                    if (ImGui.colorEdit3("Luz Ambiente", ambientColorArr)) {
+                        org.argentumforge.engine.game.Weather.INSTANCE.setAmbientColor(ambientColorArr[0],
+                                ambientColorArr[1],
+                                ambientColorArr[2]);
+                    }
+
+                    ImGui.separator();
+
+                    if (ImGui.menuItem("Día")) {
+                        ambientColorArr[0] = 1.0f;
+                        ambientColorArr[1] = 1.0f;
+                        ambientColorArr[2] = 1.0f;
+                        org.argentumforge.engine.game.Weather.INSTANCE.setAmbientColor(1.0f, 1.0f, 1.0f);
+                    }
+                    if (ImGui.menuItem("Tarde")) {
+                        ambientColorArr[0] = 0.8f;
+                        ambientColorArr[1] = 0.5f;
+                        ambientColorArr[2] = 0.3f;
+                        org.argentumforge.engine.game.Weather.INSTANCE.setAmbientColor(0.8f, 0.5f, 0.3f);
+                    }
+                    if (ImGui.menuItem("Noche")) {
+                        ambientColorArr[0] = 0.2f;
+                        ambientColorArr[1] = 0.2f;
+                        ambientColorArr[2] = 0.4f;
+                        org.argentumforge.engine.game.Weather.INSTANCE.setAmbientColor(0.2f, 0.2f, 0.4f);
+                    }
+
+                    ImGui.endMenu();
+                }
+
                 ImGui.endMenu();
             }
 
