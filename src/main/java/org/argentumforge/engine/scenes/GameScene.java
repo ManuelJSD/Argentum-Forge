@@ -58,7 +58,6 @@ import static org.lwjgl.glfw.GLFW.*;
  * @see MainScene
  * @see User
  * @see Camera
- * @see Rain
  */
 
 public final class GameScene extends Scene {
@@ -297,8 +296,6 @@ public final class GameScene extends Scene {
         renderFourthLayer(renderSettings, pixelOffsetX, pixelOffsetY);
         renderBlockOverlays(renderSettings, pixelOffsetX, pixelOffsetY);
         renderTranslationOverlays(renderSettings, pixelOffsetX, pixelOffsetY);
-
-        Rain.INSTANCE.render(weather.getWeatherColor());
     }
 
     /**
