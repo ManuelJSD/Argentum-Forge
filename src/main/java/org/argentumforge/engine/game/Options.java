@@ -1,5 +1,6 @@
 package org.argentumforge.engine.game;
 
+import org.argentumforge.engine.renderer.RenderSettings;
 import org.tinylog.Logger;
 
 import java.io.*;
@@ -21,9 +22,6 @@ public enum Options {
     private boolean fullscreen = true;
     private boolean vsync = true;
     private boolean cursorGraphic = true;
-    private String nick = "";
-    private String ipServer = "127.0.0.1";
-    private String portServer = "7666";
     private String language = "es";
     private String graphicsPath = "resources/graficos";
     private String datsPath = "resources/dats";
@@ -32,6 +30,8 @@ public enum Options {
     private int screenWidth = 1024;
     private int screenHeight = 1024;
     private String lastMapPath = ".";
+
+    private final RenderSettings renderSettings = new RenderSettings();
 
     /**
      * Carga las opciones.
@@ -68,8 +68,6 @@ public enum Options {
             write(writer, "Music", music);
             write(writer, "Sound", sound);
             write(writer, "ShowName", showName);
-            write(writer, "Name", nick);
-            write(writer, "PORT", portServer);
             write(writer, "GraphicsPath", graphicsPath);
             write(writer, "DatsPath", datsPath);
             write(writer, "InitPath", initPath);
@@ -81,17 +79,23 @@ public enum Options {
             write(writer, "ScreenWidth", screenWidth);
             write(writer, "ScreenHeight", screenHeight);
             write(writer, "LastMapPath", lastMapPath);
+
+            write(writer, "RenderLayer1", renderSettings.getShowLayer()[0]);
+            write(writer, "RenderLayer2", renderSettings.getShowLayer()[1]);
+            write(writer, "RenderLayer3", renderSettings.getShowLayer()[2]);
+            write(writer, "RenderLayer4", renderSettings.getShowLayer()[3]);
+            write(writer, "RenderShowNPCs", renderSettings.getShowNPCs());
+            write(writer, "RenderShowObjects", renderSettings.getShowOJBs());
+            write(writer, "RenderShowTriggers", renderSettings.getShowTriggers());
+            write(writer, "RenderShowTranslation", renderSettings.getShowMapTransfer());
+            write(writer, "RenderShowBlock", renderSettings.getShowBlock());
         } catch (IOException e) {
             Logger.error("Could not write to options.ini file!");
         }
     }
 
-    public String getNick() {
-        return nick;
-    }
-
-    public void setNick(String nick) {
-        this.nick = nick;
+    public RenderSettings getRenderSettings() {
+        return renderSettings;
     }
 
     public boolean isMusic() {
@@ -116,22 +120,6 @@ public enum Options {
 
     public void setShowName(boolean showName) {
         this.showName = showName;
-    }
-
-    public String getIpServer() {
-        return ipServer;
-    }
-
-    public void setIpServer(String ipServer) {
-        this.ipServer = ipServer;
-    }
-
-    public String getPortServer() {
-        return portServer;
-    }
-
-    public void setPortServer(String portServer) {
-        this.portServer = portServer;
     }
 
     public boolean isFullscreen() {
@@ -246,9 +234,6 @@ public enum Options {
             case "Music" -> music = Boolean.parseBoolean(value);
             case "Sound" -> sound = Boolean.parseBoolean(value);
             case "ShowName" -> showName = Boolean.parseBoolean(value);
-            case "Name" -> nick = value;
-            case "IP" -> ipServer = value;
-            case "PORT" -> portServer = value;
             case "GraphicsPath" -> graphicsPath = value;
             case "DatsPath", "MapsPath" -> datsPath = value;
             case "InitPath" -> initPath = value;
@@ -260,6 +245,15 @@ public enum Options {
             case "ScreenWidth" -> screenWidth = Integer.parseInt(value);
             case "ScreenHeight" -> screenHeight = Integer.parseInt(value);
             case "LastMapPath" -> lastMapPath = value;
+            case "RenderLayer1" -> renderSettings.getShowLayer()[0] = Boolean.parseBoolean(value);
+            case "RenderLayer2" -> renderSettings.getShowLayer()[1] = Boolean.parseBoolean(value);
+            case "RenderLayer3" -> renderSettings.getShowLayer()[2] = Boolean.parseBoolean(value);
+            case "RenderLayer4" -> renderSettings.getShowLayer()[3] = Boolean.parseBoolean(value);
+            case "RenderShowNPCs" -> renderSettings.setShowNPCs(Boolean.parseBoolean(value));
+            case "RenderShowObjects" -> renderSettings.setShowOJBs(Boolean.parseBoolean(value));
+            case "RenderShowTriggers" -> renderSettings.setShowTriggers(Boolean.parseBoolean(value));
+            case "RenderShowTranslation" -> renderSettings.setShowMapTransfer(Boolean.parseBoolean(value));
+            case "RenderShowBlock" -> renderSettings.setShowBlock(Boolean.parseBoolean(value));
             default -> Logger.warn("Unknown option ignored: {}", option);
         }
     }

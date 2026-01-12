@@ -9,6 +9,7 @@ import org.argentumforge.engine.gui.forms.FMain;
 import org.argentumforge.engine.gui.forms.FOptions;
 import org.argentumforge.engine.listeners.KeyHandler;
 import org.argentumforge.engine.listeners.MouseListener;
+import org.argentumforge.engine.renderer.RenderSettings;
 import org.argentumforge.engine.utils.editor.Surface;
 import org.argentumforge.engine.utils.editor.Block;
 import org.argentumforge.engine.utils.editor.Npc;
@@ -296,9 +297,11 @@ public final class GameScene extends Scene {
     private void renderScreen(int tileX, int tileY, int pixelOffsetX, int pixelOffsetY) {
         camera.update(tileX, tileY);
 
-        renderFirstLayer(pixelOffsetX, pixelOffsetY);
-        renderSecondLayer(pixelOffsetX, pixelOffsetY);
-        renderThirdLayer(pixelOffsetX, pixelOffsetY);
+        RenderSettings renderSettings = options.getRenderSettings();
+
+        renderFirstLayer(renderSettings, pixelOffsetX, pixelOffsetY);
+        renderSecondLayer(renderSettings, pixelOffsetX, pixelOffsetY);
+        renderThirdLayer(renderSettings, pixelOffsetX, pixelOffsetY);
 
         // Dialogs
         camera.setScreenY(camera.getMinYOffset() - TILE_BUFFER_SIZE);
@@ -311,12 +314,9 @@ public final class GameScene extends Scene {
             camera.incrementScreenY();
         }
 
-        renderFourthLayer(pixelOffsetX, pixelOffsetY);
-
-        // Renderizar overlays de bloqueos si está activado
-        if (block.isShowBlocks()) {
-            renderBlockOverlays(pixelOffsetX, pixelOffsetY);
-        }
+        renderFourthLayer(renderSettings, pixelOffsetX, pixelOffsetY);
+        renderBlockOverlays(renderSettings,pixelOffsetX, pixelOffsetY);
+        renderTranslationOverlays(renderSettings,pixelOffsetX, pixelOffsetY);
 
         Dialogs.updateDialogs();
         Rain.INSTANCE.render(weather.getWeatherColor());
@@ -331,21 +331,24 @@ public final class GameScene extends Scene {
      * @param pixelOffsetY Desplazamiento en píxeles en el eje Y para animaciones de
      *                     movimiento
      */
-    private void renderFirstLayer(final int pixelOffsetX, final int pixelOffsetY) {
-        for (int y = camera.getScreenminY(); y <= camera.getScreenmaxY(); y++) {
-            int x;
-            for (x = camera.getScreenminX(); x <= camera.getScreenmaxX(); x++) {
-                if (mapData[x][y].getLayer(1).getGrhIndex() != 0) {
-                    drawTexture(mapData[x][y].getLayer(1),
-                            POS_SCREEN_X + (camera.getScreenX() - 1) * TILE_PIXEL_SIZE + pixelOffsetX,
-                            POS_SCREEN_Y + (camera.getScreenY() - 1) * TILE_PIXEL_SIZE + pixelOffsetY,
-                            true, true, false, 1.0f, weather.getWeatherColor());
-                }
+    private void renderFirstLayer(RenderSettings renderSettings, final int pixelOffsetX, final int pixelOffsetY) {
+        // Si la visualización de la Capa 1 esta activa...
+        if (renderSettings.getShowLayer()[0]) {
+            for (int y = camera.getScreenminY(); y <= camera.getScreenmaxY(); y++) {
+                int x;
+                for (x = camera.getScreenminX(); x <= camera.getScreenmaxX(); x++) {
+                    if (mapData[x][y].getLayer(1).getGrhIndex() != 0) {
+                        drawTexture(mapData[x][y].getLayer(1),
+                                POS_SCREEN_X + (camera.getScreenX() - 1) * TILE_PIXEL_SIZE + pixelOffsetX,
+                                POS_SCREEN_Y + (camera.getScreenY() - 1) * TILE_PIXEL_SIZE + pixelOffsetY,
+                                true, true, false, 1.0f, weather.getWeatherColor());
+                    }
 
-                camera.incrementScreenX();
+                    camera.incrementScreenX();
+                }
+                camera.setScreenX(camera.getScreenX() - x + camera.getScreenminX());
+                camera.incrementScreenY();
             }
-            camera.setScreenX(camera.getScreenX() - x + camera.getScreenminX());
-            camera.incrementScreenY();
         }
     }
 
@@ -358,26 +361,35 @@ public final class GameScene extends Scene {
      * @param pixelOffsetY Desplazamiento en píxeles en el eje Y para animaciones de
      *                     movimiento
      */
-    private void renderSecondLayer(final int pixelOffsetX, final int pixelOffsetY) {
+    private void renderSecondLayer(RenderSettings renderSettings, final int pixelOffsetX, final int pixelOffsetY) {
+        if (!renderSettings.getShowLayer()[1] && !renderSettings.getShowOJBs())
+            return;
+
         camera.setScreenY(camera.getMinYOffset() - TILE_BUFFER_SIZE);
         for (int y = camera.getMinY(); y <= camera.getMaxY(); y++) {
             camera.setScreenX(camera.getMinXOffset() - TILE_BUFFER_SIZE);
             for (int x = camera.getMinX(); x <= camera.getMaxX(); x++) {
-                if (mapData[x][y].getLayer(2).getGrhIndex() != 0) {
-                    drawTexture(mapData[x][y].getLayer(2),
-                            POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX,
-                            POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY,
-                            true, true, false, 1.0f, weather.getWeatherColor());
-                }
-                if (mapData[x][y].getObjGrh().getGrhIndex() != 0) {
-                    if (grhData[mapData[x][y].getObjGrh().getGrhIndex()].getPixelWidth() == TILE_PIXEL_SIZE &&
-                            grhData[mapData[x][y].getObjGrh().getGrhIndex()].getPixelHeight() == TILE_PIXEL_SIZE) {
-                        drawTexture(mapData[x][y].getObjGrh(),
+                if (renderSettings.getShowLayer()[1]) {
+                    if (mapData[x][y].getLayer(2).getGrhIndex() != 0) {
+                        drawTexture(mapData[x][y].getLayer(2),
                                 POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX,
                                 POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY,
                                 true, true, false, 1.0f, weather.getWeatherColor());
                     }
                 }
+
+                if (renderSettings.getShowOJBs()) {
+                    if (mapData[x][y].getObjGrh().getGrhIndex() != 0) {
+                        if (grhData[mapData[x][y].getObjGrh().getGrhIndex()].getPixelWidth() == TILE_PIXEL_SIZE &&
+                                grhData[mapData[x][y].getObjGrh().getGrhIndex()].getPixelHeight() == TILE_PIXEL_SIZE) {
+                            drawTexture(mapData[x][y].getObjGrh(),
+                                    POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX,
+                                    POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY,
+                                    true, true, false, 1.0f, weather.getWeatherColor());
+                        }
+                    }
+                }
+
                 camera.incrementScreenX();
             }
             camera.incrementScreenY();
@@ -395,40 +407,54 @@ public final class GameScene extends Scene {
      * @param pixelOffsetY Desplazamiento en píxeles en el eje Y para animaciones de
      *                     movimiento
      */
-    private void renderThirdLayer(final int pixelOffsetX, final int pixelOffsetY) {
+    private void renderThirdLayer(RenderSettings renderSettings, final int pixelOffsetX, final int pixelOffsetY) {
         // LAYER 3, CHARACTERS & OBJECTS > 32x32
         camera.setScreenY(camera.getMinYOffset() - TILE_BUFFER_SIZE);
         for (int y = camera.getMinY(); y <= camera.getMaxY(); y++) {
             camera.setScreenX(camera.getMinXOffset() - TILE_BUFFER_SIZE);
             for (int x = camera.getMinX(); x <= camera.getMaxX(); x++) {
 
-                if (mapData[x][y].getObjGrh().getGrhIndex() != 0) {
-                    if (grhData[mapData[x][y].getObjGrh().getGrhIndex()].getPixelWidth() != TILE_PIXEL_SIZE &&
-                            grhData[mapData[x][y].getObjGrh().getGrhIndex()].getPixelHeight() != TILE_PIXEL_SIZE) {
+                if (renderSettings.getShowOJBs()) {
+                    if (mapData[x][y].getObjGrh().getGrhIndex() != 0) {
+                        if (grhData[mapData[x][y].getObjGrh().getGrhIndex()].getPixelWidth() != TILE_PIXEL_SIZE &&
+                                grhData[mapData[x][y].getObjGrh().getGrhIndex()].getPixelHeight() != TILE_PIXEL_SIZE) {
 
-                        drawTexture(mapData[x][y].getObjGrh(),
-                                POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX,
-                                POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY,
-                                true, true, false, 1.0f, weather.getWeatherColor());
+                            drawTexture(mapData[x][y].getObjGrh(),
+                                    POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX,
+                                    POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY,
+                                    true, true, false, 1.0f, weather.getWeatherColor());
+                        }
                     }
                 }
 
                 // Only render characters when walking mode is active, or render NPCs always
                 if (mapData[x][y].getCharIndex() != 0) {
-                    // Only show user character in walking mode, always show NPCs
-                    if (user.isWalkingmode() || mapData[x][y].getCharIndex() != user.getUserCharIndex()) {
-                        drawCharacter(mapData[x][y].getCharIndex(),
-                                POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX,
-                                POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY,
-                                weather.getWeatherColor());
+                    final int charIndex = mapData[x][y].getCharIndex();
+                    final boolean isUserChar = charIndex == user.getUserCharIndex();
+                    if (isUserChar) {
+                        if (user.isWalkingmode()) {
+                            drawCharacter(charIndex,
+                                    POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX,
+                                    POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY,
+                                    weather.getWeatherColor());
+                        }
+                    } else {
+                        if (renderSettings.getShowNPCs()) {
+                            drawCharacter(charIndex,
+                                    POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX,
+                                    POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY,
+                                    weather.getWeatherColor());
+                        }
                     }
                 }
 
-                if (mapData[x][y].getLayer(3).getGrhIndex() != 0) {
-                    drawTexture(mapData[x][y].getLayer(3),
-                            POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX,
-                            POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY,
-                            true, true, false, 1.0f, weather.getWeatherColor());
+                if (renderSettings.getShowLayer()[2]) {
+                    if (mapData[x][y].getLayer(3).getGrhIndex() != 0) {
+                        drawTexture(mapData[x][y].getLayer(3),
+                                POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX,
+                                POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY,
+                                true, true, false, 1.0f, weather.getWeatherColor());
+                    }
                 }
 
                 camera.incrementScreenX();
@@ -448,19 +474,80 @@ public final class GameScene extends Scene {
      * @param pixelOffsetY Desplazamiento en píxeles en el eje Y para animaciones de
      *                     movimiento
      */
-    private void renderFourthLayer(final int pixelOffsetX, final int pixelOffsetY) {
-        this.checkEffectCeiling();
-        if (alphaCeiling > 0.0f) {
+    private void renderFourthLayer(RenderSettings renderSettings, final int pixelOffsetX, final int pixelOffsetY) {
+        if (renderSettings.getShowLayer()[3]) {
+            this.checkEffectCeiling();
+            if (alphaCeiling > 0.0f) {
+                camera.setScreenY(camera.getMinYOffset() - TILE_BUFFER_SIZE);
+                for (int y = camera.getMinY(); y <= camera.getMaxY(); y++) {
+                    camera.setScreenX(camera.getMinXOffset() - TILE_BUFFER_SIZE);
+                    for (int x = camera.getMinX(); x <= camera.getMaxX(); x++) {
+
+                        if (mapData[x][y].getLayer(4).getGrhIndex() > 0) {
+                            drawTexture(mapData[x][y].getLayer(4),
+                                    POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX,
+                                    POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY,
+                                    true, true, false, alphaCeiling, weather.getWeatherColor());
+                        }
+
+                        camera.incrementScreenX();
+                    }
+                    camera.incrementScreenY();
+                }
+            }
+        }
+    }
+
+    /**
+     * Renderiza overlays rojos sobre los tiles bloqueados del
+     * mapa.
+     * Solo se renderiza cuando el modo de visualización de bloqueos está activado.
+     */
+    private void renderBlockOverlays(RenderSettings renderSettings, final int pixelOffsetX, final int pixelOffsetY) {
+        if (renderSettings.getShowBlock()) {
+            // Grafico que vamos a utilizar para representar los bloqueos
+            int grhBlock = 4;
+
             camera.setScreenY(camera.getMinYOffset() - TILE_BUFFER_SIZE);
             for (int y = camera.getMinY(); y <= camera.getMaxY(); y++) {
                 camera.setScreenX(camera.getMinXOffset() - TILE_BUFFER_SIZE);
                 for (int x = camera.getMinX(); x <= camera.getMaxX(); x++) {
 
-                    if (mapData[x][y].getLayer(4).getGrhIndex() > 0) {
-                        drawTexture(mapData[x][y].getLayer(4),
+                    // Si el tile está bloqueado, dibujamos el Grh 4
+                    if (mapData[x][y].getBlocked()) {
+                        drawGrhIndex(grhBlock,
                                 POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX,
                                 POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY,
-                                true, true, false, alphaCeiling, weather.getWeatherColor());
+                                null);
+                    }
+
+                    camera.incrementScreenX();
+                }
+                camera.incrementScreenY();
+            }
+        }
+    }
+
+    /**
+     * Renderiza overlays rojos sobre los tiles de traslado del mapa
+     * Solo se renderiza cuando el modo de visualización de traslados está activado.
+     */
+    private void renderTranslationOverlays(RenderSettings renderSettings, final int pixelOffsetX, final int pixelOffsetY) {
+        if (renderSettings.getShowMapTransfer()) {
+            // Grafico que vamos a utilizar para representar los traslados
+            int grhTrans = 3;
+
+            camera.setScreenY(camera.getMinYOffset() - TILE_BUFFER_SIZE);
+            for (int y = camera.getMinY(); y <= camera.getMaxY(); y++) {
+                camera.setScreenX(camera.getMinXOffset() - TILE_BUFFER_SIZE);
+                for (int x = camera.getMinX(); x <= camera.getMaxX(); x++) {
+
+                    // Si el tile está bloqueado, dibujamos el Grh 4
+                    if (mapData[x][y].getExitMap() > 0) {
+                        drawGrhIndex(grhTrans,
+                                POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX,
+                                POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY,
+                                null);
                     }
 
                     camera.incrementScreenX();
@@ -513,31 +600,6 @@ public final class GameScene extends Scene {
      */
     private byte getTileMouseY(int mouseY) {
         return (byte) (user.getUserPos().getY() + mouseY / TILE_PIXEL_SIZE - HALF_WINDOW_TILE_HEIGHT);
-    }
-
-    /**
-     * Renderiza overlays rojos semi-transparentes sobre los tiles bloqueados del
-     * mapa.
-     * Solo se renderiza cuando el modo de visualización de bloqueos está activado.
-     */
-    private void renderBlockOverlays(final int pixelOffsetX, final int pixelOffsetY) {
-        camera.setScreenY(camera.getMinYOffset() - TILE_BUFFER_SIZE);
-        for (int y = camera.getMinY(); y <= camera.getMaxY(); y++) {
-            camera.setScreenX(camera.getMinXOffset() - TILE_BUFFER_SIZE);
-            for (int x = camera.getMinX(); x <= camera.getMaxX(); x++) {
-
-                // Si el tile está bloqueado, dibujamos el Grh 4
-                if (mapData[x][y].getBlocked()) {
-                    drawGrhIndex(4,
-                            POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX,
-                            POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY,
-                            null);
-                }
-
-                camera.incrementScreenX();
-            }
-            camera.incrementScreenY();
-        }
     }
 
 }

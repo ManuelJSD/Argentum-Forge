@@ -5,6 +5,8 @@ import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiCond;
 import imgui.flag.ImGuiWindowFlags;
 import org.argentumforge.engine.utils.editor.Block;
+import org.argentumforge.engine.renderer.RenderSettings;
+import static org.argentumforge.engine.utils.GameData.options;
 
 /**
  * Editor de bloqueos del mapa.
@@ -77,11 +79,13 @@ public class FBlockEditor extends Form {
     }
 
     private void drawShowBlocksCheckbox() {
-        if (ImGui.checkbox("Mostrar bloqueos", block.isShowBlocks())) {
-            block.setShowBlocks(!block.isShowBlocks());
+        RenderSettings renderSettings = options.getRenderSettings();
+        if (ImGui.checkbox("Mostrar bloqueos", renderSettings.getShowBlock())) {
+            renderSettings.setShowBlock(!renderSettings.getShowBlock());
+            options.save();
         }
 
-        if (block.isShowBlocks()) {
+        if (renderSettings.getShowBlock()) {
             ImGui.textDisabled("Los tiles bloqueados se");
             ImGui.textDisabled("mostraran con un overlay rojo");
         }

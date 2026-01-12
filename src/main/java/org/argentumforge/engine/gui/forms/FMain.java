@@ -5,8 +5,9 @@ import imgui.flag.*;
 import org.argentumforge.engine.Window;
 import org.argentumforge.engine.game.console.Console;
 import org.argentumforge.engine.gui.ImGUISystem;
-import org.argentumforge.engine.utils.GameData;
+import org.argentumforge.engine.renderer.RenderSettings;
 
+import static org.argentumforge.engine.utils.GameData.options;
 import static org.argentumforge.engine.utils.Time.FPS;
 
 /**
@@ -189,18 +190,6 @@ public final class FMain extends Form {
 
         ImGui.sameLine();
 
-        // Botón Info Mapa
-        if (ImGui.button("Info Mapa", 100, 25)) {
-            if (ImGUISystem.INSTANCE.isFormVisible("FInfoMap")) {
-                // If already visible, just refocus or show again
-                ImGUISystem.INSTANCE.show(new FInfoMap());
-            } else {
-                ImGUISystem.INSTANCE.show(new FInfoMap());
-            }
-        }
-
-        ImGui.sameLine();
-
         // Botón Opciones
         /*
          * if (ImGui.button("Opciones", 100, 25)) {
@@ -210,10 +199,18 @@ public final class FMain extends Form {
     }
 
     private void drawMenuBar() {
+
         if (ImGui.beginMainMenuBar()) {
+
+            RenderSettings renderSettings = options.getRenderSettings();
+
             if (ImGui.beginMenu("Archivo")) {
                 if (ImGui.menuItem("Cargar Mapa")) {
                     this.loadMapAction();
+                }
+
+                if (ImGui.menuItem("Guardar Mapa")) {
+                    System.out.println("TODO: por desarrollar");
                 }
 
                 ImGui.separator();
@@ -252,13 +249,66 @@ public final class FMain extends Form {
              * }
              */
 
+            if (ImGui.beginMenu("Mapa")) {
+                if (ImGui.menuItem("Información del Mapa")) {
+                    ImGUISystem.INSTANCE.show(new FInfoMap());
+                }
+                ImGui.endMenu();
+            }
+
             if (ImGui.beginMenu("Ver")) {
+                if (ImGui.beginMenu("Capas")) {
+                    if (ImGui.menuItem("Capa 1 (Superficies)", "", renderSettings.getShowLayer()[0])) {
+                        renderSettings.getShowLayer()[0] = !renderSettings.getShowLayer()[0];
+                        options.save();
+                    }
+                    if (ImGui.menuItem("Capa 2 (Costas, etc)", "", renderSettings.getShowLayer()[1])) {
+                        renderSettings.getShowLayer()[1] = !renderSettings.getShowLayer()[1];
+                        options.save();
+                    }
+                    if (ImGui.menuItem("Capa 3 (Arboles, etc)", "", renderSettings.getShowLayer()[2])) {
+                        renderSettings.getShowLayer()[2] = !renderSettings.getShowLayer()[2];
+                        options.save();
+                    }
+                    if (ImGui.menuItem("Capa 4 (Techos, etc)", "", renderSettings.getShowLayer()[3])) {
+                        renderSettings.getShowLayer()[3] = !renderSettings.getShowLayer()[3];
+                        options.save();
+                    }
+                    ImGui.endMenu();
+                }
+
+                if (ImGui.menuItem("Bloqueos", "", renderSettings.getShowBlock())) {
+                    renderSettings.setShowBlock(!renderSettings.getShowBlock());
+                    options.save();
+                }
+
+                if (ImGui.menuItem("Objetos", "", renderSettings.getShowOJBs())) {
+                    renderSettings.setShowOJBs(!renderSettings.getShowOJBs());
+                    options.save();
+                }
+
+                if (ImGui.menuItem("NPC's", "", renderSettings.getShowNPCs())) {
+                    renderSettings.setShowNPCs(!renderSettings.getShowNPCs());
+                    options.save();
+                }
+
+                if (ImGui.menuItem("Traslados", "", renderSettings.getShowMapTransfer())) {
+                    renderSettings.setShowMapTransfer(!renderSettings.getShowMapTransfer());
+                    options.save();
+                }
+
+                if (ImGui.menuItem("Triggers", "", renderSettings.getShowTriggers())) {
+                    renderSettings.setShowTriggers(!renderSettings.getShowTriggers());
+                    options.save();
+                }
+
+                ImGui.endMenu();
+            }
+
+            if (ImGui.beginMenu("Miscelánea")) {
                 if (ImGui.menuItem("Modo Caminata", "", org.argentumforge.engine.game.User.INSTANCE.isWalkingmode())) {
                     org.argentumforge.engine.game.User.INSTANCE
                             .setWalkingmode(!org.argentumforge.engine.game.User.INSTANCE.isWalkingmode());
-                }
-                if (ImGui.menuItem("Información del Mapa")) {
-                    ImGUISystem.INSTANCE.show(new FInfoMap());
                 }
                 ImGui.endMenu();
             }

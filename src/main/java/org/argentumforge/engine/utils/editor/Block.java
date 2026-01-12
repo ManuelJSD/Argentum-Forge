@@ -12,11 +12,9 @@ public class Block {
     private static final Object lock = new Object();
 
     private int mode; // 0 = ninguno, 1 = bloquear, 2 = desbloquear
-    private boolean showBlocks; // Para visualizar los bloqueos en el mapa
 
     private Block() {
         this.mode = 0;
-        this.showBlocks = false;
     }
 
     public static Block getInstance() {
@@ -43,14 +41,6 @@ public class Block {
 
     public void setMode(int mode) {
         this.mode = mode;
-    }
-
-    public boolean isShowBlocks() {
-        return showBlocks;
-    }
-
-    public void setShowBlocks(boolean showBlocks) {
-        this.showBlocks = showBlocks;
     }
 
     /**
