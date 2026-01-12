@@ -27,36 +27,27 @@ import static org.lwjgl.glfw.GLFW.*;
 
 /**
  * <p>
- * {@code GameScene} es la escena mas compleja, responsable de manejar toda la
- * logica y renderizado del mundo de Argentum Online
- * cuando el jugador esta activamente conectado y controlando su personaje. Esta
- * escena se activa una vez que el usuario ha
- * iniciado sesion satisfactoriamente desde {@code MainScene}.
+ * {@code GameScene} es la escena principal del editor, responsable de
+ * renderizar el mapa
+ * y gestionar las herramientas de edición en tiempo real.
  * <p>
  * Funcionalidades principales:
  * <ul>
- * <li>Renderizado del mapa con sus multiples capas
- * <li>Control del personaje del usuario mediante entradas de teclado y raton
- * <li>Visualizacion de otros personajes y NPCs en el mundo
- * <li>Manejo de efectos como la lluvia y efectos visuales
- * <li>Mostrar dialogos sobre los personajes
- * <li>Control de la camara centrada en el personaje
- * <li>Renderizado de la interfaz de usuario superpuesta (inventario, chat,
- * estadisticas)
+ * <li>Renderizado del mapa con sus múltiples capas y visualización técnica
+ * (bloqueos, traslados).</li>
+ * <li>Gestión de las herramientas de edición (Superficies, Bloqueos, NPCs,
+ * Objetos).</li>
+ * <li>Visualización de NPCs y Objetos colocados en el mapa.</li>
+ * <li>Control de cámara y navegación por el mundo.</li>
+ * <li>Modo "Caminata" para previsualizar colisiones y movimiento.</li>
  * </ul>
  * <p>
- * Esta escena monitorea constantemente el estado de conexion del usuario. Si se
- * detecta una desconexion, la escena se cierra
- * automaticamente y regresa a {@code MainScene} para permitir una nueva
- * conexion.
- * <p>
- * El metodo {@link GameScene#render()} es particularmente complejo en esta
- * escena, ya que maneja el renderizado de multiples
- * capas en orden especifico para lograr el efecto visual correcto del mundo.
+ * El método {@link GameScene#render()} coordina el dibujado por capas para
+ * garantizar
+ * la correcta superposición de elementos visuales.
  *
  * @see Scene
- * @see MainScene
- * @see User
+ * @see FMain
  * @see Camera
  */
 

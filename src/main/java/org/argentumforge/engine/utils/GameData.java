@@ -20,28 +20,31 @@ import static org.argentumforge.scripts.Compressor.readResource;
 
 /**
  * <p>
- * Clase central de almacenamiento y gestion de datos del juego.
+ * Clase central de almacenamiento y gestión de datos del editor de mapas.
  * {@code GameData} contiene las referencias a todos los recursos,
- * estados y configuraciones necesarios para el funcionamiento del cliente.
+ * estados y configuraciones necesarios para el funcionamiento de la
+ * herramienta.
  * <p>
  * Esta clase es de tipo utilidad (utility class) y no debe ser instanciada.
- * Provee metodos estaticos para cargar, inicializar y
- * acceder a los diferentes elementos del juego como graficos, sonidos,
- * personajes, mapas y configuraciones.
+ * Provee métodos estáticos para cargar, inicializar y
+ * acceder a los diferentes elementos como gráficos, personajes (NPCs),
+ * objetos y configuraciones de mapas.
  * <p>
  * Entre sus responsabilidades principales se encuentran:
  * <ul>
- * <li>Gestionar los arrays estaticos de datos del juego (cuerpos, cabezas,
- * graficos, etc.)
- * <li>Cargar los recursos desde archivos comprimidos
- * <li>Inicializar los datos necesarios al inicio del juego
- * <li>Proporcionar metodos de acceso a los datos del juego
- * <li>Mantener el estado global de elementos como personajes, mapas y efectos
+ * <li>Gestionar los arrays estáticos de datos (cuerpos, cabezas, gráficos,
+ * etc.)</li>
+ * <li>Cargar los recursos desde archivos locales configurados</li>
+ * <li>Inicializar los datos necesarios al inicio del editor</li>
+ * <li>Proporcionar métodos de acceso a los datos para su visualización y
+ * edición</li>
+ * <li>Mantener el estado global del mapa actual, incluyendo entidades y
+ * triggers</li>
  * </ul>
  * <p>
  * La clase implementa un sistema de carga secuencial de recursos durante la
- * inicializacion, garantizando que todos los datos
- * necesarios esten disponibles antes de que el juego comience a ejecutarse.
+ * inicialización, garantizando que todos los datos necesarios estén
+ * disponibles.
  */
 
 public final class GameData {
