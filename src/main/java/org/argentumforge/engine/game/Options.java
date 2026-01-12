@@ -29,6 +29,9 @@ public enum Options {
     private int screenWidth = 1024;
     private int screenHeight = 1024;
     private String lastMapPath = ".";
+    private float ambientR = 1.0f;
+    private float ambientG = 1.0f;
+    private float ambientB = 1.0f;
 
     private final RenderSettings renderSettings = new RenderSettings();
 
@@ -77,6 +80,9 @@ public enum Options {
             write(writer, "ScreenWidth", screenWidth);
             write(writer, "ScreenHeight", screenHeight);
             write(writer, "LastMapPath", lastMapPath);
+            write(writer, "AmbientR", ambientR);
+            write(writer, "AmbientG", ambientG);
+            write(writer, "AmbientB", ambientB);
 
             write(writer, "RenderLayer1", renderSettings.getShowLayer()[0]);
             write(writer, "RenderLayer2", renderSettings.getShowLayer()[1]);
@@ -234,6 +240,9 @@ public enum Options {
             case "ScreenWidth" -> screenWidth = Integer.parseInt(value);
             case "ScreenHeight" -> screenHeight = Integer.parseInt(value);
             case "LastMapPath" -> lastMapPath = value;
+            case "AmbientR" -> ambientR = Float.parseFloat(value);
+            case "AmbientG" -> ambientG = Float.parseFloat(value);
+            case "AmbientB" -> ambientB = Float.parseFloat(value);
             case "RenderLayer1" -> renderSettings.getShowLayer()[0] = Boolean.parseBoolean(value);
             case "RenderLayer2" -> renderSettings.getShowLayer()[1] = Boolean.parseBoolean(value);
             case "RenderLayer3" -> renderSettings.getShowLayer()[2] = Boolean.parseBoolean(value);
@@ -247,4 +256,27 @@ public enum Options {
         }
     }
 
+    public float getAmbientR() {
+        return ambientR;
+    }
+
+    public void setAmbientR(float ambientR) {
+        this.ambientR = ambientR;
+    }
+
+    public float getAmbientG() {
+        return ambientG;
+    }
+
+    public void setAmbientG(float ambientG) {
+        this.ambientG = ambientG;
+    }
+
+    public float getAmbientB() {
+        return ambientB;
+    }
+
+    public void setAmbientB(float ambientB) {
+        this.ambientB = ambientB;
+    }
 }
