@@ -4,7 +4,6 @@ import org.argentumforge.engine.game.models.*;
 
 import org.argentumforge.engine.utils.AssetRegistry;
 
-import static org.argentumforge.engine.audio.Sound.*;
 import static org.argentumforge.engine.game.models.Character.*;
 import static org.argentumforge.engine.game.models.Direction.*;
 import static org.argentumforge.engine.scenes.Camera.*;
@@ -25,12 +24,9 @@ import static org.argentumforge.engine.utils.GameData.*;
  * Entre sus responsabilidades principales se encuentran:
  * <ul>
  * <li>Control del movimiento y posicionamiento del usuario</li>
- * <li>Gestion de estadisticas (vida, mana, stamina, experiencia, etc.)</li>
- * <li>Manejo del inventario y equipamiento</li>
- * <li>Administracion de hechizos disponibles</li>
- * <li>Control de estados especiales (navegando, bajo techo, hablando,
- * etc.)</li>
- * <li>Interaccion con el entorno y otros personajes</li>
+ * <li>Gestión de la posición en el mapa</li>
+ * <li>Control de estados especiales (bajo techo, etc.)</li>
+ * <li>Interacción con el entorno y otros personajes</li>
  * </ul>
  * <p>
  * La clase representa el nucleo de la experiencia de juego, siendo el punto de
@@ -50,9 +46,6 @@ public enum User {
     // mapa
     private short userMap;
     private short userCharIndex;
-
-    // stats del usuario
-    private String userName;
 
     User() {
         this.userPos = new Position();
@@ -81,7 +74,7 @@ public enum User {
                 break;
         }
 
-        // In free camera mode, move 2 tiles at a time (50% faster)
+        // En modo cámara libre, mover 2 tiles a la vez (50% más rápido)
         int multiplier = walkingmode ? 1 : 2;
         x *= multiplier;
         y *= multiplier;
@@ -137,7 +130,7 @@ public enum User {
         final int nX = x + addX;
         final int nY = y + addY;
 
-        // Validate bounds before accessing mapData
+        // Validar límites antes de acceder a mapData
         if (nX < 1 || nX > 100 || nY < 1 || nY > 100) {
             return;
         }
@@ -175,20 +168,6 @@ public enum User {
                 (mapData[x][y].getLayer(1).getGrhIndex() >= 13547 && mapData[x][y].getLayer(1).getGrhIndex() <= 13562))
                 &&
                 mapData[x][y].getLayer(2).getGrhIndex() == 0;
-    }
-
-    /**
-     * @param charIndex Numero de identificador de personaje.
-     * @param fx        Numero de efecto FX.
-     * @param loops     Tiempo del efecto FX. Establece un efecto FX en un
-     *                  personaje.
-     */
-    public void setCharacterFx(int charIndex, int fx, int loops) {
-        charList[charIndex].setFxIndex(fx);
-        if (charList[charIndex].getFxIndex() > 0) {
-            initGrh(charList[charIndex].getfX(), AssetRegistry.fxData[fx].getAnimacion(), true);
-            charList[charIndex].getfX().setLoops(loops);
-        }
     }
 
     /**
@@ -243,12 +222,12 @@ public enum User {
         if (legalOk) {
             moveScreen(direction);
 
-            // Only move character if walking mode is active
+            // Solo mover al personaje si el modo caminata está activo
             if (walkingmode) {
                 moveCharbyHead(userCharIndex, direction);
             }
         } else if (walkingmode && charList[userCharIndex].getHeading() != direction) {
-            // Only change heading in walking mode
+            // Solo cambiar el rumbo en modo caminata
             charList[userCharIndex].setHeading(direction);
         }
 
@@ -316,14 +295,14 @@ public enum User {
         if (x < minXBorder || x > maxXBorder || y < minYBorder || y > maxYBorder)
             return false;
 
-        // Modo caminata activo??
+        // ¿Modo caminata activo?
         if (!walkingmode) {
-            // Free camera mode - no restrictions
+            // Modo cámara libre - sin restricciones
             return true;
         }
 
-        // Walking mode - apply restrictions
-        // Tile Bloqueado?
+        // Modo caminata - aplicar restricciones
+        // ¿Tile bloqueado?
         if (mapData[x][y].getBlocked())
             return false;
 

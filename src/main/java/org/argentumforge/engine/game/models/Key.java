@@ -14,9 +14,10 @@ import java.util.logging.Logger;
 import static org.lwjgl.glfw.GLFW.*;
 
 /**
- * Represents keys associated with game actions with customizable configuration.
- * Keys can be loaded from file, saved and reset to
- * default values.
+ * Representa las teclas asociadas a las acciones del juego con configuracion
+ * personalizable.
+ * Las teclas pueden cargarse desde un archivo, guardarse y restablecerse a los
+ * valores predeterminados.
  */
 
 public enum Key {
@@ -104,7 +105,7 @@ public enum Key {
      */
     public static void loadKeys() {
         if (!Files.exists(Paths.get(KEYS_CONFIG_FILE))) {
-            LOGGER.info("Configuration file not found, using default values");
+            LOGGER.info("Archivo de configuracion no encontrado, usando valores por defecto");
             loadDefaultKeys();
             return;
         }
@@ -120,11 +121,11 @@ public enum Key {
                         if (isValidKeyCode(keyCode))
                             keyCodeMap.put(key, keyCode);
                         else {
-                            LOGGER.warning("Invalid key code for " + key.name() + ": " + keyCode);
+                            LOGGER.warning("Codigo de tecla invalido para " + key.name() + ": " + keyCode);
                             keyCodeMap.put(key, key.defaultKeyCode);
                         }
                     } catch (NumberFormatException e) {
-                        LOGGER.warning("Error parsing key code for " + key.name() + ": " + keyCodeStr);
+                        LOGGER.warning("Error al procesar el codigo de tecla para " + key.name() + ": " + keyCodeStr);
                         keyCodeMap.put(key, key.defaultKeyCode);
                     }
                 } else
@@ -132,7 +133,7 @@ public enum Key {
             }
             updateMaps();
         } catch (IOException e) {
-            LOGGER.severe("Error loading key configuration: " + e.getMessage());
+            LOGGER.severe("Error al cargar la configuracion de teclas: " + e.getMessage());
             loadDefaultKeys();
         }
     }
@@ -176,9 +177,10 @@ public enum Key {
         Properties properties = new Properties();
         keyCodeMap.forEach((key, code) -> properties.setProperty(key.name(), String.valueOf(code)));
         try (FileOutputStream fos = new FileOutputStream(KEYS_CONFIG_FILE)) {
-            properties.store(fos, "Key Configuration for Argentum Online LWJGL3\nMapping actions to GLFW keycodes");
+            properties.store(fos,
+                    "Configuracion de teclas para Argentum Forge\nMapeo de acciones a codigos de tecla GLFW");
         } catch (IOException e) {
-            LOGGER.severe("Error saving key configuration: " + e.getMessage());
+            LOGGER.severe("Error al guardar la configuracion de teclas: " + e.getMessage());
         }
     }
 

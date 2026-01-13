@@ -56,8 +56,9 @@ public enum Options {
                 }
             }
         } catch (IOException e) {
-            Logger.error("The " + OPTIONS_FILE_PATH
-                    + " file was not found or could not be read, a new one was created with the default configuration.");
+            Logger.error(
+                    "El archivo {} no fue encontrado o no pudo leerse, se creó uno nuevo con la configuración por defecto.",
+                    OPTIONS_FILE_PATH);
             save();
         }
     }
@@ -94,7 +95,7 @@ public enum Options {
             write(writer, "RenderShowTranslation", renderSettings.getShowMapTransfer());
             write(writer, "RenderShowBlock", renderSettings.getShowBlock());
         } catch (IOException e) {
-            Logger.error("Could not write to options.ini file!");
+            Logger.error("¡No se pudo escribir en el archivo options.ini!");
         }
     }
 
@@ -252,7 +253,7 @@ public enum Options {
             case "RenderShowTriggers" -> renderSettings.setShowTriggers(Boolean.parseBoolean(value));
             case "RenderShowTranslation" -> renderSettings.setShowMapTransfer(Boolean.parseBoolean(value));
             case "RenderShowBlock" -> renderSettings.setShowBlock(Boolean.parseBoolean(value));
-            default -> Logger.warn("Unknown option ignored: {}", option);
+            default -> Logger.warn("Opción desconocida ignorada: {}", option);
         }
     }
 

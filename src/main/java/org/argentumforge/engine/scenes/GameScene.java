@@ -72,9 +72,6 @@ public final class GameScene extends Scene {
     /** Nivel de transparencia de la capa de techos (0.0f a 1.0f). */
     private float alphaCeiling = 1.0f;
 
-    /** Indica si el movimiento automático está activo. */
-    private boolean autoMove = false;
-
     /** Formulario principal de la interfaz de usuario. */
     private FMain frmMain;
 
@@ -167,7 +164,7 @@ public final class GameScene extends Scene {
                 && !ImGUISystem.INSTANCE.isFormVisible("FMinimap"))
             return;
 
-        // Estamos haciendo click en el render?
+        // ¿Estamos haciendo clic dentro del área de renderizado del juego?
         if (inGameArea()) {
             if (MouseListener.mouseButtonDown(GLFW_MOUSE_BUTTON_LEFT)) {
 
@@ -395,7 +392,8 @@ public final class GameScene extends Scene {
                     }
                 }
 
-                // Only render characters when walking mode is active, or render NPCs always
+                // Solo renderizar personajes cuando el modo caminata está activo, o renderizar
+                // NPCs siempre
                 if (mapData[x][y].getCharIndex() != 0) {
                     final int charIndex = mapData[x][y].getCharIndex();
                     final boolean isUserChar = charIndex == user.getUserCharIndex();

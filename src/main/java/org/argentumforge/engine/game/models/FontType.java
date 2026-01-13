@@ -1,13 +1,14 @@
 package org.argentumforge.engine.game.models;
 
 /**
- * Define los diferentes tipos de fuentes y estilos tipograficos utilizados para mostrar mensajes.
+ * Define los diferentes tipos de fuentes y estilos tipográficos utilizados para
+ * mostrar mensajes.
  * <p>
  * Cada tipo de fuente define:
  * <ul>
- * <li>Un color especifico mediante valores RGB (r, g, b)
- * <li>Si el texto debe mostrarse en <b>bold</b>
- * <li>Si el texto debe mostrarse en <i>italic</i>
+ * <li>Un color específico mediante valores RGB (r, g, b)</li>
+ * <li>Si el texto debe mostrarse en <b>negrita</b> (bold)</li>
+ * <li>Si el texto debe mostrarse en <i>cursiva</i> (italic)</li>
  * </ul>
  */
 

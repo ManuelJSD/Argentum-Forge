@@ -34,12 +34,13 @@ public class Messages {
         try {
             Path resources = Paths.get("resources", filename);
             if (!Files.exists(resources)) {
-                System.err.println("The " + filename + " file could not be found!");
+                System.err.println("¡No se pudo encontrar el archivo " + filename + "!");
                 return;
             }
 
             // Leer el archivo con UTF-8
-            try (InputStreamReader reader = new InputStreamReader(Files.newInputStream(resources), StandardCharsets.UTF_8)) {
+            try (InputStreamReader reader = new InputStreamReader(Files.newInputStream(resources),
+                    StandardCharsets.UTF_8)) {
                 Properties properties = new Properties();
                 properties.load(reader);
 
@@ -52,7 +53,7 @@ public class Messages {
             }
 
         } catch (IOException e) {
-            System.err.println("Error loading messages: " + e.getMessage());
+            System.err.println("Error al cargar los mensajes: " + e.getMessage());
         }
     }
 
@@ -64,75 +65,11 @@ public class Messages {
      * Mensajes.
      */
     public enum MessageKey {
-        CRIATURA_FALLA_GOLPE,
-        CRIATURA_MATADO,
-        RECHAZO_ATAQUE_ESCUDO,
-        USUARIO_RECHAZO_ATAQUE_ESCUDO,
-        FALLADO_GOLPE,
-        SEGURO_ACTIVADO,
-        SEGURO_DESACTIVADO,
-        PIERDE_NOBLEZA,
-        USAR_MEDITANDO,
-        SEGURO_RESU_ON,
-        SEGURO_RESU_OFF,
-        GOLPE_CABEZA,
-        GOLPE_BRAZO_IZQ,
-        GOLPE_BRAZO_DER,
-        GOLPE_PIERNA_IZQ,
-        GOLPE_PIERNA_DER,
-        GOLPE_TORSO,
-        GOLPE_CRIATURA,
-        ATAQUE_FALLO,
-        RECIVE_IMPACTO_CABEZA,
-        RECIVE_IMPACTO_BRAZO_IZQ,
-        RECIVE_IMPACTO_BRAZO_DER,
-        RECIVE_IMPACTO_PIERNA_IZQ,
-        RECIVE_IMPACTO_PIERNA_DER,
-        RECIVE_IMPACTO_TORSO,
-        PRODUCE_IMPACTO,
-        PRODUCE_IMPACTO_CABEZA,
-        PRODUCE_IMPACTO_BRAZO_IZQ,
-        PRODUCE_IMPACTO_BRAZO_DER,
-        PRODUCE_IMPACTO_PIERNA_IZQ,
-        PRODUCE_IMPACTO_PIERNA_DER,
-        PRODUCE_IMPACTO_TORSO,
-        TRABAJO_MAGIA,
-        TRABAJO_PESCA,
-        TRABAJO_ROBAR,
-        TRABAJO_TALAR,
-        TRABAJO_MINERIA,
-        TRABAJO_FUNDIRMETAL,
-        TRABAJO_PROYECTILES,
         ENTRAR_PARTY,
-        NENE,
         NO_VES_NADA_INTERESANTE,
-        HAS_MATADO_A,
-        HAS_GANADO_EXPE,
-        TE_HA_MATADO,
         HOGAR,
         HOGAR_CANCEL,
-        ESTAS_MUERTO,
-        NO_SALIR_PARALIZADO,
         IR_HOGAR,
-        RACE_HUMAN,
-        RACE_ELF,
-        RACE_DROW_ELF,
-        RACE_GNOME,
-        RACE_DWARF,
-        ROLE_MAGE,
-        ROLE_CLERIC,
-        ROLE_WARRIOR,
-        ROLE_ASSASSIN,
-        ROLE_THIEF,
-        ROLE_BARD,
-        ROLE_DRUID,
-        ROLE_BANDIT,
-        ROLE_PALADIN,
-        ROLE_HUNTER,
-        ROLE_WORKER,
-        ROLE_PIRATE,
-        GENDER_MALE,
-        GENDER_FEMININE,
         TRY_CONNECT,
         ENTER_USER_PASS,
         ACCEPT,
@@ -141,8 +78,7 @@ public class Messages {
         COMPLETE_ALL_FIELDS,
         INVALID_NICK,
         INVALID_PASS,
-        INVALID_EMAIL,
-        ORO_INSUFICIENTE
+        INVALID_EMAIL
     }
 
 }
