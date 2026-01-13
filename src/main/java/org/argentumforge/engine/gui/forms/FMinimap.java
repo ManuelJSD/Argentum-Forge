@@ -147,8 +147,8 @@ public final class FMinimap extends Form {
         }
 
         // Si es animado, probamos con el color del primer frame
-        if (GameData.grhData[grh].getNumFrames() > 1) {
-            int firstFrame = GameData.grhData[grh].getFrame(0);
+        if (AssetRegistry.grhData[grh].getNumFrames() > 1) {
+            int firstFrame = AssetRegistry.grhData[grh].getFrame(0);
             if (AssetRegistry.minimapColors.containsKey(firstFrame)) {
                 return AssetRegistry.minimapColors.get(firstFrame);
             }

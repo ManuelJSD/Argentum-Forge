@@ -8,8 +8,9 @@ import org.argentumforge.engine.utils.GameData;
 import org.argentumforge.engine.utils.inits.BodyData;
 import org.argentumforge.engine.utils.inits.GrhData;
 import org.argentumforge.engine.utils.inits.HeadData;
+import org.argentumforge.engine.utils.AssetRegistry;
 
-import static org.argentumforge.engine.utils.GameData.grhData;
+import static org.argentumforge.engine.utils.AssetRegistry.grhData;
 
 public final class PreviewUtils {
 
@@ -57,10 +58,10 @@ public final class PreviewUtils {
      * control de capas.
      */
     public static void drawNpc(int bodyIndex, int headIndex, float scale) {
-        if (bodyIndex <= 0 || bodyIndex >= GameData.bodyData.length || GameData.bodyData[bodyIndex] == null)
+        if (bodyIndex <= 0 || bodyIndex >= AssetRegistry.bodyData.length || AssetRegistry.bodyData[bodyIndex] == null)
             return;
 
-        BodyData body = GameData.bodyData[bodyIndex];
+        BodyData body = AssetRegistry.bodyData[bodyIndex];
         int bodyGrhIndex = body.getWalk(3).getGrhIndex(); // 3 = Sur en AO usualmente, o 1. Probamos 3.
         if (bodyGrhIndex <= 0)
             bodyGrhIndex = body.getWalk(1).getGrhIndex();
@@ -92,8 +93,8 @@ public final class PreviewUtils {
         renderGrhToDrawList(drawList, bodyGrhIndex, centerX, bottomY, scale, true);
 
         // Renderizar Cabeza
-        if (headIndex > 0 && headIndex < GameData.headData.length && GameData.headData[headIndex] != null) {
-            HeadData head = GameData.headData[headIndex];
+        if (headIndex > 0 && headIndex < AssetRegistry.headData.length && AssetRegistry.headData[headIndex] != null) {
+            HeadData head = AssetRegistry.headData[headIndex];
             int headGrhIndex = head.getHead(3).getGrhIndex();
             if (headGrhIndex <= 0)
                 headGrhIndex = head.getHead(1).getGrhIndex();

@@ -11,7 +11,7 @@ import org.argentumforge.engine.utils.inits.GrhData;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.argentumforge.engine.utils.GameData.*;
+import static org.argentumforge.engine.utils.AssetRegistry.grhData;
 
 public class FSurfaceEditor extends Form {
 
