@@ -1,5 +1,6 @@
 package org.argentumforge.engine.utils.editor;
 
+import org.argentumforge.engine.utils.AssetRegistry;
 import org.argentumforge.engine.utils.GameData;
 import org.argentumforge.engine.utils.inits.ObjData;
 
@@ -67,8 +68,8 @@ public class Obj {
 
     private void place(int x, int y) {
         if (mapData != null && x >= 0 && x < mapData.length && y >= 0 && y < mapData[0].length) {
-            if (GameData.objs != null && GameData.objs.containsKey(objNumber)) {
-                ObjData data = GameData.objs.get(objNumber);
+            if (AssetRegistry.objs != null && AssetRegistry.objs.containsKey(objNumber)) {
+                ObjData data = AssetRegistry.objs.get(objNumber);
                 mapData[x][y].getObjGrh().setGrhIndex(0); // Reset before init
                 initGrh(mapData[x][y].getObjGrh(), (short) data.getGrhIndex(), false);
             }

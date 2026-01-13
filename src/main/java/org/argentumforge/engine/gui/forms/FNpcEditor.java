@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import static org.argentumforge.engine.utils.GameData.npcs;
+import static org.argentumforge.engine.utils.AssetRegistry.npcs;
 
 public final class FNpcEditor extends Form {
 

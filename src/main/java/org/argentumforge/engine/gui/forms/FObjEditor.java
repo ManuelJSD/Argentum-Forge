@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import static org.argentumforge.engine.utils.GameData.objs;
+import static org.argentumforge.engine.utils.AssetRegistry.objs;
 
 public final class FObjEditor extends Form {
 
