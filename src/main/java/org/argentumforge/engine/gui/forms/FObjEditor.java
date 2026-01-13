@@ -14,6 +14,12 @@ import java.util.List;
 
 import static org.argentumforge.engine.utils.AssetRegistry.objs;
 
+/**
+ * Formulario de selección y previsualización de objetos para el editor.
+ * 
+ * Permite listar todos los objetos cargados en el AssetRegistry, buscarlos por
+ * nombre y previsualizar su gráfico (GRH) antes de colocarlos en el mapa.
+ */
 public final class FObjEditor extends Form {
 
     private int selectedObjNumber = -1;
@@ -44,8 +50,8 @@ public final class FObjEditor extends Form {
         drawObjList();
         ImGui.separator();
 
-        // Preview Area
-        ImGui.text("Previsualizacion:");
+        // Área de Previsualización
+        ImGui.text("Previsualización:");
         ImGui.beginChild("ObjPreviewChild", 0, 100, true);
         if (selectedObjNumber > 0 && objs != null) {
             ObjData data = objs.get(selectedObjNumber);

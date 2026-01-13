@@ -2,6 +2,12 @@ package org.argentumforge.engine.utils.editor;
 
 import static org.argentumforge.engine.utils.GameData.mapData;
 
+/**
+ * Gestor de estado del editor para la manipulación de NPCs en el mapa.
+ * 
+ * Implementa el patrón Singleton para mantener una única instancia del estado
+ * de edición de NPCs (modo de edición y número de NPC seleccionado).
+ */
 public class Npc {
 
     private static volatile Npc instance;
@@ -15,6 +21,9 @@ public class Npc {
         this.npcNumber = 0;
     }
 
+    /**
+     * Obtiene la instancia única del gestor de edición de NPCs.
+     */
     public static Npc getInstance() {
         if (instance == null) {
             synchronized (lock) {
@@ -26,6 +35,9 @@ public class Npc {
         return instance;
     }
 
+    /**
+     * Resetea la instancia del Singleton.
+     */
     public static void resetInstance() {
         synchronized (lock) {
             instance = null;
@@ -48,6 +60,12 @@ public class Npc {
         this.npcNumber = npcNumber;
     }
 
+    /**
+     * Ejecuta la acción de edición (colocar o quitar) en las coordenadas dadas.
+     * 
+     * @param x Coordenada X del mapa.
+     * @param y Coordenada Y del mapa.
+     */
     public void npc_edit(int x, int y) {
         switch (mode) {
             case 1:
@@ -61,12 +79,24 @@ public class Npc {
         }
     }
 
+    /**
+     * Coloca el NPC seleccionado en las coordenadas especificadas.
+     * 
+     * @param x Coordenada X del mapa.
+     * @param y Coordenada Y del mapa.
+     */
     private void place(int x, int y) {
         if (mapData != null && x >= 0 && x < mapData.length && y >= 0 && y < mapData[0].length) {
             mapData[x][y].setNpcIndex((short) npcNumber);
         }
     }
 
+    /**
+     * Quita cualquier NPC de las coordenadas especificadas.
+     * 
+     * @param x Coordenada X del mapa.
+     * @param y Coordenada Y del mapa.
+     */
     private void remove(int x, int y) {
         if (mapData != null && x >= 0 && x < mapData.length && y >= 0 && y < mapData[0].length) {
             mapData[x][y].setNpcIndex((short) 0);

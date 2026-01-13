@@ -1,16 +1,14 @@
 package org.argentumforge.engine.utils.inits;
 
 /**
- * Simula el "Type" o la estructura de {@code MapData}, representando los datos
- * de una celda individual en el mapa.
+ * Representa los datos de una celda individual (tile) del mapa.
  * <p>
- * Esta clase almacena toda la informacion necesaria para representar una celda
- * especifica del mapa, incluyendo sus capas
- * graficas, personajes, objetos y propiedades de interaccion.
+ * {@code MapData} almacena la información de las 4 capas de gráficos,
+ * el índice del NPC u objeto presente, bloqueos, triggers, información
+ * de traslados (exits) y el ítem depositado en el suelo.
  *
  * @see GrhInfo
  */
-
 public final class MapData {
 
     private final GrhInfo[] layer = new GrhInfo[5];

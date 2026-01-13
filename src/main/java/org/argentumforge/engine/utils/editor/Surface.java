@@ -3,6 +3,12 @@ package org.argentumforge.engine.utils.editor;
 import static org.argentumforge.engine.utils.GameData.initGrh;
 import static org.argentumforge.engine.utils.GameData.mapData;
 
+/**
+ * Clase singleton para gestionar la edición de superficies (capas de suelo) en
+ * el mapa.
+ * Permite insertar o eliminar gráficos (GRH) en cualquiera de las 4 capas del
+ * mapa.
+ */
 public class Surface {
 
     private static volatile Surface instance;
@@ -29,7 +35,7 @@ public class Surface {
         return instance;
     }
 
-    //Para testing
+    // Para testing
     public static void resetInstance() {
         synchronized (lock) {
             instance = null;
@@ -62,12 +68,12 @@ public class Surface {
 
     public void surface_edit(int x, int y) {
         switch (mode) {
-            case 1: //Insertar
-                this.insert(x,y);
+            case 1: // Insertar
+                this.insert(x, y);
                 break;
 
-            case 2: //Eliminar
-                this.delete(x,y);
+            case 2: // Eliminar
+                this.delete(x, y);
                 break;
 
             default:
@@ -77,7 +83,8 @@ public class Surface {
 
     private void insert(int x, int y) {
         mapData[x][y].getLayer(layer).setGrhIndex(surfaceIndex);
-        mapData[x][y].setLayer(layer, initGrh(mapData[x][y].getLayer(layer), mapData[x][y].getLayer(layer).getGrhIndex(), true));
+        mapData[x][y].setLayer(layer,
+                initGrh(mapData[x][y].getLayer(layer), mapData[x][y].getLayer(layer).getGrhIndex(), true));
     }
 
     private void delete(int x, int y) {
@@ -86,7 +93,8 @@ public class Surface {
         } else {
             mapData[x][y].getLayer(layer).setGrhIndex(0);
         }
-        mapData[x][y].setLayer(layer, initGrh(mapData[x][y].getLayer(layer), mapData[x][y].getLayer(layer).getGrhIndex(), true));
+        mapData[x][y].setLayer(layer,
+                initGrh(mapData[x][y].getLayer(layer), mapData[x][y].getLayer(layer).getGrhIndex(), true));
     }
 
 }

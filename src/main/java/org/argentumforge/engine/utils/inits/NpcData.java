@@ -1,5 +1,12 @@
 package org.argentumforge.engine.utils.inits;
 
+/**
+ * Modelo de datos para un NPC (Personaje No Jugador).
+ * <p>
+ * {@code NpcData} almacena la información básica de un NPC cargado desde
+ * el archivo NPCs.dat, incluyendo su nombre, gráficos de cabeza y cuerpo,
+ * y su orientación.
+ */
 public final class NpcData {
 
     private int number;
@@ -47,7 +54,11 @@ public final class NpcData {
         this.body = body;
     }
 
-    public int getHeading() { return heading; }
+    public int getHeading() {
+        return heading;
+    }
 
-    public void setHeading(int heading) { this.heading = heading; }
+    public void setHeading(int heading) {
+        this.heading = heading;
+    }
 }

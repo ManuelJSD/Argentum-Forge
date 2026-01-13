@@ -1,19 +1,13 @@
 package org.argentumforge.engine.utils.inits;
 
 /**
+ * Datos de representación visual de los escudos equipados.
  * <p>
- * Simula el "Type" o la estructura de {@code ShieldData}, encargandose de gestionar la informacion grafica de los escudos de los
- * personajes.
- * <p>
- * Esta clase almacena la informacion necesaria para representar visualmente los escudos equipados por los personajes, manteniendo
- * referencias a los graficos correspondientes para cada direccion de movimiento posible.
- * <p>
- * Es utilizada por la clase Character para renderizar adecuadamente  el escudo del personaje mientras se desplaza por el mapa.
+ * {@code ShieldData} contiene los gráficos (GRH) de las animaciones de caminar
+ * con el escudo equipado en las cuatro direcciones cardinales.
  *
  * @see GrhInfo
- * @see Character
  */
-
 public final class ShieldData {
 
     private final GrhInfo[] shieldWalk = new GrhInfo[5];

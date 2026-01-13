@@ -1,21 +1,14 @@
 package org.argentumforge.engine.utils.inits;
 
 /**
+ * Estructura de indexación para los gráficos de cuerpos.
  * <p>
- * Simula el "Type" o la estructura de {@code IndexBodys}, utilizada para almacenar los indices graficos de los cuerpos de los
- * personajes.
- * <p>
- * Esta clase gestiona los diferentes indices graficos correspondientes a los cuerpos de los personajes, organizados segun la
- * orientacion o direccion del movimiento, asi como los desplazamientos necesarios para posicionar correctamente la cabeza sobre
- * el cuerpo.
- * <p>
- * Es utilizada durante la carga de datos de personajes para mapear correctamente los recursos graficos de los cuerpos y calcular
- * la posicion adecuada de la cabeza sobre estos.
+ * {@code IndexBodys} se utiliza durante el proceso de carga para mapear los
+ * índices de animación de caminar y los desplazamientos de cabeza definidos
+ * en los archivos de inicialización.
  *
- * @see org.argentumforge.engine.utils.inits.BodyData
- * @see org.argentumforge.engine.utils.GameData
+ * @see BodyData
  */
-
 public final class IndexBodys {
 
     private short[] body = new short[5];

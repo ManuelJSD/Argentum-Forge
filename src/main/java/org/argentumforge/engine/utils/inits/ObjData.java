@@ -1,5 +1,12 @@
 package org.argentumforge.engine.utils.inits;
 
+/**
+ * Modelo de datos para un objeto del juego.
+ * <p>
+ * {@code ObjData} almacena la información básica de un ítem u objeto cargado
+ * desde OBJ.dat, incluyendo su nombre y el índice del gráfico (GRH) que lo
+ * representa.
+ */
 public final class ObjData {
 
     private int number;

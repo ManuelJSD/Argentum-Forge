@@ -13,7 +13,10 @@ import java.nio.file.Path;
 import static org.argentumforge.engine.game.models.Character.eraseAllChars;
 
 /**
- * Clase responsable de las operaciones de gestión de mapas.
+ * Clase responsable de la gestión de archivos de mapa (.map, .inf, .dat).
+ * 
+ * Centraliza la lógica de carga, guardado e inicialización de los datos del
+ * escenario, incluyendo capas de gráficos, bloqueos, triggers y entidades.
  */
 public final class MapManager {
     private MapManager() {
@@ -21,24 +24,30 @@ public final class MapManager {
     }
 
     /**
-     * Carga un mapa desde la ruta especificada.
+     * Carga un mapa completo (capas, propiedades y entidades) desde una ruta.
+     * 
+     * @param filePath Ruta absoluta al archivo .map
      */
     public static void loadMap(String filePath) {
-        Logger.info("Loading map from: {}", filePath);
+        Logger.info("Cargando mapa desde: {}", filePath);
 
-        // Guardar la ruta del último mapa
+        // Guardar la ruta del último mapa para futuras sesiones
         Options.INSTANCE.setLastMapPath(filePath);
         Options.INSTANCE.save();
-        // Limpiar personajes existentes
+
+        // Limpiar personajes antes de cargar el nuevo escenario
         eraseAllChars();
+
         try {
             // Cargar archivo principal de capas (.map)
             byte[] data = Files.readAllBytes(Path.of(filePath));
             initMap(data);
-            // Preparar para buscar archivos compañeros (.inf y .dat)
+
+            // Preparar para buscar archivos complementarios (.inf y .dat)
             String basePath = filePath.substring(0, filePath.lastIndexOf('.'));
             String datPath = basePath + ".dat";
             String infPath = basePath + ".inf";
+
             // Intentar cargar propiedades del mapa (.dat)
             if (Files.exists(Path.of(datPath))) {
                 loadMapProperties(datPath);
@@ -46,90 +55,107 @@ public final class MapManager {
                 GameData.mapProperties = new MapProperties();
                 Logger.info("Archivo .dat no encontrado en {}, usando valores por defecto.", datPath);
             }
+
             // Intentar cargar información de entidades (.inf)
             if (Files.exists(Path.of(infPath))) {
                 loadMapInfo(infPath);
             } else {
-                Logger.info("Archivo .inf no encontrado en {}, saltando la carga de entidades.", infPath);
+                Logger.info("Archivo .inf no encontrado en {}, saltando carga de entidades.", infPath);
             }
-            Logger.info("Map loaded successfully");
+
+            Logger.info("Mapa cargado exitosamente");
         } catch (IOException e) {
-            Logger.error(e, "Could not load map from path: {}", filePath);
+            Logger.error(e, "No se pudo cargar el mapa desde: {}", filePath);
         }
     }
 
     /**
-     * Guarda el mapa actual en la ruta especificada.
+     * Guarda el estado actual del mapa en disco, generando los archivos .map, .inf
+     * y .dat.
+     * 
+     * @param filePath Ruta absoluta al archivo .map de destino.
      */
     public static void saveMap(String filePath) {
-        Logger.info("Saving map to: {}", filePath);
+        Logger.info("Guardando mapa en: {}", filePath);
 
         try {
-            // Guardar .map
+            // Guardar datos de capas (.map)
             saveMapData(filePath);
+
             String basePath = filePath.substring(0, filePath.lastIndexOf('.'));
             String datPath = basePath + ".dat";
             String infPath = basePath + ".inf";
-            // Guardar .dat
+
+            // Guardar propiedades generales (.dat)
             saveMapProperties(datPath);
-            // Guardar .inf
+
+            // Guardar información de entidades y triggers (.inf)
             saveMapInfo(infPath);
+
             Logger.info("Mapa guardado exitosamente en: {}", filePath);
             javax.swing.JOptionPane.showMessageDialog(null, "Mapa guardado correctamente.");
         } catch (IOException e) {
-            Logger.error(e, "Error al guardar el mapa: {}", filePath);
+            Logger.error(e, "Error al guardar el mapa en: {}", filePath);
             javax.swing.JOptionPane.showMessageDialog(null, "Error al guardar el mapa:\n" + e.getMessage(), "Error",
                     javax.swing.JOptionPane.ERROR_MESSAGE);
         }
     }
 
     /**
-     * Crea un mapa vacío con las dimensiones especificadas.
+     * Inicializa un mapa vacío con las dimensiones especificadas.
+     * 
+     * @param width  Ancho del mapa (normalmente 100).
+     * @param height Alto del mapa (normalmente 100).
      */
     public static void createEmptyMap(int width, int height) {
-        Logger.info("Creating empty map: {}x{}", width, height);
-        // Validar dimensiones
+        Logger.info("Creando mapa vacío de {}x{}", width, height);
+
+        // Validar dimensiones legales
         if (width < GameData.X_MIN_MAP_SIZE || width > GameData.X_MAX_MAP_SIZE ||
                 height < GameData.Y_MIN_MAP_SIZE || height > GameData.Y_MAX_MAP_SIZE) {
-            Logger.error("Invalid map dimensions: {}x{}", width, height);
+            Logger.error("Dimensiones de mapa inválidas: {}x{}", width, height);
             return;
         }
-        // Limpiar personajes
+
+        // Limpiar personajes actuales
         eraseAllChars();
-        // Crear nuevo mapa
+
+        // Inicializar rejilla de datos
         GameData.mapData = new MapData[width + 1][height + 1];
         for (int x = 0; x <= width; x++) {
             for (int y = 0; y <= height; y++) {
                 GameData.mapData[x][y] = new MapData();
             }
         }
-        // Resetear propiedades
+
+        // Resetear propiedades del mapa
         GameData.mapProperties = new MapProperties();
-        Logger.info("Empty map created successfully");
+        Logger.info("Mapa vacío creado correctamente");
     }
 
     /**
-     * Método interno para procesar el parseo de los datos binarios de un mapa.
-     * Lee cabeceras, flags, capas, bloqueos y triggers.
+     * Procesa los datos binarios del archivo .map para inicializar la rejilla.
+     * Lee cabeceras, flags de tile, capas de gráficos, bloqueos y triggers base.
      *
-     * @param data Datos binarios del mapa.
+     * @param data Contenido binario del archivo .map.
      */
     static void initMap(byte[] data) {
         GameData.reader.init(data);
 
         GameData.mapData = new MapData[GameData.X_MAX_MAP_SIZE + 1][GameData.Y_MAX_MAP_SIZE + 1];
 
+        // Leer versión y saltar cabecera heredada de VB6
         final short mapversion = GameData.reader.readShort();
-        GameData.reader.skipBytes(263); // cabecera.
+        GameData.reader.skipBytes(263);
 
         byte byflags;
-
-        GameData.reader.readShort();
-        GameData.reader.readShort();
-        GameData.reader.readShort();
-        GameData.reader.readShort();
-
         byte bloq;
+
+        // Saltar campos no utilizados en el editor
+        GameData.reader.readShort();
+        GameData.reader.readShort();
+        GameData.reader.readShort();
+        GameData.reader.readShort();
 
         GameData.mapData[0][0] = new MapData();
 
@@ -138,14 +164,18 @@ public final class MapManager {
                 GameData.mapData[x][y] = new MapData();
 
                 byflags = GameData.reader.readByte();
+
+                // Bit 1: Bloqueo
                 bloq = (byte) (byflags & 1);
                 GameData.mapData[x][y].setBlocked(bloq == 1);
 
+                // Capa 1 (Siempre presente)
                 GameData.mapData[x][y].getLayer(1).setGrhIndex(GameData.reader.readShort());
                 GameData.mapData[x][y].setLayer(1,
                         GameData.initGrh(GameData.mapData[x][y].getLayer(1),
                                 GameData.mapData[x][y].getLayer(1).getGrhIndex(), true));
 
+                // Capa 2
                 if ((byte) (byflags & 2) != 0) {
                     GameData.mapData[x][y].getLayer(2).setGrhIndex(GameData.reader.readShort());
                     GameData.mapData[x][y].setLayer(2,
@@ -155,6 +185,7 @@ public final class MapManager {
                 } else
                     GameData.mapData[x][y].getLayer(2).setGrhIndex(0);
 
+                // Capa 3
                 if ((byte) (byflags & 4) != 0) {
                     GameData.mapData[x][y].getLayer(3).setGrhIndex(GameData.reader.readShort());
                     GameData.mapData[x][y].setLayer(3,
@@ -163,6 +194,7 @@ public final class MapManager {
                 } else
                     GameData.mapData[x][y].getLayer(3).setGrhIndex(0);
 
+                // Capa 4
                 if ((byte) (byflags & 8) != 0) {
                     GameData.mapData[x][y].getLayer(4).setGrhIndex(GameData.reader.readShort());
                     GameData.mapData[x][y].setLayer(4,
@@ -171,6 +203,7 @@ public final class MapManager {
                 } else
                     GameData.mapData[x][y].getLayer(4).setGrhIndex(0);
 
+                // Triggers
                 if ((byte) (byflags & 16) != 0)
                     GameData.mapData[x][y].setTrigger(GameData.reader.readShort());
                 else
@@ -180,15 +213,15 @@ public final class MapManager {
             }
         }
 
-        // Liberar memoria
+        // Limpiar recursos de renderizado y entidades anteriores
         Surface.INSTANCE.deleteAllTextures();
         eraseAllChars();
     }
 
     /**
-     * Carga las propiedades generales del mapa desde un archivo .dat.
+     * Carga las propiedades generales del mapa (nombre, música, zona) desde un .dat
      *
-     * @param filePath Ruta absoluta al archivo .dat
+     * @param filePath Ruta absoluta al archivo .dat del mapa.
      */
     private static void loadMapProperties(String filePath) {
         Logger.info("Cargando propiedades del mapa desde: {}", filePath);
@@ -201,7 +234,7 @@ public final class MapManager {
                 if (trimmed.isEmpty() || trimmed.startsWith("'") || trimmed.startsWith("#") || trimmed.startsWith(";"))
                     continue;
 
-                // Saltamos las cabeceras de sección [MAPA1]
+                // Ignorar cabeceras de sección del archivo .ini
                 if (trimmed.startsWith("[") && trimmed.contains("]"))
                     continue;
 
@@ -233,7 +266,7 @@ public final class MapManager {
                         props.setPlayerKiller(Integer.parseInt(value));
                     }
                 } catch (NumberFormatException e) {
-                    Logger.warn("Error parseando valor '{}' para la clave '{}' en el mapa.", value, key);
+                    Logger.warn("Error parseando valor '{}' para la clave '{}' en el .dat del mapa.", value, key);
                 }
             }
         } catch (IOException e) {
@@ -241,13 +274,13 @@ public final class MapManager {
         }
 
         GameData.mapProperties = props;
-        Logger.info("Propiedades cargadas: Name={}, Music={}, Zona={}", props.getName(), props.getMusicIndex(),
+        Logger.info("Propiedades cargadas: Nombre='{}', Música={}, Zona='{}'", props.getName(), props.getMusicIndex(),
                 props.getZona());
     }
 
     /**
-     * Carga la información de entidades (NPCs, Objetos, Triggers) desde un archivo
-     * .inf.
+     * Carga la información de entidades (NPCs, Objetos, Traslados) desde un .inf.
+     * Recrea las entidades visuales en el editor.
      *
      * @param filePath Ruta absoluta al archivo .inf
      */
@@ -256,30 +289,25 @@ public final class MapManager {
             byte[] data = Files.readAllBytes(Path.of(filePath));
             GameData.reader.init(data);
 
-            // Cabecera inf (5 integers in VB6 = 10 bytes)
-            GameData.reader.readShort();
-            GameData.reader.readShort();
-            GameData.reader.readShort();
-            GameData.reader.readShort();
-            GameData.reader.readShort();
+            // Saltar cabecera del .inf (10 bytes heredados)
+            GameData.reader.skipBytes(10);
 
-            // Load arrays
+            // Recorrer el mapa para cargar la información extendida
             for (int y = GameData.Y_MIN_MAP_SIZE; y <= GameData.Y_MAX_MAP_SIZE; y++) {
                 for (int x = GameData.X_MIN_MAP_SIZE; x <= GameData.X_MAX_MAP_SIZE; x++) {
                     if (!GameData.reader.hasRemaining())
                         break;
 
-                    // .inf file
                     byte flags = GameData.reader.readByte();
 
-                    // If ByFlags And 1 Then (Exits)
+                    // Bit 1: Traslados (Exits)
                     if ((flags & 1) != 0) {
                         GameData.mapData[x][y].setExitMap(GameData.reader.readShort());
                         GameData.mapData[x][y].setExitX(GameData.reader.readShort());
                         GameData.mapData[x][y].setExitY(GameData.reader.readShort());
                     }
 
-                    // If ByFlags And 2 Then (NPCs)
+                    // Bit 2: NPCs
                     if ((flags & 2) != 0) {
                         short npcIndex = GameData.reader.readShort();
                         if (npcIndex < 0)
@@ -295,7 +323,7 @@ public final class MapManager {
                         }
                     }
 
-                    // If ByFlags And 4 Then (Objects)
+                    // Bit 4: Objetos
                     if ((flags & 4) != 0) {
                         int objIndex = GameData.reader.readShort();
                         int amount = GameData.reader.readShort();
@@ -308,7 +336,7 @@ public final class MapManager {
                             if (obj != null) {
                                 GameData.initGrh(GameData.mapData[x][y].getObjGrh(), (short) obj.getGrhIndex(), false);
                             } else {
-                                Logger.warn("Object definition not found for index: {}", objIndex);
+                                Logger.warn("Definición de objeto no encontrada para el índice: {}", objIndex);
                             }
                         }
                     }
@@ -317,20 +345,23 @@ public final class MapManager {
             }
 
         } catch (IOException e) {
-            Logger.error(e, "Error loading map info from: {}", filePath);
+            Logger.error(e, "Error al cargar información extendida (.inf) desde: {}", filePath);
         }
     }
 
+    /**
+     * Serializa las capas y bloqueos del mapa en formato binario (.map).
+     */
     private static void saveMapData(String filePath) throws IOException {
         try (FileOutputStream fos = new FileOutputStream(filePath)) {
             java.nio.channels.FileChannel channel = fos.getChannel();
 
-            // 1. Header
+            // 1. Cabecera (273 bytes)
             java.nio.ByteBuffer headerBuf = java.nio.ByteBuffer.allocate(273);
             headerBuf.order(java.nio.ByteOrder.LITTLE_ENDIAN);
 
-            headerBuf.putShort((short) 1); // Map Version
-            headerBuf.put(new byte[263]); // Cabecera vacia
+            headerBuf.putShort((short) 1); // Versión del mapa
+            headerBuf.put(new byte[263]); // Relleno cabecera
             headerBuf.putShort((short) 0);
             headerBuf.putShort((short) 0);
             headerBuf.putShort((short) 0);
@@ -339,7 +370,7 @@ public final class MapManager {
             headerBuf.flip();
             channel.write(headerBuf);
 
-            // 2. Map Data
+            // 2. Datos de tiles
             java.nio.ByteBuffer bodyBuf = java.nio.ByteBuffer.allocate(110000);
             bodyBuf.order(java.nio.ByteOrder.LITTLE_ENDIAN);
 
@@ -376,6 +407,9 @@ public final class MapManager {
         }
     }
 
+    /**
+     * Serializa las propiedades del mapa en formato de texto (.dat).
+     */
     private static void saveMapProperties(String filePath) throws IOException {
         try (PrintWriter writer = new PrintWriter(
                 Files.newBufferedWriter(Path.of(filePath), StandardCharsets.ISO_8859_1))) {
@@ -393,11 +427,14 @@ public final class MapManager {
         }
     }
 
+    /**
+     * Serializa la información de entidades (.inf) en formato binario.
+     */
     private static void saveMapInfo(String filePath) throws IOException {
         try (FileOutputStream fos = new FileOutputStream(filePath)) {
             java.nio.channels.FileChannel channel = fos.getChannel();
 
-            // Header: 5 shorts = 10 bytes
+            // Cabecera (10 bytes iniciales)
             java.nio.ByteBuffer headerBuf = java.nio.ByteBuffer.allocate(10);
             headerBuf.order(java.nio.ByteOrder.LITTLE_ENDIAN);
             headerBuf.putShort((short) 0);
@@ -408,9 +445,7 @@ public final class MapManager {
             headerBuf.flip();
             channel.write(headerBuf);
 
-            // Body
-            // Max size per cell unknown but bounded.
-            // Flag (1) + Exit(2+2+2) + NPC(2) + Obj(2+2) = 13 bytes max
+            // Datos de entidades por celda
             java.nio.ByteBuffer bodyBuf = java.nio.ByteBuffer.allocate(130000);
             bodyBuf.order(java.nio.ByteOrder.LITTLE_ENDIAN);
 
@@ -418,11 +453,11 @@ public final class MapManager {
                 for (int x = GameData.X_MIN_MAP_SIZE; x <= GameData.X_MAX_MAP_SIZE; x++) {
                     byte flags = 0;
                     if (GameData.mapData[x][y].getExitMap() > 0)
-                        flags |= 1; // Exit
+                        flags |= 1; // Traslado
                     if (GameData.mapData[x][y].getNpcIndex() > 0)
                         flags |= 2; // NPC
                     if (GameData.mapData[x][y].getObjIndex() > 0)
-                        flags |= 4; // Obj
+                        flags |= 4; // Objeto
 
                     bodyBuf.put(flags);
 

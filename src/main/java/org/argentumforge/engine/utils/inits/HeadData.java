@@ -1,19 +1,15 @@
 package org.argentumforge.engine.utils.inits;
 
 /**
- * Simula el "Type" o la estructura de {@code HeadData}, representando los datos de las cabezas de los personajes.
+ * Datos de representación visual de las cabezas de los personajes.
  * <p>
- * Esta clase almacena la informacion grafica necesaria para representar las cabezas de los personajes segun las diferentes
- * orientaciones posibles.
- * <p>
- * Es utilizada tanto para las cabezas normales de los personajes como para los cascos (helmets), permitiendo representar
- * graficamente estos elementos segun la direccion en que se mueve o mira el personaje.
+ * {@code HeadData} almacena los gráficos (GRH) correspondientes a la cabeza
+ * en las cuatro direcciones cardinales. Se utiliza tanto para cabezas base
+ * como para cascos.
  *
- * @see org.argentumforge.engine.utils.inits.GrhInfo
- * @see org.argentumforge.engine.utils.inits.IndexHeads
- * @see org.argentumforge.engine.game.models.Character
+ * @see GrhInfo
+ * @see IndexHeads
  */
-
 public final class HeadData {
 
     private GrhInfo[] head = new GrhInfo[5];

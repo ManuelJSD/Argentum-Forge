@@ -1,15 +1,15 @@
 package org.argentumforge.engine.utils.inits;
 
 /**
- * Simula el "Type" o la estructura de {@code Grh}, gestionando la informacion basica de los graficos y animaciones.
+ * Estructura que gestiona el estado de una instancia de gráfico o animación.
  * <p>
- * Esta clase almacena los datos necesarios para representar y controlar los graficos (Grh), tanto estaticos como animados,
- * manteniendo su estado y propiedades de animacion.
+ * {@code GrhInfo} almacena los datos necesarios para representar y controlar el
+ * estado actual de un gráfico (Grh), como el frame actual, la velocidad de
+ * animación y si está en reproducción.
  *
  * @see GrhData
  * @see org.argentumforge.engine.renderer.Drawn
  */
-
 public final class GrhInfo {
 
     private short grhIndex;
