@@ -2,10 +2,8 @@ package org.argentumforge.engine.utils;
 
 import org.argentumforge.engine.game.Options;
 import org.argentumforge.engine.game.models.Character;
-import org.argentumforge.engine.game.models.Direction;
 import org.argentumforge.engine.renderer.Surface;
 import org.argentumforge.engine.utils.inits.*;
-import org.argentumforge.engine.utils.inits.MapProperties;
 import org.tinylog.Logger;
 
 import java.io.*;
@@ -85,7 +83,7 @@ public final class GameData {
     public static final int Y_MAX_MAP_SIZE = 100;
 
     /** Lector de datos binarios persistente para la carga de recursos. */
-    private static BinaryDataReader reader;
+    static BinaryDataReader reader;
 
     /**
      * Inicializamos todos los datos almacenados en archivos.
@@ -138,81 +136,16 @@ public final class GameData {
      * Parsea el archivo .dat (estilo INI) para extraer nombres, cuerpos y cabezas.
      */
     private static void loadNpcs() {
-        final Path npcsPath = Path.of(options.getDatsPath(), "NPCs.dat");
+        npcs = ResourceLoader.loadNpcs();
 
-        if (!Files.exists(npcsPath)) {
-            Logger.error("NPCs.dat not found at path: {}", npcsPath.toAbsolutePath());
+        if (npcs.isEmpty()) {
+            final Path npcsPath = Path.of(options.getDatsPath(), "NPCs.dat");
             javax.swing.JOptionPane.showMessageDialog(null,
-                    "No se encontró el archivo NPCs.dat en:\n" + npcsPath.toAbsolutePath() +
+                    "No se encontró o no se pudo leer NPCs.dat en:\n" + npcsPath.toAbsolutePath() +
                             "\n\nPor favor, configure la ruta de Dats correctamente.",
                     "Error al cargar NPCs",
                     javax.swing.JOptionPane.ERROR_MESSAGE);
-            npcs = new HashMap<>();
-            return;
         }
-
-        final Map<Integer, NpcData> result = new HashMap<>();
-        NpcData currentNpc = null;
-
-        try (BufferedReader br = Files.newBufferedReader(npcsPath, StandardCharsets.ISO_8859_1)) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                String trimmed = line.trim();
-                if (trimmed.isEmpty())
-                    continue;
-                if (trimmed.startsWith("'"))
-                    continue;
-                if (trimmed.startsWith("#"))
-                    continue;
-                if (trimmed.startsWith(";"))
-                    continue;
-
-                if (trimmed.startsWith("[") && trimmed.contains("]")) {
-                    String section = trimmed.substring(1, trimmed.indexOf(']')).trim();
-                    if (section.regionMatches(true, 0, "NPC", 0, 3)) {
-                        String numPart = section.substring(3).trim();
-                        try {
-                            int npcNumber = Integer.parseInt(numPart);
-                            currentNpc = new NpcData(npcNumber);
-                            result.put(npcNumber, currentNpc);
-                        } catch (NumberFormatException e) {
-                            currentNpc = null;
-                        }
-                    } else {
-                        currentNpc = null;
-                    }
-                    continue;
-                }
-
-                if (currentNpc == null)
-                    continue;
-                int eq = trimmed.indexOf('=');
-                if (eq <= 0)
-                    continue;
-
-                String key = trimmed.substring(0, eq).trim();
-                String value = trimmed.substring(eq + 1).trim();
-
-                if (key.equalsIgnoreCase("Name")) {
-                    currentNpc.setName(value);
-                } else if (key.equalsIgnoreCase("Head")) {
-                    try {
-                        currentNpc.setHead(Integer.parseInt(value));
-                    } catch (NumberFormatException ignored) {
-                    }
-                } else if (key.equalsIgnoreCase("Body")) {
-                    try {
-                        currentNpc.setBody(Integer.parseInt(value));
-                    } catch (NumberFormatException ignored) {
-                    }
-                }
-            }
-        } catch (IOException e) {
-            Logger.error(e, "Could not read NPCs.dat from path: {}", npcsPath.toAbsolutePath());
-        }
-
-        npcs = result;
-        Logger.info("Loaded {} NPC definitions from {}", npcs.size(), npcsPath.toAbsolutePath());
     }
 
     /**
@@ -221,70 +154,16 @@ public final class GameData {
      * Parsea el archivo .dat (estilo INI) para extraer nombre y grhIndex.
      */
     private static void loadObjs() {
-        final Path objsPath = Path.of(options.getDatsPath(), "OBJ.dat");
+        objs = ResourceLoader.loadObjs();
 
-        if (!Files.exists(objsPath)) {
-            Logger.error("OBJ.dat not found at path: {}", objsPath.toAbsolutePath());
+        if (objs.isEmpty()) {
+            final Path objsPath = Path.of(options.getDatsPath(), "OBJ.dat");
             javax.swing.JOptionPane.showMessageDialog(null,
-                    "No se encontró el archivo OBJ.dat en:\n" + objsPath.toAbsolutePath() +
+                    "No se encontró o no se pudo leer OBJ.dat en:\n" + objsPath.toAbsolutePath() +
                             "\n\nPor favor, configure la ruta de Dats correctamente.",
                     "Error al cargar Objetos",
                     javax.swing.JOptionPane.ERROR_MESSAGE);
-            objs = new HashMap<>();
-            return;
         }
-
-        final Map<Integer, ObjData> result = new HashMap<>();
-        ObjData currentObj = null;
-
-        try (BufferedReader br = Files.newBufferedReader(objsPath, StandardCharsets.ISO_8859_1)) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                String trimmed = line.trim();
-                if (trimmed.isEmpty() || trimmed.startsWith("'") || trimmed.startsWith("#") || trimmed.startsWith(";"))
-                    continue;
-
-                if (trimmed.startsWith("[") && trimmed.contains("]")) {
-                    String section = trimmed.substring(1, trimmed.indexOf(']')).trim();
-                    if (section.regionMatches(true, 0, "OBJ", 0, 3)) {
-                        String numPart = section.substring(3).trim();
-                        try {
-                            int objNumber = Integer.parseInt(numPart);
-                            currentObj = new ObjData(objNumber);
-                            result.put(objNumber, currentObj);
-                        } catch (NumberFormatException e) {
-                            currentObj = null;
-                        }
-                    } else {
-                        currentObj = null;
-                    }
-                    continue;
-                }
-
-                if (currentObj == null)
-                    continue;
-                int eq = trimmed.indexOf('=');
-                if (eq <= 0)
-                    continue;
-
-                String key = trimmed.substring(0, eq).trim();
-                String value = trimmed.substring(eq + 1).trim();
-
-                if (key.equalsIgnoreCase("Name")) {
-                    currentObj.setName(value);
-                } else if (key.equalsIgnoreCase("GrhIndex")) {
-                    try {
-                        currentObj.setGrhIndex(Integer.parseInt(value));
-                    } catch (NumberFormatException ignored) {
-                    }
-                }
-            }
-        } catch (IOException e) {
-            Logger.error(e, "Could not read OBJ.dat from path: {}", objsPath.toAbsolutePath());
-        }
-
-        objs = result;
-        Logger.info("Loaded {} OBJ definitions from {}", objs.size(), objsPath.toAbsolutePath());
     }
 
     /**
@@ -878,35 +757,7 @@ public final class GameData {
      * @param filePath Ruta absoluta al archivo .map
      */
     public static void loadMap(String filePath) {
-        try {
-            // Cargar archivo principal de capas (.map)
-            byte[] data = Files.readAllBytes(Path.of(filePath));
-            initMap(data);
-
-            // Preparar para buscar archivos compañeros (.inf y .dat)
-            String basePath = filePath.substring(0, filePath.lastIndexOf('.'));
-            String datPath = basePath + ".dat";
-            String infPath = basePath + ".inf";
-
-            // Intentar cargar propiedades del mapa (.dat)
-            if (Files.exists(Path.of(datPath))) {
-                loadMapProperties(datPath);
-            } else {
-                mapProperties = new MapProperties(); // Reset a valores por defecto si no existe
-                Logger.info("Archivo .dat no encontrado en {}, usando valores por defecto.", datPath);
-            }
-
-            // Intentar cargar información de entidades (.inf)
-            if (Files.exists(Path.of(infPath))) {
-                loadMapInfo(infPath);
-            } else {
-                Logger.info("Archivo .inf no encontrado en {}, saltando la carga de entidades.", infPath);
-            }
-
-        } catch (IOException e) {
-            System.err.println("Could not load map from path: " + filePath);
-            e.printStackTrace();
-        }
+        MapManager.loadMap(filePath);
     }
 
     /**
@@ -916,290 +767,10 @@ public final class GameData {
      * @param filePath Ruta absoluta al fichero .map de destino.
      */
     public static void saveMap(String filePath) {
-        try {
-            // Guardar .map
-            saveMapData(filePath);
-
-            String basePath = filePath.substring(0, filePath.lastIndexOf('.'));
-            String datPath = basePath + ".dat";
-            String infPath = basePath + ".inf";
-
-            // Guardar .dat
-            saveMapProperties(datPath);
-
-            // Guardar .inf
-            saveMapInfo(infPath);
-
-            Logger.info("Mapa guardado exitosamente en: {}", filePath);
-            javax.swing.JOptionPane.showMessageDialog(null, "Mapa guardado correctamente.");
-
-        } catch (IOException e) {
-            Logger.error(e, "Error al guardar el mapa: {}", filePath);
-            javax.swing.JOptionPane.showMessageDialog(null, "Error al guardar el mapa:\n" + e.getMessage(), "Error",
-                    javax.swing.JOptionPane.ERROR_MESSAGE);
-        }
+        MapManager.saveMap(filePath);
     }
 
-    private static void saveMapData(String filePath) throws IOException {
-        try (FileOutputStream fos = new FileOutputStream(filePath)) {
-            java.nio.channels.FileChannel channel = fos.getChannel();
-
-            // 1. Header
-            java.nio.ByteBuffer headerBuf = java.nio.ByteBuffer.allocate(273);
-            headerBuf.order(java.nio.ByteOrder.LITTLE_ENDIAN);
-
-            headerBuf.putShort((short) 1); // Map Version
-            headerBuf.put(new byte[263]); // Cabecera vacia
-            headerBuf.putShort((short) 0);
-            headerBuf.putShort((short) 0);
-            headerBuf.putShort((short) 0);
-            headerBuf.putShort((short) 0);
-
-            headerBuf.flip();
-            channel.write(headerBuf);
-
-            // 2. Map Data
-            java.nio.ByteBuffer bodyBuf = java.nio.ByteBuffer.allocate(110000);
-            bodyBuf.order(java.nio.ByteOrder.LITTLE_ENDIAN);
-
-            for (int y = Y_MIN_MAP_SIZE; y <= Y_MAX_MAP_SIZE; y++) {
-                for (int x = X_MIN_MAP_SIZE; x <= X_MAX_MAP_SIZE; x++) {
-                    byte flags = 0;
-                    if (mapData[x][y].getBlocked())
-                        flags |= 1;
-                    if (mapData[x][y].getLayer(2).getGrhIndex() > 0)
-                        flags |= 2;
-                    if (mapData[x][y].getLayer(3).getGrhIndex() > 0)
-                        flags |= 4;
-                    if (mapData[x][y].getLayer(4).getGrhIndex() > 0)
-                        flags |= 8;
-                    if (mapData[x][y].getTrigger() > 0)
-                        flags |= 16;
-
-                    bodyBuf.put(flags);
-                    bodyBuf.putShort((short) mapData[x][y].getLayer(1).getGrhIndex());
-
-                    if ((flags & 2) != 0)
-                        bodyBuf.putShort((short) mapData[x][y].getLayer(2).getGrhIndex());
-                    if ((flags & 4) != 0)
-                        bodyBuf.putShort((short) mapData[x][y].getLayer(3).getGrhIndex());
-                    if ((flags & 8) != 0)
-                        bodyBuf.putShort((short) mapData[x][y].getLayer(4).getGrhIndex());
-                    if ((flags & 16) != 0)
-                        bodyBuf.putShort(mapData[x][y].getTrigger());
-                }
-            }
-
-            bodyBuf.flip();
-            channel.write(bodyBuf);
-        }
-    }
-
-    private static void saveMapProperties(String filePath) throws IOException {
-        try (PrintWriter writer = new PrintWriter(
-                Files.newBufferedWriter(Path.of(filePath), StandardCharsets.ISO_8859_1))) {
-            writer.println("[MAPA1]");
-            writer.println("Name=" + mapProperties.getName());
-            writer.println("MusicNum=" + mapProperties.getMusicIndex());
-            writer.println("MagiaSinefecto=" + mapProperties.getMagiaSinEfecto());
-            writer.println("NoEncriptarMP=" + mapProperties.getNoEncriptarMP());
-            writer.println("Pk=" + mapProperties.getPlayerKiller());
-            writer.println("Restringir=" + (mapProperties.getRestringir() == 0 ? "No" : mapProperties.getRestringir()));
-            writer.println("BackUp=" + mapProperties.getBackup());
-            writer.println("Zona=" + mapProperties.getZona());
-            writer.println("Terreno=" + mapProperties.getTerreno());
-        }
-    }
-
-    private static void saveMapInfo(String filePath) throws IOException {
-        try (FileOutputStream fos = new FileOutputStream(filePath)) {
-            java.nio.channels.FileChannel channel = fos.getChannel();
-
-            // Header: 5 shorts = 10 bytes
-            java.nio.ByteBuffer headerBuf = java.nio.ByteBuffer.allocate(10);
-            headerBuf.order(java.nio.ByteOrder.LITTLE_ENDIAN);
-            headerBuf.putShort((short) 0);
-            headerBuf.putShort((short) 0);
-            headerBuf.putShort((short) 0);
-            headerBuf.putShort((short) 0);
-            headerBuf.putShort((short) 0);
-            headerBuf.flip();
-            channel.write(headerBuf);
-
-            // Body
-            // Max size per cell unknown but bounded.
-            // Flag (1) + Exit(2+2+2) + NPC(2) + Obj(2+2) = 13 bytes max
-            java.nio.ByteBuffer bodyBuf = java.nio.ByteBuffer.allocate(130000);
-            bodyBuf.order(java.nio.ByteOrder.LITTLE_ENDIAN);
-
-            for (int y = Y_MIN_MAP_SIZE; y <= Y_MAX_MAP_SIZE; y++) {
-                for (int x = X_MIN_MAP_SIZE; x <= X_MAX_MAP_SIZE; x++) {
-                    byte flags = 0;
-                    if (mapData[x][y].getExitMap() > 0)
-                        flags |= 1; // Exit
-                    if (mapData[x][y].getNpcIndex() > 0)
-                        flags |= 2; // NPC
-                    if (mapData[x][y].getObjIndex() > 0)
-                        flags |= 4; // Obj
-
-                    bodyBuf.put(flags);
-
-                    if ((flags & 1) != 0) {
-                        bodyBuf.putShort(mapData[x][y].getExitMap());
-                        bodyBuf.putShort(mapData[x][y].getExitX());
-                        bodyBuf.putShort(mapData[x][y].getExitY());
-                    }
-                    if ((flags & 2) != 0) {
-                        bodyBuf.putShort(mapData[x][y].getNpcIndex());
-                    }
-                    if ((flags & 4) != 0) {
-                        bodyBuf.putShort((short) mapData[x][y].getObjIndex());
-                        bodyBuf.putShort((short) mapData[x][y].getObjAmount());
-                    }
-                }
-            }
-            bodyBuf.flip();
-            channel.write(bodyBuf);
-        }
-    }
-
-    /**
-     * Carga las propiedades generales del mapa desde un archivo .dat.
-     * 
-     * @param filePath Ruta absoluta al archivo .dat
-     */
-    private static void loadMapProperties(String filePath) {
-        Logger.info("Cargando propiedades del mapa desde: {}", filePath);
-        MapProperties props = new MapProperties();
-
-        try (BufferedReader br = Files.newBufferedReader(Path.of(filePath), StandardCharsets.ISO_8859_1)) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                String trimmed = line.trim();
-                if (trimmed.isEmpty() || trimmed.startsWith("'") || trimmed.startsWith("#") || trimmed.startsWith(";"))
-                    continue;
-
-                // Saltamos las cabeceras de sección [MAPA1]
-                if (trimmed.startsWith("[") && trimmed.contains("]"))
-                    continue;
-
-                int eq = trimmed.indexOf('=');
-                if (eq <= 0)
-                    continue;
-
-                String key = trimmed.substring(0, eq).trim();
-                String value = trimmed.substring(eq + 1).trim();
-
-                try {
-                    if (key.equalsIgnoreCase("Name")) {
-                        props.setName(value);
-                    } else if (key.equalsIgnoreCase("MusicNum")) {
-                        props.setMusicIndex(Integer.parseInt(value));
-                    } else if (key.equalsIgnoreCase("MagiaSinefecto")) {
-                        props.setMagiaSinEfecto(Integer.parseInt(value));
-                    } else if (key.equalsIgnoreCase("NoEncriptarMP")) {
-                        props.setNoEncriptarMP(Integer.parseInt(value));
-                    } else if (key.equalsIgnoreCase("Terreno")) {
-                        props.setTerreno(value);
-                    } else if (key.equalsIgnoreCase("Zona")) {
-                        props.setZona(value);
-                    } else if (key.equalsIgnoreCase("Restringir")) {
-                        props.setRestringir(value.equalsIgnoreCase("No") ? 0 : Integer.parseInt(value));
-                    } else if (key.equalsIgnoreCase("BackUp")) {
-                        props.setBackup(Integer.parseInt(value));
-                    } else if (key.equalsIgnoreCase("Pk")) {
-                        props.setPlayerKiller(Integer.parseInt(value));
-                    }
-                } catch (NumberFormatException e) {
-                    Logger.warn("Error parseando valor '{}' para la clave '{}' en el mapa.", value, key);
-                }
-            }
-        } catch (IOException e) {
-            Logger.error(e, "Error leyendo el archivo .dat del mapa: {}", filePath);
-        }
-
-        mapProperties = props;
-        Logger.info("Propiedades cargadas: Name={}, Music={}, Zona={}", props.getName(), props.getMusicIndex(),
-                props.getZona());
-    }
-
-    /**
-     * Carga la información de entidades (NPCs, Objetos, Triggers) desde un archivo
-     * .inf.
-     *
-     * @param filePath Ruta absoluta al archivo .inf
-     */
-    private static void loadMapInfo(String filePath) {
-        try {
-            byte[] data = Files.readAllBytes(Path.of(filePath));
-            reader.init(data);
-
-            // Cabecera inf (5 integers in VB6 = 10 bytes)
-            reader.readShort();
-            reader.readShort();
-            reader.readShort();
-            reader.readShort();
-            reader.readShort();
-
-            // Load arrays
-            for (int y = Y_MIN_MAP_SIZE; y <= Y_MAX_MAP_SIZE; y++) {
-                for (int x = X_MIN_MAP_SIZE; x <= X_MAX_MAP_SIZE; x++) {
-                    if (!reader.hasRemaining())
-                        break;
-
-                    // .inf file
-                    byte flags = reader.readByte();
-
-                    // If ByFlags And 1 Then (Exits)
-                    if ((flags & 1) != 0) {
-                        mapData[x][y].setExitMap(reader.readShort());
-                        mapData[x][y].setExitX(reader.readShort());
-                        mapData[x][y].setExitY(reader.readShort());
-                    }
-
-                    // If ByFlags And 2 Then (NPCs)
-                    if ((flags & 2) != 0) {
-                        short npcIndex = reader.readShort();
-                        if (npcIndex < 0)
-                            npcIndex = 0;
-
-                        if (npcIndex > 0) {
-                            mapData[x][y].setNpcIndex(npcIndex);
-                            NpcData npc = npcs.get((int) npcIndex);
-                            if (npc != null) {
-                                Character.makeChar(nextOpenChar(), npc.getBody(), npc.getHead(),
-                                        Direction.fromID(npc.getHeading()), x, y, 0, 0, 0);
-                            }
-                        }
-                    }
-
-                    // If ByFlags And 4 Then (Objects)
-                    if ((flags & 4) != 0) {
-                        int objIndex = reader.readShort();
-                        int amount = reader.readShort();
-
-                        mapData[x][y].setObjIndex(objIndex);
-                        mapData[x][y].setObjAmount(amount);
-
-                        if (objIndex > 0) {
-                            ObjData obj = objs.get(objIndex);
-                            if (obj != null) {
-                                initGrh(mapData[x][y].getObjGrh(), (short) obj.getGrhIndex(), false);
-                            } else {
-                                Logger.warn("Object definition not found for index: {}", objIndex);
-                            }
-                        }
-                    }
-
-                }
-            }
-
-        } catch (IOException e) {
-            Logger.error(e, "Error loading map info from: {}", filePath);
-        }
-    }
-
-    private static short nextOpenChar() {
+    static short nextOpenChar() {
         for (short i = 1; i < charList.length; i++) {
             if (!charList[i].isActive()) {
                 return i;
@@ -1219,7 +790,7 @@ public final class GameData {
             System.err.println("Could not load mapa" + numMap + " data!");
             return;
         }
-        initMap(data);
+        MapManager.initMap(data);
     }
 
     /**
@@ -1272,79 +843,6 @@ public final class GameData {
         grh.setLoops(0);
         grh.setFrameCounter(1);
         grh.setSpeed(0.4f);
-    }
-
-    /**
-     * Método interno para procesar el parseo de los datos binarios de un mapa.
-     * Lee cabeceras, flags, capas, bloqueos y triggers.
-     *
-     * @param data Datos binarios del mapa.
-     */
-    private static void initMap(byte[] data) {
-        reader.init(data);
-
-        mapData = new MapData[X_MAX_MAP_SIZE + 1][Y_MAX_MAP_SIZE + 1];
-
-        final short mapversion = reader.readShort();
-        reader.skipBytes(263); // cabecera.
-
-        byte byflags;
-
-        reader.readShort();
-        reader.readShort();
-        reader.readShort();
-        reader.readShort();
-
-        byte bloq;
-
-        mapData[0][0] = new MapData();
-
-        for (int y = 1; y <= 100; y++) {
-            for (int x = 1; x <= 100; x++) {
-                mapData[x][y] = new MapData();
-
-                byflags = reader.readByte();
-                bloq = (byte) (byflags & 1);
-                mapData[x][y].setBlocked(bloq == 1);
-
-                mapData[x][y].getLayer(1).setGrhIndex(reader.readShort());
-                mapData[x][y].setLayer(1,
-                        initGrh(mapData[x][y].getLayer(1), mapData[x][y].getLayer(1).getGrhIndex(), true));
-
-                if ((byte) (byflags & 2) != 0) {
-                    mapData[x][y].getLayer(2).setGrhIndex(reader.readShort());
-                    mapData[x][y].setLayer(2,
-                            initGrh(mapData[x][y].getLayer(2), mapData[x][y].getLayer(2).getGrhIndex(), true));
-
-                } else
-                    mapData[x][y].getLayer(2).setGrhIndex(0);
-
-                if ((byte) (byflags & 4) != 0) {
-                    mapData[x][y].getLayer(3).setGrhIndex(reader.readShort());
-                    mapData[x][y].setLayer(3,
-                            initGrh(mapData[x][y].getLayer(3), mapData[x][y].getLayer(3).getGrhIndex(), true));
-                } else
-                    mapData[x][y].getLayer(3).setGrhIndex(0);
-
-                if ((byte) (byflags & 8) != 0) {
-                    mapData[x][y].getLayer(4).setGrhIndex(reader.readShort());
-                    mapData[x][y].setLayer(4,
-                            initGrh(mapData[x][y].getLayer(4), mapData[x][y].getLayer(4).getGrhIndex(), true));
-                } else
-                    mapData[x][y].getLayer(4).setGrhIndex(0);
-
-                if ((byte) (byflags & 16) != 0)
-                    mapData[x][y].setTrigger(reader.readShort());
-                else
-                    mapData[x][y].setTrigger(0);
-
-                mapData[x][y].getObjGrh().setGrhIndex(0);
-            }
-        }
-
-        // Liberar memoria
-        Surface.INSTANCE.deleteAllTextures();
-        eraseAllChars();
     }
 
     /**
