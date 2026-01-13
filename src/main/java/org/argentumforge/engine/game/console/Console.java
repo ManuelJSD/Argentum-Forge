@@ -15,18 +15,17 @@ import static org.argentumforge.engine.game.console.FontStyle.*;
 /**
  * Clase que implementa una consola de texto para mostrar mensajes al usuario.
  * <p>
- * La consola mantiene un historial de mensajes con un limite maximo, eliminando
- * automaticamente los mas antiguos cuando se
- * alcanza dicho limite. Permite personalizar los mensajes con diferentes
+ * La consola mantiene un historial de mensajes con un límite máximo, eliminando
+ * automáticamente los más antiguos cuando se
+ * alcanza dicho límite. Permite personalizar los mensajes con diferentes
  * colores y estilos para categorizar o resaltar la
- * informacion mostrada al jugador.
+ * información mostrada al usuario.
  * <p>
- * Esta consola es fundamental para la comunicacion unidireccional del sistema
- * hacia el jugador, mostrando eventos importantes,
- * resultados de acciones, mensajes del servidor y otros datos relevantes
- * durante la experiencia de juego.
+ * Esta consola es fundamental para la comunicación unidireccional del sistema
+ * hacia el usuario, mostrando eventos importantes,
+ * resultados de acciones y otros datos relevantes durante la edición del mapa.
  * <p>
- * TODO Agregar italic y bold
+ * TODO: Agregar cursiva y negrita
  */
 
 public enum Console {
@@ -35,7 +34,7 @@ public enum Console {
     private static final int CONSOLE_WIDTH = 555;
     private static final int CONSOLE_HEIGHT = 98;
     private static final int MAX_SIZE_DATA = 500;
-    private static final int MAX_CHARACTERS_LENGTH = 75; // Maxima cantidad de caracteres en horizontal.
+    private static final int MAX_CHARACTERS_LENGTH = 75; // Máxima cantidad de caracteres en horizontal.
     private final boolean autoScroll;
     private final List<ConsoleData> data;
     private boolean scrollToBottom;
@@ -143,11 +142,11 @@ public enum Console {
     }
 
     /**
-     * Dibuja la consola (esta es una porcion de GUI del frmMain).
+     * Dibuja la consola (esta es una porción de GUI del FMain).
      */
     public void drawConsole() {
 
-        // Limpia la consola despues de 500 mensajes
+        // Limpia la consola después de 500 mensajes
         if (data.size() > MAX_SIZE_DATA)
             clearConsole();
 

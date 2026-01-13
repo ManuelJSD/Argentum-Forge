@@ -3,6 +3,9 @@ package org.argentumforge.engine.game;
 import org.argentumforge.engine.renderer.RGBColor;
 import org.argentumforge.engine.game.Options;
 
+/**
+ * Gestiona el clima y los efectos de iluminación ambiental del motor.
+ */
 public enum Weather {
     INSTANCE;
 
@@ -14,7 +17,7 @@ public enum Weather {
     }
 
     public void update() {
-        // No longer automated
+        // Ya no es automatizado por el ciclo día/noche heredado.
     }
 
     public void setAmbientColor(float r, float g, float b) {

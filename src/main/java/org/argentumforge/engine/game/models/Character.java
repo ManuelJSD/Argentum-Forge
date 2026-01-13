@@ -21,13 +21,11 @@ import static org.argentumforge.engine.utils.Time.timerTicksPerFrame;
  * <p>
  * Gestiona los siguientes aspectos:
  * <ul>
- * <li>Atributos fisicos (cuerpo, cabeza, armas, escudos, cascos)
- * <li>Estados del personaje (vida, invisibilidad, paralisis, etc.)
- * <li>Posicionamiento y movimiento en el mundo
- * <li>Renderizado grafico y animaciones
- * <li>Efectos visuales asociados al personaje
- * <li>Dialogos y mensajes sobre la cabeza
- * <li>Faccion, clan y nombre del personaje
+ * <li>Atributos físicos (cuerpo, cabeza, armas, escudos, cascos)</li>
+ * <li>Posicionamiento y movimiento en el mundo</li>
+ * <li>Renderizado gráfico y animaciones</li>
+ * <li>Efectos visuales asociados al personaje</li>
+ * <li>Nombre del personaje</li>
  * </ul>
  * <p>
  * La clase contiene numerosas constantes que definen los rangos de indices de
@@ -129,7 +127,7 @@ public final class Character {
 
         charList[charIndex].setHeading(direction);
 
-        // reset moving stats
+        // reiniciar estadísticas de movimiento
         charList[charIndex].setMoving(false);
         charList[charIndex].setMoveOffsetX(0);
         charList[charIndex].setMoveOffsetY(0);
@@ -138,10 +136,10 @@ public final class Character {
         charList[charIndex].getPos().setX(x);
         charList[charIndex].getPos().setY(y);
 
-        // Make active
+        // Hacer activo
         charList[charIndex].setActive(true);
 
-        // plot on map
+        // trazar en el mapa
         mapData[x][y].setCharIndex(charIndex);
     }
 
@@ -330,7 +328,7 @@ public final class Character {
                     PixelOffsetY + fxData[charList[charIndex].fxIndex].getOffsetY(),
                     true, true, true, 1.0f, ambientcolor);
 
-            // Check if animation is over
+            // Comprobar si la animación ha terminado
             if (!charList[charIndex].fX.isStarted())
                 charList[charIndex].setFxIndex(0);
         }

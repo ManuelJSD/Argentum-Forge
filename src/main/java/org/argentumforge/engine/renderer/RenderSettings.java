@@ -3,14 +3,14 @@ package org.argentumforge.engine.renderer;
 public class RenderSettings {
 
     // Capas del 1 al 4
-    private boolean[] showLayer = {true, true, true, false};
-    // NPC's
+    private boolean[] showLayer = { true, true, true, false };
+    // NPCs
     private boolean showNPCs = true;
-    // OBJ's
+    // Objetos (OBJs)
     private boolean showOJBs = true;
-    // Triggers
+    // Triggers (Disparadores)
     private boolean showTriggers = false;
-    // Traslados
+    // Traslados (Teleporks)
     private boolean showMapTransfer = true;
     // Bloqueos
     private boolean showBlock = true;
@@ -51,7 +51,7 @@ public class RenderSettings {
         return showMapTransfer;
     }
 
-    public void setShowMapTransfer(boolean showTranslation) {
+    public void setShowMapTransfer(boolean showMapTransfer) {
         this.showMapTransfer = showMapTransfer;
     }
 

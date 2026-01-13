@@ -7,7 +7,7 @@ package org.argentumforge.engine.game.models;
  * Estas direcciones permiten definir y gestionar el desplazamiento de los
  * personajes en el entorno, utilizando valores
  * predefinidos que pueden ser interpretados tanto por el sistema de movimiento
- * como por el motor grafico del juego.
+ * como por el motor gráfico del juego.
  */
 
 public enum Direction {

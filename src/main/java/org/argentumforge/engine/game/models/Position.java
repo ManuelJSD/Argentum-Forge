@@ -1,13 +1,16 @@
 package org.argentumforge.engine.game.models;
 
 /**
- * Representa una posicion en un espacio bidimensional.
+ * Representa una posición en un espacio bidimensional.
  * <p>
- * Esta clase simple encapsula las coordenadas <b>x</b> e <b>y</b> que definen la ubicacion de un elemento en el mapa.
- * {@code Position} es utilizada ampliamente en todo el codigo para representar las posiciones de personajes, items, efectos y
+ * Esta clase simple encapsula las coordenadas <b>x</b> e <b>y</b> que definen
+ * la ubicación de un elemento en el mapa.
+ * {@code Position} es utilizada ampliamente en todo el código para representar
+ * las posiciones de personajes, items, efectos y
  * otros elementos del mundo.
  * <p>
- * Esta implementacion simula el tipo o estructura de datos "position" utilizado en el diseño original.
+ * Esta implementación simula el tipo o estructura de datos "position" utilizado
+ * en el diseño original.
  */
 
 public final class Position {

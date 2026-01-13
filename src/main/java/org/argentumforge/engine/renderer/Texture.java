@@ -47,7 +47,7 @@ public class Texture {
         final BufferedImage bi;
 
         try {
-            // Generate texture on GPU
+            // Generar textura en la GPU
             this.id = glGenTextures();
             glBindTexture(GL_TEXTURE_2D, id);
 
@@ -98,7 +98,7 @@ public class Texture {
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
                     refTexture.tex_width, refTexture.tex_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 
-            // Set texture parameters
+            // Establecer parámetros de la textura
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
@@ -133,7 +133,7 @@ public class Texture {
     private byte[] loadLocalGraphic(String fileNum) {
         String graphicsPath = Options.INSTANCE.getGraphicsPath();
 
-        // Try PNG first
+        // Intentar con PNG primero
         Path pngPath = Path.of(graphicsPath, fileNum + ".png");
         if (Files.exists(pngPath)) {
             try {
@@ -142,7 +142,7 @@ public class Texture {
             }
         }
 
-        // Try BMP second
+        // Intentar con BMP en segundo lugar
         Path bmpPath = Path.of(graphicsPath, fileNum + ".bmp");
         if (Files.exists(bmpPath)) {
             try {
@@ -151,10 +151,10 @@ public class Texture {
             }
         }
 
-        // Final fallback to original resource if needed?
-        // User said "want them to load from the selected folder",
-        // but maybe keeping readResource as a last resort is safer?
-        // Let's stick to what the user asked.
+        // Fallback final al recurso original si es necesario?
+        // El usuario pidió que se carguen desde la carpeta seleccionada,
+        // pero tal vez mantener readResource como último recurso sea más seguro?
+        // Sigamos lo que pidió el usuario.
         return null;
     }
 

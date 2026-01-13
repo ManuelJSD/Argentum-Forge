@@ -3,11 +3,14 @@ package org.argentumforge.engine.game.models;
 /**
  * Representa los diferentes tipos de objetos que pueden existir en el juego.
  * <p>
- * Este enum define una amplia variedad de tipos de objetos, cada uno identificado por un ID unico. Algunos de estos tipos pueden
- * ser equipables, como armas, armaduras y otros elementos especificos, mientras que otros son simplemente interactuables o tienen
- * un proposito unico.
+ * Este enum define una amplia variedad de tipos de objetos, cada uno
+ * identificado por un ID único. Algunos de estos tipos pueden
+ * ser equipables, como armas, armaduras y otros elementos específicos, mientras
+ * que otros son simplemente interactuables o tienen
+ * un propósito único.
  * <p>
- * Los tipos de objetos cubren una amplia gama de funcionalidades para representar elementos en el mundo del juego, desde
+ * Los tipos de objetos cubren una amplia gama de funcionalidades para
+ * representar elementos en el mundo del juego, desde
  * equipamiento hasta objetos consumibles, decorativos o estructurales.
  */
 
