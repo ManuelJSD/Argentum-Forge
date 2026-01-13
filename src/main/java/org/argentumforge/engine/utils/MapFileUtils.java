@@ -1,5 +1,11 @@
 package org.argentumforge.engine.utils;
 
+/**
+ * Utilidades para la gestión de archivos de mapa en el sistema de archivos.
+ * <p>
+ * Provee diálogos de selección de archivos para cargar y guardar mapas,
+ * integrando la lógica con el {@link GameData} y las opciones de usuario.
+ */
 import org.argentumforge.engine.game.Options;
 
 import javax.swing.*;
@@ -9,9 +15,10 @@ import java.io.File;
 public class MapFileUtils {
 
     /**
-     * Opens a file chooser dialog to select a map file and loads it if selected.
+     * Abre un diálogo de selección de archivo para cargar un mapa.
      * 
-     * @return true if a map was successfully selected and loaded, false otherwise.
+     * @return true si se seleccionó y cargó un mapa correctamente, false en caso
+     *         contrario.
      */
     public static boolean openAndLoadMap() {
         JFileChooser fileChooser = new JFileChooser();
@@ -24,10 +31,10 @@ public class MapFileUtils {
 
         if (result == JFileChooser.APPROVE_OPTION) {
             File selectedFile = fileChooser.getSelectedFile();
-            // Save the last directory
+            // Guardar el último directorio utilizado
             Options.INSTANCE.setLastMapPath(selectedFile.getParent());
             Options.INSTANCE.save();
-            // Load the map
+            // Cargar el mapa
             GameData.loadMap(selectedFile.getAbsolutePath());
             return true;
         }
@@ -36,7 +43,7 @@ public class MapFileUtils {
     }
 
     /**
-     * Opens a file chooser dialog to save the current map.
+     * Abre un diálogo de selección de archivo para guardar el mapa actual.
      */
     public static void saveMap() {
         JFileChooser fileChooser = new JFileChooser();
@@ -54,16 +61,16 @@ public class MapFileUtils {
             File selectedFile = fileChooser.getSelectedFile();
             String path = selectedFile.getAbsolutePath();
 
-            // Ensure extension
+            // Asegurar la extensión .map
             if (!path.toLowerCase().endsWith(".map")) {
                 path += ".map";
             }
 
-            // Save the last directory
+            // Guardar el último directorio utilizado
             Options.INSTANCE.setLastMapPath(selectedFile.getParent());
             Options.INSTANCE.save();
 
-            // Save the map
+            // Guardar el mapa
             GameData.saveMap(path);
         }
     }

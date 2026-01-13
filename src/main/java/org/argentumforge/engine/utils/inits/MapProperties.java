@@ -1,11 +1,10 @@
 package org.argentumforge.engine.utils.inits;
 
 /**
- * Representa las propiedades generales de un mapa del juego.
+ * Propiedades generales y configuración de un mapa.
  * <p>
- * Esta clase almacena la información proveniente del archivo .dat asociado al
- * mapa,
- * como su nombre, si es zona segura, música de fondo, etc.
+ * {@code MapProperties} almacena los metadatos globales del mapa, como su
+ * nombre, música de fondo, tipo de zona (segura/combate) y tipo de terreno.
  */
 public final class MapProperties {
 

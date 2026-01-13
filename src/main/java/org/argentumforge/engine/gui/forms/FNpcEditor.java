@@ -14,6 +14,12 @@ import java.util.List;
 
 import static org.argentumforge.engine.utils.AssetRegistry.npcs;
 
+/**
+ * Formulario de edición y colocación de NPCs en el mapa.
+ * 
+ * Permite buscar NPCs por nombre o ID, previsualizar su información
+ * y alternar entre los modos de colocar o quitar NPCs en la rejilla del mapa.
+ */
 public final class FNpcEditor extends Form {
 
     private int selectedNpcNumber = -1;
@@ -135,7 +141,7 @@ public final class FNpcEditor extends Form {
                 ImGui.textDisabled("Seleccionado:");
                 ImGui.textDisabled("Nro: " + selected.getNumber());
                 ImGui.textDisabled("Nombre: " + selected.getName());
-                ImGui.textDisabled("Head: " + selected.getHead() + "  Body: " + selected.getBody());
+                ImGui.textDisabled("Cabeza: " + selected.getHead() + "  Cuerpo: " + selected.getBody());
             }
         }
     }

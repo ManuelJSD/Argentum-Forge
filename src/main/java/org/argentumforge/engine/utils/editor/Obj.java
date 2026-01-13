@@ -7,6 +7,12 @@ import org.argentumforge.engine.utils.inits.ObjData;
 import static org.argentumforge.engine.utils.GameData.initGrh;
 import static org.argentumforge.engine.utils.GameData.mapData;
 
+/**
+ * Gestor de estado del editor para la manipulación de objetos en el mapa.
+ * 
+ * Implementa el patrón Singleton para mantener una única instancia del estado
+ * de edición de objetos (modo de edición y objeto seleccionado).
+ */
 public class Obj {
 
     private static volatile Obj instance;
@@ -20,6 +26,9 @@ public class Obj {
         this.objNumber = 0;
     }
 
+    /**
+     * Obtiene la instancia única del gestor de edición de objetos.
+     */
     public static Obj getInstance() {
         if (instance == null) {
             synchronized (lock) {
@@ -31,6 +40,9 @@ public class Obj {
         return instance;
     }
 
+    /**
+     * Resetea la instancia del Singleton.
+     */
     public static void resetInstance() {
         synchronized (lock) {
             instance = null;
@@ -53,6 +65,12 @@ public class Obj {
         this.objNumber = objNumber;
     }
 
+    /**
+     * Ejecuta la acción de edición (colocar o quitar) en las coordenadas dadas.
+     * 
+     * @param x Coordenada X del mapa.
+     * @param y Coordenada Y del mapa.
+     */
     public void obj_edit(int x, int y) {
         switch (mode) {
             case 1:
@@ -66,16 +84,28 @@ public class Obj {
         }
     }
 
+    /**
+     * Coloca el objeto seleccionado en las coordenadas especificadas.
+     * 
+     * @param x Coordenada X del mapa.
+     * @param y Coordenada Y del mapa.
+     */
     private void place(int x, int y) {
         if (mapData != null && x >= 0 && x < mapData.length && y >= 0 && y < mapData[0].length) {
             if (AssetRegistry.objs != null && AssetRegistry.objs.containsKey(objNumber)) {
                 ObjData data = AssetRegistry.objs.get(objNumber);
-                mapData[x][y].getObjGrh().setGrhIndex(0); // Reset before init
+                mapData[x][y].getObjGrh().setGrhIndex(0); // Reiniciar antes de inicializar
                 initGrh(mapData[x][y].getObjGrh(), (short) data.getGrhIndex(), false);
             }
         }
     }
 
+    /**
+     * Quita cualquier objeto de las coordenadas especificadas.
+     * 
+     * @param x Coordenada X del mapa.
+     * @param y Coordenada Y del mapa.
+     */
     private void remove(int x, int y) {
         if (mapData != null && x >= 0 && x < mapData.length && y >= 0 && y < mapData[0].length) {
             mapData[x][y].getObjGrh().setGrhIndex(0);

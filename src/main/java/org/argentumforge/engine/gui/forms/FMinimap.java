@@ -8,6 +8,12 @@ import org.argentumforge.engine.game.User;
 import org.argentumforge.engine.utils.AssetRegistry;
 import org.argentumforge.engine.utils.GameData;
 
+/**
+ * Formulario que muestra un mapa en miniatura (minimapa) del escenario actual.
+ * 
+ * Renderiza las capas de gráficos, bloqueos y la posición del usuario.
+ * Permite la navegación rápida haciendo clic sobre el minimapa.
+ */
 public final class FMinimap extends Form {
 
     private static final int MINIMAP_SIZE = 200; // 2 pixels per tile (100x100)
@@ -35,8 +41,7 @@ public final class FMinimap extends Form {
                 ImGui.endMenuBar();
             }
 
-            // O simplemente botones para mayor comodidad si no queremos menu bar
-            // (ImGuiWindowFlags.MenuBar)
+            // Botones para mayor comodidad (Capa 1 a 4)
             ImGui.text("Ver capas:");
             for (int i = 0; i < 4; i++) {
                 if (i > 0)
@@ -136,12 +141,12 @@ public final class FMinimap extends Form {
     }
 
     private int getTileColor(int grh) {
-        // Primero intentamos usar MiniMap.dat
+        // Primero intentamos usar los colores definidos en MiniMap.dat
         if (AssetRegistry.minimapColors.containsKey(grh)) {
             return AssetRegistry.minimapColors.get(grh);
         }
 
-        // Si es animado, probamos con el primer frame para MiniMap.dat también
+        // Si es animado, probamos con el color del primer frame
         if (GameData.grhData[grh].getNumFrames() > 1) {
             int firstFrame = GameData.grhData[grh].getFrame(0);
             if (AssetRegistry.minimapColors.containsKey(firstFrame)) {

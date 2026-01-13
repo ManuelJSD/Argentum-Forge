@@ -103,7 +103,8 @@ public final class GameData {
             loadShields();
             loadFxs();
             loadFonts();
-            // loadMessages(options.getLanguage()); -> Removed as Messages system is deleted
+            // loadMessages(options.getLanguage()); -> Eliminado ya que el sistema de
+            // mensajes fue borrado
         }
     }
 
@@ -540,7 +541,7 @@ public final class GameData {
 
                 String key = trimmed.substring(0, eq).trim();
                 String value = trimmed.substring(eq + 1).trim();
-                // Remover comentarios inline si los hay (ej: 4719 'norte)
+                // Remover comentarios integrados si los hay (ej: 4719 'norte)
                 if (value.contains("'")) {
                     value = value.substring(0, value.indexOf('\'')).trim();
                 }
@@ -559,16 +560,16 @@ public final class GameData {
                 try {
                     short grhIndex = Short.parseShort(value);
                     if (key.equalsIgnoreCase("Dir1")) {
-                        // Dir1 -> Norte (Index 1)
+                        // Dir1 -> Norte (Índice 1)
                         initGrh(currentWeapon.getWeaponWalk(1), grhIndex, false);
                     } else if (key.equalsIgnoreCase("Dir2")) {
-                        // Dir2 -> Este (Index 2)
+                        // Dir2 -> Este (Índice 2)
                         initGrh(currentWeapon.getWeaponWalk(2), grhIndex, false);
                     } else if (key.equalsIgnoreCase("Dir3")) {
-                        // Dir3 -> Oeste (Index 4) - Asumiendo mapping para llenar slots
+                        // Dir3 -> Oeste (Índice 4) - Mapeo para llenar slots
                         initGrh(currentWeapon.getWeaponWalk(4), grhIndex, false);
                     } else if (key.equalsIgnoreCase("Dir4")) {
-                        // Dir4 -> Sur (Index 3) - Según comentario user 'sur'
+                        // Dir4 -> Sur (Índice 3) - Según formato AO
                         initGrh(currentWeapon.getWeaponWalk(3), grhIndex, false);
                     }
                 } catch (NumberFormatException ignored) {

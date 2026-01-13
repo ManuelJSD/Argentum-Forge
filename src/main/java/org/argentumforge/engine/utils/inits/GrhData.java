@@ -1,16 +1,16 @@
 package org.argentumforge.engine.utils.inits;
 
 /**
- * Simula el "Type" o la estructura de {@code GrhData}, almacenando informacion detallada sobre los recursos graficos.
+ * Almacena la definición técnica y los metadatos de un recurso gráfico (GRH).
  * <p>
- * Esta clase mantiene los datos necesarios para representar un grafico (Grh), incluyendo su ubicacion en archivos de recursos,
- * dimensiones, y propiedades de animacion si corresponde.
+ * {@code GrhData} contiene la información base cargada desde los archivos de
+ * inicialización, incluyendo las coordenadas en el atlas de texturas,
+ * dimensiones en píxeles, y la secuencia de frames para animaciones.
  *
  * @see GrhInfo
  * @see org.argentumforge.engine.utils.GameData
  * @see org.argentumforge.engine.renderer.Drawn
  */
-
 public final class GrhData {
 
     private short sX;

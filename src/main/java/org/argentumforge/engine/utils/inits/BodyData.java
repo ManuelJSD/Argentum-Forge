@@ -3,17 +3,15 @@ package org.argentumforge.engine.utils.inits;
 import org.argentumforge.engine.game.models.Position;
 
 /**
- * Simula el "Type" o la estructura de {@code BodyData}, representando los datos graficos del cuerpo de los personajes.
+ * Datos de representación visual de los cuerpos de los personajes.
  * <p>
- * Esta clase almacena la informacion grafica necesaria para representar los cuerpos de los personajes segun las diferentes
- * orientaciones durante su desplazamiento por el mapa. Mantiene un arreglo de objetos GrhInfo para las animaciones de caminar
- * donde cada indice del arreglo (1-4) representa una direccion diferente (Norte, Este, Sur, Oeste).
+ * {@code BodyData} almacena las animaciones de movimiento (caminar) en las
+ * cuatro direcciones cardinales y el desplazamiento relativo (offset) para la
+ * posición de la cabeza.
  *
  * @see GrhInfo
  * @see IndexBodys
- * @see Character
  */
-
 public final class BodyData {
 
     private final GrhInfo[] walk = new GrhInfo[5];
@@ -29,7 +27,7 @@ public final class BodyData {
     }
 
     /**
-     *  Sirve para asignar a un personaje su body ya inicializado.
+     * Sirve para asignar a un personaje su body ya inicializado.
      */
     public BodyData(BodyData other) {
         walk[1] = new GrhInfo(other.walk[1]);
