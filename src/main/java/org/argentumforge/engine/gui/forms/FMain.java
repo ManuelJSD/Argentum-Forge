@@ -48,7 +48,6 @@ public final class FMain extends Form {
     private FNpcEditor npcEditor;
     private FObjEditor objEditor;
     private FMinimap minimap;
-    private FPalette palette;
     private float[] ambientColorArr;
 
     public FMain() {
@@ -62,7 +61,6 @@ public final class FMain extends Form {
         npcEditor = new FNpcEditor();
         objEditor = new FObjEditor();
         minimap = new FMinimap();
-        palette = new FPalette();
     }
 
     @Override
@@ -174,15 +172,6 @@ public final class FMain extends Form {
         }
 
         ImGui.sameLine();
-
-        // Botón Paleta
-        if (ImGui.button("Paleta", 100, 25)) {
-            if (ImGUISystem.INSTANCE.isFormVisible("FPalette")) {
-                ImGUISystem.INSTANCE.deleteFrmArray(palette);
-            } else {
-                ImGUISystem.INSTANCE.show(palette);
-            }
-        }
 
         ImGui.sameLine();
 
