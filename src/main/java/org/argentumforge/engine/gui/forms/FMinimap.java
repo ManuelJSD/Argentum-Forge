@@ -5,6 +5,7 @@ import imgui.ImDrawList;
 import imgui.flag.ImGuiCond;
 import imgui.flag.ImGuiWindowFlags;
 import org.argentumforge.engine.game.User;
+import org.argentumforge.engine.utils.AssetRegistry;
 import org.argentumforge.engine.utils.GameData;
 
 public final class FMinimap extends Form {
@@ -136,15 +137,15 @@ public final class FMinimap extends Form {
 
     private int getTileColor(int grh) {
         // Primero intentamos usar MiniMap.dat
-        if (GameData.minimapColors.containsKey(grh)) {
-            return GameData.minimapColors.get(grh);
+        if (AssetRegistry.minimapColors.containsKey(grh)) {
+            return AssetRegistry.minimapColors.get(grh);
         }
 
         // Si es animado, probamos con el primer frame para MiniMap.dat también
         if (GameData.grhData[grh].getNumFrames() > 1) {
             int firstFrame = GameData.grhData[grh].getFrame(0);
-            if (GameData.minimapColors.containsKey(firstFrame)) {
-                return GameData.minimapColors.get(firstFrame);
+            if (AssetRegistry.minimapColors.containsKey(firstFrame)) {
+                return AssetRegistry.minimapColors.get(firstFrame);
             }
             grh = firstFrame;
         }

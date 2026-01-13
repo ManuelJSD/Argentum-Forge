@@ -66,11 +66,7 @@ public final class GameData {
 
     /** Lista global de personajes activos en el mundo. */
     public static Character[] charList = new Character[10000 + 1];
-    /** Mapa de definiciones de NPCs cargadas desde el archivo de datos. */
-    public static Map<Integer, NpcData> npcs;
-    /** Mapa de definiciones de Objetos cargadas desde el archivo de datos. */
-    public static Map<Integer, ObjData> objs;
-    public static Map<Integer, Integer> minimapColors = new HashMap<>();
+
     /** Propiedades generales del mapa actual (.dat). */
     public static MapProperties mapProperties = new MapProperties();
     /** Instancia de configuración del usuario. */
@@ -136,9 +132,9 @@ public final class GameData {
      * Parsea el archivo .dat (estilo INI) para extraer nombres, cuerpos y cabezas.
      */
     private static void loadNpcs() {
-        npcs = ResourceLoader.loadNpcs();
+        AssetRegistry.npcs = ResourceLoader.loadNpcs();
 
-        if (npcs.isEmpty()) {
+        if (AssetRegistry.npcs.isEmpty()) {
             final Path npcsPath = Path.of(options.getDatsPath(), "NPCs.dat");
             javax.swing.JOptionPane.showMessageDialog(null,
                     "No se encontró o no se pudo leer NPCs.dat en:\n" + npcsPath.toAbsolutePath() +
@@ -154,9 +150,9 @@ public final class GameData {
      * Parsea el archivo .dat (estilo INI) para extraer nombre y grhIndex.
      */
     private static void loadObjs() {
-        objs = ResourceLoader.loadObjs();
+        AssetRegistry.objs = ResourceLoader.loadObjs();
 
-        if (objs.isEmpty()) {
+        if (AssetRegistry.objs.isEmpty()) {
             final Path objsPath = Path.of(options.getDatsPath(), "OBJ.dat");
             javax.swing.JOptionPane.showMessageDialog(null,
                     "No se encontró o no se pudo leer OBJ.dat en:\n" + objsPath.toAbsolutePath() +
@@ -192,7 +188,8 @@ public final class GameData {
                 if (trimmed.startsWith("[") && trimmed.contains("]")) {
                     // Guardar el anterior antes de empezar uno nuevo
                     if (currentGrh != -1) {
-                        minimapColors.put(currentGrh, imgui.ImGui.getColorU32(r / 255f, g / 255f, b / 255f, 1.0f));
+                        AssetRegistry.minimapColors.put(currentGrh,
+                                imgui.ImGui.getColorU32(r / 255f, g / 255f, b / 255f, 1.0f));
                     }
 
                     String section = trimmed.substring(1, trimmed.indexOf(']')).trim();
@@ -230,9 +227,11 @@ public final class GameData {
             }
             // Guardar el último
             if (currentGrh != -1) {
-                minimapColors.put(currentGrh, imgui.ImGui.getColorU32(r / 255f, g / 255f, b / 255f, 1.0f));
+                AssetRegistry.minimapColors.put(currentGrh,
+                        imgui.ImGui.getColorU32(r / 255f, g / 255f, b / 255f, 1.0f));
             }
-            Logger.info("Cargados {} colores para el minimapa desde {}", minimapColors.size(), minimapPath);
+            Logger.info("Cargados {} colores para el minimapa desde {}", AssetRegistry.minimapColors.size(),
+                    minimapPath);
         } catch (IOException e) {
             Logger.error(e, "Error al leer MiniMap.dat");
         }

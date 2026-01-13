@@ -287,7 +287,7 @@ public final class MapManager {
 
                         if (npcIndex > 0) {
                             GameData.mapData[x][y].setNpcIndex(npcIndex);
-                            NpcData npc = GameData.npcs.get((int) npcIndex);
+                            NpcData npc = AssetRegistry.npcs.get((int) npcIndex);
                             if (npc != null) {
                                 Character.makeChar(GameData.nextOpenChar(), npc.getBody(), npc.getHead(),
                                         Direction.fromID(npc.getHeading()), x, y, 0, 0, 0);
@@ -304,7 +304,7 @@ public final class MapManager {
                         GameData.mapData[x][y].setObjAmount(amount);
 
                         if (objIndex > 0) {
-                            ObjData obj = GameData.objs.get(objIndex);
+                            ObjData obj = AssetRegistry.objs.get(objIndex);
                             if (obj != null) {
                                 GameData.initGrh(GameData.mapData[x][y].getObjGrh(), (short) obj.getGrhIndex(), false);
                             } else {
