@@ -301,19 +301,19 @@ public final class GameScene extends Scene {
     private void renderFirstLayer(RenderSettings renderSettings, final int pixelOffsetX, final int pixelOffsetY) {
         // Si la visualización de la Capa 1 esta activa...
         if (renderSettings.getShowLayer()[0]) {
-            for (int y = camera.getScreenminY(); y <= camera.getScreenmaxY(); y++) {
-                int x;
-                for (x = camera.getScreenminX(); x <= camera.getScreenmaxX(); x++) {
+            camera.setScreenY(camera.getMinYOffset() - TILE_BUFFER_SIZE);
+            for (int y = camera.getMinY(); y <= camera.getMaxY(); y++) {
+                camera.setScreenX(camera.getMinXOffset() - TILE_BUFFER_SIZE);
+                for (int x = camera.getMinX(); x <= camera.getMaxX(); x++) {
                     if (mapData[x][y].getLayer(1).getGrhIndex() != 0) {
                         drawTexture(mapData[x][y].getLayer(1),
-                                POS_SCREEN_X + (camera.getScreenX() - 1) * TILE_PIXEL_SIZE + pixelOffsetX,
-                                POS_SCREEN_Y + (camera.getScreenY() - 1) * TILE_PIXEL_SIZE + pixelOffsetY,
+                                POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX,
+                                POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY,
                                 true, true, false, 1.0f, weather.getWeatherColor());
                     }
 
                     camera.incrementScreenX();
                 }
-                camera.setScreenX(camera.getScreenX() - x + camera.getScreenminX());
                 camera.incrementScreenY();
             }
         }
