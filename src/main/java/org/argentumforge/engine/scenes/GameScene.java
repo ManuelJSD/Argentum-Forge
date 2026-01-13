@@ -157,12 +157,15 @@ public final class GameScene extends Scene {
      */
     @Override
     public void mouseEvents() {
-        if (!ImGUISystem.INSTANCE.isMainLast() && !ImGUISystem.INSTANCE.isFormVisible("FSurfaceEditor")
-                && !ImGUISystem.INSTANCE.isFormVisible("FBlockEditor")
-                && !ImGUISystem.INSTANCE.isFormVisible("FNpcEditor")
-                && !ImGUISystem.INSTANCE.isFormVisible("FObjEditor")
-                && !ImGUISystem.INSTANCE.isFormVisible("FMinimap"))
-            return;
+        // Bloqueamos si ImGui está capturando el ratón activamente (sobre una ventana o
+        // widget)
+        // EXCEPTO si solo la ventana principal FMain está activa, permitiendo
+        // click-through al mapa.
+        if (imgui.ImGui.getIO().getWantCaptureMouse()) {
+            if (!ImGUISystem.INSTANCE.isMainLast()) {
+                return;
+            }
+        }
 
         // ¿Estamos haciendo clic dentro del área de renderizado del juego?
         if (inGameArea()) {
@@ -206,11 +209,9 @@ public final class GameScene extends Scene {
      * {@link #checkWalkKeys}.
      */
     private void checkBindedKeys() {
-        if ((!ImGUISystem.INSTANCE.isMainLast() && !ImGUISystem.INSTANCE.isFormVisible("FSurfaceEditor")
-                && !ImGUISystem.INSTANCE.isFormVisible("FBlockEditor")
-                && !ImGUISystem.INSTANCE.isFormVisible("FNpcEditor")
-                && !ImGUISystem.INSTANCE.isFormVisible("FObjEditor")
-                && !ImGUISystem.INSTANCE.isFormVisible("FMinimap")))
+        // Bloqueamos keyboard solo si hay un campo de texto activo (ej. buscador de la
+        // paleta)
+        if (imgui.ImGui.getIO().getWantTextInput())
             return;
 
         // Usando el metodo estatico de Key para obtener la tecla desde el codigo
