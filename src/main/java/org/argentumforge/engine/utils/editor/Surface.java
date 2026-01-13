@@ -14,7 +14,7 @@ public class Surface {
     private static volatile Surface instance;
     private static final Object lock = new Object();
 
-    private int mode;
+    private int mode; // 0 = ninguno, 1 = colocar, 2 = borrar, 3 = capturar (pick)
     private int surfaceIndex;
     private int layer;
 
@@ -75,6 +75,9 @@ public class Surface {
             case 2: // Eliminar
                 this.delete(x, y);
                 break;
+            case 3: // Capturar (pick)
+                this.pick(x, y);
+                break;
 
             default:
                 break;
@@ -95,6 +98,16 @@ public class Surface {
         }
         mapData[x][y].setLayer(layer,
                 initGrh(mapData[x][y].getLayer(layer), mapData[x][y].getLayer(layer).getGrhIndex(), true));
+    }
+
+    private void pick(int x, int y) {
+        if (mapData != null && x >= 0 && x < mapData.length && y >= 0 && y < mapData[0].length) {
+            int grhIdx = mapData[x][y].getLayer(layer).getGrhIndex();
+            if (grhIdx > 0) {
+                this.surfaceIndex = grhIdx;
+                this.mode = 1; // Volvemos a modo insertar con el nuevo índice
+            }
+        }
     }
 
 }

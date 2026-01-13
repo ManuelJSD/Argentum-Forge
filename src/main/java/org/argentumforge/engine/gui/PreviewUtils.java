@@ -1,17 +1,18 @@
 package org.argentumforge.engine.gui;
 
 import imgui.ImGui;
-import imgui.ImDrawList;
 import org.argentumforge.engine.renderer.Surface;
 import org.argentumforge.engine.renderer.Texture;
-import org.argentumforge.engine.utils.GameData;
+import org.argentumforge.engine.utils.AssetRegistry;
 import org.argentumforge.engine.utils.inits.BodyData;
 import org.argentumforge.engine.utils.inits.GrhData;
 import org.argentumforge.engine.utils.inits.HeadData;
-import org.argentumforge.engine.utils.AssetRegistry;
 
 import static org.argentumforge.engine.utils.AssetRegistry.grhData;
 
+/**
+ * Utilidades para previsualizar elementos gráficos en la interfaz de ImGui.
+ */
 public final class PreviewUtils {
 
     private PreviewUtils() {
@@ -25,10 +26,9 @@ public final class PreviewUtils {
             return;
         }
 
-        // Si es animado, mostramos el primer frame
         int currentGrh = grhIndex;
         if (grhData[grhIndex].getNumFrames() > 1) {
-            currentGrh = grhData[grhIndex].getFrame(0);
+            currentGrh = grhData[grhIndex].getFrame(1); // Frames en AO son 1-indexed
         }
 
         GrhData data = grhData[currentGrh];
@@ -39,60 +39,93 @@ public final class PreviewUtils {
         if (tex == null)
             return;
 
-        float texW = tex.getTex_width();
-        float texH = tex.getTex_height();
+        float u0 = data.getsX() / (float) tex.getTex_width();
+        float v0 = (data.getsY() + data.getPixelHeight()) / (float) tex.getTex_height();
+        float u1 = (data.getsX() + data.getPixelWidth()) / (float) tex.getTex_width();
+        float v1 = data.getsY() / (float) tex.getTex_height();
 
-        // Calcular UVs (ImGui usa 0.0 a 1.0)
-        float u0 = data.getsX() / texW;
-        float v0 = (data.getsY() + data.getPixelHeight()) / texH;
-        float u1 = (data.getsX() + data.getPixelWidth()) / texW;
-        float v1 = data.getsY() / texH;
-
-        // ImGui.image: texture_id, size_x, size_y, uv0 (top-left), uv1 (bottom-right)
-        // Engine renders textures flipped, so we use v1 (top) and v0 (bottom).
         ImGui.image(tex.getId(), data.getPixelWidth() * scale, data.getPixelHeight() * scale, u0, v1, u1, v0);
     }
 
     /**
-     * Dibuja un NPC (Cuerpo + Cabeza) en ImGui usando la DrawList para mejor
-     * control de capas.
+     * Dibuja un GrhIndex ajustado (aspect ratio) y centrado dentro de un área
+     * específica.
+     */
+    public static void drawGrhFit(int grhIndex, float maxWidth, float maxHeight) {
+        if (grhIndex <= 0 || grhIndex >= grhData.length || grhData[grhIndex] == null)
+            return;
+
+        int currentGrh = grhIndex;
+        if (grhData[grhIndex].getNumFrames() > 1) {
+            currentGrh = grhData[grhIndex].getFrame(1);
+        }
+
+        GrhData data = grhData[currentGrh];
+        if (data.getFileNum() <= 0)
+            return;
+
+        Texture tex = Surface.INSTANCE.getTexture(data.getFileNum());
+        if (tex == null)
+            return;
+
+        float w = data.getPixelWidth();
+        float h = data.getPixelHeight();
+
+        // Calcular escala para que quepa en el área manteniendo proporción
+        float scale = 1.0f;
+        if (w > maxWidth || h > maxHeight) {
+            scale = Math.min(maxWidth / w, maxHeight / h);
+        }
+
+        float finalW = w * scale;
+        float finalH = h * scale;
+
+        // Guardar posición inicial para centrar
+        float startX = ImGui.getCursorPosX();
+        float startY = ImGui.getCursorPosY();
+
+        // Centrar dentro del área maxWidth x maxHeight
+        ImGui.setCursorPos(startX + (maxWidth - finalW) / 2, startY + (maxHeight - finalH) / 2);
+
+        float u0 = data.getsX() / (float) tex.getTex_width();
+        float v0 = (data.getsY() + data.getPixelHeight()) / (float) tex.getTex_height();
+        float u1 = (data.getsX() + data.getPixelWidth()) / (float) tex.getTex_width();
+        float v1 = data.getsY() / (float) tex.getTex_height();
+
+        ImGui.image(tex.getId(), finalW, finalH, u0, v1, u1, v0);
+
+        // Restaurar cursor al inicio del área lógica para que ImGui sepa que ocupamos
+        // ese
+        // espacio
+        ImGui.setCursorPos(startX, startY);
+        ImGui.dummy(maxWidth, maxHeight);
+    }
+
+    /**
+     * Dibuja un NPC (Cuerpo + Cabeza) en ImGui de forma relativa al cursor actual.
      */
     public static void drawNpc(int bodyIndex, int headIndex, float scale) {
         if (bodyIndex <= 0 || bodyIndex >= AssetRegistry.bodyData.length || AssetRegistry.bodyData[bodyIndex] == null)
             return;
 
         BodyData body = AssetRegistry.bodyData[bodyIndex];
-        int bodyGrhIndex = body.getWalk(3).getGrhIndex(); // 3 = Sur en AO usualmente, o 1. Probamos 3.
+
+        // Dirección 3 (Sur)
+        int bodyGrhIndex = body.getWalk(3).getGrhIndex();
         if (bodyGrhIndex <= 0)
             bodyGrhIndex = body.getWalk(1).getGrhIndex();
+
         if (bodyGrhIndex <= 0)
             return;
 
-        GrhData bodyData = grhData[bodyGrhIndex];
-        if (bodyData.getFileNum() <= 0)
-            return;
+        // Guardamos posición inicial del cursor (posición actual antes de dibujar nada)
+        float startPosX = ImGui.getCursorPosX();
+        float startPosY = ImGui.getCursorPosY();
 
-        Texture bodyTex = Surface.INSTANCE.getTexture(bodyData.getFileNum());
-        if (bodyTex == null)
-            return;
+        // 1. Dibujar Cuerpo
+        drawGrhRelative(bodyGrhIndex, startPosX, startPosY, scale, 0, 0);
 
-        // Reservar espacio en el layout de ImGui
-        float startX = ImGui.getCursorScreenPos().x;
-        float startY = ImGui.getCursorScreenPos().y;
-        float areaWidth = 100 * scale;
-        float areaHeight = 100 * scale;
-        ImGui.dummy(areaWidth, areaHeight);
-
-        ImDrawList drawList = ImGui.getWindowDrawList();
-
-        // Centro de la base (donde estarian los pies)
-        float centerX = startX + areaWidth / 2;
-        float bottomY = startY + areaHeight - 10 * scale;
-
-        // Renderizar Cuerpo
-        renderGrhToDrawList(drawList, bodyGrhIndex, centerX, bottomY, scale, true);
-
-        // Renderizar Cabeza
+        // 2. Dibujar Cabeza
         if (headIndex > 0 && headIndex < AssetRegistry.headData.length && AssetRegistry.headData[headIndex] != null) {
             HeadData head = AssetRegistry.headData[headIndex];
             int headGrhIndex = head.getHead(3).getGrhIndex();
@@ -100,23 +133,31 @@ public final class PreviewUtils {
                 headGrhIndex = head.getHead(1).getGrhIndex();
 
             if (headGrhIndex > 0) {
-                float headX = centerX + body.getHeadOffset().getX() * scale;
-                float headY = bottomY + body.getHeadOffset().getY() * scale;
-                renderGrhToDrawList(drawList, headGrhIndex, headX, headY, scale, true);
+                float offsetX = body.getHeadOffset().getX() * scale;
+                float offsetY = body.getHeadOffset().getY() * scale;
+                drawGrhRelative(headGrhIndex, startPosX, startPosY, scale, offsetX, offsetY);
             }
         }
+
+        // Dejar el cursor al final del área (ajustado para que el dummy no desplace
+        // demasiado)
+        ImGui.setCursorPos(startPosX, startPosY);
+        ImGui.dummy(64 * scale, 64 * scale);
     }
 
-    private static void renderGrhToDrawList(ImDrawList drawList, int grhIndex, float x, float y, float scale,
-            boolean center) {
+    private static void drawGrhRelative(int grhIndex, float basePosX, float basePosY, float scale, float offsetX,
+            float offsetY) {
         if (grhIndex <= 0 || grhData[grhIndex] == null)
             return;
 
-        int currentGrh = grhIndex;
-        if (grhData[grhIndex].getNumFrames() > 1) {
-            currentGrh = grhData[grhIndex].getFrame(0);
-        }
-        GrhData data = grhData[currentGrh];
+        GrhData grh = grhData[grhIndex];
+        // En este motor los frames son 1-indexed para animaciones
+        int frameIndex = grh.getNumFrames() > 1 ? grh.getFrame(1) : grhIndex;
+
+        if (frameIndex <= 0 || frameIndex >= grhData.length || grhData[frameIndex] == null)
+            return;
+
+        GrhData data = grhData[frameIndex];
         Texture tex = Surface.INSTANCE.getTexture(data.getFileNum());
         if (tex == null)
             return;
@@ -124,22 +165,18 @@ public final class PreviewUtils {
         float w = data.getPixelWidth() * scale;
         float h = data.getPixelHeight() * scale;
 
-        float drawX = x;
-        float drawY = y;
-
-        if (center) {
-            drawX = x - w / 2;
-            drawY = y - h;
-        }
-
         float u0 = data.getsX() / (float) tex.getTex_width();
         float v0 = (data.getsY() + data.getPixelHeight()) / (float) tex.getTex_height();
         float u1 = (data.getsX() + data.getPixelWidth()) / (float) tex.getTex_width();
         float v1 = data.getsY() / (float) tex.getTex_height();
 
-        // ImGui addImage: p_min (top-left), p_max (bottom-right), uv_min (top-left),
-        // uv_max (bottom-right)
-        // Engine renders textures flipped, so we use v1 (top) and v0 (bottom).
-        drawList.addImage(tex.getId(), drawX, drawY, drawX + w, drawY + h, u0, v1, u1, v0);
+        // Centrado: basePosX es el inicio del área.
+        // AO dibuja desde los pies. Queremos que los pies estén cerca de la base del
+        // área (basePosY + 64*scale)
+        float targetX = basePosX + offsetX + (32 * scale) - (w / 2);
+        float targetY = basePosY + offsetY + (62 * scale) - h;
+
+        ImGui.setCursorPos(targetX, targetY);
+        ImGui.image(tex.getId(), w, h, u0, v1, u1, v0);
     }
 }

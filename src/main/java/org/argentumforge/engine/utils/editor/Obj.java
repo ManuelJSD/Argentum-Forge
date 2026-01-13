@@ -18,7 +18,7 @@ public class Obj {
     private static volatile Obj instance;
     private static final Object lock = new Object();
 
-    private int mode; // 0 = ninguno, 1 = colocar, 2 = quitar
+    private int mode; // 0 = ninguno, 1 = colocar, 2 = quitar, 3 = capturar (pick)
     private int objNumber;
 
     private Obj() {
@@ -79,6 +79,9 @@ public class Obj {
             case 2:
                 remove(x, y);
                 break;
+            case 3:
+                pick(x, y);
+                break;
             default:
                 break;
         }
@@ -109,6 +112,25 @@ public class Obj {
     private void remove(int x, int y) {
         if (mapData != null && x >= 0 && x < mapData.length && y >= 0 && y < mapData[0].length) {
             mapData[x][y].getObjGrh().setGrhIndex(0);
+        }
+    }
+
+    /**
+     * Captura el ID del objeto en las coordenadas dadas.
+     */
+    private void pick(int x, int y) {
+        if (mapData != null && x >= 0 && x < mapData.length && y >= 0 && y < mapData[0].length) {
+            int grhIdx = mapData[x][y].getObjGrh().getGrhIndex();
+            if (grhIdx > 0) {
+                // Buscamos el ObjNumber que use este GrhIndex
+                for (org.argentumforge.engine.utils.inits.ObjData data : AssetRegistry.objs.values()) {
+                    if (data.getGrhIndex() == grhIdx) {
+                        this.objNumber = data.getNumber();
+                        this.mode = 1; // Volver a modo colocar
+                        break;
+                    }
+                }
+            }
         }
     }
 }
