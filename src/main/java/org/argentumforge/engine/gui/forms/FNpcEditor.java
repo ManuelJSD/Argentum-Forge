@@ -7,6 +7,9 @@ import imgui.flag.ImGuiWindowFlags;
 import org.argentumforge.engine.utils.editor.Npc;
 import org.argentumforge.engine.utils.inits.NpcData;
 import imgui.type.ImString;
+import org.argentumforge.engine.game.console.Console;
+import org.argentumforge.engine.game.console.FontStyle;
+import org.argentumforge.engine.renderer.RGBColor;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -104,6 +107,8 @@ public final class FNpcEditor extends Form {
                 npcEditor.setMode(0);
             } else {
                 npcEditor.setMode(2);
+                Console.INSTANCE.addMsgToConsole("Modo: Quitar NPC activado. Clic en el mapa para eliminar.",
+                        FontStyle.REGULAR, new RGBColor(1, 1, 1));
             }
         }
         if (pushQuitar)
@@ -127,6 +132,9 @@ public final class FNpcEditor extends Form {
             } else {
                 npcEditor.setMode(1);
                 npcEditor.setNpcNumber(selectedNpcNumber);
+                Console.INSTANCE.addMsgToConsole(
+                        "Modo: Colocar NPC (" + selectedNpcNumber + ") activado. Clic en el mapa para colocar.",
+                        FontStyle.REGULAR, new RGBColor(1, 1, 1));
             }
         }
         if (!placeEnabled)
