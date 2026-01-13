@@ -107,13 +107,22 @@ public final class Drawn {
      * Dibujamos sin animacion
      */
     public static void drawGrhIndex(int grhIndex, int x, int y, RGBColor color) {
+        drawGrhIndex(grhIndex, x, y, 1.0f, color);
+    }
+
+    /**
+     * Dibujamos sin animacion con opacidad ajustable
+     */
+    public static void drawGrhIndex(int grhIndex, int x, int y, float alpha, RGBColor color) {
+        if (grhIndex <= 0 || grhIndex >= grhData.length || grhData[grhIndex] == null)
+            return;
         if (color == null)
             color = new RGBColor(1.0f, 1.0f, 1.0f);
         geometryBoxRender(grhIndex, x, y,
                 grhData[grhIndex].getPixelWidth(),
                 grhData[grhIndex].getPixelHeight(),
                 grhData[grhIndex].getsX(),
-                grhData[grhIndex].getsY(), false, 1.0f, color);
+                grhData[grhIndex].getsY(), false, alpha, color);
     }
 
     /**

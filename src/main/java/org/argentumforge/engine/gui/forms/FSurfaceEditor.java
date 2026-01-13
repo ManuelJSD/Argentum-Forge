@@ -59,6 +59,11 @@ public class FSurfaceEditor extends Form {
             drawSearchAndPagination();
             ImGui.separator();
 
+            // Sincronizar selección si cambió externamente (por pick)
+            if (surface.getSurfaceIndex() != selectedGrhIndex && surface.getMode() != 3) {
+                selectedGrhIndex = surface.getSurfaceIndex();
+            }
+
             drawTileGrid();
         }
         ImGui.end();
@@ -114,6 +119,17 @@ public class FSurfaceEditor extends Form {
             surface.setMode(2);
         }
         if (currentMode == 2)
+            ImGui.popStyleColor();
+
+        ImGui.sameLine();
+
+        // Botón Capturar (Pick)
+        if (currentMode == 3)
+            ImGui.pushStyleColor(ImGuiCol.Button, activeColor);
+        if (ImGui.button("Capturar")) {
+            surface.setMode(3);
+        }
+        if (currentMode == 3)
             ImGui.popStyleColor();
     }
 
@@ -224,7 +240,7 @@ public class FSurfaceEditor extends Form {
                 }
                 ImGui.endTable();
             }
-            ImGui.endChild();
         }
+        ImGui.endChild();
     }
 }

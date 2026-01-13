@@ -103,16 +103,14 @@ public class FPalette extends Form {
         }
 
         // Child window para que el scroll solo afecte a la rejilla
-        if (ImGui.beginChild("PaletteGrid", 0, 0, true)) {
-
+        if (ImGui.beginChild("TileGridChild", 0, 0, true)) {
             float windowWidth = ImGui.getContentRegionAvailX();
-            int columns = Math.max(1, (int) (windowWidth / (TILE_SIZE + 12)));
+            int columns = Math.max(1, (int) (windowWidth / (TILE_SIZE + 10)));
 
             int totalGrhs = AssetRegistry.grhData.length;
             int start = searchGrh.get() > 0 ? searchGrh.get() : (currentPage * ITEMS_PER_PAGE);
             if (start <= 0)
                 start = 1;
-
             int end = searchGrh.get() > 0 ? start + 1 : Math.min(start + ITEMS_PER_PAGE, totalGrhs);
 
             // Usamos tablas para una alineacion perfecta
@@ -146,12 +144,11 @@ public class FPalette extends Form {
                         if (ImGui.imageButton(tex.getId(), (float) TILE_SIZE, (float) TILE_SIZE, u0, v1, u1, v0)) {
                             selectedGrh = i;
                             Surface.getInstance().setSurfaceIndex(i);
-                            if (Surface.getInstance().getMode() == 0)
-                                Surface.getInstance().setMode(1);
                         }
                     } else {
                         if (ImGui.button("?", (float) TILE_SIZE, (float) TILE_SIZE)) {
                             selectedGrh = i;
+                            Surface.getInstance().setSurfaceIndex(i);
                         }
                     }
 
@@ -162,7 +159,6 @@ public class FPalette extends Form {
                     if (ImGui.isItemHovered()) {
                         ImGui.beginTooltip();
                         ImGui.text("GRH: " + i);
-                        ImGui.text("File: " + data.getFileNum());
                         ImGui.text("Size: " + data.getPixelWidth() + "x" + data.getPixelHeight());
                         PreviewUtils.drawGrh(i, 2.0f);
                         ImGui.endTooltip();
@@ -172,7 +168,7 @@ public class FPalette extends Form {
                 }
                 ImGui.endTable();
             }
-            ImGui.endChild();
         }
+        ImGui.endChild();
     }
 }

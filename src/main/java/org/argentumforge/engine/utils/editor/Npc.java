@@ -14,7 +14,7 @@ public class Npc {
     private static volatile Npc instance;
     private static final Object lock = new Object();
 
-    private int mode; // 0 = ninguno, 1 = colocar, 2 = quitar
+    private int mode; // 0 = ninguno, 1 = colocar, 2 = quitar, 3 = capturar (pick)
     private int npcNumber;
 
     private Npc() {
@@ -75,6 +75,9 @@ public class Npc {
             case 2:
                 remove(x, y);
                 break;
+            case 3:
+                pick(x, y);
+                break;
             default:
                 break;
         }
@@ -131,6 +134,20 @@ public class Npc {
 
             // Limpiamos el dato del mapa
             mapData[x][y].setNpcIndex((short) 0);
+        }
+    }
+
+    /**
+     * Captura el ID del NPC en las coordenadas dadas.
+     */
+    private void pick(int x, int y) {
+        if (mapData != null && x >= 0 && x < mapData.length && y >= 0 && y < mapData[0].length) {
+            short npcIdx = mapData[x][y].getNpcIndex();
+            if (npcIdx > 0) {
+                this.npcNumber = npcIdx;
+                // Una vez capturado, volvemos a modo colocar con ese NPC
+                this.mode = 1;
+            }
         }
     }
 }

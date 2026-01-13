@@ -28,6 +28,8 @@ public enum Options {
     private String musicPath = "resources/musica";
     private int screenWidth = 1024;
     private int screenHeight = 1024;
+    private int clientWidth = 13;
+    private int clientHeight = 11;
     private String lastMapPath = ".";
     private float ambientR = 1.0f;
     private float ambientG = 1.0f;
@@ -80,6 +82,8 @@ public enum Options {
             write(writer, "Language", language);
             write(writer, "ScreenWidth", screenWidth);
             write(writer, "ScreenHeight", screenHeight);
+            write(writer, "ClientWidth", clientWidth);
+            write(writer, "ClientHeight", clientHeight);
             write(writer, "LastMapPath", lastMapPath);
             write(writer, "AmbientR", ambientR);
             write(writer, "AmbientG", ambientG);
@@ -199,6 +203,22 @@ public enum Options {
         this.screenHeight = screenHeight;
     }
 
+    public int getClientWidth() {
+        return clientWidth;
+    }
+
+    public void setClientWidth(int clientWidth) {
+        this.clientWidth = clientWidth;
+    }
+
+    public int getClientHeight() {
+        return clientHeight;
+    }
+
+    public void setClientHeight(int clientHeight) {
+        this.clientHeight = clientHeight;
+    }
+
     public String getLastMapPath() {
         return lastMapPath;
     }
@@ -240,6 +260,8 @@ public enum Options {
             case "Language" -> language = value;
             case "ScreenWidth" -> screenWidth = Integer.parseInt(value);
             case "ScreenHeight" -> screenHeight = Integer.parseInt(value);
+            case "ClientWidth" -> clientWidth = Integer.parseInt(value);
+            case "ClientHeight" -> clientHeight = Integer.parseInt(value);
             case "LastMapPath" -> lastMapPath = value;
             case "AmbientR" -> ambientR = Float.parseFloat(value);
             case "AmbientG" -> ambientG = Float.parseFloat(value);

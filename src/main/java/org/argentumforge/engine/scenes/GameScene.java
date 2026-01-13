@@ -480,11 +480,12 @@ public final class GameScene extends Scene {
                 camera.setScreenX(camera.getMinXOffset() - TILE_BUFFER_SIZE);
                 for (int x = camera.getMinX(); x <= camera.getMaxX(); x++) {
 
-                    // Si el tile está bloqueado, dibujamos el Grh 4
+                    // Si el tile está bloqueado, dibujamos el Grh 4 con opacidad variable
                     if (mapData[x][y].getBlocked()) {
-                        drawGrhIndex(grhBlock,
+                        org.argentumforge.engine.renderer.Drawn.drawGrhIndex(grhBlock,
                                 POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX,
                                 POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY,
+                                renderSettings.getBlockOpacity(),
                                 null);
                     }
 

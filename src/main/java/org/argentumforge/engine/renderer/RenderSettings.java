@@ -14,6 +14,7 @@ public class RenderSettings {
     private boolean showMapTransfer = true;
     // Bloqueos
     private boolean showBlock = true;
+    private float blockOpacity = 0.5f;
 
     public boolean[] getShowLayer() {
         return showLayer;
@@ -61,6 +62,14 @@ public class RenderSettings {
 
     public void setShowBlock(boolean showBlock) {
         this.showBlock = showBlock;
+    }
+
+    public float getBlockOpacity() {
+        return blockOpacity;
+    }
+
+    public void setBlockOpacity(float blockOpacity) {
+        this.blockOpacity = blockOpacity;
     }
 
 }
