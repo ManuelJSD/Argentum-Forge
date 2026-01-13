@@ -112,6 +112,11 @@ public class FSurfaceEditor extends Form {
             ImGui.popStyleColor();
         if (pushInsertar)
             ImGui.popStyleColor();
+
+        // Sincronizar con la paleta si cambió externamente
+        if (surface.getSurfaceIndex() != selectedGrhIndex && surface.getMode() == 1) {
+            selectedGrhIndex = surface.getSurfaceIndex();
+        }
     }
 
     private void drawGrhList() {

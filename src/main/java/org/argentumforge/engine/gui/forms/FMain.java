@@ -11,6 +11,7 @@ import org.argentumforge.engine.renderer.RenderSettings;
 
 import static org.argentumforge.engine.utils.GameData.options;
 import static org.argentumforge.engine.utils.Time.FPS;
+import static org.argentumforge.engine.utils.Time.deltaTime;
 
 /**
  * Formulario principal que proporciona la interfaz de usuario del editor de
@@ -47,6 +48,7 @@ public final class FMain extends Form {
     private FNpcEditor npcEditor;
     private FObjEditor objEditor;
     private FMinimap minimap;
+    private FPalette palette;
     private float[] ambientColorArr;
 
     public FMain() {
@@ -60,27 +62,15 @@ public final class FMain extends Form {
         npcEditor = new FNpcEditor();
         objEditor = new FObjEditor();
         minimap = new FMinimap();
+        palette = new FPalette();
     }
 
     @Override
     public void render() {
         drawMenuBar();
-        ImGui.setNextWindowSize(Window.INSTANCE.getWidth() + 10, Window.INSTANCE.getHeight() + 5, ImGuiCond.Always);
-        ImGui.setNextWindowPos(-5, -1, ImGuiCond.Once);
-
-        ImGui.begin(this.getClass().getSimpleName(), ImGuiWindowFlags.NoTitleBar |
-                ImGuiWindowFlags.NoMove |
-                ImGuiWindowFlags.NoFocusOnAppearing |
-                ImGuiWindowFlags.NoDecoration |
-                ImGuiWindowFlags.NoBackground |
-                ImGuiWindowFlags.NoResize |
-                ImGuiWindowFlags.NoSavedSettings |
-                ImGuiWindowFlags.NoBringToFrontOnFocus);
-
         this.renderFPS();
         this.drawButtons();
         Console.INSTANCE.drawConsole();
-        ImGui.end();
     }
 
     /**
@@ -95,36 +85,32 @@ public final class FMain extends Form {
     // FPS
     private void renderFPS() {
         final String txtFPS = String.valueOf(FPS) + " FPS";
-        float widgetWidth = 100;
-        ImGui.setCursorPos(Window.INSTANCE.getWidth() - widgetWidth - 10, 20);
+        float widgetWidth = 80;
 
-        ImGui.pushStyleVar(ImGuiStyleVar.SelectableTextAlign, 1.0f, 0.5f);
-        ImGui.pushStyleColor(ImGuiCol.HeaderHovered, TRANSPARENT_COLOR);
-        ImGui.pushStyleColor(ImGuiCol.HeaderActive, TRANSPARENT_COLOR);
-        ImGui.selectable(txtFPS, false, ImGuiSelectableFlags.None, widgetWidth, 15);
-        ImGui.popStyleColor();
-        ImGui.popStyleColor();
-        ImGui.popStyleVar();
+        ImGui.setNextWindowPos(Window.INSTANCE.getWidth() - widgetWidth - 10, 20);
+        ImGui.setNextWindowSize(widgetWidth, 30);
+        if (ImGui.begin("FPS", ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoInputs
+                | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoSavedSettings)) {
+            ImGui.pushStyleVar(ImGuiStyleVar.SelectableTextAlign, 1.0f, 0.5f);
+            ImGui.pushStyleColor(ImGuiCol.HeaderHovered, TRANSPARENT_COLOR);
+            ImGui.pushStyleColor(ImGuiCol.HeaderActive, TRANSPARENT_COLOR);
+            ImGui.selectable(txtFPS, false, ImGuiSelectableFlags.None, widgetWidth - 10, 20);
+            ImGui.popStyleColor();
+            ImGui.popStyleColor();
+            ImGui.popStyleVar();
+        }
+        ImGui.end();
     }
 
     // Botones principales
     private void drawButtons() {
-        /*-=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=-
-                         WINDOWS CONTROLS BUTTONS
-        -=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=-*/
-        /*
-         * if (drawButton(775, 3, 17, 17, "close")) {
-         * playSound(SND_CLICK);
-         * Engine.closeClient();
-         * }
-         * if (drawButton(755, 3, 17, 17, "minimizar")) {
-         * playSound(SND_CLICK);
-         * Window.INSTANCE.minimizar();
-         * }
-         */
-
-        // Botones de control de editores
-        drawEditorButtons();
+        ImGui.setNextWindowPos(0, 20);
+        ImGui.setNextWindowSize(700, 40); // Solo el ancho de los botones
+        if (ImGui.begin("ToolBar", ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoBackground
+                | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoSavedSettings)) {
+            drawEditorButtons();
+        }
+        ImGui.end();
     }
 
     /**
@@ -132,7 +118,7 @@ public final class FMain extends Form {
      * bloqueos.
      */
     private void drawEditorButtons() {
-        ImGui.setCursorPos(10, 30);
+        ImGui.setCursorPos(10, 5); // Alineado arriba dentro de la mini-ventana
 
         // Botón Superficies
         if (ImGui.button("Superficies", 100, 25)) {
@@ -184,6 +170,17 @@ public final class FMain extends Form {
                 ImGUISystem.INSTANCE.deleteFrmArray(minimap);
             } else {
                 ImGUISystem.INSTANCE.show(minimap);
+            }
+        }
+
+        ImGui.sameLine();
+
+        // Botón Paleta
+        if (ImGui.button("Paleta", 100, 25)) {
+            if (ImGUISystem.INSTANCE.isFormVisible("FPalette")) {
+                ImGUISystem.INSTANCE.deleteFrmArray(palette);
+            } else {
+                ImGUISystem.INSTANCE.show(palette);
             }
         }
 
