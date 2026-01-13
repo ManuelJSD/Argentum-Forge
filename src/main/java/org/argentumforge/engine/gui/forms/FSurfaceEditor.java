@@ -4,161 +4,227 @@ import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiCond;
 import imgui.flag.ImGuiWindowFlags;
+import imgui.flag.ImGuiTableFlags;
 import imgui.type.ImInt;
+import org.argentumforge.engine.gui.PreviewUtils;
 import org.argentumforge.engine.utils.editor.Surface;
+import org.argentumforge.engine.utils.AssetRegistry;
 import org.argentumforge.engine.utils.inits.GrhData;
+import org.argentumforge.engine.renderer.Texture;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.argentumforge.engine.utils.AssetRegistry.grhData;
-
+/**
+ * Editor de Superficies Unificado.
+ * Combina los controles de capa y modo con una paleta visual de tiles (GRHs).
+ */
 public class FSurfaceEditor extends Form {
 
-    private int selectedGrhIndex = -1; // índice seleccionado en la lista principal (grhData)
-    private final ImInt selectedLayer = new ImInt(0); // índice seleccionado en el ComboBox de capas
+    private final ImInt searchGrh = new ImInt(0);
+    private int selectedGrhIndex = -1;
+    private final ImInt selectedLayer = new ImInt(0);
     private final List<Integer> capas = new ArrayList<>(List.of(1, 2, 3, 4));
 
+    // Configuración de la rejilla
+    private static final int TILE_SIZE = 48;
+    private static final int ITEMS_PER_PAGE = 100;
+    private int currentPage = 0;
+
     private Surface surface;
-    // activeMode removed to avoid state desync
 
     public FSurfaceEditor() {
-        surface = Surface.getInstance();
+        this.surface = Surface.getInstance();
+        this.selectedGrhIndex = surface.getSurfaceIndex();
 
-        // Seleccionar automáticamente el primer GRH si existe
-        if (grhData != null && grhData.length > 1) {
-            selectedGrhIndex = 1;
-        } else {
-            selectedGrhIndex = -1;
+        // Sincronizar capa inicial
+        for (int i = 0; i < capas.size(); i++) {
+            if (capas.get(i) == surface.getLayer()) {
+                selectedLayer.set(i);
+                break;
+            }
         }
-
-        selectedLayer.set(0); // Primera capa
     }
 
     @Override
     public void render() {
-        ImGui.setNextWindowSize(210, 400, ImGuiCond.Always);
-        ImGui.begin(this.getClass().getSimpleName(),
-                ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoResize);
+        ImGui.setNextWindowSize(350, 600, ImGuiCond.FirstUseEver);
 
-        ImGui.text("Superficies:");
-        ImGui.separator();
+        // Ventana principal del editor de superficies
+        if (ImGui.begin("Editor de Superficies", ImGuiWindowFlags.None)) {
 
-        drawGrhList();
-        ImGui.separator();
+            drawLayerAndModeControls();
+            ImGui.separator();
 
-        // Preview
-        ImGui.text("Previsualizacion:");
-        ImGui.beginChild("PreviewChild", 0, 100, true);
-        if (selectedGrhIndex > 0) {
-            org.argentumforge.engine.gui.PreviewUtils.drawGrh(selectedGrhIndex, 1.0f);
+            drawSearchAndPagination();
+            ImGui.separator();
+
+            drawTileGrid();
         }
-        ImGui.endChild();
-        ImGui.separator();
-
-        drawCapasCombo();
-        ImGui.separator();
-
-        drawButtons();
-
         ImGui.end();
     }
 
-    private void drawButtons() {
-        int normalColor = 0xFFFFFFFF; // blanco
-        int activeColor = 0xFF00FF00; // verde
+    private void drawLayerAndModeControls() {
+        // Selector de Capas
+        ImGui.text("Capa Activa:");
+        ImGui.sameLine();
+        String[] labels = capas.stream().map(n -> "Capa " + n).toArray(String[]::new);
+        ImGui.pushItemWidth(120);
+        if (ImGui.combo("##capasCombo", selectedLayer, labels, labels.length)) {
+            surface.setLayer(capas.get(selectedLayer.get()));
+        }
+        ImGui.popItemWidth();
 
+        ImGui.spacing();
+
+        // Modos de Edición
+        int activeColor = 0xFF00FF00; // Verde activo
         int currentMode = surface.getMode();
 
-        // Botón Borrar
-        boolean pushBorrar = false;
-        if (currentMode == 2) {
+        // Botón Seleccionar (Vacio)
+        if (currentMode == 0)
             ImGui.pushStyleColor(ImGuiCol.Button, activeColor);
-            pushBorrar = true;
+        if (ImGui.button("Seleccion")) {
+            surface.setMode(0);
+            selectedGrhIndex = -1;
         }
-        if (ImGui.button("Borrar")) {
-            if (currentMode == 2) {
-                surface.setMode(0);
-            } else {
-                surface.setMode(2);
-            }
-        }
-        if (pushBorrar)
+        if (currentMode == 0)
             ImGui.popStyleColor();
 
         ImGui.sameLine();
 
         // Botón Insertar
-        boolean pushInsertar = false;
-        boolean insertEnabled = selectedGrhIndex > 0 && grhData != null;
-        if (currentMode == 1) {
+        if (currentMode == 1)
             ImGui.pushStyleColor(ImGuiCol.Button, activeColor);
-            pushInsertar = true;
-        }
-        // Deshabilitar botón si no hay GRH
-        if (!insertEnabled)
-            ImGui.pushStyleColor(ImGuiCol.Button, 0x88888888); // gris
         if (ImGui.button("Insertar")) {
-            if (!insertEnabled) {
-                // no hacer nada
-            } else if (currentMode == 1) {
-                surface.setMode(0);
-            } else {
+            if (selectedGrhIndex > 0) {
                 surface.setMode(1);
                 surface.setSurfaceIndex(selectedGrhIndex);
             }
         }
-        if (!insertEnabled)
-            ImGui.popStyleColor();
-        if (pushInsertar)
+        if (currentMode == 1)
             ImGui.popStyleColor();
 
-        // Sincronizar con la paleta si cambió externamente
-        if (surface.getSurfaceIndex() != selectedGrhIndex && surface.getMode() == 1) {
-            selectedGrhIndex = surface.getSurfaceIndex();
+        ImGui.sameLine();
+
+        // Botón Borrar
+        if (currentMode == 2)
+            ImGui.pushStyleColor(ImGuiCol.Button, activeColor);
+        if (ImGui.button("Borrar")) {
+            surface.setMode(2);
         }
+        if (currentMode == 2)
+            ImGui.popStyleColor();
     }
 
-    private void drawGrhList() {
-        ImGui.beginChild("GrhListChild", 0, 150, true);
+    private void drawSearchAndPagination() {
+        if (AssetRegistry.grhData == null)
+            return;
 
-        if (grhData != null) {
-            for (int i = 1; i < grhData.length; i++) {
-                GrhData g = grhData[i];
-                if (g == null)
-                    continue;
+        // Buscador
+        ImGui.text("Buscar ID:");
+        ImGui.sameLine();
+        ImGui.pushItemWidth(80);
+        if (ImGui.inputInt("##search", searchGrh)) {
+            if (searchGrh.get() < 0)
+                searchGrh.set(0);
+            if (searchGrh.get() >= AssetRegistry.grhData.length)
+                searchGrh.set(AssetRegistry.grhData.length - 1);
+            if (searchGrh.get() > 0)
+                currentPage = 0;
+        }
+        ImGui.popItemWidth();
 
-                String label = String.format("GRH %d - %d frames", i, g.getNumFrames());
-                if (ImGui.selectable(label, selectedGrhIndex == i)) {
-                    selectedGrhIndex = i;
-                    ImGui.setScrollHereY();
+        if (searchGrh.get() > 0) {
+            ImGui.sameLine();
+            if (ImGui.button("X"))
+                searchGrh.set(0);
+        }
 
-                    // Si Insertar está activo, actualizamos surfaceIndex al seleccionar otro GRH
-                    if (surface.getMode() == 1) {
-                        surface.setSurfaceIndex(selectedGrhIndex);
+        ImGui.spacing();
+
+        // Paginación
+        int totalGrhs = AssetRegistry.grhData.length;
+        int maxPages = (totalGrhs / ITEMS_PER_PAGE);
+
+        ImGui.text("Pag: " + (currentPage + 1) + "/" + (maxPages + 1));
+        ImGui.sameLine();
+        if (ImGui.button("<") && currentPage > 0)
+            currentPage--;
+        ImGui.sameLine();
+        if (ImGui.button(">") && currentPage < maxPages)
+            currentPage++;
+    }
+
+    private void drawTileGrid() {
+        if (AssetRegistry.grhData == null) {
+            ImGui.textColored(1f, 0f, 0f, 1f, "grhData no cargado");
+            return;
+        }
+
+        if (ImGui.beginChild("TileGridChild", 0, 0, true)) {
+            float windowWidth = ImGui.getContentRegionAvailX();
+            int columns = Math.max(1, (int) (windowWidth / (TILE_SIZE + 10)));
+
+            int totalGrhs = AssetRegistry.grhData.length;
+            int start = searchGrh.get() > 0 ? searchGrh.get() : (currentPage * ITEMS_PER_PAGE);
+            if (start <= 0)
+                start = 1;
+            int end = searchGrh.get() > 0 ? start + 1 : Math.min(start + ITEMS_PER_PAGE, totalGrhs);
+
+            if (ImGui.beginTable("GridTable", columns, ImGuiTableFlags.SizingFixedFit)) {
+                for (int i = start; i < end; i++) {
+                    if (i <= 0 || i >= totalGrhs)
+                        continue;
+                    GrhData data = AssetRegistry.grhData[i];
+                    if (data == null || data.getFileNum() == 0)
+                        continue;
+
+                    ImGui.tableNextColumn();
+                    ImGui.pushID(i);
+
+                    int currentGrh = data.getNumFrames() > 1 ? data.getFrame(0) : i;
+                    GrhData frameData = AssetRegistry.grhData[currentGrh];
+                    Texture tex = org.argentumforge.engine.renderer.Surface.INSTANCE.getTexture(frameData.getFileNum());
+
+                    boolean isSelected = (selectedGrhIndex == i);
+                    if (isSelected)
+                        ImGui.pushStyleColor(ImGuiCol.Border, 1f, 1f, 0f, 1f);
+
+                    if (tex != null) {
+                        float u0 = frameData.getsX() / (float) tex.getTex_width();
+                        float v0 = (frameData.getsY() + frameData.getPixelHeight()) / (float) tex.getTex_height();
+                        float u1 = (frameData.getsX() + frameData.getPixelWidth()) / (float) tex.getTex_width();
+                        float v1 = frameData.getsY() / (float) tex.getTex_height();
+
+                        if (ImGui.imageButton(tex.getId(), (float) TILE_SIZE, (float) TILE_SIZE, u0, v1, u1, v0)) {
+                            selectedGrhIndex = i;
+                            surface.setSurfaceIndex(i);
+                            surface.setMode(1); // Auto-activar insertar al seleccionar
+                        }
+                    } else {
+                        if (ImGui.button("?", (float) TILE_SIZE, (float) TILE_SIZE)) {
+                            selectedGrhIndex = i;
+                            surface.setSurfaceIndex(i);
+                        }
                     }
+
+                    if (isSelected)
+                        ImGui.popStyleColor();
+
+                    if (ImGui.isItemHovered()) {
+                        ImGui.beginTooltip();
+                        ImGui.text("GRH: " + i);
+                        ImGui.text("Size: " + data.getPixelWidth() + "x" + data.getPixelHeight());
+                        PreviewUtils.drawGrh(i, 2.0f);
+                        ImGui.endTooltip();
+                    }
+
+                    ImGui.popID();
                 }
+                ImGui.endTable();
             }
-        } else {
-            ImGui.textDisabled("grhData no cargado");
-        }
-
-        ImGui.endChild();
-    }
-
-    private void drawCapasCombo() {
-        ImGui.text("Capas:");
-        String[] labels = capas.stream()
-                .map(n -> "Capa " + n)
-                .toArray(String[]::new);
-
-        if (labels.length > 0) {
-            if (ImGui.combo("##capasCombo", selectedLayer, labels, labels.length)) {
-                int capaSeleccionada = capas.get(selectedLayer.get());
-                surface.setLayer(capaSeleccionada); // actualiza la capa activa directamente
-            }
-        } else {
-            ImGui.textDisabled("Sin capas");
+            ImGui.endChild();
         }
     }
 }
