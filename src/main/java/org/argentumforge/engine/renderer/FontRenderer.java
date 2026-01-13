@@ -7,23 +7,30 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.argentumforge.engine.renderer.Drawn.drawGrhIndex;
-import static org.argentumforge.engine.utils.GameData.grhData;
+import static org.argentumforge.engine.utils.AssetRegistry.grhData;
 import static org.argentumforge.scripts.Compressor.readResource;
 
 /**
  * Clase utilitaria que maneja la carga y renderizado de fuentes de texto.
  * <p>
- * Esta clase estatica proporciona funcionalidad para cargar distintos tipos de fuentes desde archivos, renderizar texto en
- * pantalla con diferentes estilos, y calcular las dimensiones del texto para su correcta ubicacion.
+ * Esta clase estatica proporciona funcionalidad para cargar distintos tipos de
+ * fuentes desde archivos, renderizar texto en
+ * pantalla con diferentes estilos, y calcular las dimensiones del texto para su
+ * correcta ubicacion.
  * <p>
- * Contiene constantes predefinidas para los diferentes tipos de fuentes utilizados (como fuente normal y fuente para mostrar
- * golpes), y metodos para dibujar texto con diferentes colores, alineaciones y formatos. Tambien ofrece funciones para medir el
+ * Contiene constantes predefinidas para los diferentes tipos de fuentes
+ * utilizados (como fuente normal y fuente para mostrar
+ * golpes), y metodos para dibujar texto con diferentes colores, alineaciones y
+ * formatos. Tambien ofrece funciones para medir el
  * ancho y alto del texto renderizado.
  * <p>
- * La clase utiliza un sistema de mapeo de caracteres a sus representaciones graficas, permitiendo renderizar texto de manera
- * eficiente mediante el sistema de graficos. Ademas, soporta caracteres Unicode.
+ * La clase utiliza un sistema de mapeo de caracteres a sus representaciones
+ * graficas, permitiendo renderizar texto de manera
+ * eficiente mediante el sistema de graficos. Ademas, soporta caracteres
+ * Unicode.
  * <p>
- * Es fundamental para mostrar dialogos, mensajes del sistema, nombres de personajes y cualquier otro texto que aparece en el
+ * Es fundamental para mostrar dialogos, mensajes del sistema, nombres de
+ * personajes y cualquier otro texto que aparece en el
  * juego.
  */
 
@@ -58,7 +65,8 @@ public class FontRenderer {
             // Cargar los caracteres ASCII (0-255) en el mapa
             for (int k = 0; k < 256; k++) {
                 int grh = reader.readInt();
-                if (grh > 0) fonts[i].characters.put((char) k, grh);
+                if (grh > 0)
+                    fonts[i].characters.put((char) k, grh);
             }
         }
 
@@ -69,17 +77,22 @@ public class FontRenderer {
     /**
      * Renderiza texto en la pantalla utilizando el sistema de fuentes del juego.
      * <p>
-     * Este metodo dibuja cada caracter del texto proporcionado en la posicion especificada, utilizando la fuente y color
-     * indicados. Soporta caracteres Unicode y puede renderizar texto en multiples lineas si se habilita la opcion
-     * correspondiente. El texto se dibuja desde la posicion (x,y) hacia la derecha y abajo.
+     * Este metodo dibuja cada caracter del texto proporcionado en la posicion
+     * especificada, utilizando la fuente y color
+     * indicados. Soporta caracteres Unicode y puede renderizar texto en multiples
+     * lineas si se habilita la opcion
+     * correspondiente. El texto se dibuja desde la posicion (x,y) hacia la derecha
+     * y abajo.
      * <p>
      * Caracteristicas principales:
      * <ul>
-     *   <li>Renderizado de caracteres basado en representaciones graficas (grh)
-     *   <li>Soporte para multiples fuentes mediante el parametro fontIndex
-     *   <li>Manejo automatico de saltos de linea cuando excede 20 caracteres (si multiLine=true)
-     *   <li>Reconocimiento de caracteres de control (\n, \r) para forzar nuevas lineas
-     *   <li>Espaciado automatico entre caracteres segun su ancho grafico
+     * <li>Renderizado de caracteres basado en representaciones graficas (grh)
+     * <li>Soporte para multiples fuentes mediante el parametro fontIndex
+     * <li>Manejo automatico de saltos de linea cuando excede 20 caracteres (si
+     * multiLine=true)
+     * <li>Reconocimiento de caracteres de control (\n, \r) para forzar nuevas
+     * lineas
+     * <li>Espaciado automatico entre caracteres segun su ancho grafico
      * </ul>
      *
      * @param text      texto a dibujar
@@ -87,20 +100,24 @@ public class FontRenderer {
      * @param y         posicion y inicial (coordenada vertical)
      * @param color     color del texto
      * @param fontIndex indice del tipo de fuente a utilizar
-     * @param multiLine si es {@code true}, el texto se dividira automaticamente en multiples lineas cuando exceda 20 caracteres o
-     *                  encuentre caracteres de nueva linea (\n). Si es {@code false}, todo el texto se renderizara en una sola
+     * @param multiLine si es {@code true}, el texto se dividira automaticamente en
+     *                  multiples lineas cuando exceda 20 caracteres o
+     *                  encuentre caracteres de nueva linea (\n). Si es
+     *                  {@code false}, todo el texto se renderizara en una sola
      *                  linea.
      */
     public static void drawText(String text, int x, int y, RGBColor color, int fontIndex, boolean multiLine) {
-        int posX = x + 1;  // Posicion x actual (con pequeño desplazamiento)
-        int posY = y;      // Posicion y actual
-        int charWidth;     // Ancho del caracter actual
+        int posX = x + 1; // Posicion x actual (con pequeño desplazamiento)
+        int posY = y; // Posicion y actual
+        int charWidth; // Ancho del caracter actual
         int lineWidth = 0; // Ancho de la linea actual
         int lineCount = 0; // Contador de lineas dibujadas
         int charCount = 0; // Contador de caracteres en la linea actual
 
-        if (text.isEmpty()) return; // Si el texto esta vacio, termina
-        if (fontIndex >= fonts.length) fontIndex = NORMAL_FONT; // Usa la fuente normal si el indice es invalido
+        if (text.isEmpty())
+            return; // Si el texto esta vacio, termina
+        if (fontIndex >= fonts.length)
+            fontIndex = NORMAL_FONT; // Usa la fuente normal si el indice es invalido
 
         // Itera cada caracter del texto y los procesa individualmente
         for (int i = 0; i < text.length(); i++) {
@@ -147,15 +164,22 @@ public class FontRenderer {
     /**
      * Calcula el ancho total en pixeles que ocupa un texto al ser renderizado.
      * <p>
-     * Este metodo procesa cada caracter del texto, considerando su representacion grafica y manejando los saltos de linea si se
-     * permite el texto multilinea. Para los caracteres que no tienen una representacion grafica especifica, se utiliza un ancho
-     * predeterminado. Adicionalmente, se consideran los espacios y saltos de linea explicitos o automaticos.
+     * Este metodo procesa cada caracter del texto, considerando su representacion
+     * grafica y manejando los saltos de linea si se
+     * permite el texto multilinea. Para los caracteres que no tienen una
+     * representacion grafica especifica, se utiliza un ancho
+     * predeterminado. Adicionalmente, se consideran los espacios y saltos de linea
+     * explicitos o automaticos.
      *
-     * @param text      Texto cuyo ancho sera calculado. Si es nulo o vacio, el ancho devuelto sera 0.
-     * @param multiLine Indica si el texto puede dividirse en multiples lineas. Si es {@code true}, se aplican saltos de linea
-     *                  automaticos y se calcula el ancho maximo por linea. Si es {@code false}, todo el texto se tratara como una
+     * @param text      Texto cuyo ancho sera calculado. Si es nulo o vacio, el
+     *                  ancho devuelto sera 0.
+     * @param multiLine Indica si el texto puede dividirse en multiples lineas. Si
+     *                  es {@code true}, se aplican saltos de linea
+     *                  automaticos y se calcula el ancho maximo por linea. Si es
+     *                  {@code false}, todo el texto se tratara como una
      *                  sola linea.
-     * @return El ancho total en pixeles que ocupa el texto. Si es vacio o nulo, se retorna 0.
+     * @return El ancho total en pixeles que ocupa el texto. Si es vacio o nulo, se
+     *         retorna 0.
      */
     public static int getTextWidth(String text, boolean multiLine) {
         int retVal = 0; // Almacena el ancho maximo de todas las lineas
@@ -163,7 +187,8 @@ public class FontRenderer {
         int charCount = 0; // Contador de caracteres en la linea actual
 
         // Si el texto es nulo o vacio, el ancho es 0
-        if (text == null || text.isEmpty()) return 0;
+        if (text == null || text.isEmpty())
+            return 0;
 
         // Itera cada caracter del texto y calcula incrementalmente el ancho
         for (int i = 0; i < text.length(); i++) {
@@ -175,7 +200,8 @@ public class FontRenderer {
                     // Nueva linea y reinicia el ancho de linea actual
                     charCount = 0;
                     lineWidth = 0;
-                } else if (c == ' ') lineWidth += 4; // Los espacios ocupan 4 pixeles
+                } else if (c == ' ')
+                    lineWidth += 4; // Los espacios ocupan 4 pixeles
                 charCount++;
                 continue;
             }
@@ -184,10 +210,14 @@ public class FontRenderer {
 
             // Si existe una representacion grafica valida, usa su ancho especifico
             if (grhIndex != null && grhIndex > 12)
-                lineWidth += grhData[grhIndex].getPixelWidth(); // Usa el ancho real del caracter segun su representacion grafica
-            else lineWidth += DEFAULT_CHAR_WIDTH;  // Para caracteres sin representacion grafica, usa un ancho predeterminado
+                lineWidth += grhData[grhIndex].getPixelWidth(); // Usa el ancho real del caracter segun su
+                                                                // representacion grafica
+            else
+                lineWidth += DEFAULT_CHAR_WIDTH; // Para caracteres sin representacion grafica, usa un ancho
+                                                 // predeterminado
 
-            if (lineWidth > retVal) retVal = lineWidth; // Actualiza el ancho maximo (retVal) si la linea actual es mas ancha
+            if (lineWidth > retVal)
+                retVal = lineWidth; // Actualiza el ancho maximo (retVal) si la linea actual es mas ancha
 
             charCount++;
         }
@@ -196,27 +226,36 @@ public class FontRenderer {
     }
 
     /**
-     * Calcula la altura total en pixeles que ocupa un texto al ser renderizado, basandose en el numero de lineas de texto.
+     * Calcula la altura total en pixeles que ocupa un texto al ser renderizado,
+     * basandose en el numero de lineas de texto.
      * <p>
-     * Si el texto es de una sola linea, se utiliza una altura fija estandar. Si es multilinea, se calculan las lineas necesarias
+     * Si el texto es de una sola linea, se utiliza una altura fija estandar. Si es
+     * multilinea, se calculan las lineas necesarias
      * considerando los saltos de linea y un maximo de 20 caracteres por linea.
      *
-     * @param text      El texto para el cual se calcula la altura. No debe ser nulo.
-     * @param multiLine Indica si el texto puede dividirse en multiples lineas. Si es {@code true}, se procesan los saltos de
-     *                  linea explicitos y automáticos. Si es {@code false}, el texto se considera de una sola linea.
-     * @return La altura total en pixeles del texto calculada en base al numero de lineas. Devuelve 14 si el texto es de una sola
-     * linea.
+     * @param text      El texto para el cual se calcula la altura. No debe ser
+     *                  nulo.
+     * @param multiLine Indica si el texto puede dividirse en multiples lineas. Si
+     *                  es {@code true}, se procesan los saltos de
+     *                  linea explicitos y automáticos. Si es {@code false}, el
+     *                  texto se considera de una sola linea.
+     * @return La altura total en pixeles del texto calculada en base al numero de
+     *         lineas. Devuelve 14 si el texto es de una sola
+     *         linea.
      */
     public static int getTextHeight(String text, boolean multiLine) {
-        // Si el texto no es multilinea, siempre devuelve 14 pixeles, que es la altura estandar de una linea de texto
-        if (!multiLine) return 14;
+        // Si el texto no es multilinea, siempre devuelve 14 pixeles, que es la altura
+        // estandar de una linea de texto
+        if (!multiLine)
+            return 14;
         int lineCount = 1; // Comienza con una linea
         int charCount = 0; // Contador de caracteres en la linea actual
 
         // Itera cada caracter del texto
         for (int i = 0; i < text.length(); i++) {
             char c = text.charAt(i);
-            // Incrementa el contador de lineas cuando encuentra un salto de linea explicito o alcanza 20 caracteres y encuentra un espacio o retorno de carro
+            // Incrementa el contador de lineas cuando encuentra un salto de linea explicito
+            // o alcanza 20 caracteres y encuentra un espacio o retorno de carro
             if (c == '\n' || (charCount >= 20 && (c == ' ' || c == '\r'))) {
                 lineCount++;
                 charCount = 0;
@@ -247,11 +286,13 @@ public class FontRenderer {
      * @return indice grafico para el caracter, o null si no existe
      */
     private static Integer getCharGrhIndex(char c, int fontIndex) {
-        if (fontIndex >= fonts.length) fontIndex = NORMAL_FONT;
+        if (fontIndex >= fonts.length)
+            fontIndex = NORMAL_FONT;
         // Busca el caracter en el mapa
         Integer grhIndex = fonts[fontIndex].characters.get(c);
         // Si no se encuentra, intenta con el caracter de reemplazo
-        if (grhIndex == null) grhIndex = fonts[fontIndex].characters.get(REPLACEMENT_CHAR);
+        if (grhIndex == null)
+            grhIndex = fonts[fontIndex].characters.get(REPLACEMENT_CHAR);
         // Si aun no se encuentra, usa el primero disponible
         if (grhIndex == null && !fonts[fontIndex].characters.isEmpty())
             grhIndex = fonts[fontIndex].characters.values().iterator().next();
@@ -261,7 +302,8 @@ public class FontRenderer {
     private static class Font {
         int size;
         /**
-         * Reemplazo del array {@code ascii_code} por un mapa para poder mapear cualquier caracter Unicode a su representacion
+         * Reemplazo del array {@code ascii_code} por un mapa para poder mapear
+         * cualquier caracter Unicode a su representacion
          * grafica.
          */
         Map<Character, Integer> characters;

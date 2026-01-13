@@ -3,10 +3,13 @@ package org.argentumforge.engine.game.models;
 import org.argentumforge.engine.renderer.RGBColor;
 import org.argentumforge.engine.utils.inits.*;
 
+import org.argentumforge.engine.utils.AssetRegistry;
+
 import static org.argentumforge.engine.game.models.Direction.DOWN;
 import static org.argentumforge.engine.renderer.Drawn.drawTexture;
 import static org.argentumforge.engine.renderer.FontRenderer.*;
 import static org.argentumforge.engine.utils.GameData.*;
+import static org.argentumforge.engine.utils.AssetRegistry.*;
 import static org.argentumforge.engine.utils.Time.timerTicksPerFrame;
 
 /**
@@ -103,21 +106,24 @@ public final class Character {
         charList[charIndex].setiHead(head);
         charList[charIndex].setiBody(body);
 
-        charList[charIndex].setHead(new HeadData(headData[head]));
-        charList[charIndex].setBody(new BodyData(bodyData[body]));
+        charList[charIndex].setHead(new HeadData(AssetRegistry.headData[head]));
+        charList[charIndex].setBody(new BodyData(AssetRegistry.bodyData[body]));
 
-        if (weaponData != null && weapon < weaponData.length && weaponData[weapon] != null)
-            charList[charIndex].setWeapon(new WeaponData(weaponData[weapon]));
+        if (AssetRegistry.weaponData != null && weapon < AssetRegistry.weaponData.length
+                && AssetRegistry.weaponData[weapon] != null)
+            charList[charIndex].setWeapon(new WeaponData(AssetRegistry.weaponData[weapon]));
         else
             charList[charIndex].setWeapon(new WeaponData(new WeaponData()));
 
-        if (shieldData != null && shield < shieldData.length && shieldData[shield] != null)
-            charList[charIndex].setShield(new ShieldData(shieldData[shield]));
+        if (AssetRegistry.shieldData != null && shield < AssetRegistry.shieldData.length
+                && AssetRegistry.shieldData[shield] != null)
+            charList[charIndex].setShield(new ShieldData(AssetRegistry.shieldData[shield]));
         else
             charList[charIndex].setShield(new ShieldData(new ShieldData()));
 
-        if (helmetsData != null && helmet < helmetsData.length && helmetsData[helmet] != null)
-            charList[charIndex].setHelmet(new HeadData(helmetsData[helmet]));
+        if (AssetRegistry.helmetsData != null && helmet < AssetRegistry.helmetsData.length
+                && AssetRegistry.helmetsData[helmet] != null)
+            charList[charIndex].setHelmet(new HeadData(AssetRegistry.helmetsData[helmet]));
         else
             charList[charIndex].setHelmet(new HeadData(new HeadData()));
 

@@ -21,6 +21,7 @@ import static org.argentumforge.engine.renderer.Drawn.drawTexture;
 import static org.argentumforge.engine.renderer.Drawn.drawGrhIndex;
 import static org.argentumforge.engine.scenes.Camera.*;
 import static org.argentumforge.engine.utils.GameData.*;
+import static org.argentumforge.engine.utils.AssetRegistry.grhData;
 import static org.argentumforge.engine.utils.Time.deltaTime;
 import static org.argentumforge.engine.utils.Time.timerTicksPerFrame;
 import static org.lwjgl.glfw.GLFW.*;

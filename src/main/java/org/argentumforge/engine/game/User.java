@@ -2,6 +2,8 @@ package org.argentumforge.engine.game;
 
 import org.argentumforge.engine.game.models.*;
 
+import org.argentumforge.engine.utils.AssetRegistry;
+
 import static org.argentumforge.engine.audio.Sound.*;
 import static org.argentumforge.engine.game.models.Character.*;
 import static org.argentumforge.engine.game.models.Direction.*;
@@ -184,7 +186,7 @@ public enum User {
     public void setCharacterFx(int charIndex, int fx, int loops) {
         charList[charIndex].setFxIndex(fx);
         if (charList[charIndex].getFxIndex() > 0) {
-            initGrh(charList[charIndex].getfX(), fxData[fx].getAnimacion(), true);
+            initGrh(charList[charIndex].getfX(), AssetRegistry.fxData[fx].getAnimacion(), true);
             charList[charIndex].getfX().setLoops(loops);
         }
     }

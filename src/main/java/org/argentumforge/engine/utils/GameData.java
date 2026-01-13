@@ -6,6 +6,8 @@ import org.argentumforge.engine.renderer.Surface;
 import org.argentumforge.engine.utils.inits.*;
 import org.tinylog.Logger;
 
+import static org.argentumforge.engine.utils.AssetRegistry.*;
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -47,20 +49,6 @@ import static org.argentumforge.scripts.Compressor.readResource;
 
 public final class GameData {
 
-    /** Datos de los cuerpos (animaciones de movimiento, offsets, etc). */
-    public static BodyData[] bodyData;
-    /** Datos de las cabezas. */
-    public static HeadData[] headData;
-    /** Datos de los cascos. */
-    public static HeadData[] helmetsData;
-    /** Datos de las armas. */
-    public static WeaponData[] weaponData;
-    /** Datos de los escudos. */
-    public static ShieldData[] shieldData;
-    /** Datos de los efectos visuales (FXs). */
-    public static FxData[] fxData;
-    /** Datos de los gráficos (definiciones de GRH, frames, velocidades, etc). */
-    public static GrhData[] grhData;
     /** Datos de la rejilla del mapa actual. */
     public static MapData[][] mapData;
 
@@ -253,74 +241,78 @@ public final class GameData {
             final int fileVersion = reader.readInt();
             final int grhCount = reader.readInt();
 
-            grhData = new GrhData[grhCount + 1];
+            AssetRegistry.grhData = new GrhData[grhCount + 1];
 
             int grh = 0;
-            grhData[0] = new GrhData();
+            AssetRegistry.grhData[0] = new GrhData();
 
             while (grh < grhCount) {
                 grh = reader.readInt();
 
-                grhData[grh] = new GrhData();
-                grhData[grh].setNumFrames(reader.readShort());
+                AssetRegistry.grhData[grh] = new GrhData();
+                AssetRegistry.grhData[grh].setNumFrames(reader.readShort());
 
-                if (grhData[grh].getNumFrames() <= 0)
+                if (AssetRegistry.grhData[grh].getNumFrames() <= 0)
                     throw new IOException("getFrame(frame) ERROR IN THE GRHINDEX: " + grh);
 
-                grhData[grh].setFrames(new int[grhData[grh].getNumFrames() + 1]);
+                AssetRegistry.grhData[grh].setFrames(new int[AssetRegistry.grhData[grh].getNumFrames() + 1]);
 
-                if (grhData[grh].getNumFrames() > 1) {
-                    for (int i = 1; i <= grhData[grh].getNumFrames(); i++) {
-                        grhData[grh].setFrame(i, reader.readInt());
-                        if (grhData[grh].getFrame(i) <= 0)
+                if (AssetRegistry.grhData[grh].getNumFrames() > 1) {
+                    for (int i = 1; i <= AssetRegistry.grhData[grh].getNumFrames(); i++) {
+                        AssetRegistry.grhData[grh].setFrame(i, reader.readInt());
+                        if (AssetRegistry.grhData[grh].getFrame(i) <= 0)
                             throw new IOException("getFrame(frame) ERROR IN THE GRHINDEX: " + grh);
                     }
 
-                    grhData[grh].setSpeed(reader.readFloat());
-                    if (grhData[grh].getSpeed() <= 0)
+                    AssetRegistry.grhData[grh].setSpeed(reader.readFloat());
+                    if (AssetRegistry.grhData[grh].getSpeed() <= 0)
                         throw new IOException("getSpeed ERROR IN THE GRHINDEX: " + grh);
 
-                    grhData[grh].setPixelHeight(grhData[grhData[grh].getFrame(1)].getPixelHeight());
+                    AssetRegistry.grhData[grh].setPixelHeight(
+                            AssetRegistry.grhData[AssetRegistry.grhData[grh].getFrame(1)].getPixelHeight());
 
-                    if (grhData[grh].getPixelHeight() <= 0)
+                    if (AssetRegistry.grhData[grh].getPixelHeight() <= 0)
                         throw new IOException("getPixelHeight ERROR IN THE GRHINDEX: " + grh);
 
-                    grhData[grh].setPixelWidth(grhData[grhData[grh].getFrame(1)].getPixelWidth());
-                    if (grhData[grh].getPixelWidth() <= 0)
+                    AssetRegistry.grhData[grh].setPixelWidth(
+                            AssetRegistry.grhData[AssetRegistry.grhData[grh].getFrame(1)].getPixelWidth());
+                    if (AssetRegistry.grhData[grh].getPixelWidth() <= 0)
                         throw new IOException("getPixelWidth ERROR IN THE GRHINDEX: " + grh);
 
-                    grhData[grh].setTileWidth(grhData[grhData[grh].getFrame(1)].getTileWidth());
-                    if (grhData[grh].getTileWidth() <= 0)
+                    AssetRegistry.grhData[grh]
+                            .setTileWidth(AssetRegistry.grhData[AssetRegistry.grhData[grh].getFrame(1)].getTileWidth());
+                    if (AssetRegistry.grhData[grh].getTileWidth() <= 0)
                         throw new IOException("getTileWidth ERROR IN THE GRHINDEX: " + grh);
 
-                    grhData[grh].setTileHeight(grhData[grhData[grh].getFrame(1)].getTileHeight());
-                    if (grhData[grh].getTileHeight() <= 0)
+                    AssetRegistry.grhData[grh].setTileHeight(
+                            AssetRegistry.grhData[AssetRegistry.grhData[grh].getFrame(1)].getTileHeight());
+                    if (AssetRegistry.grhData[grh].getTileHeight() <= 0)
                         throw new IOException("getTileHeight ERROR IN THE GRHINDEX: " + grh);
 
                 } else {
-                    grhData[grh].setFileNum(reader.readInt());
-                    if (grhData[grh].getFileNum() <= 0)
+                    AssetRegistry.grhData[grh].setFileNum(reader.readInt());
+                    if (AssetRegistry.grhData[grh].getFileNum() <= 0)
                         throw new IOException("getFileNum ERROR IN THE GRHINDEX: " + grh);
 
-                    grhData[grh].setsX(reader.readShort());
-                    if (grhData[grh].getsX() < 0)
+                    AssetRegistry.grhData[grh].setsX(reader.readShort());
+                    if (AssetRegistry.grhData[grh].getsX() < 0)
                         throw new IOException("getsX ERROR IN THE GRHINDEX: " + grh);
 
-                    grhData[grh].setsY(reader.readShort());
-                    if (grhData[grh].getsY() < 0)
+                    AssetRegistry.grhData[grh].setsY(reader.readShort());
+                    if (AssetRegistry.grhData[grh].getsY() < 0)
                         throw new IOException("getsY ERROR IN THE GRHINDEX: " + grh);
 
-                    grhData[grh].setPixelWidth(reader.readShort());
-                    if (grhData[grh].getPixelWidth() <= 0)
+                    AssetRegistry.grhData[grh].setPixelWidth(reader.readShort());
+                    if (AssetRegistry.grhData[grh].getPixelWidth() <= 0)
                         throw new IOException("getPixelWidth ERROR IN THE GRHINDEX: " + grh);
 
-                    grhData[grh].setPixelHeight(reader.readShort());
-                    if (grhData[grh].getPixelHeight() <= 0)
+                    AssetRegistry.grhData[grh].setPixelHeight(reader.readShort());
+                    if (AssetRegistry.grhData[grh].getPixelHeight() <= 0)
                         throw new IOException("getPixelHeight ERROR IN THE GRHINDEX: " + grh);
 
-                    grhData[grh].setTileWidth((float) grhData[grh].getPixelWidth() / 32);
-                    grhData[grh].setTileHeight((float) grhData[grh].getPixelHeight() / 32);
-                    grhData[grh].setFrame(1, grh);
+                    AssetRegistry.grhData[grh].setTileWidth((float) AssetRegistry.grhData[grh].getPixelWidth() / 32);
+                    AssetRegistry.grhData[grh].setTileHeight((float) AssetRegistry.grhData[grh].getPixelHeight() / 32);
+                    AssetRegistry.grhData[grh].setFrame(1, grh);
                 }
 
             }
@@ -344,10 +336,10 @@ public final class GameData {
 
         final IndexHeads[] myHeads;
         final short numHeads = reader.readShort();
-        headData = new HeadData[numHeads + 1];
+        AssetRegistry.headData = new HeadData[numHeads + 1];
         myHeads = new IndexHeads[numHeads + 1];
 
-        headData[0] = new HeadData();
+        AssetRegistry.headData[0] = new HeadData();
         for (int i = 1; i <= numHeads; i++) {
             myHeads[i] = new IndexHeads();
             myHeads[i].setHead(1, reader.readShort());
@@ -355,12 +347,16 @@ public final class GameData {
             myHeads[i].setHead(3, reader.readShort());
             myHeads[i].setHead(4, reader.readShort());
 
-            headData[i] = new HeadData();
+            AssetRegistry.headData[i] = new HeadData();
             if (myHeads[i].getHead(1) != 0) {
-                headData[i].setHead(1, initGrh(headData[i].getHead(1), myHeads[i].getHead(1), false));
-                headData[i].setHead(2, initGrh(headData[i].getHead(2), myHeads[i].getHead(2), false));
-                headData[i].setHead(3, initGrh(headData[i].getHead(3), myHeads[i].getHead(3), false));
-                headData[i].setHead(4, initGrh(headData[i].getHead(4), myHeads[i].getHead(4), false));
+                AssetRegistry.headData[i].setHead(1,
+                        initGrh(AssetRegistry.headData[i].getHead(1), myHeads[i].getHead(1), false));
+                AssetRegistry.headData[i].setHead(2,
+                        initGrh(AssetRegistry.headData[i].getHead(2), myHeads[i].getHead(2), false));
+                AssetRegistry.headData[i].setHead(3,
+                        initGrh(AssetRegistry.headData[i].getHead(3), myHeads[i].getHead(3), false));
+                AssetRegistry.headData[i].setHead(4,
+                        initGrh(AssetRegistry.headData[i].getHead(4), myHeads[i].getHead(4), false));
             }
         }
 
@@ -379,10 +375,10 @@ public final class GameData {
 
         final IndexHeads[] myHeads;
         final short numHeads = reader.readShort();
-        helmetsData = new HeadData[numHeads + 1];
+        AssetRegistry.helmetsData = new HeadData[numHeads + 1];
         myHeads = new IndexHeads[numHeads + 1];
 
-        helmetsData[0] = new HeadData();
+        AssetRegistry.helmetsData[0] = new HeadData();
         for (int i = 1; i <= numHeads; i++) {
             myHeads[i] = new IndexHeads();
             myHeads[i].setHead(1, reader.readShort());
@@ -390,12 +386,16 @@ public final class GameData {
             myHeads[i].setHead(3, reader.readShort());
             myHeads[i].setHead(4, reader.readShort());
 
-            helmetsData[i] = new HeadData();
+            AssetRegistry.helmetsData[i] = new HeadData();
             if (myHeads[i].getHead(1) != 0) {
-                helmetsData[i].setHead(1, initGrh(helmetsData[i].getHead(1), myHeads[i].getHead(1), false));
-                helmetsData[i].setHead(2, initGrh(helmetsData[i].getHead(2), myHeads[i].getHead(2), false));
-                helmetsData[i].setHead(3, initGrh(helmetsData[i].getHead(3), myHeads[i].getHead(3), false));
-                helmetsData[i].setHead(4, initGrh(helmetsData[i].getHead(4), myHeads[i].getHead(4), false));
+                AssetRegistry.helmetsData[i].setHead(1,
+                        initGrh(AssetRegistry.helmetsData[i].getHead(1), myHeads[i].getHead(1), false));
+                AssetRegistry.helmetsData[i].setHead(2,
+                        initGrh(AssetRegistry.helmetsData[i].getHead(2), myHeads[i].getHead(2), false));
+                AssetRegistry.helmetsData[i].setHead(3,
+                        initGrh(AssetRegistry.helmetsData[i].getHead(3), myHeads[i].getHead(3), false));
+                AssetRegistry.helmetsData[i].setHead(4,
+                        initGrh(AssetRegistry.helmetsData[i].getHead(4), myHeads[i].getHead(4), false));
             }
         }
 
@@ -419,10 +419,10 @@ public final class GameData {
 
         final IndexBodys[] myBodys;
         final short numBodys = reader.readShort();
-        bodyData = new BodyData[numBodys + 1];
+        AssetRegistry.bodyData = new BodyData[numBodys + 1];
         myBodys = new IndexBodys[numBodys + 1];
 
-        bodyData[0] = new BodyData();
+        AssetRegistry.bodyData[0] = new BodyData();
         for (int i = 1; i <= numBodys; i++) {
             myBodys[i] = new IndexBodys();
             myBodys[i].setBody(1, reader.readShort());
@@ -433,15 +433,19 @@ public final class GameData {
             myBodys[i].setHeadOffsetX(reader.readShort());
             myBodys[i].setHeadOffsetY(reader.readShort());
 
-            bodyData[i] = new BodyData();
+            AssetRegistry.bodyData[i] = new BodyData();
             if (myBodys[i].getBody(1) != 0) {
-                bodyData[i].setWalk(1, initGrh(bodyData[i].getWalk(1), myBodys[i].getBody(1), false));
-                bodyData[i].setWalk(2, initGrh(bodyData[i].getWalk(2), myBodys[i].getBody(2), false));
-                bodyData[i].setWalk(3, initGrh(bodyData[i].getWalk(3), myBodys[i].getBody(3), false));
-                bodyData[i].setWalk(4, initGrh(bodyData[i].getWalk(4), myBodys[i].getBody(4), false));
+                AssetRegistry.bodyData[i].setWalk(1,
+                        initGrh(AssetRegistry.bodyData[i].getWalk(1), myBodys[i].getBody(1), false));
+                AssetRegistry.bodyData[i].setWalk(2,
+                        initGrh(AssetRegistry.bodyData[i].getWalk(2), myBodys[i].getBody(2), false));
+                AssetRegistry.bodyData[i].setWalk(3,
+                        initGrh(AssetRegistry.bodyData[i].getWalk(3), myBodys[i].getBody(3), false));
+                AssetRegistry.bodyData[i].setWalk(4,
+                        initGrh(AssetRegistry.bodyData[i].getWalk(4), myBodys[i].getBody(4), false));
 
-                bodyData[i].getHeadOffset().setX(myBodys[i].getHeadOffsetX());
-                bodyData[i].getHeadOffset().setY(myBodys[i].getHeadOffsetY());
+                AssetRegistry.bodyData[i].getHeadOffset().setX(myBodys[i].getHeadOffsetX());
+                AssetRegistry.bodyData[i].getHeadOffset().setY(myBodys[i].getHeadOffsetY());
             }
         }
 
@@ -460,15 +464,19 @@ public final class GameData {
         reader.init(data);
 
         final int numArms = reader.readShort();
-        weaponData = new WeaponData[numArms + 1];
+        AssetRegistry.weaponData = new WeaponData[numArms + 1];
 
-        weaponData[0] = new WeaponData();
+        AssetRegistry.weaponData[0] = new WeaponData();
         for (int loopc = 1; loopc <= numArms; loopc++) {
-            weaponData[loopc] = new WeaponData();
-            weaponData[loopc].setWeaponWalk(1, initGrh(weaponData[loopc].getWeaponWalk(1), reader.readShort(), false));
-            weaponData[loopc].setWeaponWalk(2, initGrh(weaponData[loopc].getWeaponWalk(2), reader.readShort(), false));
-            weaponData[loopc].setWeaponWalk(3, initGrh(weaponData[loopc].getWeaponWalk(3), reader.readShort(), false));
-            weaponData[loopc].setWeaponWalk(4, initGrh(weaponData[loopc].getWeaponWalk(4), reader.readShort(), false));
+            AssetRegistry.weaponData[loopc] = new WeaponData();
+            AssetRegistry.weaponData[loopc].setWeaponWalk(1,
+                    initGrh(AssetRegistry.weaponData[loopc].getWeaponWalk(1), reader.readShort(), false));
+            AssetRegistry.weaponData[loopc].setWeaponWalk(2,
+                    initGrh(AssetRegistry.weaponData[loopc].getWeaponWalk(2), reader.readShort(), false));
+            AssetRegistry.weaponData[loopc].setWeaponWalk(3,
+                    initGrh(AssetRegistry.weaponData[loopc].getWeaponWalk(3), reader.readShort(), false));
+            AssetRegistry.weaponData[loopc].setWeaponWalk(4,
+                    initGrh(AssetRegistry.weaponData[loopc].getWeaponWalk(4), reader.readShort(), false));
         }
 
     }
@@ -489,8 +497,8 @@ public final class GameData {
                                 "Por favor, configure las rutas correctamente.",
                         "Error al cargar Armas",
                         javax.swing.JOptionPane.ERROR_MESSAGE);
-                weaponData = new WeaponData[1];
-                weaponData[0] = new WeaponData();
+                AssetRegistry.weaponData = new WeaponData[1];
+                AssetRegistry.weaponData[0] = new WeaponData();
                 return;
             }
         }
@@ -582,20 +590,20 @@ public final class GameData {
 
         // Inicializar array final
         int finalSize = Math.max(numArmsFromInit, maxWeaponId);
-        weaponData = new WeaponData[finalSize + 1];
-        weaponData[0] = new WeaponData();
+        AssetRegistry.weaponData = new WeaponData[finalSize + 1];
+        AssetRegistry.weaponData[0] = new WeaponData();
 
         for (Map.Entry<Integer, WeaponData> entry : tempWeapons.entrySet()) {
             int id = entry.getKey();
             if (id <= finalSize) {
-                weaponData[id] = entry.getValue();
+                AssetRegistry.weaponData[id] = entry.getValue();
             }
         }
 
         // Llenar huecos con armas vacías para evitar nulls
         for (int i = 1; i <= finalSize; i++) {
-            if (weaponData[i] == null) {
-                weaponData[i] = new WeaponData();
+            if (AssetRegistry.weaponData[i] == null) {
+                AssetRegistry.weaponData[i] = new WeaponData();
             }
         }
 
@@ -615,15 +623,19 @@ public final class GameData {
         reader.init(data);
 
         final int numShields = reader.readShort();
-        shieldData = new ShieldData[numShields + 1];
+        AssetRegistry.shieldData = new ShieldData[numShields + 1];
 
-        shieldData[0] = new ShieldData();
+        AssetRegistry.shieldData[0] = new ShieldData();
         for (int loopc = 1; loopc <= numShields; loopc++) {
-            shieldData[loopc] = new ShieldData();
-            shieldData[loopc].setShieldWalk(1, initGrh(shieldData[loopc].getShieldWalk(1), reader.readShort(), false));
-            shieldData[loopc].setShieldWalk(2, initGrh(shieldData[loopc].getShieldWalk(2), reader.readShort(), false));
-            shieldData[loopc].setShieldWalk(3, initGrh(shieldData[loopc].getShieldWalk(3), reader.readShort(), false));
-            shieldData[loopc].setShieldWalk(4, initGrh(shieldData[loopc].getShieldWalk(4), reader.readShort(), false));
+            AssetRegistry.shieldData[loopc] = new ShieldData();
+            AssetRegistry.shieldData[loopc].setShieldWalk(1,
+                    initGrh(AssetRegistry.shieldData[loopc].getShieldWalk(1), reader.readShort(), false));
+            AssetRegistry.shieldData[loopc].setShieldWalk(2,
+                    initGrh(AssetRegistry.shieldData[loopc].getShieldWalk(2), reader.readShort(), false));
+            AssetRegistry.shieldData[loopc].setShieldWalk(3,
+                    initGrh(AssetRegistry.shieldData[loopc].getShieldWalk(3), reader.readShort(), false));
+            AssetRegistry.shieldData[loopc].setShieldWalk(4,
+                    initGrh(AssetRegistry.shieldData[loopc].getShieldWalk(4), reader.readShort(), false));
         }
 
     }
@@ -643,8 +655,8 @@ public final class GameData {
                                 "Por favor, configure las rutas correctamente.",
                         "Error al cargar Escudos",
                         javax.swing.JOptionPane.ERROR_MESSAGE);
-                shieldData = new ShieldData[1];
-                shieldData[0] = new ShieldData();
+                AssetRegistry.shieldData = new ShieldData[1];
+                AssetRegistry.shieldData[0] = new ShieldData();
                 return;
             }
         }
@@ -729,19 +741,19 @@ public final class GameData {
         }
 
         int finalSize = Math.max(numShieldsFromInit, maxShieldId);
-        shieldData = new ShieldData[finalSize + 1];
-        shieldData[0] = new ShieldData();
+        AssetRegistry.shieldData = new ShieldData[finalSize + 1];
+        AssetRegistry.shieldData[0] = new ShieldData();
 
         for (Map.Entry<Integer, ShieldData> entry : tempShields.entrySet()) {
             int id = entry.getKey();
             if (id <= finalSize) {
-                shieldData[id] = entry.getValue();
+                AssetRegistry.shieldData[id] = entry.getValue();
             }
         }
 
         for (int i = 1; i <= finalSize; i++) {
-            if (shieldData[i] == null) {
-                shieldData[i] = new ShieldData();
+            if (AssetRegistry.shieldData[i] == null) {
+                AssetRegistry.shieldData[i] = new ShieldData();
             }
         }
 
@@ -833,7 +845,8 @@ public final class GameData {
     }
 
     private static void initGrhOrReset(GrhInfo grh, short grhIndex, boolean started) {
-        if (grhData != null && grhIndex >= 0 && grhIndex < grhData.length && grhData[grhIndex] != null) {
+        if (AssetRegistry.grhData != null && grhIndex >= 0 && grhIndex < AssetRegistry.grhData.length
+                && AssetRegistry.grhData[grhIndex] != null) {
             initGrh(grh, grhIndex, started);
             return;
         }
@@ -857,13 +870,13 @@ public final class GameData {
         reader.skipBytes(263);
 
         final short numFXs = reader.readShort();
-        fxData = new FxData[numFXs + 1];
+        AssetRegistry.fxData = new FxData[numFXs + 1];
 
         for (int i = 1; i <= numFXs; i++) {
-            fxData[i] = new FxData();
-            fxData[i].setAnimacion(reader.readShort());
-            fxData[i].setOffsetX(reader.readShort());
-            fxData[i].setOffsetY(reader.readShort());
+            AssetRegistry.fxData[i] = new FxData();
+            AssetRegistry.fxData[i].setAnimacion(reader.readShort());
+            AssetRegistry.fxData[i].setOffsetX(reader.readShort());
+            AssetRegistry.fxData[i].setOffsetY(reader.readShort());
         }
     }
 
@@ -887,13 +900,13 @@ public final class GameData {
         grh.setLoops(0);
 
         if (started)
-            grh.setStarted(grhData[grh.getGrhIndex()].getNumFrames() > 1);
+            grh.setStarted(AssetRegistry.grhData[grh.getGrhIndex()].getNumFrames() > 1);
 
         if (grh.isStarted())
             grh.setLoops(-1);
 
         grh.setFrameCounter(1);
-        // grh.setSpeed( grhData[grhIndex].getSpeed() );
+        // grh.setSpeed( AssetRegistry.grhData[grhIndex].getSpeed() );
         grh.setSpeed(0.4f);
 
         return grh;
