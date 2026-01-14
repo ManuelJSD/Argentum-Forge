@@ -1,6 +1,6 @@
 <div align='center'>
     <br/>
-    <p align='right'><a href="README_ES.md">🇪🇸 Leer en Español</a></p>
+    <p align='right'><a href="README_ES.md">🇪🇸 Leer en </a></p>
     <img width="1024" height="1024" alt="ChatGPT Image 3 dic 2025, 01_55_12" src="https://github.com/user-attachments/assets/77ae11ca-8b34-489d-bf8b-010889771a25" />
     <a target="_blank"><img src="https://img.shields.io/badge/Built%20in-Java_17-43ca1f.svg?style=flat-square"></img></a>
     <a target="_blank"><img src="https://img.shields.io/badge/Made%20in-IntelliJ%20Community-be27e9.svg?style=flat-square"></img></a>
@@ -58,7 +58,7 @@ https://github.com/Lorwik/Argentum-Forge.git
 
 # Imágenes
 
-<img width="1918" height="1078" alt="image" src="https://github.com/user-attachments/assets/7af938c5-2be6-444d-902e-c8bc096d4894" />
+<img width="1918" height="1082" alt="image" src="https://github.com/user-attachments/assets/4d30b682-89c0-4d06-9b88-e2bfb0ecbe2e" />
 
 <h1>Agradecimientos:</h1>
 <br/>
