@@ -103,3 +103,11 @@ shadowJar {
     // Esto es crucial para librerias que usan ServiceLoader (como quizas tinylog o algunas de audio)
     mergeServiceFiles()
 }
+
+tasks.build {
+    dependsOn tasks.shadowJar
+}
+
+tasks.jar {
+    enabled = false
+}
