@@ -35,7 +35,7 @@ The project uses the following main dependencies (managed by Gradle):
 
 1. Clone the repository:
 ```bash
-https://github.com/Lorwik/Argentum-Forge.git
+https://github.com/ManuelJSandalio/Argentum-Forge.git
 ```
 
 2. Open the project:
