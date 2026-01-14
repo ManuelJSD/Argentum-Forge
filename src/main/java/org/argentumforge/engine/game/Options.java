@@ -18,7 +18,7 @@ public enum Options {
 
     private boolean music = true;
     private boolean sound = true;
-    private boolean fullscreen = true;
+    private boolean fullscreen = false;
     private boolean vsync = true;
     private boolean cursorGraphic = true;
     private String language = "es";
@@ -26,8 +26,8 @@ public enum Options {
     private String datsPath = "resources/dats";
     private String initPath = "resources/inits";
     private String musicPath = "resources/musica";
-    private int screenWidth = 1024;
-    private int screenHeight = 1024;
+    private int screenWidth = 1366;
+    private int screenHeight = 768;
     private int clientWidth = 13;
     private int clientHeight = 11;
     private String lastMapPath = ".";

@@ -44,7 +44,7 @@ public final class FOptions extends Form {
         }
 
         // Selector de Resolucion
-        String[] resolutions = { "800x600", "1024x768", "1024x1024", "1280x720", "1366x768", "1920x1080" };
+        String[] resolutions = { "800x600", "1024x768", "1024x1024", "1280x720", "1366x768", "1920x1080", "2560x1440", "3840x2160" };
         int currentResIndex = 0;
         String currentResString = options.getScreenWidth() + "x" + options.getScreenHeight();
 
