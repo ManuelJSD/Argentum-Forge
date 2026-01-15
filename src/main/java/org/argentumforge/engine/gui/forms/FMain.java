@@ -212,6 +212,21 @@ public final class FMain extends Form {
                 ImGui.endMenu();
             }
 
+            if (ImGui.beginMenu("Editar")) {
+                org.argentumforge.engine.utils.editor.commands.CommandManager manager = org.argentumforge.engine.utils.editor.commands.CommandManager
+                        .getInstance();
+
+                if (ImGui.menuItem("Deshacer", "Ctrl+Z", false, manager.canUndo())) {
+                    manager.undo();
+                }
+
+                if (ImGui.menuItem("Rehacer", "Ctrl+Y", false, manager.canRedo())) {
+                    manager.redo();
+                }
+
+                ImGui.endMenu();
+            }
+
             /*
              * if (ImGui.beginMenu("Editores")) {
              * if (ImGui.menuItem("Superficies", "",

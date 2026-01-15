@@ -91,49 +91,24 @@ public class Npc {
      */
     private void place(int x, int y) {
         if (mapData != null && x >= 0 && x < mapData.length && y >= 0 && y < mapData[0].length) {
+            short oldNpc = mapData[x][y].getNpcIndex();
+            if (oldNpc == (short) npcNumber)
+                return;
 
-            // Si ya hay un personaje ahí, lo borramos primero
-            if (mapData[x][y].getCharIndex() != 0) {
-                Character.eraseChar(mapData[x][y].getCharIndex());
-            }
-
-            // Actualizamos el dato del mapa (para persistencia)
-            mapData[x][y].setNpcIndex((short) npcNumber);
-
-            // Creamos la instancia visual si hay un NPC seleccionado
-            if (npcNumber > 0 && org.argentumforge.engine.utils.AssetRegistry.npcs.containsKey(npcNumber)) {
-                org.argentumforge.engine.utils.inits.NpcData data = org.argentumforge.engine.utils.AssetRegistry.npcs
-                        .get(npcNumber);
-
-                // Buscamos un slot libre en charList
-                for (short i = 1; i < org.argentumforge.engine.utils.GameData.charList.length; i++) {
-                    if (!org.argentumforge.engine.utils.GameData.charList[i].isActive()) {
-                        Character.makeChar(i, data.getBody(), data.getHead(),
-                                org.argentumforge.engine.game.models.Direction.DOWN, x, y, 0, 0, 0);
-                        break;
-                    }
-                }
-            }
+            org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
+                    new org.argentumforge.engine.utils.editor.commands.NpcChangeCommand(x, y, oldNpc,
+                            (short) npcNumber));
         }
     }
 
-    /**
-     * Quita cualquier NPC de las coordenadas especificadas.
-     * 
-     * @param x Coordenada X del mapa.
-     * @param y Coordenada Y del mapa.
-     */
     private void remove(int x, int y) {
         if (mapData != null && x >= 0 && x < mapData.length && y >= 0 && y < mapData[0].length) {
+            short oldNpc = mapData[x][y].getNpcIndex();
+            if (oldNpc == 0)
+                return;
 
-            // Borramos la instancia visual si existe
-            short charIndex = mapData[x][y].getCharIndex();
-            if (charIndex != 0) {
-                Character.eraseChar(charIndex);
-            }
-
-            // Limpiamos el dato del mapa
-            mapData[x][y].setNpcIndex((short) 0);
+            org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
+                    new org.argentumforge.engine.utils.editor.commands.NpcChangeCommand(x, y, oldNpc, (short) 0));
         }
     }
 

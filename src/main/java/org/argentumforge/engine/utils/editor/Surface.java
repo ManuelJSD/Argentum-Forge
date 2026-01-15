@@ -67,6 +67,10 @@ public class Surface {
     }
 
     public void surface_edit(int x, int y) {
+        if (mapData == null || x < 0 || x >= mapData.length || y < 0 || y >= mapData[0].length) {
+            return;
+        }
+
         switch (mode) {
             case 1: // Insertar
                 this.insert(x, y);
@@ -85,19 +89,24 @@ public class Surface {
     }
 
     private void insert(int x, int y) {
-        mapData[x][y].getLayer(layer).setGrhIndex(surfaceIndex);
-        mapData[x][y].setLayer(layer,
-                initGrh(mapData[x][y].getLayer(layer), mapData[x][y].getLayer(layer).getGrhIndex(), true));
+        short oldGrh = mapData[x][y].getLayer(layer).getGrhIndex();
+        if (oldGrh == (short) surfaceIndex)
+            return;
+
+        org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
+                new org.argentumforge.engine.utils.editor.commands.TileChangeCommand(x, y, layer, oldGrh,
+                        (short) surfaceIndex));
     }
 
     private void delete(int x, int y) {
-        if (layer == 1) {
-            mapData[x][y].getLayer(layer).setGrhIndex(1);
-        } else {
-            mapData[x][y].getLayer(layer).setGrhIndex(0);
-        }
-        mapData[x][y].setLayer(layer,
-                initGrh(mapData[x][y].getLayer(layer), mapData[x][y].getLayer(layer).getGrhIndex(), true));
+        short oldGrh = mapData[x][y].getLayer(layer).getGrhIndex();
+        short targetGrh = (short) (layer == 1 ? 1 : 0);
+
+        if (oldGrh == targetGrh)
+            return;
+
+        org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
+                new org.argentumforge.engine.utils.editor.commands.TileChangeCommand(x, y, layer, oldGrh, targetGrh));
     }
 
     private void pick(int x, int y) {

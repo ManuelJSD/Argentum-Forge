@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'org.argentumforge'
-version = '1.0-SNAPSHOT'
+version = '0.1.0-alpha'
 
 import org.gradle.internal.os.OperatingSystem
 
@@ -98,7 +98,7 @@ jar {
 shadowJar {
     archiveBaseName.set('ArgentumForge')
     archiveClassifier.set('') // Esto hace que el jar final no se llame "-all.jar"
-    archiveVersion.set('1.0-SNAPSHOT')
+    archiveVersion.set(project.version.toString())
 
     // Esto es crucial para librerias que usan ServiceLoader (como quizas tinylog o algunas de audio)
     mergeServiceFiles()
