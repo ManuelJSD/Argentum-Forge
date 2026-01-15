@@ -8,6 +8,7 @@ import org.argentumforge.engine.Window;
 import org.argentumforge.engine.game.console.Console;
 import org.argentumforge.engine.gui.ImGUISystem;
 import org.argentumforge.engine.renderer.RenderSettings;
+import org.argentumforge.engine.gui.Theme;
 import org.argentumforge.engine.utils.editor.*;
 
 import static org.argentumforge.engine.utils.GameData.options;
@@ -50,7 +51,7 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public final class FMain extends Form {
 
-    private static final int TRANSPARENT_COLOR = ImGui.getColorU32(0f, 0f, 0f, 0f);
+    private static final int TRANSPARENT_COLOR = Theme.TRANSPARENT;
 
     private FSurfaceEditor surfaceEditor;
     private FBlockEditor blockEditor;
@@ -59,6 +60,7 @@ public final class FMain extends Form {
     private FMinimap minimap;
     private FGrhLibrary grhLibrary;
     private FTriggerEditor triggerEditor;
+    private FTransferEditor transferEditor;
     private float[] ambientColorArr;
 
     public FMain() {
@@ -74,6 +76,7 @@ public final class FMain extends Form {
         minimap = new FMinimap();
         grhLibrary = new FGrhLibrary();
         triggerEditor = new FTriggerEditor();
+        transferEditor = new FTransferEditor();
     }
 
     @Override
@@ -121,7 +124,7 @@ public final class FMain extends Form {
     // Botones principales
     private void drawButtons() {
         ImGui.setNextWindowPos(0, 20);
-        ImGui.setNextWindowSize(700, 40); // Solo el ancho de los botones
+        ImGui.setNextWindowSize(800, 40); // Aumentado para incluir botón Traslados
         if (ImGui.begin("ToolBar", ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoBackground
                 | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoSavedSettings)) {
             drawEditorButtons();
@@ -194,7 +197,7 @@ public final class FMain extends Form {
         // Botón Selección
         boolean selectionActive = Selection.getInstance().isActive();
         if (selectionActive) {
-            ImGui.pushStyleColor(ImGuiCol.Button, 0xFF00FF00); // Verde
+            ImGui.pushStyleColor(ImGuiCol.Button, Theme.COLOR_ACCENT);
         }
         if (ImGui.button("Selección", 100, 25)) {
             Selection sel = Selection.getInstance();
@@ -214,6 +217,17 @@ public final class FMain extends Form {
         }
         if (selectionActive) {
             ImGui.popStyleColor();
+        }
+
+        ImGui.sameLine();
+
+        // Botón Traslados
+        if (ImGui.button("Traslados", 100, 25)) {
+            if (ImGUISystem.INSTANCE.isFormVisible("FTransferEditor")) {
+                ImGUISystem.INSTANCE.deleteFrmArray(transferEditor);
+            } else {
+                ImGUISystem.INSTANCE.show(transferEditor);
+            }
         }
 
     }
