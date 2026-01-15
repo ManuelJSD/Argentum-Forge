@@ -102,6 +102,64 @@ public final class PreviewUtils {
     }
 
     /**
+     * Dibuja un mosaico completo (GrhIndex + rejilla) en ImGui.
+     */
+    public static void drawGrhMosaic(int grhIndex, int width, int height, float maxWidth, float maxHeight) {
+        if (grhIndex <= 0 || grhIndex >= grhData.length || grhData[grhIndex] == null)
+            return;
+
+        float totalW = 0;
+        float totalH = 0;
+
+        // Calcular tamaño total del mosaico asumiendo que todos los tiles miden lo
+        // mismo que el primero
+        GrhData baseData = grhData[grhIndex];
+        totalW = baseData.getPixelWidth() * width;
+        totalH = baseData.getPixelHeight() * height;
+
+        float scale = 1.0f;
+        if (totalW > maxWidth || totalH > maxHeight) {
+            scale = Math.min(maxWidth / totalW, maxHeight / totalH);
+        }
+
+        float finalW = totalW * scale;
+        float finalH = totalH * scale;
+        float tileW = baseData.getPixelWidth() * scale;
+        float tileH = baseData.getPixelHeight() * scale;
+
+        float startX = ImGui.getCursorPosX();
+        float startY = ImGui.getCursorPosY();
+
+        // Centrar
+        ImGui.setCursorPos(startX + (maxWidth - finalW) / 2, startY + (maxHeight - finalH) / 2);
+        float currentX = ImGui.getCursorPosX();
+        float currentY = ImGui.getCursorPosY();
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int currentGrh = grhIndex + (y * width) + x;
+                if (currentGrh >= grhData.length || grhData[currentGrh] == null)
+                    continue;
+
+                GrhData data = grhData[currentGrh];
+                Texture tex = Surface.INSTANCE.getTexture(data.getFileNum());
+                if (tex != null) {
+                    float u0 = data.getsX() / (float) tex.getTex_width();
+                    float v0 = (data.getsY() + data.getPixelHeight()) / (float) tex.getTex_height();
+                    float u1 = (data.getsX() + data.getPixelWidth()) / (float) tex.getTex_width();
+                    float v1 = data.getsY() / (float) tex.getTex_height();
+
+                    ImGui.setCursorPos(currentX + (x * tileW), currentY + (y * tileH));
+                    ImGui.image(tex.getId(), tileW, tileH, u0, v1, u1, v0);
+                }
+            }
+        }
+
+        ImGui.setCursorPos(startX, startY);
+        ImGui.dummy(maxWidth, maxHeight);
+    }
+
+    /**
      * Dibuja un NPC (Cuerpo + Cabeza) en ImGui de forma relativa al cursor actual.
      */
     public static void drawNpc(int bodyIndex, int headIndex, float scale) {

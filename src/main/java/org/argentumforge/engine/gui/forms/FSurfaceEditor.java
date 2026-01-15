@@ -5,6 +5,7 @@ import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiCond;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.flag.ImGuiTableFlags;
+import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import org.argentumforge.engine.gui.PreviewUtils;
 import org.argentumforge.engine.utils.editor.Surface;
@@ -25,6 +26,9 @@ public class FSurfaceEditor extends Form {
     private int selectedGrhIndex = -1;
     private final ImInt selectedLayer = new ImInt(0);
     private final List<Integer> capas = new ArrayList<>(List.of(1, 2, 3, 4));
+    private final ImInt selectedBrushSize = new ImInt(1);
+    private final float[] scatterDensityArr = { 0.3f };
+    private final ImBoolean useMosaicChecked = new ImBoolean(true);
 
     // Configuración de la rejilla
     private static final int TILE_SIZE = 48;
@@ -44,6 +48,9 @@ public class FSurfaceEditor extends Form {
                 break;
             }
         }
+
+        selectedBrushSize.set(surface.getBrushSize());
+        scatterDensityArr[0] = surface.getScatterDensity();
     }
 
     @Override
@@ -53,20 +60,92 @@ public class FSurfaceEditor extends Form {
         // Ventana principal del editor de superficies
         if (ImGui.begin("Editor de Superficies", ImGuiWindowFlags.None)) {
 
+            drawToolSettings();
+            ImGui.separator();
             drawLayerAndModeControls();
             ImGui.separator();
 
-            drawSearchAndPagination();
-            ImGui.separator();
+            if (ImGui.beginTabBar("SurfaceTabs")) {
+                if (ImGui.beginTabItem("Paleta")) {
+                    drawSearchAndPagination();
+                    ImGui.separator();
 
-            // Sincronizar selección si cambió externamente (por pick)
-            if (surface.getSurfaceIndex() != selectedGrhIndex && surface.getMode() != 3) {
-                selectedGrhIndex = surface.getSurfaceIndex();
+                    // Sincronizar selección si cambió externamente (por pick)
+                    if (surface.getSurfaceIndex() != selectedGrhIndex && surface.getMode() != 3) {
+                        selectedGrhIndex = surface.getSurfaceIndex();
+                    }
+
+                    drawTileGrid();
+                    ImGui.endTabItem();
+                }
+
+                if (ImGui.beginTabItem("Biblioteca")) {
+                    if (ImGui.button("Editar Biblioteca", ImGui.getContentRegionAvailX(), 25)) {
+                        IM_GUI_SYSTEM.show(new FGrhLibrary());
+                    }
+                    ImGui.separator();
+
+                    useMosaicChecked.set(surface.isUseMosaic());
+                    if (ImGui.checkbox("Colocar Mosaico Completo", useMosaicChecked)) {
+                        surface.setUseMosaic(useMosaicChecked.get());
+                    }
+                    ImGui.separator();
+
+                    drawLibraryTab();
+                    ImGui.endTabItem();
+                }
+                ImGui.endTabBar();
             }
-
-            drawTileGrid();
         }
         ImGui.end();
+    }
+
+    private void drawLibraryTab() {
+        org.argentumforge.engine.utils.editor.GrhLibraryManager lib = org.argentumforge.engine.utils.editor.GrhLibraryManager
+                .getInstance();
+        List<org.argentumforge.engine.utils.editor.models.GrhCategory> categories = lib.getCategories();
+
+        if (ImGui.beginChild("LibraryChild")) {
+            for (org.argentumforge.engine.utils.editor.models.GrhCategory cat : categories) {
+                if (ImGui.collapsingHeader(cat.getName())) {
+                    for (org.argentumforge.engine.utils.editor.models.GrhIndexRecord rec : cat.getRecords()) {
+                        boolean isSelected = (selectedGrhIndex == rec.getGrhIndex());
+
+                        if (ImGui.selectable(rec.getName() + " (GRH: " + rec.getGrhIndex() + ")", isSelected)) {
+                            selectedGrhIndex = rec.getGrhIndex();
+                            surface.setSurfaceIndex(rec.getGrhIndex());
+                            surface.setLayer(rec.getLayer());
+                            surface.setAutoBlock(rec.isAutoBlock());
+                            surface.setMosaicWidth(rec.getWidth());
+                            surface.setMosaicHeight(rec.getHeight());
+                            surface.setMode(1);
+
+                            // Actualizar combo de capa visualmente
+                            for (int i = 0; i < capas.size(); i++) {
+                                if (capas.get(i) == rec.getLayer()) {
+                                    selectedLayer.set(i);
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (ImGui.isItemHovered()) {
+                            ImGui.beginTooltip();
+                            if (rec.getWidth() > 1 || rec.getHeight() > 1) {
+                                ImGui.text("Mosaic: " + rec.getWidth() + "x" + rec.getHeight());
+                                PreviewUtils.drawGrhMosaic(rec.getGrhIndex(), rec.getWidth(), rec.getHeight(), 128,
+                                        128);
+                            } else {
+                                ImGui.text("GRH: " + rec.getGrhIndex());
+                                PreviewUtils.drawGrh(rec.getGrhIndex(), 1.0f);
+                            }
+                            ImGui.endTooltip();
+                        }
+                    }
+                }
+            }
+        }
+        ImGui.endChild();
     }
 
     private void drawLayerAndModeControls() {
@@ -131,6 +210,45 @@ public class FSurfaceEditor extends Form {
         }
         if (currentMode == 3)
             ImGui.popStyleColor();
+    }
+
+    private void drawToolSettings() {
+        ImGui.text("Herramienta:");
+
+        if (ImGui.radioButton("Pincel", surface.getToolMode() == Surface.ToolMode.BRUSH)) {
+            surface.setToolMode(Surface.ToolMode.BRUSH);
+        }
+        ImGui.sameLine();
+        if (ImGui.radioButton("Cubo", surface.getToolMode() == Surface.ToolMode.BUCKET)) {
+            surface.setToolMode(Surface.ToolMode.BUCKET);
+        }
+
+        ImGui.spacing();
+
+        if (surface.getToolMode() == Surface.ToolMode.BRUSH) {
+            ImGui.text("Forma:");
+            if (ImGui.radioButton("Cuadrado", surface.getBrushShape() == Surface.BrushShape.SQUARE)) {
+                surface.setBrushShape(Surface.BrushShape.SQUARE);
+            }
+            ImGui.sameLine();
+            if (ImGui.radioButton("Circulo", surface.getBrushShape() == Surface.BrushShape.CIRCLE)) {
+                surface.setBrushShape(Surface.BrushShape.CIRCLE);
+            }
+            ImGui.sameLine();
+            if (ImGui.radioButton("Scatter", surface.getBrushShape() == Surface.BrushShape.SCATTER)) {
+                surface.setBrushShape(Surface.BrushShape.SCATTER);
+            }
+
+            if (ImGui.sliderInt("Tamaño", selectedBrushSize.getData(), 1, 15)) {
+                surface.setBrushSize(selectedBrushSize.get());
+            }
+
+            if (surface.getBrushShape() == Surface.BrushShape.SCATTER) {
+                if (ImGui.sliderFloat("Densidad", scatterDensityArr, 0.05f, 1.0f)) {
+                    surface.setScatterDensity(scatterDensityArr[0]);
+                }
+            }
+        }
     }
 
     private void drawSearchAndPagination() {

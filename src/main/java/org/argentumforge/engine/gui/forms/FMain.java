@@ -48,6 +48,7 @@ public final class FMain extends Form {
     private FNpcEditor npcEditor;
     private FObjEditor objEditor;
     private FMinimap minimap;
+    private FGrhLibrary grhLibrary;
     private float[] ambientColorArr;
 
     public FMain() {
@@ -61,6 +62,7 @@ public final class FMain extends Form {
         npcEditor = new FNpcEditor();
         objEditor = new FObjEditor();
         minimap = new FMinimap();
+        grhLibrary = new FGrhLibrary();
     }
 
     @Override
@@ -170,6 +172,8 @@ public final class FMain extends Form {
                 ImGUISystem.INSTANCE.show(minimap);
             }
         }
+
+        ImGui.sameLine();
 
         ImGui.sameLine();
 
@@ -340,6 +344,17 @@ public final class FMain extends Form {
                     }
 
                     ImGui.endMenu();
+                }
+
+                ImGui.separator();
+
+                if (ImGui.menuItem("Biblioteca GRH", "")) {
+                    if (ImGUISystem.INSTANCE.isFormVisible("FGrhLibrary")) {
+                        ImGUISystem.INSTANCE.deleteFrmArray(grhLibrary);
+                    } else {
+                        grhLibrary = new FGrhLibrary();
+                        ImGUISystem.INSTANCE.show(grhLibrary);
+                    }
                 }
 
                 ImGui.endMenu();

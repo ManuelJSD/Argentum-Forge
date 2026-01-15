@@ -9,9 +9,15 @@
 
 <h1>Argentum Forge - Editor de Mapas para Argentum Online</h1>
 
-<p>
   <b>Argentum Forge</b> es un editor de mapas y cliente para Argentum Online portado a Java utilizando LWJGL3.<br/><br/>
 </p>
+
+## Características Principales
+- **Sistema de Deshacer/Rehacer (Undo/Redo):** Historial completo para tiles, bloqueos, NPCs y objetos.
+- **Herramientas de Edición Avanzadas:**
+  - **Bote de Pintura (Bucket Fill):** Relleno eficiente de áreas usando algoritmo BFS.
+  - **Pinceles Especiales:** Pinceles Cuadrados, Circulares y tipo Scatter (Dispersión) para terrenos naturales.
+  - **Operaciones Masivas:** Comandos optimizados para cambios de gran escala sin pérdida de rendimiento.
 
 # Discord
 Para aquellos que quieran colaborar con el proyecto, ¡son más que bienvenidos! Pueden comunicarse con nosotros en nuestro <a href="https://discord.gg/RtsGRqJVt9">Discord.</a>
