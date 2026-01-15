@@ -36,6 +36,7 @@ public class MapFileUtils {
             Options.INSTANCE.save();
             // Cargar el mapa
             GameData.loadMap(selectedFile.getAbsolutePath());
+            org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().clearHistory();
             return true;
         }
 

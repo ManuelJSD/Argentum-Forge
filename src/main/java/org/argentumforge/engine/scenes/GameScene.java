@@ -219,6 +219,16 @@ public final class GameScene extends Scene {
 
         checkWalkKeys();
 
+        // Atajos de Undo/Redo (Ctrl+Z, Ctrl+Y)
+        if (KeyHandler.isKeyPressed(GLFW_KEY_LEFT_CONTROL) || KeyHandler.isKeyPressed(GLFW_KEY_RIGHT_CONTROL)) {
+
+            if (KeyHandler.isKeyJustPressed(GLFW_KEY_Z)) {
+                org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().undo();
+            } else if (KeyHandler.isKeyJustPressed(GLFW_KEY_Y)) {
+                org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().redo();
+            }
+        }
+
         if (key == null)
             return; // ni me gasto si la tecla presionada no existe en nuestro bind.
 
@@ -235,6 +245,8 @@ public final class GameScene extends Scene {
                     user.setWalkingmode(!user.isWalkingmode());
                     break;
                 case EXIT_GAME:
+                    break;
+                default:
                     break;
             }
         }

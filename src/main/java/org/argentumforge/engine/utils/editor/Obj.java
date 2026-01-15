@@ -97,21 +97,26 @@ public class Obj {
         if (mapData != null && x >= 0 && x < mapData.length && y >= 0 && y < mapData[0].length) {
             if (AssetRegistry.objs != null && AssetRegistry.objs.containsKey(objNumber)) {
                 ObjData data = AssetRegistry.objs.get(objNumber);
-                mapData[x][y].getObjGrh().setGrhIndex(0); // Reiniciar antes de inicializar
-                initGrh(mapData[x][y].getObjGrh(), (short) data.getGrhIndex(), false);
+                int oldGrh = mapData[x][y].getObjGrh().getGrhIndex();
+                int newGrh = data.getGrhIndex();
+
+                if (oldGrh == newGrh)
+                    return;
+
+                org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
+                        new org.argentumforge.engine.utils.editor.commands.ObjChangeCommand(x, y, oldGrh, newGrh));
             }
         }
     }
 
-    /**
-     * Quita cualquier objeto de las coordenadas especificadas.
-     * 
-     * @param x Coordenada X del mapa.
-     * @param y Coordenada Y del mapa.
-     */
     private void remove(int x, int y) {
         if (mapData != null && x >= 0 && x < mapData.length && y >= 0 && y < mapData[0].length) {
-            mapData[x][y].getObjGrh().setGrhIndex(0);
+            int oldGrh = mapData[x][y].getObjGrh().getGrhIndex();
+            if (oldGrh == 0)
+                return;
+
+            org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
+                    new org.argentumforge.engine.utils.editor.commands.ObjChangeCommand(x, y, oldGrh, 0));
         }
     }
 
