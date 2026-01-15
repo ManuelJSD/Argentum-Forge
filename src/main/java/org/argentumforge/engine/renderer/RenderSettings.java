@@ -15,6 +15,7 @@ public class RenderSettings {
     // Bloqueos
     private boolean showBlock = true;
     private float blockOpacity = 0.5f;
+    private float ghostOpacity = 0.5f;
 
     public boolean[] getShowLayer() {
         return showLayer;
@@ -70,6 +71,14 @@ public class RenderSettings {
 
     public void setBlockOpacity(float blockOpacity) {
         this.blockOpacity = blockOpacity;
+    }
+
+    public float getGhostOpacity() {
+        return ghostOpacity;
+    }
+
+    public void setGhostOpacity(float ghostOpacity) {
+        this.ghostOpacity = ghostOpacity;
     }
 
 }

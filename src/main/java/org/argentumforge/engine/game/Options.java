@@ -98,6 +98,8 @@ public enum Options {
             write(writer, "RenderShowTriggers", renderSettings.getShowTriggers());
             write(writer, "RenderShowTranslation", renderSettings.getShowMapTransfer());
             write(writer, "RenderShowBlock", renderSettings.getShowBlock());
+            write(writer, "RenderBlockOpacity", renderSettings.getBlockOpacity());
+            write(writer, "RenderGhostOpacity", renderSettings.getGhostOpacity());
         } catch (IOException e) {
             Logger.error("¡No se pudo escribir en el archivo options.ini!");
         }
@@ -275,6 +277,8 @@ public enum Options {
             case "RenderShowTriggers" -> renderSettings.setShowTriggers(Boolean.parseBoolean(value));
             case "RenderShowTranslation" -> renderSettings.setShowMapTransfer(Boolean.parseBoolean(value));
             case "RenderShowBlock" -> renderSettings.setShowBlock(Boolean.parseBoolean(value));
+            case "RenderBlockOpacity" -> renderSettings.setBlockOpacity(Float.parseFloat(value));
+            case "RenderGhostOpacity" -> renderSettings.setGhostOpacity(Float.parseFloat(value));
             default -> Logger.warn("Opción desconocida ignorada: {}", option);
         }
     }

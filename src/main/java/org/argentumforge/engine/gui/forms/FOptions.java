@@ -35,7 +35,7 @@ public final class FOptions extends Form {
 
     @Override
     public void render() {
-        ImGui.setNextWindowSize(400, 320, ImGuiCond.Always);
+        ImGui.setNextWindowSize(400, 360, ImGuiCond.Always);
         ImGui.begin("Configuración", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize);
 
         if (ImGui.checkbox("Pantalla Completa", options.isFullscreen())) {
@@ -44,7 +44,8 @@ public final class FOptions extends Form {
         }
 
         // Selector de Resolucion
-        String[] resolutions = { "800x600", "1024x768", "1024x1024", "1280x720", "1366x768", "1920x1080", "2560x1440", "3840x2160" };
+        String[] resolutions = { "800x600", "1024x768", "1024x1024", "1280x720", "1366x768", "1920x1080", "2560x1440",
+                "3840x2160" };
         int currentResIndex = 0;
         String currentResString = options.getScreenWidth() + "x" + options.getScreenHeight();
 
@@ -96,6 +97,13 @@ public final class FOptions extends Form {
 
         if (ImGui.checkbox("Cursores graficos", options.isCursorGraphic())) {
             options.setCursorGraphic(!options.isCursorGraphic());
+        }
+
+        ImGui.separator();
+        ImGui.text("Transparencia Previsualizacion (Ghost):");
+        float[] ghostAlpha = { options.getRenderSettings().getGhostOpacity() };
+        if (ImGui.sliderFloat("##ghostAlpha", ghostAlpha, 0.0f, 1.0f)) {
+            options.getRenderSettings().setGhostOpacity(ghostAlpha[0]);
         }
 
         // Add some spacing before buttons
