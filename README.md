@@ -14,6 +14,13 @@
 Map editor for Argentum Online based on argentum online lwjgl3 (https://github.com/gasti-jm/argentum-online-lwjgl3)
 </p>
 
+## Key Features
+- **Undo/Redo System:** Full history for tiles, blocks, NPCs, and objects.
+- **Advanced Editing Tools:**
+  - **Bucket Fill:** Fill large areas efficiently using BFS.
+  - **Special Brushes:** Square, Circle, and Scatter brushes for natural terrain creation.
+  - **Bulk Operations:** Optimized command system for massive changes.
+
 # Discord
 For those who want to collaborate with the project, they are more than welcome! You can communicate with us on our <a href="https://discord.gg/RtsGRqJVt9">Discord.</a>
 

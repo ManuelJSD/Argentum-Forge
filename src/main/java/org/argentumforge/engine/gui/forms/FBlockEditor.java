@@ -92,6 +92,16 @@ public class FBlockEditor extends Form {
             ImGui.popStyleColor();
 
         ImGui.spacing();
+        ImGui.text("Forma:");
+        if (ImGui.radioButton("Cuadrado", block.getBrushShape() == Block.BrushShape.SQUARE)) {
+            block.setBrushShape(Block.BrushShape.SQUARE);
+        }
+        ImGui.sameLine();
+        if (ImGui.radioButton("Circulo", block.getBrushShape() == Block.BrushShape.CIRCLE)) {
+            block.setBrushShape(Block.BrushShape.CIRCLE);
+        }
+
+        ImGui.spacing();
         ImGui.text("Pincel:");
         ImGui.sameLine();
         int currentBrush = block.getBrushSize();

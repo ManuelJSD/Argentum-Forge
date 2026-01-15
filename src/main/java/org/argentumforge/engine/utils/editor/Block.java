@@ -11,8 +11,13 @@ public class Block {
     private static volatile Block instance;
     private static final Object lock = new Object();
 
+    public enum BrushShape {
+        SQUARE, CIRCLE
+    }
+
     private int mode; // 0 = ninguno, 1 = bloquear, 2 = desbloquear, 3 = invertir
     private int brushSize = 1; // 1, 3, 5...
+    private BrushShape brushShape = BrushShape.SQUARE;
 
     private Block() {
         this.mode = 0;
@@ -52,6 +57,14 @@ public class Block {
         this.brushSize = brushSize;
     }
 
+    public BrushShape getBrushShape() {
+        return brushShape;
+    }
+
+    public void setBrushShape(BrushShape brushShape) {
+        this.brushShape = brushShape;
+    }
+
     /**
      * Edita el estado de bloqueo de un tile en las coordenadas especificadas.
      * 
@@ -66,9 +79,18 @@ public class Block {
         boolean targetState = (mode == 1);
 
         int offset = brushSize / 2;
+        double radiusSq = Math.pow(brushSize / 2.0, 2);
+
         for (int i = x - offset; i <= x + offset; i++) {
             for (int j = y - offset; j <= y + offset; j++) {
                 if (i >= 0 && i < mapData.length && j >= 0 && j < mapData[0].length && mapData[i][j] != null) {
+
+                    if (brushShape == BrushShape.CIRCLE) {
+                        double dx = i - x;
+                        double dy = j - y;
+                        if (dx * dx + dy * dy > radiusSq)
+                            continue;
+                    }
                     boolean current = mapData[i][j].getBlocked();
                     boolean next = current;
 
