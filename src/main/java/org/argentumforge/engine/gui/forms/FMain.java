@@ -225,6 +225,13 @@ public final class FMain extends Form {
             RenderSettings renderSettings = options.getRenderSettings();
 
             if (ImGui.beginMenu("Archivo")) {
+
+                if (ImGui.menuItem("Nuevo Mapa")) {
+                    this.newMap();
+                }
+
+                ImGui.separator();
+
                 if (ImGui.menuItem("Cargar Mapa")) {
                     this.loadMapAction();
                 }
@@ -397,6 +404,10 @@ public final class FMain extends Form {
 
     private void loadMapAction() {
         org.argentumforge.engine.utils.MapFileUtils.openAndLoadMap();
+    }
+
+    private void newMap() {
+        org.argentumforge.engine.utils.MapManager.createEmptyMap(100,100);
     }
 
 }
