@@ -18,17 +18,23 @@ import static org.argentumforge.engine.utils.Time.deltaTime;
 import static org.lwjgl.glfw.GLFW.*;
 
 /**
- * Sistema centralizado para la gestion de interfaces graficas de usuario basado en {@code ImGui}.
+ * Sistema centralizado para la gestion de interfaces graficas de usuario basado
+ * en {@code ImGui}.
  * <p>
- * Se encarga de inicializar, configurar y renderizar todos los elementos de la interfaz de usuario utilizando la biblioteca
+ * Se encarga de inicializar, configurar y renderizar todos los elementos de la
+ * interfaz de usuario utilizando la biblioteca
  * <i>Dear ImGui</i> adaptada para {@code LWJGL3}.
  * <p>
- * Administra el ciclo de vida de las distintas ventanas y formularios de la interfaz, permitiendo mostrar, ocultar y gestionar
- * componentes de UI como dialogos, menus, paneles y otros elementos interactivos. Mantiene una coleccion de formularios activos y
+ * Administra el ciclo de vida de las distintas ventanas y formularios de la
+ * interfaz, permitiendo mostrar, ocultar y gestionar
+ * componentes de UI como dialogos, menus, paneles y otros elementos
+ * interactivos. Mantiene una coleccion de formularios activos y
  * coordina su renderizado en cada fotograma.
  * <p>
- * Proporciona funcionalidad para la configuracion de estilos, fuentes y comportamientos de la interfaz, y maneja la
- * sincronizacion entre los eventos de entrada (teclado y raton) entre el sistema de ventanas GLFW y los componentes de ImGui,
+ * Proporciona funcionalidad para la configuracion de estilos, fuentes y
+ * comportamientos de la interfaz, y maneja la
+ * sincronizacion entre los eventos de entrada (teclado y raton) entre el
+ * sistema de ventanas GLFW y los componentes de ImGui,
  * asegurando una respuesta coherente de la interfaz.
  */
 
@@ -54,7 +60,7 @@ public enum ImGUISystem {
 
     // arreglo de ventanas gui
     private final List<Form> frms = new ArrayList<>();
-    
+
     private final Window window = Window.INSTANCE;
 
     private boolean showDebug = false;
@@ -71,8 +77,9 @@ public enum ImGUISystem {
         ImGui.createContext();
 
         /*
-          ImGui proporciona 3 esquemas de color diferentes para diseñar. Usaremos el clásico aquí.
-          Pruebe otros con los métodos ImGui.styleColors().
+         * ImGui proporciona 3 esquemas de color diferentes para diseñar. Usaremos el
+         * clásico aquí.
+         * Pruebe otros con los métodos ImGui.styleColors().
          */
         ImGui.styleColorsClassic();
 
@@ -81,7 +88,8 @@ public enum ImGUISystem {
 
         io.setIniFilename("resources/gui.ini"); // Guardamos en un archivo .ini
         io.setConfigFlags(ImGuiConfigFlags.NavEnableKeyboard); // Navegacion con el teclado
-        io.setBackendFlags(ImGuiBackendFlags.HasMouseCursors); // Cursores del mouse para mostrar al cambiar el tamaño de las ventanas, etc.
+        io.setBackendFlags(ImGuiBackendFlags.HasMouseCursors); // Cursores del mouse para mostrar al cambiar el tamaño
+                                                               // de las ventanas, etc.
         io.setBackendPlatformName("imgui_java_impl_glfw");
         io.setBackendRendererName("imgui_java_impl_lwjgl");
 
@@ -113,7 +121,7 @@ public enum ImGUISystem {
         keyMap[ImGuiKey.Delete] = GLFW_KEY_DELETE;
         keyMap[ImGuiKey.Backspace] = GLFW_KEY_BACKSPACE;
         keyMap[ImGuiKey.Space] = GLFW_KEY_SPACE;
-        //keyMap[ImGuiKey.Enter]          = GLFW_KEY_ENTER;
+        // keyMap[ImGuiKey.Enter] = GLFW_KEY_ENTER;
         keyMap[ImGuiKey.Escape] = GLFW_KEY_ESCAPE;
         keyMap[ImGuiKey.KeyPadEnter] = GLFW_KEY_KP_ENTER;
         keyMap[ImGuiKey.A] = GLFW_KEY_A;
@@ -140,7 +148,8 @@ public enum ImGUISystem {
 
     private void setCallbacks(ImGuiIO io) {
         glfwSetCharCallback(window.getWindow(), (w, c) -> {
-            if (c != GLFW_KEY_DELETE) io.addInputCharacter(c);
+            if (c != GLFW_KEY_DELETE)
+                io.addInputCharacter(c);
         });
 
         io.setSetClipboardTextFn(new ImStrConsumer() {
@@ -167,21 +176,21 @@ public enum ImGUISystem {
         // La creación de ImFontConfig asignará memoria nativa...
         final ImFontConfig fontConfig = new ImFontConfig();
 
-        // Todas las fuentes agregadas mientras este modo está activado se fusionarán con la fuente agregada anteriormente
+        // Todas las fuentes agregadas mientras este modo está activado se fusionarán
+        // con la fuente agregada anteriormente
         fontConfig.setMergeMode(true);
         fontConfig.setPixelSnapH(true);
         fontConfig.setGlyphRanges(fontAtlas.getGlyphRangesCyrillic());
-
 
         fontConfig.setMergeMode(false);
         fontConfig.setPixelSnapH(false);
 
         fontConfig.setRasterizerMultiply(1.2f);
 
-        ImGuiFonts.fontRegular      = fontAtlas.addFontFromFileTTF("resources/fonts/LiberationSans-Regular.ttf", 13);
-        ImGuiFonts.fontBold         = fontAtlas.addFontFromFileTTF("resources/fonts/LiberationSans-Bold.ttf", 13);
-        ImGuiFonts.fontItalic       = fontAtlas.addFontFromFileTTF("resources/fonts/LiberationSans-Italic.ttf", 13);
-        ImGuiFonts.fontBoldItalic   = fontAtlas.addFontFromFileTTF("resources/fonts/LiberationSans-BoldItalic.ttf", 13);
+        ImGuiFonts.fontRegular = fontAtlas.addFontFromFileTTF("resources/fonts/LiberationSans-Regular.ttf", 13);
+        ImGuiFonts.fontBold = fontAtlas.addFontFromFileTTF("resources/fonts/LiberationSans-Bold.ttf", 13);
+        ImGuiFonts.fontItalic = fontAtlas.addFontFromFileTTF("resources/fonts/LiberationSans-Italic.ttf", 13);
+        ImGuiFonts.fontBoldItalic = fontAtlas.addFontFromFileTTF("resources/fonts/LiberationSans-BoldItalic.ttf", 13);
 
         fontConfig.destroy();
     }
@@ -192,7 +201,8 @@ public enum ImGUISystem {
     }
 
     public void renderGUI() {
-        if (deltaTime <= 0) return;
+        if (deltaTime <= 0)
+            return;
 
         final ImGuiIO io = ImGui.getIO();
 
@@ -217,13 +227,13 @@ public enum ImGUISystem {
 
         // ACA HAY QUE LABURAR CON LOS CURSORES.
         if (window.isCursorCrosshair())
-            if(options.isCursorGraphic()) {
+            if (options.isCursorGraphic()) {
                 Window.INSTANCE.setCursorGraphic(true);
             } else {
                 glfwSetCursor(window.getWindow(), glfwCreateStandardCursor(GLFW_CROSSHAIR_CURSOR));
             }
         else {
-            if(options.isCursorGraphic()) {
+            if (options.isCursorGraphic()) {
                 Window.INSTANCE.setCursorGraphic(false);
             } else {
                 glfwSetCursor(window.getWindow(), mouseCursors[ImGui.getMouseCursor()]);
@@ -275,7 +285,8 @@ public enum ImGUISystem {
                 break;
             }
         }
-        if (!exits) addFrm(frm);
+        if (!exits)
+            addFrm(frm);
     }
 
     public boolean isFormVisible(String fromClass) {
@@ -293,12 +304,11 @@ public enum ImGUISystem {
      * Checkea si el frm solicitiado es el ultimo de nuestro array de frms.
      */
     public boolean isMainLast() {
-        if (frms.size() <= 0) return false;
-
+        if (frms.size() <= 0)
+            return false;
 
         return frms.get(frms.size() - 1).getClass().getSimpleName().equals("FMain");
     }
-
 
     public void deleteFrmArray(Form frm) {
         frms.remove(frm);
@@ -317,5 +327,20 @@ public enum ImGUISystem {
      */
     public java.util.List<Form> getActiveForms() {
         return new java.util.ArrayList<>(frms);
+    }
+
+    /**
+     * Obtiene una instancia de un formulario específico por su clase.
+     * 
+     * @param formClass Clase del formulario a buscar
+     * @return La instancia del formulario si está visible, null en caso contrario
+     */
+    public <T extends Form> T getForm(Class<T> formClass) {
+        for (Form frm : frms) {
+            if (formClass.isInstance(frm)) {
+                return formClass.cast(frm);
+            }
+        }
+        return null;
     }
 }

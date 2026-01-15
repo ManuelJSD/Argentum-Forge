@@ -10,6 +10,8 @@ import imgui.type.ImString;
 import org.argentumforge.engine.game.console.Console;
 import org.argentumforge.engine.game.console.FontStyle;
 import org.argentumforge.engine.renderer.RGBColor;
+import org.argentumforge.engine.gui.Theme;
+import org.argentumforge.engine.gui.widgets.UIComponents;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -236,73 +238,45 @@ public final class FNpcEditor extends Form {
     }
 
     private void drawButtons() {
-        int activeColor = 0xFF00FF00; // verde
         int currentMode = npcEditor.getMode();
 
-        boolean pushQuitar = false;
+        // Botón Quitar (Destructivo)
         if (currentMode == 2) {
-            ImGui.pushStyleColor(ImGuiCol.Button, activeColor);
-            pushQuitar = true;
+            ImGui.pushStyleColor(ImGuiCol.Button, Theme.COLOR_DANGER);
         }
         if (ImGui.button("Quitar", 110, 30)) {
-            if (currentMode == 2) {
-                npcEditor.setMode(0);
-            } else {
-                npcEditor.setMode(2);
+            npcEditor.setMode(currentMode == 2 ? 0 : 2);
+            if (npcEditor.getMode() == 2) {
                 Console.INSTANCE.addMsgToConsole("Modo: Quitar NPC activado. Clic en el mapa para eliminar.",
                         FontStyle.REGULAR, new RGBColor(1, 1, 1));
             }
         }
-        if (pushQuitar)
+        if (currentMode == 2) {
             ImGui.popStyleColor();
+        }
 
         ImGui.sameLine();
 
-        boolean pushCapturar = false;
-        if (currentMode == 3) {
-            ImGui.pushStyleColor(ImGuiCol.Button, activeColor);
-            pushCapturar = true;
-        }
-        if (ImGui.button("Capturar", 60, 30)) {
-            if (currentMode == 3) {
-                npcEditor.setMode(0);
-            } else {
-                npcEditor.setMode(3);
+        if (UIComponents.toggleButton("Capturar", currentMode == 3, 60, 30)) {
+            npcEditor.setMode(currentMode == 3 ? 0 : 3);
+            if (npcEditor.getMode() == 3) {
                 Console.INSTANCE.addMsgToConsole(
                         "Modo: Capturar NPC activado. Clic en un NPC del mapa para seleccionarlo.",
                         FontStyle.REGULAR, new RGBColor(1, 1, 1));
             }
         }
-        if (pushCapturar)
-            ImGui.popStyleColor();
 
         ImGui.sameLine();
 
-        boolean pushColocar = false;
-        boolean placeEnabled = selectedNpcNumber > 0;
-        if (currentMode == 1) {
-            ImGui.pushStyleColor(ImGuiCol.Button, activeColor);
-            pushColocar = true;
-        }
-        if (!placeEnabled)
-            ImGui.pushStyleColor(ImGuiCol.Button, 0x88888888);
-        if (ImGui.button("Colocar", 110, 30)) {
-            if (!placeEnabled) {
-                // no hacer nada
-            } else if (currentMode == 1) {
-                npcEditor.setMode(0);
-            } else {
-                npcEditor.setMode(1);
+        if (UIComponents.toggleButton("Colocar", currentMode == 1 && selectedNpcNumber > 0, 110, 30)) {
+            npcEditor.setMode(currentMode == 1 ? 0 : 1);
+            if (npcEditor.getMode() == 1) {
                 npcEditor.setNpcNumber(selectedNpcNumber);
                 Console.INSTANCE.addMsgToConsole(
                         "Modo: Colocar NPC (" + selectedNpcNumber + ") activado. Clic en el mapa para colocar.",
                         FontStyle.REGULAR, new RGBColor(1, 1, 1));
             }
         }
-        if (!placeEnabled)
-            ImGui.popStyleColor();
-        if (pushColocar)
-            ImGui.popStyleColor();
 
         if (selectedNpcNumber > 0 && npcs != null) {
             NpcData selected = npcs.get(selectedNpcNumber);

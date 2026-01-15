@@ -16,6 +16,7 @@ import org.argentumforge.engine.utils.editor.Npc;
 import org.argentumforge.engine.utils.editor.Obj;
 import org.argentumforge.engine.utils.editor.Selection;
 import org.argentumforge.engine.utils.editor.Trigger;
+import org.argentumforge.engine.utils.editor.Transfer;
 import org.argentumforge.engine.renderer.Texture;
 import org.argentumforge.engine.Engine;
 
@@ -101,6 +102,9 @@ public final class GameScene extends Scene {
     /** Herramienta de Triggers. */
     private Trigger trigger;
 
+    /** Herramienta de Traslados. */
+    private Transfer transfer;
+
     /** Flag auxiliar para el borrado de capas (uso interno del editor). */
     private boolean DeleteLayer;
 
@@ -124,6 +128,7 @@ public final class GameScene extends Scene {
         obj = Obj.getInstance();
         selection = Selection.getInstance();
         trigger = Trigger.getInstance();
+        transfer = Transfer.getInstance();
 
         whiteTexture = new Texture();
         whiteTexture.createWhitePixel();
@@ -220,7 +225,26 @@ public final class GameScene extends Scene {
                 npc.npc_edit(x, y);
                 obj.obj_edit(x, y);
                 trigger.trigger_edit(x, y);
+                transfer.transfer_edit(x, y);
+            }
 
+            // Clic derecho para capturar coordenadas de traslado
+            if (MouseListener.mouseButtonDown(GLFW_MOUSE_BUTTON_RIGHT)) {
+                if (transfer.isActive() && mapData[x][y].getExitMap() > 0) {
+                    int destMap = mapData[x][y].getExitMap();
+                    int destX = mapData[x][y].getExitX();
+                    int destY = mapData[x][y].getExitY();
+
+                    transfer.captureCoordinates(destMap, destX, destY);
+                    System.out.println("Traslado capturado: Mapa=" + destMap + " X=" + destX + " Y=" + destY);
+
+                    // Actualizar campos del editor si está abierto
+                    org.argentumforge.engine.gui.forms.FTransferEditor editor = (org.argentumforge.engine.gui.forms.FTransferEditor) ImGUISystem.INSTANCE
+                            .getForm(org.argentumforge.engine.gui.forms.FTransferEditor.class);
+                    if (editor != null) {
+                        editor.updateInputFields(destMap, destX, destY);
+                    }
+                }
             }
 
         }

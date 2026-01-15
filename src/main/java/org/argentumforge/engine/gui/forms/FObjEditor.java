@@ -10,6 +10,8 @@ import imgui.type.ImString;
 import org.argentumforge.engine.game.console.Console;
 import org.argentumforge.engine.game.console.FontStyle;
 import org.argentumforge.engine.renderer.RGBColor;
+import org.argentumforge.engine.gui.Theme;
+import org.argentumforge.engine.gui.widgets.UIComponents;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -233,12 +235,12 @@ public final class FObjEditor extends Form {
     }
 
     private void drawButtons() {
-        int activeColor = 0xFF00FF00;
         int currentMode = objEditor.getMode();
 
-        boolean pushQuitar = currentMode == 2;
-        if (pushQuitar)
-            ImGui.pushStyleColor(ImGuiCol.Button, activeColor);
+        // Botón Quitar (Destructivo)
+        if (currentMode == 2) {
+            ImGui.pushStyleColor(ImGuiCol.Button, Theme.COLOR_DANGER);
+        }
         if (ImGui.button("Quitar", 85, 30)) {
             objEditor.setMode(currentMode == 2 ? 0 : 2);
             if (objEditor.getMode() == 2) {
@@ -246,34 +248,23 @@ public final class FObjEditor extends Form {
                         new RGBColor(1, 1, 1));
             }
         }
-        if (pushQuitar)
+        if (currentMode == 2) {
             ImGui.popStyleColor();
+        }
 
         ImGui.sameLine();
 
-        boolean pushCapturar = currentMode == 3;
-        if (pushCapturar)
-            ImGui.pushStyleColor(ImGuiCol.Button, activeColor);
-        if (ImGui.button("Capturar", 85, 30)) {
+        if (UIComponents.toggleButton("Capturar", currentMode == 3, 85, 30)) {
             objEditor.setMode(currentMode == 3 ? 0 : 3);
             if (objEditor.getMode() == 3) {
                 Console.INSTANCE.addMsgToConsole("Modo: Capturar Objeto activado.", FontStyle.REGULAR,
                         new RGBColor(1, 1, 1));
             }
         }
-        if (pushCapturar)
-            ImGui.popStyleColor();
 
         ImGui.sameLine();
 
-        boolean pushColocar = currentMode == 1;
-        boolean placeEnabled = selectedObjNumber > 0;
-        if (pushColocar)
-            ImGui.pushStyleColor(ImGuiCol.Button, activeColor);
-        if (!placeEnabled)
-            ImGui.pushStyleVar(imgui.flag.ImGuiStyleVar.Alpha, 0.5f);
-
-        if (ImGui.button("Colocar", 85, 30) && placeEnabled) {
+        if (UIComponents.toggleButton("Colocar", currentMode == 1 && selectedObjNumber > 0, 85, 30)) {
             objEditor.setMode(currentMode == 1 ? 0 : 1);
             if (objEditor.getMode() == 1) {
                 objEditor.setObjNumber(selectedObjNumber);
@@ -281,11 +272,6 @@ public final class FObjEditor extends Form {
                         FontStyle.REGULAR, new RGBColor(1, 1, 1));
             }
         }
-
-        if (!placeEnabled)
-            ImGui.popStyleVar();
-        if (pushColocar)
-            ImGui.popStyleColor();
 
         if (selectedObjNumber > 0) {
             ObjData selected = objs.get(selectedObjNumber);

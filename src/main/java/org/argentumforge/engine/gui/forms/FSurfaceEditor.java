@@ -12,6 +12,8 @@ import org.argentumforge.engine.utils.editor.Surface;
 import org.argentumforge.engine.utils.AssetRegistry;
 import org.argentumforge.engine.utils.inits.GrhData;
 import org.argentumforge.engine.renderer.Texture;
+import org.argentumforge.engine.gui.Theme;
+import org.argentumforge.engine.gui.widgets.UIComponents;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -162,54 +164,45 @@ public class FSurfaceEditor extends Form {
         ImGui.spacing();
 
         // Modos de Edición
-        int activeColor = 0xFF00FF00; // Verde activo
         int currentMode = surface.getMode();
 
         // Botón Seleccionar (Vacio)
-        if (currentMode == 0)
-            ImGui.pushStyleColor(ImGuiCol.Button, activeColor);
-        if (ImGui.button("Seleccion")) {
-            surface.setMode(0);
+        if (UIComponents.toggleButton("Seleccion", currentMode == 0)) {
+            surface.setMode(currentMode == 0 ? 0 : 0); // Always set to 0 when clicked
             selectedGrhIndex = -1;
         }
-        if (currentMode == 0)
-            ImGui.popStyleColor();
 
         ImGui.sameLine();
 
         // Botón Insertar
-        if (currentMode == 1)
-            ImGui.pushStyleColor(ImGuiCol.Button, activeColor);
-        if (ImGui.button("Insertar")) {
+        if (UIComponents.toggleButton("Insertar", currentMode == 1)) {
             if (selectedGrhIndex > 0) {
-                surface.setMode(1);
-                surface.setSurfaceIndex(selectedGrhIndex);
+                surface.setMode(currentMode == 1 ? 0 : 1);
+                if (surface.getMode() == 1) {
+                    surface.setSurfaceIndex(selectedGrhIndex);
+                }
             }
         }
-        if (currentMode == 1)
-            ImGui.popStyleColor();
 
         ImGui.sameLine();
 
-        // Botón Borrar
-        if (currentMode == 2)
-            ImGui.pushStyleColor(ImGuiCol.Button, activeColor);
-        if (ImGui.button("Borrar")) {
-            surface.setMode(2);
+        // Botón Borrar (Destructivo - toggle)
+        if (currentMode == 2) {
+            ImGui.pushStyleColor(ImGuiCol.Button, Theme.COLOR_DANGER);
         }
-        if (currentMode == 2)
+        if (ImGui.button("Borrar")) {
+            surface.setMode(currentMode == 2 ? 0 : 2);
+        }
+        if (currentMode == 2) {
             ImGui.popStyleColor();
+        }
 
         ImGui.sameLine();
 
         // Botón Capturar (Pick)
-        if (currentMode == 3)
-            ImGui.pushStyleColor(ImGuiCol.Button, activeColor);
-        if (ImGui.button("Capturar")) {
-            surface.setMode(3);
+        if (UIComponents.toggleButton("Capturar", currentMode == 3)) {
+            surface.setMode(currentMode == 3 ? 0 : 3);
         }
-        if (currentMode == 3)
-            ImGui.popStyleColor();
     }
 
     private void drawToolSettings() {
@@ -323,7 +316,7 @@ public class FSurfaceEditor extends Form {
 
                     boolean isSelected = (selectedGrhIndex == i);
                     if (isSelected)
-                        ImGui.pushStyleColor(ImGuiCol.Border, 1f, 1f, 0f, 1f);
+                        ImGui.pushStyleColor(ImGuiCol.Border, Theme.COLOR_ACCENT);
 
                     if (tex != null) {
                         float u0 = frameData.getsX() / (float) tex.getTex_width();
