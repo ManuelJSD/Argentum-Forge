@@ -58,6 +58,7 @@ public final class FMain extends Form {
     private FObjEditor objEditor;
     private FMinimap minimap;
     private FGrhLibrary grhLibrary;
+    private FTriggerEditor triggerEditor;
     private float[] ambientColorArr;
 
     public FMain() {
@@ -72,6 +73,7 @@ public final class FMain extends Form {
         objEditor = new FObjEditor();
         minimap = new FMinimap();
         grhLibrary = new FGrhLibrary();
+        triggerEditor = new FTriggerEditor();
     }
 
     @Override
@@ -81,6 +83,10 @@ public final class FMain extends Form {
         this.drawButtons();
         Console.INSTANCE.drawConsole();
         handleShortcuts();
+
+        if (org.argentumforge.engine.Engine.getCurrentScene() instanceof GameScene) {
+            ((GameScene) org.argentumforge.engine.Engine.getCurrentScene()).renderImGuiOverlays();
+        }
     }
 
     /**
@@ -152,6 +158,17 @@ public final class FMain extends Form {
 
         ImGui.sameLine();
 
+        // Botón Triggers
+        if (ImGui.button("Triggers", 100, 25)) {
+            if (ImGUISystem.INSTANCE.isFormVisible("FTriggerEditor")) {
+                ImGUISystem.INSTANCE.deleteFrmArray(triggerEditor);
+            } else {
+                ImGUISystem.INSTANCE.show(triggerEditor);
+            }
+        }
+
+        ImGui.sameLine();
+
         // Botón NPCs
         if (ImGui.button("NPCs", 100, 25)) {
             if (ImGUISystem.INSTANCE.isFormVisible("FNpcEditor")) {
@@ -199,29 +216,6 @@ public final class FMain extends Form {
             ImGui.popStyleColor();
         }
 
-        ImGui.sameLine();
-
-        // Botón Minimapa
-        if (ImGui.button("Minimapa", 100, 25)) {
-            if (ImGUISystem.INSTANCE.isFormVisible("FMinimap")) {
-                ImGUISystem.INSTANCE.deleteFrmArray(minimap);
-            } else {
-                ImGUISystem.INSTANCE.show(minimap);
-            }
-        }
-
-        ImGui.sameLine();
-
-        ImGui.sameLine();
-
-        ImGui.sameLine();
-
-        // Botón Opciones
-        /*
-         * if (ImGui.button("Opciones", 100, 25)) {
-         * ImGUISystem.INSTANCE.show(new FOptions());
-         * }
-         */
     }
 
     private void drawMenuBar() {

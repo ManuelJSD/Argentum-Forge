@@ -15,6 +15,7 @@ import org.argentumforge.engine.utils.editor.Block;
 import org.argentumforge.engine.utils.editor.Npc;
 import org.argentumforge.engine.utils.editor.Obj;
 import org.argentumforge.engine.utils.editor.Selection;
+import org.argentumforge.engine.utils.editor.Trigger;
 import org.argentumforge.engine.renderer.Texture;
 import org.argentumforge.engine.Engine;
 
@@ -97,6 +98,9 @@ public final class GameScene extends Scene {
     /** Herramienta de seleccion y movimiento. */
     private Selection selection;
 
+    /** Herramienta de Triggers. */
+    private Trigger trigger;
+
     /** Flag auxiliar para el borrado de capas (uso interno del editor). */
     private boolean DeleteLayer;
 
@@ -119,6 +123,7 @@ public final class GameScene extends Scene {
         npc = Npc.getInstance();
         obj = Obj.getInstance();
         selection = Selection.getInstance();
+        trigger = Trigger.getInstance();
 
         whiteTexture = new Texture();
         whiteTexture.createWhitePixel();
@@ -214,6 +219,7 @@ public final class GameScene extends Scene {
                 block.block_edit(x, y);
                 npc.npc_edit(x, y);
                 obj.obj_edit(x, y);
+                trigger.trigger_edit(x, y);
 
             }
 
@@ -332,6 +338,7 @@ public final class GameScene extends Scene {
         renderThirdLayer(renderSettings, pixelOffsetX, pixelOffsetY);
         renderFourthLayer(renderSettings, pixelOffsetX, pixelOffsetY);
         renderBlockOverlays(renderSettings, pixelOffsetX, pixelOffsetY);
+        // renderTriggerOverlays removed - called via FMain/ImGui now
         renderTranslationOverlays(renderSettings, pixelOffsetX, pixelOffsetY);
         renderEditorPreviews(pixelOffsetX, pixelOffsetY);
     }
@@ -580,6 +587,51 @@ public final class GameScene extends Scene {
                                 null);
                     }
 
+                    camera.incrementScreenX();
+                }
+                camera.incrementScreenY();
+            }
+        }
+    }
+
+    /**
+     * Renderiza overlays amarillos sobre los tiles con triggers.
+     * Muestra el ID del trigger si es posible.
+     */
+    public void renderImGuiOverlays() {
+        RenderSettings renderSettings = org.argentumforge.engine.game.Options.INSTANCE.getRenderSettings();
+        // Renderizar si la opcion esta activa O si la herramienta de edicion esta
+        // activa
+        if (org.argentumforge.engine.utils.editor.Trigger.getInstance().isActive()
+                || renderSettings.getShowTriggers()) {
+
+            // Recalcular offsets para ImGui overlay
+            int pixelOffsetX = (int) offSetCounterX;
+            int pixelOffsetY = (int) offSetCounterY;
+
+            camera.setScreenY(camera.getMinYOffset() - TILE_BUFFER_SIZE);
+
+            // Usamos ImGui para dibujar los numeros por encima de todo
+            imgui.ImDrawList drawList = imgui.ImGui.getForegroundDrawList();
+
+            for (int y = camera.getMinY(); y <= camera.getMaxY(); y++) {
+                camera.setScreenX(camera.getMinXOffset() - TILE_BUFFER_SIZE);
+                for (int x = camera.getMinX(); x <= camera.getMaxX(); x++) {
+
+                    if (mapData[x][y].getTrigger() > 0) {
+                        int screenX = POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX;
+                        int screenY = POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY;
+
+                        String idText = String.valueOf(mapData[x][y].getTrigger());
+                        float textWidth = imgui.ImGui.calcTextSize(idText).x;
+                        float textX = screenX + (TILE_PIXEL_SIZE - textWidth) / 2;
+                        float textY = screenY + (TILE_PIXEL_SIZE - 14) / 2;
+
+                        // Sombra Negra (offset +1)
+                        drawList.addText(textX + 1, textY + 1, 0xFF000000, idText);
+                        // Texto Blanco (con opacidad completa)
+                        drawList.addText(textX, textY, 0xFFFFFFFF, idText);
+                    }
                     camera.incrementScreenX();
                 }
                 camera.incrementScreenY();
