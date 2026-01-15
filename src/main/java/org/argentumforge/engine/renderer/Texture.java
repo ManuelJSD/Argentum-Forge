@@ -158,4 +158,26 @@ public class Texture {
         return null;
     }
 
+    public void createWhitePixel() {
+        this.tex_width = 1;
+        this.tex_height = 1;
+
+        // Limpiar cualquier bindeo previo para evitar que se pisen texturas
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        this.id = glGenTextures();
+        glBindTexture(GL_TEXTURE_2D, id);
+
+        ByteBuffer pixels = BufferUtils.createByteBuffer(4);
+        pixels.put((byte) 255).put((byte) 255).put((byte) 255).put((byte) 255);
+        pixels.flip();
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+        // Desvincular texture
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+
 }

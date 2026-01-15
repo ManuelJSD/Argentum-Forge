@@ -15,6 +15,8 @@ import org.argentumforge.engine.utils.editor.Block;
 import org.argentumforge.engine.utils.editor.Npc;
 import org.argentumforge.engine.utils.editor.Obj;
 import org.argentumforge.engine.utils.editor.Selection;
+import org.argentumforge.engine.renderer.Texture;
+import org.argentumforge.engine.Engine;
 
 import static org.argentumforge.engine.game.IntervalTimer.INT_SENTRPU;
 import static org.argentumforge.engine.game.models.Character.drawCharacter;
@@ -26,6 +28,10 @@ import static org.argentumforge.engine.utils.AssetRegistry.*;
 import static org.argentumforge.engine.utils.Time.deltaTime;
 import static org.argentumforge.engine.utils.Time.timerTicksPerFrame;
 import static org.lwjgl.glfw.GLFW.*;
+import org.argentumforge.engine.renderer.RGBColor;
+import org.argentumforge.engine.renderer.Drawn;
+import org.argentumforge.engine.utils.editor.Selection.SelectedEntity;
+import org.argentumforge.engine.utils.editor.Selection.SelectedEntity;
 
 /**
  * <p>
@@ -94,6 +100,8 @@ public final class GameScene extends Scene {
     /** Flag auxiliar para el borrado de capas (uso interno del editor). */
     private boolean DeleteLayer;
 
+    private Texture whiteTexture;
+
     /**
      * Inicializa los componentes de la escena del juego.
      * Configura el tipo de escena de retorno, el clima, los editores y añade el
@@ -111,6 +119,9 @@ public final class GameScene extends Scene {
         npc = Npc.getInstance();
         obj = Obj.getInstance();
         selection = Selection.getInstance();
+
+        whiteTexture = new Texture();
+        whiteTexture.createWhitePixel();
 
         ImGUISystem.INSTANCE.addFrm(frmMain);
     }
@@ -177,15 +188,21 @@ public final class GameScene extends Scene {
             int x = getTileMouseX((int) MouseListener.getX() - POS_SCREEN_X);
             int y = getTileMouseY((int) MouseListener.getY() - POS_SCREEN_Y);
 
-            // Herramienta de Selección (Drag & Drop)
+            // Herramienta de Selección (Drag & Drop + Marquee)
             if (selection.isActive()) {
+                boolean multiSelectPressed = KeyHandler.isActionKeyPressed(Key.MULTI_SELECT);
+
                 if (MouseListener.mouseButtonDown(GLFW_MOUSE_BUTTON_LEFT)) {
-                    if (!selection.isDragging()) {
-                        selection.tryGrab(x, y);
+                    if (!selection.isDragging() && !selection.isAreaSelecting()) {
+                        selection.tryGrab(x, y, multiSelectPressed);
+                    } else if (selection.isAreaSelecting()) {
+                        selection.updateAreaSelect(x, y);
                     }
                 } else if (MouseListener.mouseButtonReleased(GLFW_MOUSE_BUTTON_LEFT)) {
                     if (selection.isDragging()) {
                         selection.finalizeMove(x, y);
+                    } else if (selection.isAreaSelecting()) {
+                        selection.finalizeAreaSelect();
                     }
                 }
                 return; // Prioridad absoluta
@@ -381,9 +398,15 @@ public final class GameScene extends Scene {
                                 grhData[mapData[x][y].getObjGrh().getGrhIndex()].getPixelHeight() == TILE_PIXEL_SIZE) {
 
                             // No renderizar el objeto original si se está arrastrando desde esta posición
-                            boolean isDragged = selection.isDragging()
-                                    && selection.getSelectedEntityType() == Selection.EntityType.OBJECT
-                                    && selection.getSourceX() == x && selection.getSourceY() == y;
+                            boolean isDragged = false;
+                            if (selection.isDragging()) {
+                                for (SelectedEntity se : selection.getSelectedEntities()) {
+                                    if (se.x == x && se.y == y && se.type == Selection.EntityType.OBJECT) {
+                                        isDragged = true;
+                                        break;
+                                    }
+                                }
+                            }
 
                             if (!isDragged) {
                                 drawTexture(mapData[x][y].getObjGrh(),
@@ -425,9 +448,15 @@ public final class GameScene extends Scene {
                                 grhData[mapData[x][y].getObjGrh().getGrhIndex()].getPixelHeight() != TILE_PIXEL_SIZE) {
 
                             // No renderizar el objeto original si se está arrastrando desde esta posición
-                            boolean isDragged = selection.isDragging()
-                                    && selection.getSelectedEntityType() == Selection.EntityType.OBJECT
-                                    && selection.getSourceX() == x && selection.getSourceY() == y;
+                            boolean isDragged = false;
+                            if (selection.isDragging()) {
+                                for (SelectedEntity se : selection.getSelectedEntities()) {
+                                    if (se.x == x && se.y == y && se.type == Selection.EntityType.OBJECT) {
+                                        isDragged = true;
+                                        break;
+                                    }
+                                }
+                            }
 
                             if (!isDragged) {
                                 drawTexture(mapData[x][y].getObjGrh(),
@@ -445,9 +474,15 @@ public final class GameScene extends Scene {
                     final int charIndex = mapData[x][y].getCharIndex();
 
                     // No renderizar el NPC original si se está arrastrando desde esta posición
-                    boolean isDragged = selection.isDragging()
-                            && selection.getSelectedEntityType() == Selection.EntityType.NPC
-                            && selection.getSourceX() == x && selection.getSourceY() == y;
+                    boolean isDragged = false;
+                    if (selection.isDragging()) {
+                        for (SelectedEntity se : selection.getSelectedEntities()) {
+                            if (se.x == x && se.y == y && se.type == Selection.EntityType.NPC) {
+                                isDragged = true;
+                                break;
+                            }
+                        }
+                    }
 
                     if (!isDragged) {
                         final boolean isUserChar = charIndex == user.getUserCharIndex();
@@ -599,7 +634,7 @@ public final class GameScene extends Scene {
     /**
      * Detecta si tenemos el mouse adentro del "render MainViewPic".
      */
-    private boolean inGameArea() {
+    public static boolean inGameArea() {
         if (MouseListener.getX() < POS_SCREEN_X || MouseListener.getX() > POS_SCREEN_X + Window.SCREEN_WIDTH)
             return false;
         if (MouseListener.getY() < POS_SCREEN_Y || MouseListener.getY() > POS_SCREEN_Y + Window.SCREEN_HEIGHT)
@@ -613,8 +648,8 @@ public final class GameScene extends Scene {
      *          hacer click izquierdo por el mapa, para
      *          interactuar con NPCs, etc.
      */
-    private byte getTileMouseX(int mouseX) {
-        return (byte) (user.getUserPos().getX() + mouseX / TILE_PIXEL_SIZE - HALF_WINDOW_TILE_WIDTH);
+    public static int getTileMouseX(int mouseX) {
+        return (User.INSTANCE.getUserPos().getX() + mouseX / Camera.TILE_PIXEL_SIZE - Camera.HALF_WINDOW_TILE_WIDTH);
     }
 
     /**
@@ -623,8 +658,8 @@ public final class GameScene extends Scene {
      *          hacer click izquierdo por el mapa, para
      *          interactuar con NPCs, etc.
      */
-    private byte getTileMouseY(int mouseY) {
-        return (byte) (user.getUserPos().getY() + mouseY / TILE_PIXEL_SIZE - HALF_WINDOW_TILE_HEIGHT);
+    public static int getTileMouseY(int mouseY) {
+        return (User.INSTANCE.getUserPos().getY() + mouseY / Camera.TILE_PIXEL_SIZE - Camera.HALF_WINDOW_TILE_HEIGHT);
     }
 
     /**
@@ -689,6 +724,24 @@ public final class GameScene extends Scene {
             }
         }
 
+        // Renderizar Resaltado de Selección
+        if (selection.isActive() && !selection.getSelectedEntities().isEmpty()) {
+            for (SelectedEntity se : selection.getSelectedEntities()) {
+                int sTileX = se.x;
+                int sTileY = se.y;
+
+                int screenX = POS_SCREEN_X
+                        + (sTileX - camera.getMinX() + camera.getMinXOffset() - TILE_BUFFER_SIZE) * TILE_PIXEL_SIZE
+                        + pixelOffsetX;
+                int screenY = POS_SCREEN_Y
+                        + (sTileY - camera.getMinY() + camera.getMinYOffset() - TILE_BUFFER_SIZE) * TILE_PIXEL_SIZE
+                        + pixelOffsetY;
+
+                Engine.batch.draw(whiteTexture, screenX, screenY, 0, 0, TILE_PIXEL_SIZE, TILE_PIXEL_SIZE, true, 0.2f,
+                        new RGBColor(0.0f, 1.0f, 0.0f));
+            }
+        }
+
         // Previsualizar Objetos
         if (obj.getMode() == 1 && obj.getObjNumber() > 0) {
             org.argentumforge.engine.utils.inits.ObjData data = objs.get(obj.getObjNumber());
@@ -698,24 +751,74 @@ public final class GameScene extends Scene {
             }
         }
 
-        // Previsualizar Arrastre (Seleccion)
+        // Previsualizar Arrastre (Seleccion Múltiple)
         if (selection.isDragging()) {
-            if (selection.getSelectedEntityType() == Selection.EntityType.NPC) {
-                org.argentumforge.engine.utils.inits.NpcData data = npcs.get(selection.getSelectedId());
-                if (data != null) {
+            for (SelectedEntity se : selection.getSelectedEntities()) {
+                int dragTileX = tileX + se.offsetX;
+                int dragTileY = tileY + se.offsetY;
+
+                if (se.type == Selection.EntityType.NPC) {
+                    org.argentumforge.engine.utils.inits.NpcData data = npcs.get(se.id);
+                    if (data != null) {
+                        int screenX = POS_SCREEN_X
+                                + (dragTileX - camera.getMinX() + camera.getMinXOffset() - TILE_BUFFER_SIZE)
+                                        * TILE_PIXEL_SIZE
+                                + pixelOffsetX;
+                        int screenY = POS_SCREEN_Y
+                                + (dragTileY - camera.getMinY() + camera.getMinYOffset() - TILE_BUFFER_SIZE)
+                                        * TILE_PIXEL_SIZE
+                                + pixelOffsetY;
+                        org.argentumforge.engine.game.models.Character.drawCharacterGhost(data.getBody(),
+                                data.getHead(),
+                                screenX, screenY, options.getRenderSettings().getGhostOpacity(),
+                                weather.getWeatherColor());
+                    }
+                } else if (se.type == Selection.EntityType.OBJECT) {
+                    drawPreviewGrh((short) se.id, dragTileX, dragTileY, pixelOffsetX, pixelOffsetY,
+                            options.getRenderSettings().getGhostOpacity());
+                } else if (se.type == Selection.EntityType.TILE) {
+                    // Si arrastramos un TILE, deberíamos ver sus capas?
+                    // En Selection.tryGrab para TILE id es 0.
+                    // Si queremos fantasmas de tiles arrastrados, necesitaríamos los datos de capas
+                    // en SelectedEntity.
+                    // Para simplificar ahora, dibujamos un recuadro fantasma.
                     int screenX = POS_SCREEN_X
-                            + (tileX - camera.getMinX() + camera.getMinXOffset() - TILE_BUFFER_SIZE) * TILE_PIXEL_SIZE
+                            + (dragTileX - camera.getMinX() + camera.getMinXOffset() - TILE_BUFFER_SIZE)
+                                    * TILE_PIXEL_SIZE
                             + pixelOffsetX;
                     int screenY = POS_SCREEN_Y
-                            + (tileY - camera.getMinY() + camera.getMinYOffset() - TILE_BUFFER_SIZE) * TILE_PIXEL_SIZE
+                            + (dragTileY - camera.getMinY() + camera.getMinYOffset() - TILE_BUFFER_SIZE)
+                                    * TILE_PIXEL_SIZE
                             + pixelOffsetY;
-                    org.argentumforge.engine.game.models.Character.drawCharacterGhost(data.getBody(), data.getHead(),
-                            screenX, screenY, options.getRenderSettings().getGhostOpacity(), weather.getWeatherColor());
+                    Engine.batch.draw(whiteTexture, screenX, screenY, 0, 0, TILE_PIXEL_SIZE, TILE_PIXEL_SIZE, true,
+                            0.3f, new RGBColor(1.0f, 1.0f, 1.0f));
                 }
-            } else if (selection.getSelectedEntityType() == Selection.EntityType.OBJECT) {
-                drawPreviewGrh((short) selection.getSelectedId(), tileX, tileY, pixelOffsetX, pixelOffsetY,
-                        options.getRenderSettings().getGhostOpacity());
             }
+        }
+
+        // Renderizar Cuadro de Selección (Marquee)
+        if (selection.isAreaSelecting()) {
+            int x1 = selection.getMarqueeStartX();
+            int y1 = selection.getMarqueeStartY();
+            int x2 = selection.getMarqueeEndX();
+            int y2 = selection.getMarqueeEndY();
+
+            int minX = Math.min(x1, x2);
+            int maxX = Math.max(x1, x2);
+            int minY = Math.min(y1, y2);
+            int maxY = Math.max(y1, y2);
+
+            int screenX = POS_SCREEN_X
+                    + (minX - camera.getMinX() + camera.getMinXOffset() - TILE_BUFFER_SIZE) * TILE_PIXEL_SIZE
+                    + pixelOffsetX;
+            int screenY = POS_SCREEN_Y
+                    + (minY - camera.getMinY() + camera.getMinYOffset() - TILE_BUFFER_SIZE) * TILE_PIXEL_SIZE
+                    + pixelOffsetY;
+            int width = (maxX - minX + 1) * TILE_PIXEL_SIZE;
+            int height = (maxY - minY + 1) * TILE_PIXEL_SIZE;
+
+            Engine.batch.draw(whiteTexture, screenX, screenY, 0, 0, width, height, true, 0.3f,
+                    new RGBColor(0.2f, 0.5f, 1.0f));
         }
     }
 

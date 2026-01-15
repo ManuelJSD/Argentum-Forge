@@ -36,6 +36,7 @@ public enum Key {
     SHOW_OPTIONS(GLFW_KEY_F5),
     DEBUG_SHOW(GLFW_KEY_F1),
     TOGGLE_WALKING_MODE(GLFW_KEY_F3),
+    MULTI_SELECT(GLFW_KEY_LEFT_SHIFT),
     EXIT_GAME(GLFW_KEY_ESCAPE);
 
     private static final String KEYS_CONFIG_FILE = "resources/keys.properties";
