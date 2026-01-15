@@ -21,7 +21,7 @@ import static org.argentumforge.engine.renderer.Drawn.drawTexture;
 import static org.argentumforge.engine.renderer.Drawn.drawGrhIndex;
 import static org.argentumforge.engine.scenes.Camera.*;
 import static org.argentumforge.engine.utils.GameData.*;
-import static org.argentumforge.engine.utils.AssetRegistry.grhData;
+import static org.argentumforge.engine.utils.AssetRegistry.*;
 import static org.argentumforge.engine.utils.Time.deltaTime;
 import static org.argentumforge.engine.utils.Time.timerTicksPerFrame;
 import static org.lwjgl.glfw.GLFW.*;
@@ -298,6 +298,7 @@ public final class GameScene extends Scene {
         renderFourthLayer(renderSettings, pixelOffsetX, pixelOffsetY);
         renderBlockOverlays(renderSettings, pixelOffsetX, pixelOffsetY);
         renderTranslationOverlays(renderSettings, pixelOffsetX, pixelOffsetY);
+        renderEditorPreviews(pixelOffsetX, pixelOffsetY);
     }
 
     /**
@@ -415,6 +416,7 @@ public final class GameScene extends Scene {
                             drawCharacter(charIndex,
                                     POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX,
                                     POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY,
+                                    1.0f,
                                     weather.getWeatherColor());
                         }
                     } else {
@@ -422,6 +424,7 @@ public final class GameScene extends Scene {
                             drawCharacter(charIndex,
                                     POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX,
                                     POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY,
+                                    1.0f,
                                     weather.getWeatherColor());
                         }
                     }
@@ -583,4 +586,101 @@ public final class GameScene extends Scene {
         return (byte) (user.getUserPos().getY() + mouseY / TILE_PIXEL_SIZE - HALF_WINDOW_TILE_HEIGHT);
     }
 
+    /**
+     * Renderiza una previsualización de lo que el usuario está a punto de colocar.
+     */
+    private void renderEditorPreviews(int pixelOffsetX, int pixelOffsetY) {
+        if (!inGameArea())
+            return;
+
+        int mouseX = (int) MouseListener.getX() - POS_SCREEN_X;
+        int mouseY = (int) MouseListener.getY() - POS_SCREEN_Y;
+        int tileX = getTileMouseX(mouseX);
+        int tileY = getTileMouseY(mouseY);
+
+        // Previsualizar Superficies
+        if (surface.getMode() == 1 && surface.getSurfaceIndex() > 0) {
+            int half = surface.getBrushSize() / 2;
+            float alpha = options.getRenderSettings().getGhostOpacity();
+
+            if (surface.isUseMosaic() && (surface.getMosaicWidth() > 1 || surface.getMosaicHeight() > 1)) {
+                // Modo Estampado
+                for (int dx = 0; dx < surface.getMosaicWidth(); dx++) {
+                    for (int dy = 0; dy < surface.getMosaicHeight(); dy++) {
+                        int mapX = tileX + dx;
+                        int mapY = tileY + dy;
+                        drawPreviewGrh((short) (surface.getSurfaceIndex() + (dy * surface.getMosaicWidth()) + dx), mapX,
+                                mapY, pixelOffsetX, pixelOffsetY, alpha);
+                    }
+                }
+            } else {
+                // Modo Pincel Normal
+                for (int i = tileX - half; i <= tileX + half; i++) {
+                    for (int j = tileY - half; j <= tileY + half; j++) {
+                        if (surface.getBrushShape() == Surface.BrushShape.CIRCLE
+                                && (Math.pow(i - tileX, 2) + Math.pow(j - tileY, 2) > Math.pow(half, 2)))
+                            continue;
+
+                        short targetGrh = (short) surface.getSurfaceIndex();
+                        if (surface.getMosaicWidth() > 1 || surface.getMosaicHeight() > 1) {
+                            targetGrh = (short) (surface.getSurfaceIndex()
+                                    + ((j % surface.getMosaicHeight()) * surface.getMosaicWidth())
+                                    + (i % surface.getMosaicWidth()));
+                        }
+                        drawPreviewGrh(targetGrh, i, j, pixelOffsetX, pixelOffsetY, alpha);
+                    }
+                }
+            }
+        }
+
+        // Previsualizar NPCs
+        if (npc.getMode() == 1 && npc.getNpcNumber() > 0) {
+            org.argentumforge.engine.utils.inits.NpcData data = npcs.get(npc.getNpcNumber());
+            if (data != null) {
+                int screenX = POS_SCREEN_X
+                        + (tileX - camera.getMinX() + camera.getMinXOffset() - TILE_BUFFER_SIZE) * TILE_PIXEL_SIZE
+                        + pixelOffsetX;
+                int screenY = POS_SCREEN_Y
+                        + (tileY - camera.getMinY() + camera.getMinYOffset() - TILE_BUFFER_SIZE) * TILE_PIXEL_SIZE
+                        + pixelOffsetY;
+                org.argentumforge.engine.game.models.Character.drawCharacterGhost(data.getBody(), data.getHead(),
+                        screenX, screenY, options.getRenderSettings().getGhostOpacity(), weather.getWeatherColor());
+            }
+        }
+
+        // Previsualizar Objetos
+        if (obj.getMode() == 1 && obj.getObjNumber() > 0) {
+            org.argentumforge.engine.utils.inits.ObjData data = objs.get(obj.getObjNumber());
+            if (data != null) {
+                drawPreviewGrh((short) data.getGrhIndex(), tileX, tileY, pixelOffsetX, pixelOffsetY,
+                        options.getRenderSettings().getGhostOpacity());
+            }
+        }
+    }
+
+    private void drawPreviewGrh(short grhIndex, int tileX, int tileY, int pixelOffsetX, int pixelOffsetY, float alpha) {
+        if (mapData == null || tileX < 0 || tileX >= mapData.length || tileY < 0 || tileY >= mapData[0].length)
+            return;
+
+        int screenX = POS_SCREEN_X
+                + (tileX - camera.getMinX() + camera.getMinXOffset() - TILE_BUFFER_SIZE) * TILE_PIXEL_SIZE
+                + pixelOffsetX;
+        int screenY = POS_SCREEN_Y
+                + (tileY - camera.getMinY() + camera.getMinYOffset() - TILE_BUFFER_SIZE) * TILE_PIXEL_SIZE
+                + pixelOffsetY;
+
+        // Aplicar centrado para GRHs grandes (mismo sistema que Drawn.drawTexture)
+        if (grhIndex > 0 && grhIndex < grhData.length && grhData[grhIndex] != null) {
+            if (grhData[grhIndex].getTileWidth() != 1.0f) {
+                screenX = screenX - (int) (grhData[grhIndex].getTileWidth() * TILE_PIXEL_SIZE / 2)
+                        + TILE_PIXEL_SIZE / 2;
+            }
+            if (grhData[grhIndex].getTileHeight() != 1.0f) {
+                screenY = screenY - (int) (grhData[grhIndex].getTileHeight() * TILE_PIXEL_SIZE) + TILE_PIXEL_SIZE;
+            }
+        }
+
+        org.argentumforge.engine.renderer.Drawn.drawGrhIndex(grhIndex, screenX, screenY, alpha,
+                weather.getWeatherColor());
+    }
 }

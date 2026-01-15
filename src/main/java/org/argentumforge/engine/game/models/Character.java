@@ -202,7 +202,8 @@ public final class Character {
     /**
      * Dibuja nuestro personaje!
      */
-    public static void drawCharacter(int charIndex, int PixelOffsetX, int PixelOffsetY, RGBColor ambientcolor) {
+    public static void drawCharacter(int charIndex, int PixelOffsetX, int PixelOffsetY, float alpha,
+            RGBColor ambientcolor) {
         boolean moved = false;
         RGBColor color = new RGBColor();
 
@@ -280,7 +281,7 @@ public final class Character {
             if (charList[charIndex].getBody().getWalk(charList[charIndex].getHeading().getId())
                     .getGrhIndex() != 0) {
                 drawTexture(charList[charIndex].getBody().getWalk(charList[charIndex].getHeading().getId()),
-                        PixelOffsetX, PixelOffsetY, true, true, false, 1.0f, ambientcolor);
+                        PixelOffsetX, PixelOffsetY, true, true, false, alpha, ambientcolor);
             }
 
             if (charList[charIndex].getHead().getHead(charList[charIndex].getHeading().getId())
@@ -288,28 +289,28 @@ public final class Character {
                 drawTexture(charList[charIndex].getHead().getHead(charList[charIndex].getHeading().getId()),
                         PixelOffsetX + charList[charIndex].getBody().getHeadOffset().getX(),
                         PixelOffsetY + charList[charIndex].getBody().getHeadOffset().getY(),
-                        true, false, false, 1.0f, ambientcolor);
+                        true, false, false, alpha, ambientcolor);
 
                 if (charList[charIndex].getHelmet().getHead(charList[charIndex].getHeading().getId())
                         .getGrhIndex() != 0) {
                     drawTexture(charList[charIndex].getHelmet().getHead(charList[charIndex].getHeading().getId()),
                             PixelOffsetX + charList[charIndex].getBody().getHeadOffset().getX(),
                             PixelOffsetY + charList[charIndex].getBody().getHeadOffset().getY() - 34,
-                            true, false, false, 1.0f, ambientcolor);
+                            true, false, false, alpha, ambientcolor);
                 }
 
                 if (charList[charIndex].getWeapon().getWeaponWalk(charList[charIndex].getHeading().getId())
                         .getGrhIndex() != 0) {
                     drawTexture(
                             charList[charIndex].getWeapon().getWeaponWalk(charList[charIndex].getHeading().getId()),
-                            PixelOffsetX, PixelOffsetY, true, true, false, 1.0f, ambientcolor);
+                            PixelOffsetX, PixelOffsetY, true, true, false, alpha, ambientcolor);
                 }
 
                 if (charList[charIndex].getShield().getShieldWalk(charList[charIndex].getHeading().getId())
                         .getGrhIndex() != 0) {
                     drawTexture(
                             charList[charIndex].getShield().getShieldWalk(charList[charIndex].getHeading().getId()),
-                            PixelOffsetX, PixelOffsetY, true, true, false, 1.0f, ambientcolor);
+                            PixelOffsetX, PixelOffsetY, true, true, false, alpha, ambientcolor);
                 }
 
             }
@@ -317,7 +318,7 @@ public final class Character {
         } else {
             if (charList[charIndex].getBody().getWalk(charList[charIndex].getHeading().getId()).getGrhIndex() > 0) {
                 drawTexture(charList[charIndex].getBody().getWalk(charList[charIndex].getHeading().getId()),
-                        PixelOffsetX, PixelOffsetY, true, true, false, 1.0f, ambientcolor);
+                        PixelOffsetX, PixelOffsetY, true, true, false, alpha, ambientcolor);
             }
         }
 
@@ -331,6 +332,36 @@ public final class Character {
             // Comprobar si la animación ha terminado
             if (!charList[charIndex].fX.isStarted())
                 charList[charIndex].setFxIndex(0);
+        }
+    }
+
+    /**
+     * Dibuja un "fantasma" de personaje sin necesidad de estar activado en la
+     * lista global.
+     */
+    public static void drawCharacterGhost(int bodyIndex, int headIndex, int PixelOffsetX, int PixelOffsetY, float alpha,
+            RGBColor ambientcolor) {
+        if (bodyIndex <= 0 || bodyIndex >= AssetRegistry.bodyData.length || AssetRegistry.bodyData[bodyIndex] == null)
+            return;
+
+        BodyData body = AssetRegistry.bodyData[bodyIndex];
+        Direction heading = DOWN;
+
+        // Cuerpo (Frame 1)
+        if (body.getWalk(heading.getId()).getGrhIndex() != 0) {
+            drawTexture(body.getWalk(heading.getId()), PixelOffsetX, PixelOffsetY, true, false, false, alpha,
+                    ambientcolor);
+        }
+
+        // Cabeza
+        if (headIndex > 0 && headIndex < AssetRegistry.headData.length && AssetRegistry.headData[headIndex] != null) {
+            HeadData head = AssetRegistry.headData[headIndex];
+            if (head.getHead(heading.getId()).getGrhIndex() != 0) {
+                drawTexture(head.getHead(heading.getId()),
+                        PixelOffsetX + body.getHeadOffset().getX(),
+                        PixelOffsetY + body.getHeadOffset().getY(),
+                        true, false, false, alpha, ambientcolor);
+            }
         }
     }
 
