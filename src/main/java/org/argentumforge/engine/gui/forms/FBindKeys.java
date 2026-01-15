@@ -90,6 +90,10 @@ public class FBindKeys extends Form {
             renderKeyBindRow("Mostrar Opciones", Key.SHOW_OPTIONS);
             renderKeyBindRow("Mostrar Debug", Key.DEBUG_SHOW);
             renderKeyBindRow("Modo Caminata", Key.TOGGLE_WALKING_MODE);
+
+            renderGroupHeader("Herramientas de Selección");
+            renderKeyBindRow("Selección Múltiple", Key.MULTI_SELECT);
+
             renderKeyBindRow("Salir", Key.EXIT_GAME);
 
             ImGui.columns(1); // End columns

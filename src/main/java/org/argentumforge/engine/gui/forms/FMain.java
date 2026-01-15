@@ -12,10 +12,15 @@ import org.argentumforge.engine.utils.editor.*;
 
 import static org.argentumforge.engine.utils.GameData.options;
 import static org.argentumforge.engine.utils.Time.FPS;
-import static org.argentumforge.engine.utils.Time.deltaTime;
-import org.argentumforge.engine.game.console.Console;
 import org.argentumforge.engine.renderer.RGBColor;
 import static org.argentumforge.engine.game.console.FontStyle.REGULAR;
+import org.argentumforge.engine.utils.editor.commands.*;
+import org.argentumforge.engine.game.models.Key;
+import org.argentumforge.engine.listeners.KeyHandler;
+import org.argentumforge.engine.listeners.MouseListener;
+import org.argentumforge.engine.scenes.GameScene;
+import org.argentumforge.engine.scenes.Camera;
+import static org.lwjgl.glfw.GLFW.*;
 
 /**
  * Formulario principal que proporciona la interfaz de usuario del editor de
@@ -75,6 +80,7 @@ public final class FMain extends Form {
         this.renderFPS();
         this.drawButtons();
         Console.INSTANCE.drawConsole();
+        handleShortcuts();
     }
 
     /**
@@ -255,8 +261,7 @@ public final class FMain extends Form {
             }
 
             if (ImGui.beginMenu("Editar")) {
-                org.argentumforge.engine.utils.editor.commands.CommandManager manager = org.argentumforge.engine.utils.editor.commands.CommandManager
-                        .getInstance();
+                CommandManager manager = CommandManager.getInstance();
 
                 if (ImGui.menuItem("Deshacer", "Ctrl+Z", false, manager.canUndo())) {
                     manager.undo();
@@ -264,6 +269,27 @@ public final class FMain extends Form {
 
                 if (ImGui.menuItem("Rehacer", "Ctrl+Y", false, manager.canRedo())) {
                     manager.redo();
+                }
+
+                ImGui.separator();
+
+                if (ImGui.menuItem("Cortar", "Ctrl+X", false,
+                        !Selection.getInstance().getSelectedEntities().isEmpty())) {
+                    cutSelection();
+                }
+
+                if (ImGui.menuItem("Copiar", "Ctrl+C", false,
+                        !Selection.getInstance().getSelectedEntities().isEmpty())) {
+                    copySelection();
+                }
+
+                if (ImGui.menuItem("Pegar", "Ctrl+V", false, !Clipboard.getInstance().isEmpty())) {
+                    pasteSelection();
+                }
+
+                if (ImGui.menuItem("Suprimir", "Supr", false,
+                        !Selection.getInstance().getSelectedEntities().isEmpty())) {
+                    deleteSelection();
                 }
 
                 ImGui.endMenu();
@@ -407,7 +433,66 @@ public final class FMain extends Form {
     }
 
     private void newMap() {
-        org.argentumforge.engine.utils.MapManager.createEmptyMap(100,100);
+        org.argentumforge.engine.utils.MapManager.createEmptyMap(100, 100);
     }
 
+    private void handleShortcuts() {
+        if (ImGui.getIO().getWantCaptureKeyboard())
+            return;
+
+        boolean modifierPressed = KeyHandler.isActionKeyPressed(Key.MULTI_SELECT);
+
+        if (modifierPressed && ImGui.isKeyPressed(GLFW_KEY_C))
+            copySelection();
+        if (modifierPressed && ImGui.isKeyPressed(GLFW_KEY_X))
+            cutSelection();
+        if (modifierPressed && ImGui.isKeyPressed(GLFW_KEY_V))
+            pasteSelection();
+        if (ImGui.isKeyPressed(GLFW_KEY_DELETE))
+            deleteSelection();
+    }
+
+    private void copySelection() {
+        Selection sel = Selection.getInstance();
+        if (sel.getSelectedEntities().isEmpty())
+            return;
+
+        // Usar la primera entidad como referencia para el offset
+        int refX = sel.getSelectedEntities().get(0).x;
+        int refY = sel.getSelectedEntities().get(0).y;
+
+        Clipboard.getInstance().copy(sel.getSelectedEntities(), refX, refY);
+        Console.INSTANCE.addMsgToConsole("Copiadas " + sel.getSelectedEntities().size() + " entidades.", REGULAR,
+                new RGBColor(0f, 1f, 1f));
+    }
+
+    private void cutSelection() {
+        copySelection();
+        deleteSelection();
+    }
+
+    private void pasteSelection() {
+        Clipboard clip = Clipboard.getInstance();
+        if (clip.isEmpty())
+            return;
+
+        if (!GameScene.inGameArea())
+            return;
+
+        int mx = (int) MouseListener.getX() - Camera.POS_SCREEN_X;
+        int my = (int) MouseListener.getY() - Camera.POS_SCREEN_Y;
+        int tx = GameScene.getTileMouseX(mx);
+        int ty = GameScene.getTileMouseY(my);
+
+        CommandManager.getInstance().executeCommand(new PasteEntitiesCommand(clip.getItems(), tx, ty));
+    }
+
+    private void deleteSelection() {
+        Selection sel = Selection.getInstance();
+        if (sel.getSelectedEntities().isEmpty())
+            return;
+
+        CommandManager.getInstance().executeCommand(new DeleteEntitiesCommand(sel.getSelectedEntities()));
+        sel.getSelectedEntities().clear();
+    }
 }

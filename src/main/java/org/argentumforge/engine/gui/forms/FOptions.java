@@ -121,13 +121,13 @@ public final class FOptions extends Form {
         ImGui.setCursorPosX(centerX);
         if (ImGui.button("Configurar Teclas", buttonWidth, 25)) {
             playSound(SND_CLICK);
-            IM_GUI_SYSTEM.show(new FBindKeys());
+            org.argentumforge.engine.gui.ImGUISystem.INSTANCE.show(new FBindKeys());
         }
 
         ImGui.setCursorPosX(centerX);
         if (ImGui.button("Editar Rutas", buttonWidth, 25)) {
             playSound(SND_CLICK);
-            IM_GUI_SYSTEM.show(new FRoutes());
+            org.argentumforge.engine.gui.ImGUISystem.INSTANCE.show(new FRoutes());
         }
 
         ImGui.separator();
