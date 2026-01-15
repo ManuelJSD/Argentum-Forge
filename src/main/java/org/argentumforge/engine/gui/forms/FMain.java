@@ -8,10 +8,14 @@ import org.argentumforge.engine.Window;
 import org.argentumforge.engine.game.console.Console;
 import org.argentumforge.engine.gui.ImGUISystem;
 import org.argentumforge.engine.renderer.RenderSettings;
+import org.argentumforge.engine.utils.editor.*;
 
 import static org.argentumforge.engine.utils.GameData.options;
 import static org.argentumforge.engine.utils.Time.FPS;
 import static org.argentumforge.engine.utils.Time.deltaTime;
+import org.argentumforge.engine.game.console.Console;
+import org.argentumforge.engine.renderer.RGBColor;
+import static org.argentumforge.engine.game.console.FontStyle.REGULAR;
 
 /**
  * Formulario principal que proporciona la interfaz de usuario del editor de
@@ -160,6 +164,33 @@ public final class FMain extends Form {
             } else {
                 ImGUISystem.INSTANCE.show(objEditor);
             }
+        }
+
+        ImGui.sameLine();
+
+        // Botón Selección
+        boolean selectionActive = Selection.getInstance().isActive();
+        if (selectionActive) {
+            ImGui.pushStyleColor(ImGuiCol.Button, 0xFF00FF00); // Verde
+        }
+        if (ImGui.button("Selección", 100, 25)) {
+            Selection sel = Selection.getInstance();
+            sel.setActive(!sel.isActive());
+
+            if (sel.isActive()) {
+                Console.INSTANCE.addMsgToConsole("Modo Selección ACTIVADO. Pincha y arrastra NPCs u Objetos.", REGULAR,
+                        new RGBColor(0f, 1f, 0f));
+                // Desactivar otros modos
+                Surface.getInstance().setMode(0);
+                Npc.getInstance().setMode(0);
+                Obj.getInstance().setMode(0);
+                Block.getInstance().setMode(0);
+            } else {
+                Console.INSTANCE.addMsgToConsole("Modo Selección DESACTIVADO.", REGULAR, new RGBColor(1f, 1f, 0f));
+            }
+        }
+        if (selectionActive) {
+            ImGui.popStyleColor();
         }
 
         ImGui.sameLine();
