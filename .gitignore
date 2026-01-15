@@ -49,4 +49,6 @@ resources/gui.ini
 ### options.ini ###
 resources/options.ini
 
+*.log
+
 *~

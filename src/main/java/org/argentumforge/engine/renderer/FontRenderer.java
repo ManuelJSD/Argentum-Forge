@@ -116,6 +116,10 @@ public class FontRenderer {
 
         if (text.isEmpty())
             return; // Si el texto esta vacio, termina
+
+        if (fonts == null)
+            return; // Prevention against NPE if fonts failed to load
+
         if (fontIndex >= fonts.length)
             fontIndex = NORMAL_FONT; // Usa la fuente normal si el indice es invalido
 
@@ -187,7 +191,7 @@ public class FontRenderer {
         int charCount = 0; // Contador de caracteres en la linea actual
 
         // Si el texto es nulo o vacio, el ancho es 0
-        if (text == null || text.isEmpty())
+        if (text == null || text.isEmpty() || fonts == null)
             return 0;
 
         // Itera cada caracter del texto y calcula incrementalmente el ancho
@@ -286,6 +290,8 @@ public class FontRenderer {
      * @return indice grafico para el caracter, o null si no existe
      */
     private static Integer getCharGrhIndex(char c, int fontIndex) {
+        if (fonts == null)
+            return null;
         if (fontIndex >= fonts.length)
             fontIndex = NORMAL_FONT;
         // Busca el caracter en el mapa

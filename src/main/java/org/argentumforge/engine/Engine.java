@@ -43,8 +43,13 @@ public final class Engine {
     /** Sistema de interfaz grafica de usuario. */
     private final ImGUISystem guiSystem = ImGUISystem.INSTANCE;
     /** Escena actual que esta siendo renderizada y actualizada en el motor. */
-    private Scene currentScene;
+    private static Scene currentScene;
+    /** Renderizador por lotes para el dibujado eficiente de graficos. */
     public static BatchRenderer batch;
+
+    public static Scene getCurrentScene() {
+        return currentScene;
+    }
 
     /**
      * Finaliza el cliente del motor grafico cerrando los recursos necesarios y

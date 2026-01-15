@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "name": "Des layer 4"
+  },
+  {
+    "id": 2,
+    "name": "Des layer 4 y AntiRespawn Npcs"
+  },
+  {
+    "id": 3,
+    "name": "Posicion ilegal para npcs"
+  },
+  {
+    "id": 4,
+    "name": "Des layer 4 y No Combate"
+  },
+  {
+    "id": 5,
+    "name": "Anti Piquete"
+  },
+  {
+    "id": 6,
+    "name": "Zona de Combate"
+  }
+]
