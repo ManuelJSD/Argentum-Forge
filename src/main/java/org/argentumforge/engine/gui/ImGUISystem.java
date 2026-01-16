@@ -272,7 +272,7 @@ public enum ImGUISystem {
         for (int i = 0; i < frms.size(); i++)
             frms.get(i).render();
 
-        ImGui.showDemoWindow();
+        // ImGui.showDemoWindow();
     }
 
     public void show(Form frm) {

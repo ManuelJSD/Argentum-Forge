@@ -101,7 +101,7 @@ public final class FMain extends Form {
             return;
 
         ImGui.setNextWindowPos(0, 19); // Debajo de la barra de menú Principal
-        ImGui.setNextWindowSize(Window.INSTANCE.getWidth(), 35);
+        ImGui.setNextWindowSize(Window.INSTANCE.getWidth(), 30);
         if (ImGui.begin("WorkspaceTabsWindow", ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoBackground
                 | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoSavedSettings)) {
             if (ImGui.beginTabBar("##WorkspaceTabs", ImGuiTabBarFlags.AutoSelectNewTabs)) {
@@ -122,7 +122,17 @@ public final class FMain extends Form {
                     }
 
                     if (!open.get()) {
-                        contextToClose = context;
+                        if (context.isModified()) {
+                            // Cambiar temporalmente al contexto para guardar si es necesario
+                            org.argentumforge.engine.utils.GameData.setActiveContext(context);
+                            if (org.argentumforge.engine.utils.MapManager.checkUnsavedChanges()) {
+                                contextToClose = context;
+                            } else {
+                                open.set(true); // Cancelar cierre
+                            }
+                        } else {
+                            contextToClose = context;
+                        }
                     }
                 }
 
@@ -151,7 +161,7 @@ public final class FMain extends Form {
                 + (int) (org.argentumforge.engine.scenes.Camera.getZoomScale() * 100) + "%";
         float widgetWidth = 165;
 
-        ImGui.setNextWindowPos(Window.INSTANCE.getWidth() - widgetWidth - 10, 20);
+        ImGui.setNextWindowPos(Window.INSTANCE.getWidth() - widgetWidth - 10, 52);
         ImGui.setNextWindowSize(widgetWidth, 30);
         ImGui.pushStyleColor(ImGuiCol.WindowBg, 0.0f, 0.0f, 0.0f, 0.4f);
         if (ImGui.begin("Stats",
@@ -169,7 +179,7 @@ public final class FMain extends Form {
 
     // Botones principales
     private void drawButtons() {
-        ImGui.setNextWindowPos(0, 20);
+        ImGui.setNextWindowPos(0, 49);
         ImGui.setNextWindowSize(1000, 40); // Aumentado para evitar que los botones se corten
         if (ImGui.begin("ToolBar", ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoBackground
                 | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoSavedSettings)) {

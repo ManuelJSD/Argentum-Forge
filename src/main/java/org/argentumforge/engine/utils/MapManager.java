@@ -19,7 +19,6 @@ import static org.argentumforge.engine.game.models.Character.eraseAllChars;
  * escenario, incluyendo capas de gráficos, bloqueos, triggers y entidades.
  */
 public final class MapManager {
-    private static boolean hasUnsavedChanges = false;
 
     private MapManager() {
         // Clase de utilidad
@@ -29,21 +28,30 @@ public final class MapManager {
      * Marca el mapa como modificado para el prompt de guardado.
      */
     public static void markAsModified() {
-        hasUnsavedChanges = true;
+        MapContext context = GameData.getActiveContext();
+        if (context != null) {
+            context.setModified(true);
+            GameData.updateWindowTitle();
+        }
     }
 
     /**
      * Verifica si hay cambios sin guardar.
      */
     public static boolean hasUnsavedChanges() {
-        return hasUnsavedChanges;
+        MapContext context = GameData.getActiveContext();
+        return context != null && context.isModified();
     }
 
     /**
      * Limpia la marca de modificaciones.
      */
     public static void markAsSaved() {
-        hasUnsavedChanges = false;
+        MapContext context = GameData.getActiveContext();
+        if (context != null) {
+            context.setModified(false);
+            GameData.updateWindowTitle();
+        }
     }
 
     /**
@@ -52,7 +60,7 @@ public final class MapManager {
      * @return true si es seguro continuar, false si el usuario canceló.
      */
     public static boolean checkUnsavedChanges() {
-        if (!hasUnsavedChanges)
+        if (!hasUnsavedChanges())
             return true;
 
         int result = javax.swing.JOptionPane.showConfirmDialog(
@@ -101,8 +109,12 @@ public final class MapManager {
         Options.INSTANCE.save();
 
         try {
-            // Limpiar personajes antes de cargar el nuevo escenario
-            eraseAllChars();
+            GameData.clearActiveContext();
+
+            // Reiniciar estado para el nuevo mapa (sin borrar el anterior array)
+            org.argentumforge.engine.game.models.Character.lastChar = 0;
+            org.argentumforge.engine.utils.GameData.mapData = null;
+
             GameData.charList = new org.argentumforge.engine.game.models.Character[10001];
             for (int i = 0; i < GameData.charList.length; i++) {
                 GameData.charList[i] = new org.argentumforge.engine.game.models.Character();
@@ -136,6 +148,7 @@ public final class MapManager {
 
             // Crear el contexto y registrarlo
             MapContext context = new MapContext(filePath, GameData.mapData, GameData.mapProperties, GameData.charList);
+            context.setLastChar(org.argentumforge.engine.game.models.Character.lastChar);
             GameData.setActiveContext(context);
 
             // Reiniciar estado de modificaciones
@@ -199,7 +212,11 @@ public final class MapManager {
             return;
         }
 
-        // Limpiar personajes actuales
+        // Guardar estado del contexto actual si existe y desvincularlo
+        GameData.clearActiveContext();
+
+        // Reiniciar estado
+        org.argentumforge.engine.game.models.Character.lastChar = 0;
         GameData.charList = new org.argentumforge.engine.game.models.Character[10001];
         for (int i = 0; i < GameData.charList.length; i++) {
             GameData.charList[i] = new org.argentumforge.engine.game.models.Character();
@@ -217,7 +234,9 @@ public final class MapManager {
         GameData.mapProperties = new MapProperties();
 
         // Crear contexto sin ruta (Sin Título)
+        // Crear contexto sin ruta (Sin Título)
         MapContext context = new MapContext("", GameData.mapData, GameData.mapProperties, GameData.charList);
+        context.setLastChar(org.argentumforge.engine.game.models.Character.lastChar);
         GameData.setActiveContext(context);
 
         // Reiniciar estado de modificaciones

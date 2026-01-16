@@ -657,6 +657,9 @@ public final class GameScene extends Scene {
             // las ventanas UI
             imgui.ImDrawList drawList = imgui.ImGui.getBackgroundDrawList();
 
+            if (mapData == null)
+                return;
+
             for (int y = camera.getMinY(); y <= camera.getMaxY(); y++) {
                 camera.setScreenX(camera.getMinXOffset() - TILE_BUFFER_SIZE);
                 for (int x = camera.getMinX(); x <= camera.getMaxX(); x++) {
