@@ -16,6 +16,8 @@ public class RenderSettings {
     private boolean showBlock = true;
     private float blockOpacity = 0.5f;
     private float ghostOpacity = 0.5f;
+    private boolean showGrid = false;
+    private float[] gridColor = { 1.0f, 1.0f, 1.0f, 0.2f }; // Blanco semi-transparente por defecto
 
     public boolean[] getShowLayer() {
         return showLayer;
@@ -79,6 +81,22 @@ public class RenderSettings {
 
     public void setGhostOpacity(float ghostOpacity) {
         this.ghostOpacity = ghostOpacity;
+    }
+
+    public boolean isShowGrid() {
+        return showGrid;
+    }
+
+    public void setShowGrid(boolean showGrid) {
+        this.showGrid = showGrid;
+    }
+
+    public float[] getGridColor() {
+        return gridColor;
+    }
+
+    public void setGridColor(float[] gridColor) {
+        this.gridColor = gridColor;
     }
 
 }

@@ -24,6 +24,7 @@ public class FGrhLibrary extends Form {
     private final ImBoolean editRecordAutoBlock = new ImBoolean(false);
     private final ImInt editRecordWidth = new ImInt(1);
     private final ImInt editRecordHeight = new ImInt(1);
+    private final ImString searchQuery = new ImString(64);
 
     private GrhCategory selectedCategory = null;
     private GrhIndexRecord selectedRecord = null;
@@ -37,15 +38,41 @@ public class FGrhLibrary extends Form {
             ImGui.columns(2, "LibraryColumns", true);
             ImGui.setColumnWidth(0, 250);
 
+            // Buscador Global
+            ImGui.text("Buscar:");
+            ImGui.sameLine();
+            if (ImGui.inputText("##search", searchQuery)) {
+                // El filtrado ocurre en tiempo real en los bucles de renderizado
+            }
+            ImGui.separator();
+
             // Columna Izquierda: Categorías
             ImGui.text("Categorías");
             if (ImGui.beginChild("CategoriesList", 0, 300, true)) {
                 List<GrhCategory> categories = GrhLibraryManager.getInstance().getCategories();
+                String filter = searchQuery.get().toLowerCase();
                 for (GrhCategory cat : categories) {
-                    if (ImGui.selectable(cat.getName(), selectedCategory == cat)) {
-                        selectedCategory = cat;
-                        selectedRecord = null;
-                        syncCatEditField();
+                    // Si hay búsqueda, comprobamos si la categoría o alguno de sus registros
+                    // coincide
+                    boolean matches = filter.isEmpty() || cat.getName().toLowerCase().contains(filter);
+
+                    // Si la categoría no coincide, vemos si alguno de sus hijos coincide
+                    if (!matches && !filter.isEmpty()) {
+                        for (GrhIndexRecord rec : cat.getRecords()) {
+                            if (rec.getName().toLowerCase().contains(filter) ||
+                                    String.valueOf(rec.getGrhIndex()).contains(filter)) {
+                                matches = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (matches) {
+                        if (ImGui.selectable(cat.getName(), selectedCategory == cat)) {
+                            selectedCategory = cat;
+                            selectedRecord = null;
+                            syncCatEditField();
+                        }
                     }
                 }
             }
@@ -89,10 +116,18 @@ public class FGrhLibrary extends Form {
             if (selectedCategory != null) {
                 ImGui.text("Registros en: " + selectedCategory.getName());
                 if (ImGui.beginChild("RecordsList", 0, 150, true)) {
+                    String filter = searchQuery.get().toLowerCase();
                     for (GrhIndexRecord rec : selectedCategory.getRecords()) {
-                        if (ImGui.selectable(rec.getName() + " [" + rec.getGrhIndex() + "]", selectedRecord == rec)) {
-                            selectedRecord = rec;
-                            syncEditFields();
+                        boolean matches = filter.isEmpty() ||
+                                rec.getName().toLowerCase().contains(filter) ||
+                                String.valueOf(rec.getGrhIndex()).contains(filter);
+
+                        if (matches) {
+                            if (ImGui.selectable(rec.getName() + " [" + rec.getGrhIndex() + "]",
+                                    selectedRecord == rec)) {
+                                selectedRecord = rec;
+                                syncEditFields();
+                            }
                         }
                     }
                 }

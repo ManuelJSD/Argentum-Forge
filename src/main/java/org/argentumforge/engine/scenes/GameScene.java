@@ -25,6 +25,7 @@ import org.argentumforge.engine.utils.AssetRegistry;
 import org.argentumforge.engine.utils.inits.NpcData;
 import org.argentumforge.engine.utils.inits.ObjData;
 import org.argentumforge.engine.gui.forms.FTransferEditor;
+import org.argentumforge.engine.renderer.Drawn;
 
 import static org.argentumforge.engine.game.IntervalTimer.INT_SENTRPU;
 import static org.argentumforge.engine.game.models.Character.drawCharacter;
@@ -38,7 +39,6 @@ import static org.argentumforge.engine.utils.Time.timerTicksPerFrame;
 import static org.argentumforge.engine.game.console.FontStyle.REGULAR;
 import static org.lwjgl.glfw.GLFW.*;
 import org.argentumforge.engine.renderer.RGBColor;
-import org.argentumforge.engine.renderer.Drawn;
 import org.argentumforge.engine.utils.editor.Selection.SelectedEntity;
 
 /**
@@ -327,50 +327,12 @@ public final class GameScene extends Scene {
      * {@link #checkWalkKeys}.
      */
     private void checkBindedKeys() {
-        // Bloqueamos keyboard solo si hay un campo de texto activo (ej. buscador de la
-        // paleta)
-        if (imgui.ImGui.getIO().getWantTextInput())
-            return;
+        // Delegamos el manejo de atajos al ShortcutManager
+        org.argentumforge.engine.listeners.ShortcutManager.getInstance().update();
 
-        // Usando el metodo estatico de Key para obtener la tecla desde el codigo
-        final Key key = Key.getKey(KeyHandler.getLastKeyPressed());
-
+        // El movimiento sigue gestionándose aquí por ahora ya que es específico de la
+        // escena
         checkWalkKeys();
-
-        // Atajos de Undo/Redo (Ctrl+Z, Ctrl+Y)
-        if (KeyHandler.isKeyPressed(GLFW_KEY_LEFT_CONTROL) || KeyHandler.isKeyPressed(GLFW_KEY_RIGHT_CONTROL)) {
-
-            if (KeyHandler.isKeyJustPressed(GLFW_KEY_Z)) {
-                org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().undo();
-            } else if (KeyHandler.isKeyJustPressed(GLFW_KEY_Y)) {
-                org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().redo();
-            } else if (KeyHandler.isKeyJustPressed(GLFW_KEY_0)) {
-                Camera.setTileSize(32);
-            }
-        }
-
-        if (key == null)
-            return; // ni me gasto si la tecla presionada no existe en nuestro bind.
-
-        if (KeyHandler.isActionKeyJustPressed(key)) {
-
-            switch (key) {
-                case DEBUG_SHOW:
-                    ImGUISystem.INSTANCE.setShowDebug(!ImGUISystem.INSTANCE.isShowDebug());
-                    break;
-                case SHOW_OPTIONS:
-                    ImGUISystem.INSTANCE.show(new FOptions());
-                    break;
-                case TOGGLE_WALKING_MODE:
-                    user.setWalkingmode(!user.isWalkingmode());
-                    break;
-                case EXIT_GAME:
-                    break;
-                default:
-                    break;
-            }
-        }
-
     }
 
     /**
@@ -419,6 +381,7 @@ public final class GameScene extends Scene {
         renderBlockOverlays(renderSettings, pixelOffsetX, pixelOffsetY);
         // renderTriggerOverlays removed - called via FMain/ImGui now
         renderTranslationOverlays(renderSettings, pixelOffsetX, pixelOffsetY);
+        renderGrid(renderSettings, pixelOffsetX, pixelOffsetY);
         renderEditorPreviews(pixelOffsetX, pixelOffsetY);
     }
 
@@ -980,5 +943,45 @@ public final class GameScene extends Scene {
 
         drawGrhIndex(grhIndex, screenX, screenY, alpha,
                 weather.getWeatherColor());
+    }
+
+    /**
+     * Renderiza una rejilla visual sobre el mapa.
+     */
+    private void renderGrid(RenderSettings renderSettings, int pixelOffsetX, int pixelOffsetY) {
+        if (!renderSettings.isShowGrid())
+            return;
+
+        float[] colorArr = renderSettings.getGridColor();
+        RGBColor gridColorObj = new RGBColor(colorArr[0], colorArr[1], colorArr[2]);
+        float gridAlpha = colorArr[3];
+        int tileSize = Camera.TILE_PIXEL_SIZE;
+
+        // Calcular los límites de la pantalla en píxeles relativos al mapa
+        int startX = POS_SCREEN_X + (camera.getMinXOffset() - TILE_BUFFER_SIZE) * tileSize + pixelOffsetX;
+        int startY = POS_SCREEN_Y + (camera.getMinYOffset() - TILE_BUFFER_SIZE) * tileSize + pixelOffsetY;
+
+        int endX = startX + (camera.getMaxX() - camera.getMinX() + 1 + TILE_BUFFER_SIZE * 2) * tileSize;
+        int endY = startY + (camera.getMaxY() - camera.getMinY() + 1 + TILE_BUFFER_SIZE * 2) * tileSize;
+
+        // Limitar al área de renderizado
+        int minX = Math.max(POS_SCREEN_X, startX);
+        int minY = Math.max(POS_SCREEN_Y, startY);
+        int maxX = Math.min(POS_SCREEN_X + Window.SCREEN_WIDTH, endX);
+        int maxY = Math.min(POS_SCREEN_Y + Window.SCREEN_HEIGHT, endY);
+
+        // Dibujar líneas verticales
+        for (int x = startX; x <= endX; x += tileSize) {
+            if (x >= POS_SCREEN_X && x <= POS_SCREEN_X + Window.SCREEN_WIDTH) {
+                Drawn.geometryBoxRender(whiteTexture, x, minY, 1, maxY - minY, 0f, 0f, true, gridAlpha, gridColorObj);
+            }
+        }
+
+        // Dibujar líneas horizontales
+        for (int y = startY; y <= endY; y += tileSize) {
+            if (y >= POS_SCREEN_Y && y <= POS_SCREEN_Y + Window.SCREEN_HEIGHT) {
+                Drawn.geometryBoxRender(whiteTexture, minX, y, maxX - minX, 1, 0f, 0f, true, gridAlpha, gridColorObj);
+            }
+        }
     }
 }

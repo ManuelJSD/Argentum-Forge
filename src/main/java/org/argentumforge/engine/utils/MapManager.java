@@ -86,19 +86,30 @@ public final class MapManager {
      * @param filePath Ruta absoluta al archivo .map
      */
     public static void loadMap(String filePath) {
-        if (!checkUnsavedChanges())
-            return;
+        // Si el mapa ya está abierto, simplemente lo activamos
+        for (MapContext context : GameData.getOpenMaps()) {
+            if (filePath.equals(context.getFilePath())) {
+                GameData.setActiveContext(context);
+                return;
+            }
+        }
 
         Logger.info("Cargando mapa desde: {}", filePath);
 
-        // Guardar la ruta del último mapa para futuras sesiones
+        // Guardar la ruta del último mapa para futuras sesiones y añadir al historial
         Options.INSTANCE.setLastMapPath(filePath);
         Options.INSTANCE.save();
 
-        // Limpiar personajes antes de cargar el nuevo escenario
-        eraseAllChars();
-
         try {
+            // Limpiar personajes antes de cargar el nuevo escenario
+            eraseAllChars();
+            GameData.charList = new org.argentumforge.engine.game.models.Character[10001];
+            for (int i = 0; i < GameData.charList.length; i++) {
+                GameData.charList[i] = new org.argentumforge.engine.game.models.Character();
+            }
+            GameData.mapData = null;
+            GameData.mapProperties = new MapProperties();
+
             // Cargar archivo principal de capas (.map)
             byte[] data = Files.readAllBytes(Path.of(filePath));
             initMap(data);
@@ -122,6 +133,10 @@ public final class MapManager {
             } else {
                 Logger.info("Archivo .inf no encontrado en {}, saltando carga de entidades.", infPath);
             }
+
+            // Crear el contexto y registrarlo
+            MapContext context = new MapContext(filePath, GameData.mapData, GameData.mapProperties, GameData.charList);
+            GameData.setActiveContext(context);
 
             // Reiniciar estado de modificaciones
             markAsSaved();
@@ -175,9 +190,6 @@ public final class MapManager {
      * @param height Alto del mapa (normalmente 100).
      */
     public static void createEmptyMap(int width, int height) {
-        if (!checkUnsavedChanges())
-            return;
-
         Logger.info("Creando mapa vacío de {}x{}", width, height);
 
         // Validar dimensiones legales
@@ -188,7 +200,10 @@ public final class MapManager {
         }
 
         // Limpiar personajes actuales
-        eraseAllChars();
+        GameData.charList = new org.argentumforge.engine.game.models.Character[10001];
+        for (int i = 0; i < GameData.charList.length; i++) {
+            GameData.charList[i] = new org.argentumforge.engine.game.models.Character();
+        }
 
         // Inicializar rejilla de datos
         GameData.mapData = new MapData[width + 1][height + 1];
@@ -200,6 +215,10 @@ public final class MapManager {
 
         // Resetear propiedades del mapa
         GameData.mapProperties = new MapProperties();
+
+        // Crear contexto sin ruta (Sin Título)
+        MapContext context = new MapContext("", GameData.mapData, GameData.mapProperties, GameData.charList);
+        GameData.setActiveContext(context);
 
         // Reiniciar estado de modificaciones
         markAsSaved();

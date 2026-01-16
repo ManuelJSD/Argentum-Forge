@@ -34,6 +34,8 @@ public enum Options {
     private float ambientR = 1.0f;
     private float ambientG = 1.0f;
     private float ambientB = 1.0f;
+    private java.util.List<String> recentMaps = new java.util.ArrayList<>();
+    private static final int MAX_RECENT_MAPS = 10;
 
     private final RenderSettings renderSettings = new RenderSettings();
 
@@ -100,6 +102,11 @@ public enum Options {
             write(writer, "RenderShowBlock", renderSettings.getShowBlock());
             write(writer, "RenderBlockOpacity", renderSettings.getBlockOpacity());
             write(writer, "RenderGhostOpacity", renderSettings.getGhostOpacity());
+            write(writer, "RenderShowGrid", renderSettings.isShowGrid());
+
+            for (int i = 0; i < recentMaps.size(); i++) {
+                write(writer, "Recent" + (i + 1), recentMaps.get(i));
+            }
         } catch (IOException e) {
             Logger.error("¡No se pudo escribir en el archivo options.ini!");
         }
@@ -231,6 +238,21 @@ public enum Options {
 
     public void setLastMapPath(String lastMapPath) {
         this.lastMapPath = lastMapPath;
+        addRecentMap(lastMapPath);
+    }
+
+    public java.util.List<String> getRecentMaps() {
+        return recentMaps;
+    }
+
+    private void addRecentMap(String path) {
+        if (path == null || path.isEmpty())
+            return;
+        recentMaps.remove(path);
+        recentMaps.add(0, path);
+        if (recentMaps.size() > MAX_RECENT_MAPS) {
+            recentMaps.remove(recentMaps.size() - 1);
+        }
     }
 
     /**
@@ -283,7 +305,16 @@ public enum Options {
             case "RenderShowBlock" -> renderSettings.setShowBlock(Boolean.parseBoolean(value));
             case "RenderBlockOpacity" -> renderSettings.setBlockOpacity(Float.parseFloat(value));
             case "RenderGhostOpacity" -> renderSettings.setGhostOpacity(Float.parseFloat(value));
-            default -> Logger.warn("Opción desconocida ignorada: {}", option);
+            case "RenderShowGrid" -> renderSettings.setShowGrid(Boolean.parseBoolean(value));
+            default -> {
+                if (option.startsWith("Recent")) {
+                    if (!recentMaps.contains(value) && new java.io.File(value).exists()) {
+                        recentMaps.add(value);
+                    }
+                } else {
+                    Logger.warn("Opción desconocida ignorada: {}", option);
+                }
+            }
         }
     }
 
