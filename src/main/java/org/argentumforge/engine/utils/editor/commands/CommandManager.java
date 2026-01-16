@@ -38,6 +38,9 @@ public class CommandManager {
         if (undoStack.size() > MAX_STACK_SIZE) {
             undoStack.remove(0);
         }
+
+        // Marcar el mapa como modificado
+        org.argentumforge.engine.utils.MapManager.markAsModified();
     }
 
     /**
@@ -48,6 +51,9 @@ public class CommandManager {
             Command command = undoStack.pop();
             command.undo();
             redoStack.push(command);
+
+            // Marcar el mapa como modificado
+            org.argentumforge.engine.utils.MapManager.markAsModified();
         }
     }
 
@@ -59,6 +65,9 @@ public class CommandManager {
             Command command = redoStack.pop();
             command.execute();
             undoStack.push(command);
+
+            // Marcar el mapa como modificado
+            org.argentumforge.engine.utils.MapManager.markAsModified();
         }
     }
 

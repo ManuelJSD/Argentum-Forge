@@ -61,6 +61,9 @@ public final class Engine {
      * {@code prgRun} a {@code false}.
      */
     public static void closeClient() {
+        if (!org.argentumforge.engine.utils.MapManager.checkUnsavedChanges()) {
+            return;
+        }
         options.save();
         prgRun = false;
     }

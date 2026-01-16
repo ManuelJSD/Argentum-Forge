@@ -169,6 +169,10 @@ public enum Options {
         return datsPath;
     }
 
+    public String getMapsPath() {
+        return datsPath;
+    }
+
     public void setDatsPath(String datsPath) {
         this.datsPath = datsPath;
     }
