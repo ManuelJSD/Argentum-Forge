@@ -71,6 +71,16 @@ public final class FMinimap extends Form {
             drawList.addRectFilled(contentX, contentY, contentX + MINIMAP_SIZE, contentY + MINIMAP_SIZE,
                     ImGui.getColorU32(0.1f, 0.1f, 0.1f, 1.0f));
 
+            // Warning si no hay colores generados
+            if (AssetRegistry.minimapColors.isEmpty()) {
+                ImGui.setCursorPos(20, 150);
+                ImGui.textColored(ImGui.getColorU32(1.0f, 0.0f, 0.0f, 1.0f), "¡Colores no generados!");
+                ImGui.setCursorPos(20, 170);
+                if (ImGui.button("Generar ahora")) {
+                    org.argentumforge.engine.utils.editor.MinimapColorGenerator.generateBinary();
+                }
+            }
+
             if (GameData.mapData != null) {
                 for (int y = 1; y <= 100; y++) {
                     for (int x = 1; x <= 100; x++) {
@@ -99,6 +109,42 @@ public final class FMinimap extends Form {
                                     contentX + x * TILE_SIZE,
                                     contentY + y * TILE_SIZE,
                                     ImGui.getColorU32(1.0f, 0.0f, 0.0f, 0.3f));
+                        }
+
+                        // Renderizar Traslados (Exits) - Azul
+                        if (GameData.mapData[x][y].getExitMap() > 0) {
+                            drawList.addRectFilled(
+                                    contentX + (x - 1) * TILE_SIZE,
+                                    contentY + (y - 1) * TILE_SIZE,
+                                    contentX + x * TILE_SIZE,
+                                    contentY + y * TILE_SIZE,
+                                    ImGui.getColorU32(0.0f, 0.0f, 1.0f, 0.8f));
+                        }
+
+                        // Renderizar Triggers - Violeta
+                        if (GameData.mapData[x][y].getTrigger() > 0) {
+                            drawList.addRectFilled(
+                                    contentX + (x - 1) * TILE_SIZE,
+                                    contentY + (y - 1) * TILE_SIZE,
+                                    contentX + x * TILE_SIZE,
+                                    contentY + y * TILE_SIZE,
+                                    ImGui.getColorU32(0.6f, 0.0f, 0.8f, 0.6f));
+                        }
+
+                        // Renderizar NPCs - Amarillo
+                        // Usamos charIndex del mapa
+                        int charIndex = GameData.mapData[x][y].getCharIndex();
+                        if (charIndex > 0) {
+                            // Podríamos verificar si el char está activo o es usuario,
+                            // pero charIndex en mapa suele estar sincronizado.
+                            // El usuario se dibuja aparte, así que filtramos si es el propio usuario?
+                            // No, mapData.getCharIndex() suele tener al user también.
+                            // Dibujamos todos los chars como puntos amarillos pequeños.
+                            drawList.addCircleFilled(
+                                    contentX + (x - 1) * TILE_SIZE + 1,
+                                    contentY + (y - 1) * TILE_SIZE + 1,
+                                    1.5f,
+                                    ImGui.getColorU32(1.0f, 1.0f, 0.0f, 1.0f));
                         }
                     }
                 }
@@ -133,6 +179,20 @@ public final class FMinimap extends Form {
                     User.INSTANCE.getAddToUserPos().setX(0);
                     User.INSTANCE.getAddToUserPos().setY(0);
                     User.INSTANCE.setUserMoving(false);
+                }
+            }
+
+            // Tooltip de coordenadas
+            if (ImGui.isWindowHovered()) {
+                float localX = mouseX - contentX;
+                float localY = mouseY - contentY;
+                if (localX >= 0 && localX < MINIMAP_SIZE && localY >= 0 && localY < MINIMAP_SIZE) {
+                    int hoverX = (int) (localX / TILE_SIZE) + 1;
+                    int hoverY = (int) (localY / TILE_SIZE) + 1;
+
+                    if (hoverX >= 1 && hoverX <= 100 && hoverY >= 1 && hoverY <= 100) {
+                        ImGui.setTooltip("X: " + hoverX + ", Y: " + hoverY);
+                    }
                 }
             }
 

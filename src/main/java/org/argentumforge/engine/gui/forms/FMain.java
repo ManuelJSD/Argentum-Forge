@@ -483,6 +483,19 @@ public final class FMain extends Form {
                 ImGui.endMenu();
             }
 
+            if (ImGui.beginMenu("Herramientas")) {
+                if (ImGui.menuItem("Generar Colores Minimapa")) {
+                    int response = javax.swing.JOptionPane.showConfirmDialog(null,
+                            "Esta operación puede tardar unos minutos.\n¿Desea continuar?",
+                            "Generar Colores", javax.swing.JOptionPane.YES_NO_OPTION);
+
+                    if (response == javax.swing.JOptionPane.YES_OPTION) {
+                        MinimapColorGenerator.generateBinary();
+                    }
+                }
+                ImGui.endMenu();
+            }
+
             if (ImGui.beginMenu("Miscelánea")) {
                 if (ImGui.menuItem("Modo Caminata", "", org.argentumforge.engine.game.User.INSTANCE.isWalkingmode())) {
                     org.argentumforge.engine.game.User.INSTANCE
