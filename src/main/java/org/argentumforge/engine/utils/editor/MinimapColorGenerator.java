@@ -22,88 +22,103 @@ import java.nio.file.Path;
  */
 public class MinimapColorGenerator {
 
+    public static boolean generating = false;
+    public static float progress = 0.0f;
+
     public static void generateBinary() {
-        Path outputPath = Path.of(Options.INSTANCE.getInitPath(), "minimap.bin");
-        Logger.info("Iniciando generacion de colores de minimapa en: {}", outputPath);
-
-        GrhData[] grhData = AssetRegistry.grhData;
-        if (grhData == null || grhData.length == 0) {
-            Logger.warn("No hay datos de graficos cargados.");
+        if (generating)
             return;
-        }
 
-        try (FileOutputStream fos = new FileOutputStream(outputPath.toFile());
-                BufferedOutputStream bos = new BufferedOutputStream(fos)) {
+        generating = true;
+        progress = 0.0f;
 
-            // Buffer para escribir enteros (4 bytes) en Little Endian (estándar
-            // VB6/Windows)
-            ByteBuffer buffer = ByteBuffer.allocate(4);
-            buffer.order(ByteOrder.LITTLE_ENDIAN);
+        new Thread(() -> {
+            Path outputPath = Path.of(Options.INSTANCE.getInitPath(), "minimap.bin");
+            Logger.info("Iniciando generacion de colores de minimapa en: {}", outputPath);
 
-            int total = grhData.length;
-            int processed = 0;
-
-            // En VB6 Seek #1, 1 empieza en el byte 1.
-            // Iteramos desde 1 hasta GrhCount como en el ejemplo.
-            for (int i = 1; i < total; i++) {
-                int color = 0; // Negro por defecto
-
-                if (grhData[i] != null) {
-                    color = calculateAverageColor(grhData[i]);
-                }
-
-                // Actualizar mapa en memoria para verlo al instante
-                if (color != 0) {
-                    // ImGui usa ABGR o RGBA dependiendo del backend, pero aquí guardamos formato
-                    // nativo de AO
-                    // para compatibilidad binaria si se desea, o formato ImGui para uso directo.
-                    // El loader después convierte.
-                    // Pero ojo: VB6 escribe un Long. RGB(r,g,b).
-                    // RGB en VB6 es: 0x00BBGGRR (Little Endian en memoria 0xRR, 0xGG, 0xBB, 0x00?)
-                    // RGB function returns a Long integer: Red + (Green * 256) + (Blue * 65536).
-                    // So Memory layout (Little Endian): R, G, B, 0.
-
-                    // En Java/ImGui queremos 0xAABBGGRR o similar.
-                    // Para mantener el formato "minimap.bin" compatible, escribiremos RGB estilo
-                    // VB6.
-                    // Y actualizaremos el AssetRegistry convirtiendo al vuelo.
-
-                    // Guardamos en memoria como ImGui color (A B G R packed int)
-                    int r = color & 0xFF;
-                    int g = (color >> 8) & 0xFF;
-                    int b = (color >> 16) & 0xFF;
-
-                    // Manual pack to match GameData change and ensure correct ImGui Format (ABGR)
-                    int packed = (0xFF << 24) | (b << 16) | (g << 8) | r;
-                    AssetRegistry.minimapColors.put(i, packed);
-                }
-
-                buffer.clear();
-                buffer.putInt(color);
-                bos.write(buffer.array());
-
-                processed++;
-                if (processed % 100 == 0) {
-                    Logger.info("Generando colores minimapa: {}/{} procesados ({:.0f}%)",
-                            processed, total, (processed / (float) total) * 100);
-                }
+            GrhData[] grhData = AssetRegistry.grhData;
+            if (grhData == null || grhData.length == 0) {
+                Logger.warn("No hay datos de graficos cargados.");
+                return;
             }
 
-            Logger.info("Generacion completada. {} colores guardados.", processed);
-            javax.swing.JOptionPane.showMessageDialog(null,
-                    "Se generaron los colores del minimapa exitosamente.\nArchivo guardado en: "
-                            + outputPath.toAbsolutePath(),
-                    "Generador de Minimapa", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+            try (FileOutputStream fos = new FileOutputStream(outputPath.toFile());
+                    BufferedOutputStream bos = new BufferedOutputStream(fos)) {
 
-        } catch (IOException e) {
-            Logger.error(e, "Error al generar minimap.bin");
-            javax.swing.JOptionPane.showMessageDialog(null,
-                    "Error al generar el archivo: " + e.getMessage(),
-                    "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
-        }
+                // Buffer para escribir enteros (4 bytes) en Little Endian (estándar
+                // VB6/Windows)
+                ByteBuffer buffer = ByteBuffer.allocate(4);
+                buffer.order(ByteOrder.LITTLE_ENDIAN);
+
+                int total = grhData.length;
+                int processed = 0;
+
+                // En VB6 Seek #1, 1 empieza en el byte 1.
+                // Iteramos desde 1 hasta GrhCount como en el ejemplo.
+                for (int i = 1; i < total; i++) {
+                    int color = 0; // Negro por defecto
+
+                    if (grhData[i] != null) {
+                        color = calculateAverageColor(grhData[i], i);
+                    }
+
+                    // Actualizar mapa en memoria para verlo al instante
+                    if (color != 0) {
+                        // ImGui usa ABGR o RGBA dependiendo del backend, pero aquí guardamos formato
+                        // nativo de AO
+                        // para compatibilidad binaria si se desea, o formato ImGui para uso directo.
+                        // El loader después convierte.
+                        // Pero ojo: VB6 escribe un Long. RGB(r,g,b).
+                        // RGB en VB6 es: 0x00BBGGRR (Little Endian en memoria 0xRR, 0xGG, 0xBB, 0x00?)
+                        // RGB function returns a Long integer: Red + (Green * 256) + (Blue * 65536).
+                        // So Memory layout (Little Endian): R, G, B, 0.
+
+                        // En Java/ImGui queremos 0xAABBGGRR o similar.
+                        // Para mantener el formato "minimap.bin" compatible, escribiremos RGB estilo
+                        // VB6.
+                        // Y actualizaremos el AssetRegistry convirtiendo al vuelo.
+
+                        // Guardamos en memoria como ImGui color (A B G R packed int)
+                        int r = color & 0xFF;
+                        int g = (color >> 8) & 0xFF;
+                        int b = (color >> 16) & 0xFF;
+
+                        // Manual pack to match GameData change and ensure correct ImGui Format (ARGB /
+                        // ABGR mismatch fix)
+                        // Previous attempt: (0xFF << 24) | (b << 16) | (g << 8) | r
+                        // New attempt: (0xFF << 24) | (r << 16) | (g << 8) | b
+                        int packed = (0xFF << 24) | (r << 16) | (g << 8) | b;
+                        AssetRegistry.minimapColors.put(i, packed);
+                    }
+
+                    buffer.clear();
+                    buffer.putInt(color);
+                    bos.write(buffer.array());
+
+                    processed++;
+                    progress = (processed / (float) total) * 100;
+
+                    if (processed % 100 == 0) {
+                        Logger.info("Generando colores minimapa: {}/{} procesados ({:.0f}%)",
+                                processed, total, (processed / (float) total) * 100);
+                    }
+                }
+
+                Logger.info("Generacion completada. {} colores guardados.", processed);
+                javax.swing.JOptionPane.showMessageDialog(null,
+                        "Se generaron los colores del minimapa exitosamente.\nArchivo guardado en: "
+                                + outputPath.toAbsolutePath(),
+                        "Generador de Minimapa", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+
+            } catch (IOException e) {
+                Logger.error(e, "Error al generar minimap.bin");
+            } finally {
+                generating = false;
+            }
+        }).start();
     }
 
-    private static int calculateAverageColor(GrhData grh) {
+    private static int calculateAverageColor(GrhData grh, int index) {
         // Validación básica
         if (grh.getFileNum() <= 0)
             return 0;
@@ -116,7 +131,7 @@ public class MinimapColorGenerator {
             int firstFrameIndex = grh.getFrame(1);
             if (firstFrameIndex > 0 && firstFrameIndex < AssetRegistry.grhData.length
                     && AssetRegistry.grhData[firstFrameIndex] != null) {
-                return calculateAverageColor(AssetRegistry.grhData[firstFrameIndex]);
+                return calculateAverageColor(AssetRegistry.grhData[firstFrameIndex], firstFrameIndex);
             }
             return 0;
         }
@@ -145,7 +160,7 @@ public class MinimapColorGenerator {
 
             if (sx < 0 || sy < 0 || w <= 0 || h <= 0 || sx + w > image.getWidth() || sy + h > image.getHeight()) {
                 Logger.warn("GRH {} fuera de limites de imagen: sx={}, sy={}, w={}, h={}, imgW={}, imgH={}",
-                        grh.getGrhIndex(), sx, sy, w, h, image.getWidth(), image.getHeight());
+                        index, sx, sy, w, h, image.getWidth(), image.getHeight());
                 return 0;
             }
 

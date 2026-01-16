@@ -92,6 +92,20 @@ public final class FMain extends Form {
         if (org.argentumforge.engine.Engine.getCurrentScene() instanceof GameScene) {
             ((GameScene) org.argentumforge.engine.Engine.getCurrentScene()).renderImGuiOverlays();
         }
+
+        // Global Progress Modal for Minimap Generation
+        if (org.argentumforge.engine.utils.editor.MinimapColorGenerator.generating) {
+            ImGui.openPopup("Procesando Colores");
+        }
+
+        if (ImGui.beginPopupModal("Procesando Colores",
+                ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoTitleBar)) {
+            ImGui.text("Generando paleta de colores...");
+            ImGui.separator();
+            ImGui.progressBar(org.argentumforge.engine.utils.editor.MinimapColorGenerator.progress / 100.0f, 300, 20,
+                    String.format("%.0f%%", org.argentumforge.engine.utils.editor.MinimapColorGenerator.progress));
+            ImGui.endPopup();
+        }
     }
 
     private void drawTabs() {

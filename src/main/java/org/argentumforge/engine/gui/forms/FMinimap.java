@@ -71,8 +71,11 @@ public final class FMinimap extends Form {
             drawList.addRectFilled(contentX, contentY, contentX + MINIMAP_SIZE, contentY + MINIMAP_SIZE,
                     ImGui.getColorU32(0.1f, 0.1f, 0.1f, 1.0f));
 
-            // Warning si no hay colores generados
-            if (AssetRegistry.minimapColors.isEmpty()) {
+            // Warning si no hay colores generados (o minimap.bin no existe)
+            boolean binExists = java.nio.file.Files.exists(java.nio.file.Path
+                    .of(org.argentumforge.engine.utils.GameData.options.getInitPath(), "minimap.bin"));
+
+            if (!binExists || AssetRegistry.minimapColors.isEmpty()) {
                 ImGui.setCursorPos(20, 150);
                 ImGui.textColored(ImGui.getColorU32(1.0f, 0.0f, 0.0f, 1.0f), "¡Colores no generados!");
                 ImGui.setCursorPos(20, 170);
