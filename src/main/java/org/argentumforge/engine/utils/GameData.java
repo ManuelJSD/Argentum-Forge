@@ -247,8 +247,14 @@ public final class GameData {
                         // El generador iteró 1..total y escribió secuencialmente.
                         // La primera escritura corresponde al Grh index 1.
                         // Así que index = i + 1.
-                        // Pack manually to avoid ImGui crash if context not ready: ABGR
-                        int packed = (0xFF << 24) | (b << 16) | (g << 8) | r;
+                        // Pack manually to avoid ImGui crash if context not ready.
+                        // ImGui expects RGBA order in the integer (0xAABBGGRR for little endian, or
+                        // 0xAARRGGBB for big endian??)
+                        // Actually standard ImGui is AABBGGRR.
+                        // Let's try swapping R and B from previous attempt.
+                        // Previous: (0xFF << 24) | (b << 16) | (g << 8) | r (ABGR?)
+                        // New Try: (0xFF << 24) | (r << 16) | (g << 8) | b (ARGB?)
+                        int packed = (0xFF << 24) | (r << 16) | (g << 8) | b;
                         AssetRegistry.minimapColors.put(i + 1, packed);
                     }
                 }
@@ -281,7 +287,7 @@ public final class GameData {
                 if (trimmed.startsWith("[") && trimmed.contains("]")) {
                     // Guardar el anterior antes de empezar uno nuevo
                     if (currentGrh != -1) {
-                        int packed = (0xFF << 24) | (b << 16) | (g << 8) | r;
+                        int packed = (0xFF << 24) | (r << 16) | (g << 8) | b;
                         AssetRegistry.minimapColors.put(currentGrh, packed);
                     }
 
@@ -320,7 +326,7 @@ public final class GameData {
             }
             // Guardar el último
             if (currentGrh != -1) {
-                int packed = (0xFF << 24) | (b << 16) | (g << 8) | r;
+                int packed = (0xFF << 24) | (r << 16) | (g << 8) | b;
                 AssetRegistry.minimapColors.put(currentGrh, packed);
             }
             Logger.info("Cargados {} colores para el minimapa desde {}", AssetRegistry.minimapColors.size(),
