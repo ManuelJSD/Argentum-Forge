@@ -44,12 +44,13 @@ public class MapValidator {
             for (int y = minY; y <= maxY; y++) {
 
                 // 1. Check Invalid Transfers
-                if (mapData[x][y].getTileExit().getMap() > 0) {
+                // 1. Check Invalid Transfers
+                if (mapData[x][y].getExitMap() > 0) {
                     // Si hay mapa destino, verificar que sea válido (mayor a 0 y menor que max maps
                     // si tuvieramos el dato, por ahora > 0)
                     // Y verificar que las coordenadas destino sean válidas
-                    int destX = mapData[x][y].getTileExit().getX();
-                    int destY = mapData[x][y].getTileExit().getY();
+                    int destX = mapData[x][y].getExitX();
+                    int destY = mapData[x][y].getExitY();
 
                     if (destX < minX || destX > maxX || destY < minY || destY > maxY) {
                         errors.add(new ValidationError(x, y,
@@ -57,7 +58,7 @@ public class MapValidator {
                     }
                 } else {
                     // Si Map es 0, pero X o Y son distintos de 0, es un traslado sucio/roto
-                    if (mapData[x][y].getTileExit().getX() != 0 || mapData[x][y].getTileExit().getY() != 0) {
+                    if (mapData[x][y].getExitX() != 0 || mapData[x][y].getExitY() != 0) {
                         errors.add(new ValidationError(x, y,
                                 "Datos de traslado corruptos (Mapa 0 pero X/Y definidos)", "WARNING"));
                     }
