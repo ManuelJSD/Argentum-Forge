@@ -74,7 +74,8 @@ public final class FMinimap extends Form {
                         }
 
                         // Bloqueos (siempre en la parte superior si está en capa 1?)
-                        if (GameData.mapData[x][y].getBlocked()) {
+                        if (Options.INSTANCE.getRenderSettings().isShowMinimapBlocks()
+                                && GameData.mapData[x][y].getBlocked()) {
                             drawList.addRectFilled(
                                     contentX + (x - 1) * TILE_SIZE,
                                     contentY + (y - 1) * TILE_SIZE,
