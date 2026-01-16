@@ -100,10 +100,18 @@ public final class FMain extends Form {
 
         if (ImGui.beginPopupModal("Procesando Colores",
                 ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoTitleBar)) {
-            ImGui.text("Generando paleta de colores...");
-            ImGui.separator();
-            ImGui.progressBar(org.argentumforge.engine.utils.editor.MinimapColorGenerator.progress / 100.0f, 300, 20,
-                    String.format("%.0f%%", org.argentumforge.engine.utils.editor.MinimapColorGenerator.progress));
+            if (!org.argentumforge.engine.utils.editor.MinimapColorGenerator.generating) {
+                ImGui.textColored(ImGui.getColorU32(0.0f, 1.0f, 0.0f, 1.0f), "¡Completado!");
+                if (ImGui.button("Cerrar", 300, 0)) {
+                    ImGui.closeCurrentPopup();
+                }
+            } else {
+                ImGui.text("Generando paleta de colores...");
+                ImGui.separator();
+                ImGui.progressBar(org.argentumforge.engine.utils.editor.MinimapColorGenerator.progress / 100.0f, 300,
+                        20,
+                        String.format("%.0f%%", org.argentumforge.engine.utils.editor.MinimapColorGenerator.progress));
+            }
             ImGui.endPopup();
         }
     }
