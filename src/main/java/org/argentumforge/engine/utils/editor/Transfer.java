@@ -107,16 +107,29 @@ public class Transfer {
                 }
             }
 
-            // Aplicar traslado
-            mapData[x][y].setExitMap(finalMap);
-            mapData[x][y].setExitX(finalX);
-            mapData[x][y].setExitY(finalY);
+            // Aplicar traslado mediante comando (con soporte para undo/redo)
+            short oldMap = mapData[x][y].getExitMap();
+            short oldX = mapData[x][y].getExitX();
+            short oldY = mapData[x][y].getExitY();
 
+            if (oldMap != (short) finalMap || oldX != (short) finalX || oldY != (short) finalY) {
+                org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
+                        new org.argentumforge.engine.utils.editor.commands.TransferChangeCommand(x, y,
+                                oldMap, oldX, oldY,
+                                (short) finalMap, (short) finalX, (short) finalY));
+            }
         } else {
             // Modo quitar
-            mapData[x][y].setExitMap(0);
-            mapData[x][y].setExitX(0);
-            mapData[x][y].setExitY(0);
+            short oldMap = mapData[x][y].getExitMap();
+            short oldX = mapData[x][y].getExitX();
+            short oldY = mapData[x][y].getExitY();
+
+            if (oldMap != 0) {
+                org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
+                        new org.argentumforge.engine.utils.editor.commands.TransferChangeCommand(x, y,
+                                oldMap, oldX, oldY,
+                                (short) 0, (short) 0, (short) 0));
+            }
         }
     }
 
@@ -131,6 +144,84 @@ public class Transfer {
         this.destinationMap = map;
         this.destinationX = x;
         this.destinationY = y;
+    }
+
+    /**
+     * Une automáticamente los bordes del mapa actual con mapas adyacentes.
+     * 
+     * @param north Mapa al norte (>=0 para aplicar, -1 para ignorar, 0 para borrar)
+     * @param south Mapa al sur
+     * @param east  Mapa al este
+     * @param west  Mapa al oeste
+     */
+    public void autoUnionBorders(int north, int south, int east, int west) {
+        if (mapData == null)
+            return;
+
+        boolean changed = false;
+
+        // Norte (Arriba) -> Destino: Sur del mapa norte (y=90)
+        if (north >= 0) {
+            for (int x = 1; x <= 100; x++) {
+                for (int y = 1; y <= BORDER_TOP; y++) {
+                    applyAutoTransfer(x, y, north, (short) (north == 0 ? 0 : x), (short) (north == 0 ? 0 : 90));
+                    changed = true;
+                }
+            }
+        }
+
+        // Sur (Abajo) -> Destino: Norte del mapa sur (y=11)
+        if (south >= 0) {
+            for (int x = 1; x <= 100; x++) {
+                for (int y = BORDER_BOTTOM; y <= 100; y++) {
+                    applyAutoTransfer(x, y, south, (short) (south == 0 ? 0 : x), (short) (south == 0 ? 0 : 11));
+                    changed = true;
+                }
+            }
+        }
+
+        // Este (Derecha) -> Destino: Oeste del mapa este (x=12)
+        if (east >= 0) {
+            for (int x = BORDER_RIGHT; x <= 100; x++) {
+                for (int y = 1; y <= 100; y++) {
+                    applyAutoTransfer(x, y, east, (short) (east == 0 ? 0 : 12), (short) (east == 0 ? 0 : y));
+                    changed = true;
+                }
+            }
+        }
+
+        // Oeste (Izquierda) -> Destino: Este del mapa oeste (x=91)
+        if (west >= 0) {
+            for (int x = 1; x <= BORDER_LEFT; x++) {
+                for (int y = 1; y <= 100; y++) {
+                    applyAutoTransfer(x, y, west, (short) (west == 0 ? 0 : 91), (short) (west == 0 ? 0 : y));
+                    changed = true;
+                }
+            }
+        }
+
+        if (changed) {
+            org.argentumforge.engine.game.console.Console.INSTANCE.addMsgToConsole(
+                    "Unión automática completada.",
+                    org.argentumforge.engine.game.console.FontStyle.BOLD,
+                    new org.argentumforge.engine.renderer.RGBColor(0, 1, 0));
+        }
+    }
+
+    /**
+     * Aplica un traslado automáticamente si es diferente al actual.
+     */
+    private void applyAutoTransfer(int x, int y, int destMap, int destX, int destY) {
+        short oldMap = mapData[x][y].getExitMap();
+        short oldX = mapData[x][y].getExitX();
+        short oldY = mapData[x][y].getExitY();
+
+        if (oldMap != (short) destMap || oldX != (short) destX || oldY != (short) destY) {
+            org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
+                    new org.argentumforge.engine.utils.editor.commands.TransferChangeCommand(x, y,
+                            oldMap, oldX, oldY,
+                            (short) destMap, (short) destX, (short) destY));
+        }
     }
 
     /**

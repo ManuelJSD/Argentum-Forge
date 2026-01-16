@@ -48,9 +48,13 @@ public class Trigger {
                             continue;
                     }
 
-                    // Aplicar trigger
-                    // En MapData, el trigger es int trigger
-                    mapData[i][j].setTrigger(selectedTriggerId);
+                    // Aplicar trigger mediante comando (soporta undo/redo y dirty flag)
+                    short oldTrigger = (short) mapData[i][j].getTrigger();
+                    if (oldTrigger != (short) selectedTriggerId) {
+                        org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
+                                new org.argentumforge.engine.utils.editor.commands.TriggerChangeCommand(i, j,
+                                        oldTrigger, (short) selectedTriggerId));
+                    }
                 }
             }
         }

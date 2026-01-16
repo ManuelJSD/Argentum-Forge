@@ -19,6 +19,7 @@ import org.argentumforge.engine.utils.editor.Trigger;
 import org.argentumforge.engine.utils.editor.Transfer;
 import org.argentumforge.engine.renderer.Texture;
 import org.argentumforge.engine.Engine;
+import org.argentumforge.engine.game.console.Console;
 
 import static org.argentumforge.engine.game.IntervalTimer.INT_SENTRPU;
 import static org.argentumforge.engine.game.models.Character.drawCharacter;
@@ -29,10 +30,10 @@ import static org.argentumforge.engine.utils.GameData.*;
 import static org.argentumforge.engine.utils.AssetRegistry.*;
 import static org.argentumforge.engine.utils.Time.deltaTime;
 import static org.argentumforge.engine.utils.Time.timerTicksPerFrame;
+import static org.argentumforge.engine.game.console.FontStyle.REGULAR;
 import static org.lwjgl.glfw.GLFW.*;
 import org.argentumforge.engine.renderer.RGBColor;
 import org.argentumforge.engine.renderer.Drawn;
-import org.argentumforge.engine.utils.editor.Selection.SelectedEntity;
 import org.argentumforge.engine.utils.editor.Selection.SelectedEntity;
 
 /**
@@ -230,7 +231,7 @@ public final class GameScene extends Scene {
 
             // Clic derecho para capturar coordenadas de traslado
             if (MouseListener.mouseButtonDown(GLFW_MOUSE_BUTTON_RIGHT)) {
-                if (transfer.isActive() && mapData[x][y].getExitMap() > 0) {
+                if (x >= 1 && x <= 100 && y >= 1 && y <= 100 && transfer.isActive() && mapData[x][y].getExitMap() > 0) {
                     int destMap = mapData[x][y].getExitMap();
                     int destX = mapData[x][y].getExitX();
                     int destY = mapData[x][y].getExitY();
@@ -243,6 +244,46 @@ public final class GameScene extends Scene {
                             .getForm(org.argentumforge.engine.gui.forms.FTransferEditor.class);
                     if (editor != null) {
                         editor.updateInputFields(destMap, destX, destY);
+                    }
+                }
+            }
+
+            // Doble clic para navegar al mapa de destino
+            if (MouseListener.mouseButtonDoubleClick(GLFW_MOUSE_BUTTON_LEFT)) {
+                if (x >= 1 && x <= 100 && y >= 1 && y <= 100 && mapData[x][y].getExitMap() > 0) {
+                    int destMap = mapData[x][y].getExitMap();
+                    int destX = mapData[x][y].getExitX();
+                    int destY = mapData[x][y].getExitY();
+
+                    System.out.println("Navegando a traslado: Mapa=" + destMap + " X=" + destX + " Y=" + destY);
+
+                    // Cargar el mapa de destino en la misma ubicación que el mapa actual
+                    String lastPath = org.argentumforge.engine.utils.GameData.options.getLastMapPath();
+                    java.io.File currentFile = new java.io.File(lastPath);
+                    String mapDir = currentFile.getParent();
+
+                    if (mapDir == null) {
+                        mapDir = org.argentumforge.engine.utils.GameData.options.getMapsPath();
+                    }
+
+                    String mapPath = mapDir + java.io.File.separator + "Mapa" + destMap + ".map";
+
+                    java.io.File mapFile = new java.io.File(mapPath);
+                    if (mapFile.exists()) {
+                        org.argentumforge.engine.utils.GameData.loadMap(mapPath);
+
+                        // Posicionar la cámara en las coordenadas de destino
+                        camera.update(destX, destY);
+
+                        Console.INSTANCE.addMsgToConsole(
+                                "Navegado a Mapa " + destMap + " (" + destX + ", " + destY + ")",
+                                REGULAR,
+                                new RGBColor(0f, 1f, 1f));
+                    } else {
+                        Console.INSTANCE.addMsgToConsole(
+                                "Error: No se encontró el mapa " + destMap + " en " + mapPath,
+                                REGULAR,
+                                new RGBColor(1f, 0f, 0f));
                     }
                 }
             }

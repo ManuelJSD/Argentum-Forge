@@ -32,7 +32,7 @@ public class FTransferEditor extends Form {
 
     @Override
     public void render() {
-        ImGui.setNextWindowSize(320, 280, imgui.flag.ImGuiCond.Once);
+        ImGui.setNextWindowSize(320, 310, imgui.flag.ImGuiCond.Once);
         ImGui.begin("Editor de Traslados", imgui.flag.ImGuiWindowFlags.NoResize);
 
         // === SECCIÓN: DESTINO ===
@@ -152,6 +152,11 @@ public class FTransferEditor extends Form {
 
         if (ImGui.isItemHovered()) {
             ImGui.setTooltip("Calcula automáticamente las coordenadas\nde destino según el borde del mapa");
+        }
+
+        ImGui.sameLine(160);
+        if (ImGui.button("Unión Automática")) {
+            org.argentumforge.engine.gui.ImGUISystem.INSTANCE.show(new FAutoUnion());
         }
 
         ImGui.spacing();

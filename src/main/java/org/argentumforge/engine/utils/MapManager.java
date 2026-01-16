@@ -19,8 +19,65 @@ import static org.argentumforge.engine.game.models.Character.eraseAllChars;
  * escenario, incluyendo capas de gráficos, bloqueos, triggers y entidades.
  */
 public final class MapManager {
+    private static boolean hasUnsavedChanges = false;
+
     private MapManager() {
         // Clase de utilidad
+    }
+
+    /**
+     * Marca el mapa como modificado para el prompt de guardado.
+     */
+    public static void markAsModified() {
+        hasUnsavedChanges = true;
+    }
+
+    /**
+     * Verifica si hay cambios sin guardar.
+     */
+    public static boolean hasUnsavedChanges() {
+        return hasUnsavedChanges;
+    }
+
+    /**
+     * Limpia la marca de modificaciones.
+     */
+    public static void markAsSaved() {
+        hasUnsavedChanges = false;
+    }
+
+    /**
+     * Verifica si hay cambios sin guardar y pregunta al usuario si desea continuar.
+     * 
+     * @return true si es seguro continuar, false si el usuario canceló.
+     */
+    public static boolean checkUnsavedChanges() {
+        if (!hasUnsavedChanges)
+            return true;
+
+        int result = javax.swing.JOptionPane.showConfirmDialog(
+                null,
+                "Hay cambios sin guardar en el mapa actual.\n¿Desea guardarlos antes de continuar?",
+                "Cambios sin guardar",
+                javax.swing.JOptionPane.YES_NO_CANCEL_OPTION,
+                javax.swing.JOptionPane.WARNING_MESSAGE);
+
+        if (result == javax.swing.JOptionPane.YES_OPTION) {
+            // Intentar guardar en la última ruta conocida
+            String lastPath = org.argentumforge.engine.game.Options.INSTANCE.getLastMapPath();
+            if (lastPath != null && !lastPath.isEmpty() && new java.io.File(lastPath).exists()) {
+                saveMap(lastPath);
+                return true;
+            } else {
+                javax.swing.JOptionPane.showMessageDialog(null,
+                        "No se pudo autoguardar. Por favor, guarde el mapa manualmente.");
+                return false;
+            }
+        } else if (result == javax.swing.JOptionPane.NO_OPTION) {
+            return true; // Descartar cambios
+        } else {
+            return false; // Cancelar
+        }
     }
 
     /**
@@ -29,6 +86,9 @@ public final class MapManager {
      * @param filePath Ruta absoluta al archivo .map
      */
     public static void loadMap(String filePath) {
+        if (!checkUnsavedChanges())
+            return;
+
         Logger.info("Cargando mapa desde: {}", filePath);
 
         // Guardar la ruta del último mapa para futuras sesiones
@@ -63,6 +123,10 @@ public final class MapManager {
                 Logger.info("Archivo .inf no encontrado en {}, saltando carga de entidades.", infPath);
             }
 
+            // Reiniciar estado de modificaciones
+            markAsSaved();
+            org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().clearHistory();
+
             Logger.info("Mapa cargado exitosamente");
         } catch (IOException e) {
             Logger.error(e, "No se pudo cargar el mapa desde: {}", filePath);
@@ -92,6 +156,9 @@ public final class MapManager {
             // Guardar información de entidades y triggers (.inf)
             saveMapInfo(infPath);
 
+            // Reiniciar estado de modificaciones
+            markAsSaved();
+
             Logger.info("Mapa guardado exitosamente en: {}", filePath);
             javax.swing.JOptionPane.showMessageDialog(null, "Mapa guardado correctamente.");
         } catch (IOException e) {
@@ -108,6 +175,9 @@ public final class MapManager {
      * @param height Alto del mapa (normalmente 100).
      */
     public static void createEmptyMap(int width, int height) {
+        if (!checkUnsavedChanges())
+            return;
+
         Logger.info("Creando mapa vacío de {}x{}", width, height);
 
         // Validar dimensiones legales
@@ -130,6 +200,11 @@ public final class MapManager {
 
         // Resetear propiedades del mapa
         GameData.mapProperties = new MapProperties();
+
+        // Reiniciar estado de modificaciones
+        markAsSaved();
+        org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().clearHistory();
+
         Logger.info("Mapa vacío creado correctamente");
     }
 

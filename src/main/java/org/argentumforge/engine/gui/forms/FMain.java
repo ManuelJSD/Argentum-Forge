@@ -124,7 +124,7 @@ public final class FMain extends Form {
     // Botones principales
     private void drawButtons() {
         ImGui.setNextWindowPos(0, 20);
-        ImGui.setNextWindowSize(800, 40); // Aumentado para incluir botón Traslados
+        ImGui.setNextWindowSize(1000, 40); // Aumentado para evitar que los botones se corten
         if (ImGui.begin("ToolBar", ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoBackground
                 | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoSavedSettings)) {
             drawEditorButtons();
@@ -194,6 +194,28 @@ public final class FMain extends Form {
 
         ImGui.sameLine();
 
+        // Botón Traslados
+        if (ImGui.button("Traslados", 100, 25)) {
+            if (ImGUISystem.INSTANCE.isFormVisible("FTransferEditor")) {
+                ImGUISystem.INSTANCE.deleteFrmArray(transferEditor);
+            } else {
+                ImGUISystem.INSTANCE.show(transferEditor);
+            }
+        }
+
+        ImGui.sameLine();
+
+        // Botón Minimapa
+        if (ImGui.button("Minimapa", 100, 25)) {
+            if (ImGUISystem.INSTANCE.isFormVisible("FMinimap")) {
+                ImGUISystem.INSTANCE.deleteFrmArray(minimap);
+            } else {
+                ImGUISystem.INSTANCE.show(minimap);
+            }
+        }
+
+        ImGui.sameLine();
+
         // Botón Selección
         boolean selectionActive = Selection.getInstance().isActive();
         if (selectionActive) {
@@ -217,17 +239,6 @@ public final class FMain extends Form {
         }
         if (selectionActive) {
             ImGui.popStyleColor();
-        }
-
-        ImGui.sameLine();
-
-        // Botón Traslados
-        if (ImGui.button("Traslados", 100, 25)) {
-            if (ImGUISystem.INSTANCE.isFormVisible("FTransferEditor")) {
-                ImGUISystem.INSTANCE.deleteFrmArray(transferEditor);
-            } else {
-                ImGUISystem.INSTANCE.show(transferEditor);
-            }
         }
 
     }
