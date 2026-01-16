@@ -1,5 +1,6 @@
 package org.argentumforge.engine.gui.forms;
 
+import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 
 import imgui.ImGui;
@@ -82,6 +83,7 @@ public final class FMain extends Form {
     @Override
     public void render() {
         drawMenuBar();
+        drawTabs();
         this.renderFPS();
         this.drawButtons();
         Console.INSTANCE.drawConsole();
@@ -90,6 +92,48 @@ public final class FMain extends Form {
         if (org.argentumforge.engine.Engine.getCurrentScene() instanceof GameScene) {
             ((GameScene) org.argentumforge.engine.Engine.getCurrentScene()).renderImGuiOverlays();
         }
+    }
+
+    private void drawTabs() {
+        java.util.List<org.argentumforge.engine.utils.MapContext> openMaps = org.argentumforge.engine.utils.GameData
+                .getOpenMaps();
+        if (openMaps.isEmpty())
+            return;
+
+        ImGui.setNextWindowPos(0, 19); // Debajo de la barra de menú Principal
+        ImGui.setNextWindowSize(Window.INSTANCE.getWidth(), 35);
+        if (ImGui.begin("WorkspaceTabsWindow", ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoBackground
+                | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoSavedSettings)) {
+            if (ImGui.beginTabBar("##WorkspaceTabs", ImGuiTabBarFlags.AutoSelectNewTabs)) {
+                org.argentumforge.engine.utils.MapContext contextToClose = null;
+
+                for (org.argentumforge.engine.utils.MapContext context : openMaps) {
+                    ImBoolean open = new ImBoolean(true);
+                    int flags = (context == org.argentumforge.engine.utils.GameData.getActiveContext())
+                            ? ImGuiTabItemFlags.None
+                            : ImGuiTabItemFlags.None;
+                    // Cheat: ImGui maneja la selección automáticamente si el nombre es único.
+                    // Usamos el hash para unicidad en el ID del tab.
+                    if (ImGui.beginTabItem(context.getMapName() + "###Tab" + context.hashCode(), open, flags)) {
+                        if (context != org.argentumforge.engine.utils.GameData.getActiveContext()) {
+                            org.argentumforge.engine.utils.GameData.setActiveContext(context);
+                        }
+                        ImGui.endTabItem();
+                    }
+
+                    if (!open.get()) {
+                        contextToClose = context;
+                    }
+                }
+
+                if (contextToClose != null) {
+                    org.argentumforge.engine.utils.GameData.closeMap(contextToClose);
+                }
+
+                ImGui.endTabBar();
+            }
+        }
+        ImGui.end();
     }
 
     /**
@@ -263,6 +307,20 @@ public final class FMain extends Form {
                     this.loadMapAction();
                 }
 
+                if (ImGui.beginMenu("Mapas Recientes")) {
+                    java.util.List<String> recentMaps = options.getRecentMaps();
+                    if (recentMaps.isEmpty()) {
+                        ImGui.textDisabled("No hay mapas recientes");
+                    } else {
+                        for (String mapPath : recentMaps) {
+                            if (ImGui.menuItem(mapPath)) {
+                                org.argentumforge.engine.utils.MapManager.loadMap(mapPath);
+                            }
+                        }
+                    }
+                    ImGui.endMenu();
+                }
+
                 if (ImGui.menuItem("Guardar Mapa")) {
                     org.argentumforge.engine.utils.MapFileUtils.saveMap();
                 }
@@ -394,6 +452,13 @@ public final class FMain extends Form {
 
                 if (ImGui.menuItem("Triggers", "", renderSettings.getShowTriggers())) {
                     renderSettings.setShowTriggers(!renderSettings.getShowTriggers());
+                    options.save();
+                }
+
+                ImGui.separator();
+
+                if (ImGui.menuItem("Rejilla", "G", renderSettings.isShowGrid())) {
+                    renderSettings.setShowGrid(!renderSettings.isShowGrid());
                     options.save();
                 }
 

@@ -60,6 +60,47 @@ public final class GameData {
     /** Instancia de configuración del usuario. */
     public static Options options = Options.INSTANCE;
 
+    private static final List<MapContext> openMaps = new ArrayList<>();
+    private static MapContext activeContext = null;
+
+    public static List<MapContext> getOpenMaps() {
+        return openMaps;
+    }
+
+    public static MapContext getActiveContext() {
+        return activeContext;
+    }
+
+    /**
+     * Establece el contexto activo y sincroniza los campos estáticos para
+     * compatibilidad heredada.
+     */
+    public static void setActiveContext(MapContext context) {
+        if (context == null)
+            return;
+
+        activeContext = context;
+        mapData = context.getMapData();
+        mapProperties = context.getMapProperties();
+        charList = context.getCharList();
+
+        if (!openMaps.contains(context)) {
+            openMaps.add(context);
+        }
+    }
+
+    public static void closeMap(MapContext context) {
+        openMaps.remove(context);
+        if (activeContext == context) {
+            if (!openMaps.isEmpty()) {
+                setActiveContext(openMaps.get(openMaps.size() - 1));
+            } else {
+                activeContext = null;
+                mapData = null;
+            }
+        }
+    }
+
     /** Tamaño del mapa */
     public static final int X_MIN_MAP_SIZE = 1;
     public static final int X_MAX_MAP_SIZE = 100;
