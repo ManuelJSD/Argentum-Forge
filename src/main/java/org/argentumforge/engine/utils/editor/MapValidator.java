@@ -1,5 +1,6 @@
 package org.argentumforge.engine.utils.editor;
 
+import org.argentumforge.engine.game.Options;
 import org.argentumforge.engine.game.models.Character;
 import org.argentumforge.engine.utils.AssetRegistry;
 import org.argentumforge.engine.utils.GameData;
@@ -86,12 +87,8 @@ public class MapValidator {
                         ObjData objInfo = AssetRegistry.objs.get(mapData[x][y].getObjIndex());
 
                         if (objInfo != null) {
-                            int type = objInfo.getType();
-                            // Allowed blocking types:
-                            // 4: Arboles, 6: Puertas, 8: Carteles, 10: Foros, 15: Fogata
-                            // 20: Muebles, 22: Yacimiento, 27: Yunque, 28: Fragua
-                            if (type == 4 || type == 6 || type == 8 || type == 10 || type == 15 ||
-                                    type == 20 || type == 22 || type == 27 || type == 28) {
+                            // Use configurable ignored types from Options
+                            if (Options.INSTANCE.getIgnoredObjTypes().contains(objInfo.getType())) {
                                 suppressWarning = true;
                             }
                         }
