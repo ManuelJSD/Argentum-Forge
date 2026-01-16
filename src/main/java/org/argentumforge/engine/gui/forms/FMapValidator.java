@@ -3,7 +3,11 @@ package org.argentumforge.engine.gui.forms;
 import imgui.ImGui;
 import imgui.flag.ImGuiTableColumnFlags;
 import imgui.flag.ImGuiTableFlags;
+import imgui.ImGui;
+import imgui.flag.ImGuiTableColumnFlags;
+import imgui.flag.ImGuiTableFlags;
 import imgui.flag.ImGuiWindowFlags;
+import org.argentumforge.engine.game.Options;
 import org.argentumforge.engine.gui.ImGUISystem;
 import org.argentumforge.engine.scenes.Camera;
 import org.argentumforge.engine.utils.editor.MapValidator;
@@ -15,6 +19,7 @@ public class FMapValidator extends Form {
 
     private List<MapValidator.ValidationError> currentErrors = null;
     private final ImBoolean open = new ImBoolean(true);
+    private final imgui.type.ImInt inputObjType = new imgui.type.ImInt(0);
 
     public FMapValidator() {
         this.currentErrors = MapValidator.validateCurrentMap();
@@ -28,6 +33,34 @@ public class FMapValidator extends Form {
 
             if (ImGui.button("Re-Escanear Mapa")) {
                 this.currentErrors = MapValidator.validateCurrentMap();
+            }
+
+            ImGui.sameLine();
+            if (ImGui.treeNode("Configurar Filtros de Objetos")) {
+                ImGui.text("Ignorar advertencia de bloqueo para ObjTypes:");
+
+                ImGui.inputInt("ObjType ID", inputObjType);
+                ImGui.sameLine();
+                if (ImGui.button("Agregar")) {
+                    Options.INSTANCE.getIgnoredObjTypes().add(inputObjType.get());
+                    Options.INSTANCE.save(); // Salvar cambios
+                }
+
+                ImGui.separator();
+
+                // Mostrar tags removibles
+                java.util.List<Integer> sortedTypes = new java.util.ArrayList<>(Options.INSTANCE.getIgnoredObjTypes());
+                java.util.Collections.sort(sortedTypes);
+
+                for (Integer typeId : sortedTypes) {
+                    ImGui.bulletText("Type " + typeId);
+                    ImGui.sameLine();
+                    if (ImGui.smallButton("X##" + typeId)) {
+                        Options.INSTANCE.getIgnoredObjTypes().remove(typeId);
+                        Options.INSTANCE.save();
+                    }
+                }
+                ImGui.treePop();
             }
 
             ImGui.separator();
