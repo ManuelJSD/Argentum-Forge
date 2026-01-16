@@ -20,6 +20,11 @@ import org.argentumforge.engine.utils.editor.Transfer;
 import org.argentumforge.engine.renderer.Texture;
 import org.argentumforge.engine.Engine;
 import org.argentumforge.engine.game.console.Console;
+import org.argentumforge.engine.game.models.Character;
+import org.argentumforge.engine.utils.AssetRegistry;
+import org.argentumforge.engine.utils.inits.NpcData;
+import org.argentumforge.engine.utils.inits.ObjData;
+import org.argentumforge.engine.gui.forms.FTransferEditor;
 
 import static org.argentumforge.engine.game.IntervalTimer.INT_SENTRPU;
 import static org.argentumforge.engine.game.models.Character.drawCharacter;
@@ -272,7 +277,9 @@ public final class GameScene extends Scene {
                     if (mapFile.exists()) {
                         org.argentumforge.engine.utils.GameData.loadMap(mapPath);
 
-                        // Posicionar la cámara en las coordenadas de destino
+                        // Posicionar al usuario y la cámara en las coordenadas de destino
+                        user.getUserPos().setX(destX);
+                        user.getUserPos().setY(destY);
                         camera.update(destX, destY);
 
                         Console.INSTANCE.addMsgToConsole(
@@ -287,9 +294,14 @@ public final class GameScene extends Scene {
                     }
                 }
             }
-
         }
 
+        // Manejar Zoom con la rueda del ratón
+        float scrollY = MouseListener.getScrollY();
+        if (scrollY != 0) {
+            int newSize = Camera.TILE_PIXEL_SIZE + (int) (scrollY * 4);
+            Camera.setTileSize(newSize);
+        }
     }
 
     /**
@@ -332,6 +344,8 @@ public final class GameScene extends Scene {
                 org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().undo();
             } else if (KeyHandler.isKeyJustPressed(GLFW_KEY_Y)) {
                 org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().redo();
+            } else if (KeyHandler.isKeyJustPressed(GLFW_KEY_0)) {
+                Camera.setTileSize(32);
             }
         }
 
@@ -676,8 +690,9 @@ public final class GameScene extends Scene {
 
             camera.setScreenY(camera.getMinYOffset() - TILE_BUFFER_SIZE);
 
-            // Usamos ImGui para dibujar los numeros por encima de todo
-            imgui.ImDrawList drawList = imgui.ImGui.getForegroundDrawList();
+            // Usamos el listado de dibujo de fondo para que los números queden detrás de
+            // las ventanas UI
+            imgui.ImDrawList drawList = imgui.ImGui.getBackgroundDrawList();
 
             for (int y = camera.getMinY(); y <= camera.getMaxY(); y++) {
                 camera.setScreenX(camera.getMinXOffset() - TILE_BUFFER_SIZE);
@@ -828,7 +843,7 @@ public final class GameScene extends Scene {
 
         // Previsualizar NPCs
         if (npc.getMode() == 1 && npc.getNpcNumber() > 0) {
-            org.argentumforge.engine.utils.inits.NpcData data = npcs.get(npc.getNpcNumber());
+            NpcData data = AssetRegistry.npcs.get(npc.getNpcNumber());
             if (data != null) {
                 int screenX = POS_SCREEN_X
                         + (tileX - camera.getMinX() + camera.getMinXOffset() - TILE_BUFFER_SIZE) * TILE_PIXEL_SIZE
@@ -836,7 +851,7 @@ public final class GameScene extends Scene {
                 int screenY = POS_SCREEN_Y
                         + (tileY - camera.getMinY() + camera.getMinYOffset() - TILE_BUFFER_SIZE) * TILE_PIXEL_SIZE
                         + pixelOffsetY;
-                org.argentumforge.engine.game.models.Character.drawCharacterGhost(data.getBody(), data.getHead(),
+                Character.drawCharacterGhost(data.getBody(), data.getHead(),
                         screenX, screenY, options.getRenderSettings().getGhostOpacity(), weather.getWeatherColor());
             }
         }
@@ -854,14 +869,15 @@ public final class GameScene extends Scene {
                         + (sTileY - camera.getMinY() + camera.getMinYOffset() - TILE_BUFFER_SIZE) * TILE_PIXEL_SIZE
                         + pixelOffsetY;
 
-                Engine.batch.draw(whiteTexture, screenX, screenY, 0, 0, TILE_PIXEL_SIZE, TILE_PIXEL_SIZE, true, 0.2f,
+                Engine.batch.draw(whiteTexture, screenX, screenY, 0, 0, 1, 1, TILE_PIXEL_SIZE, TILE_PIXEL_SIZE, true,
+                        0.2f,
                         new RGBColor(0.0f, 1.0f, 0.0f));
             }
         }
 
         // Previsualizar Objetos
         if (obj.getMode() == 1 && obj.getObjNumber() > 0) {
-            org.argentumforge.engine.utils.inits.ObjData data = objs.get(obj.getObjNumber());
+            ObjData data = AssetRegistry.objs.get(obj.getObjNumber());
             if (data != null) {
                 drawPreviewGrh((short) data.getGrhIndex(), tileX, tileY, pixelOffsetX, pixelOffsetY,
                         options.getRenderSettings().getGhostOpacity());
@@ -875,7 +891,7 @@ public final class GameScene extends Scene {
                 int dragTileY = tileY + se.offsetY;
 
                 if (se.type == Selection.EntityType.NPC) {
-                    org.argentumforge.engine.utils.inits.NpcData data = npcs.get(se.id);
+                    NpcData data = AssetRegistry.npcs.get(se.id);
                     if (data != null) {
                         int screenX = POS_SCREEN_X
                                 + (dragTileX - camera.getMinX() + camera.getMinXOffset() - TILE_BUFFER_SIZE)
@@ -885,7 +901,7 @@ public final class GameScene extends Scene {
                                 + (dragTileY - camera.getMinY() + camera.getMinYOffset() - TILE_BUFFER_SIZE)
                                         * TILE_PIXEL_SIZE
                                 + pixelOffsetY;
-                        org.argentumforge.engine.game.models.Character.drawCharacterGhost(data.getBody(),
+                        Character.drawCharacterGhost(data.getBody(),
                                 data.getHead(),
                                 screenX, screenY, options.getRenderSettings().getGhostOpacity(),
                                 weather.getWeatherColor());
@@ -907,7 +923,8 @@ public final class GameScene extends Scene {
                             + (dragTileY - camera.getMinY() + camera.getMinYOffset() - TILE_BUFFER_SIZE)
                                     * TILE_PIXEL_SIZE
                             + pixelOffsetY;
-                    Engine.batch.draw(whiteTexture, screenX, screenY, 0, 0, TILE_PIXEL_SIZE, TILE_PIXEL_SIZE, true,
+                    Engine.batch.draw(whiteTexture, screenX, screenY, 0, 0, 1, 1, TILE_PIXEL_SIZE, TILE_PIXEL_SIZE,
+                            true,
                             0.3f, new RGBColor(1.0f, 1.0f, 1.0f));
                 }
             }
@@ -934,7 +951,7 @@ public final class GameScene extends Scene {
             int width = (maxX - minX + 1) * TILE_PIXEL_SIZE;
             int height = (maxY - minY + 1) * TILE_PIXEL_SIZE;
 
-            Engine.batch.draw(whiteTexture, screenX, screenY, 0, 0, width, height, true, 0.3f,
+            Engine.batch.draw(whiteTexture, screenX, screenY, 0, 0, 1, 1, width, height, true, 0.3f,
                     new RGBColor(0.2f, 0.5f, 1.0f));
         }
     }
@@ -961,7 +978,7 @@ public final class GameScene extends Scene {
             }
         }
 
-        org.argentumforge.engine.renderer.Drawn.drawGrhIndex(grhIndex, screenX, screenY, alpha,
+        drawGrhIndex(grhIndex, screenX, screenY, alpha,
                 weather.getWeatherColor());
     }
 }

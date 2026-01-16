@@ -52,7 +52,9 @@ public final class Drawn {
     public static void geometryBoxRender(int grh_index, int x, int y, int src_width, int src_height, float sX, float sY,
             boolean blend, float alpha, RGBColor color) {
         final Texture texture = Surface.INSTANCE.getTexture(grhData[grh_index].getFileNum());
-        batch.draw(texture, x, y, sX, sY, src_width, src_height, blend, alpha, color);
+        float scale = org.argentumforge.engine.scenes.Camera.getZoomScale();
+        batch.draw(texture, x, y, sX, sY, src_width, src_height, src_width * scale, src_height * scale, blend, alpha,
+                color);
     }
 
     /**
@@ -60,7 +62,9 @@ public final class Drawn {
      */
     public static void geometryBoxRender(Texture texture, int x, int y, int src_width, int src_height, float sX,
             float sY, boolean blend, float alpha, RGBColor color) {
-        batch.draw(texture, x, y, sX, sY, src_width, src_height, blend, alpha, color);
+        float scale = org.argentumforge.engine.scenes.Camera.getZoomScale();
+        batch.draw(texture, x, y, sX, sY, src_width, src_height, src_width * scale, src_height * scale, blend, alpha,
+                color);
     }
 
     /**
@@ -197,12 +201,16 @@ public final class Drawn {
         glBegin(GL_QUADS);
 
         {
+            float scale = org.argentumforge.engine.scenes.Camera.getZoomScale();
+            float dWidth = src_width * scale;
+            float dHeight = src_height * scale;
+
             // 0----0
             // | |
             // 1----0
             glColor4f(color.getRed(), color.getGreen(), color.getBlue(), alpha);
             glTexCoord2f(sX / texture.getTex_width(), (src_bottom) / texture.getTex_height());
-            glVertex2d(x, y + src_height);
+            glVertex2d(x, y + dHeight);
 
             // 1----0
             // | |
@@ -216,14 +224,14 @@ public final class Drawn {
             // 0----0
             glColor4f(color.getRed(), color.getGreen(), color.getBlue(), alpha);
             glTexCoord2f((src_right) / texture.getTex_width(), sY / texture.getTex_height());
-            glVertex2d(x + src_width, y);
+            glVertex2d(x + dWidth, y);
 
             // 0----0
             // | |
             // 0----1
             glColor4f(color.getRed(), color.getGreen(), color.getBlue(), alpha);
             glTexCoord2f((src_right) / texture.getTex_width(), (src_bottom) / texture.getTex_height());
-            glVertex2d(x + src_width, y + src_height);
+            glVertex2d(x + dWidth, y + dHeight);
         }
 
         texture.unbind();
@@ -321,11 +329,15 @@ public final class Drawn {
         glDisable(GL_TEXTURE_2D);
         glBegin(GL_QUADS);
 
+        float scale = org.argentumforge.engine.scenes.Camera.getZoomScale();
+        float dWidth = width * scale;
+        float dHeight = height * scale;
+
         glColor4f(color.getRed(), color.getGreen(), color.getBlue(), alpha);
-        glVertex2d(x, y + height);
+        glVertex2d(x, y + dHeight);
         glVertex2d(x, y);
-        glVertex2d(x + width, y);
-        glVertex2d(x + width, y + height);
+        glVertex2d(x + dWidth, y);
+        glVertex2d(x + dWidth, y + dHeight);
 
         glEnd();
         glEnable(GL_TEXTURE_2D);

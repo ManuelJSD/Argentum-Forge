@@ -103,19 +103,21 @@ public final class FMain extends Form {
 
     // FPS
     private void renderFPS() {
-        final String txtFPS = String.valueOf(FPS) + " FPS";
-        float widgetWidth = 80;
+        final String txtStats = FPS + " FPS | Zoom: "
+                + (int) (org.argentumforge.engine.scenes.Camera.getZoomScale() * 100) + "%";
+        float widgetWidth = 165;
 
         ImGui.setNextWindowPos(Window.INSTANCE.getWidth() - widgetWidth - 10, 20);
         ImGui.setNextWindowSize(widgetWidth, 30);
-        if (ImGui.begin("FPS", ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoInputs
-                | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoSavedSettings)) {
-            ImGui.pushStyleVar(ImGuiStyleVar.SelectableTextAlign, 1.0f, 0.5f);
+        ImGui.pushStyleColor(ImGuiCol.WindowBg, 0.0f, 0.0f, 0.0f, 0.4f);
+        if (ImGui.begin("Stats",
+                ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoInputs
+                        | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoSavedSettings)) {
+            ImGui.pushStyleVar(ImGuiStyleVar.SelectableTextAlign, 0.5f, 0.5f);
             ImGui.pushStyleColor(ImGuiCol.HeaderHovered, TRANSPARENT_COLOR);
             ImGui.pushStyleColor(ImGuiCol.HeaderActive, TRANSPARENT_COLOR);
-            ImGui.selectable(txtFPS, false, ImGuiSelectableFlags.None, widgetWidth - 10, 20);
-            ImGui.popStyleColor();
-            ImGui.popStyleColor();
+            ImGui.selectable(txtStats, false, ImGuiSelectableFlags.None, widgetWidth - 10, 20);
+            ImGui.popStyleColor(3);
             ImGui.popStyleVar();
         }
         ImGui.end();
@@ -344,6 +346,12 @@ public final class FMain extends Form {
             }
 
             if (ImGui.beginMenu("Ver")) {
+                if (ImGui.menuItem("Restablecer Zoom", "Ctrl+0")) {
+                    Camera.setTileSize(32);
+                }
+
+                ImGui.separator();
+
                 if (ImGui.beginMenu("Capas")) {
                     if (ImGui.menuItem("Capa 1 (Superficies)", "", renderSettings.getShowLayer()[0])) {
                         renderSettings.getShowLayer()[0] = !renderSettings.getShowLayer()[0];
