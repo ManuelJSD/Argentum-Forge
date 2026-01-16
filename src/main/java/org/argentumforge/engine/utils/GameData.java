@@ -227,7 +227,7 @@ public final class GameData {
      */
     private static void loadMiniMapColors() {
         // 1. Intentar cargar binario (más rápido y completo)
-        Path binPath = Path.of(options.getInitPath(), "minimap.bin");
+        Path binPath = Path.of("minimap.bin");
         if (Files.exists(binPath)) {
             try {
                 byte[] bytes = Files.readAllBytes(binPath);
@@ -243,18 +243,9 @@ public final class GameData {
                         int g = (color >> 8) & 0xFF;
                         int b = (color >> 16) & 0xFF;
 
-                        // Index es 1-based según el generador (i=1 -> offset 0 bytes?
-                        // El generador iteró 1..total y escribió secuencialmente.
-                        // La primera escritura corresponde al Grh index 1.
-                        // Así que index = i + 1.
-                        // Pack manually to avoid ImGui crash if context not ready.
-                        // ImGui expects RGBA order in the integer (0xAABBGGRR for little endian, or
-                        // 0xAARRGGBB for big endian??)
-                        // Actually standard ImGui is AABBGGRR.
-                        // Let's try swapping R and B from previous attempt.
-                        // Previous: (0xFF << 24) | (b << 16) | (g << 8) | r (ABGR?)
-                        // New Try: (0xFF << 24) | (r << 16) | (g << 8) | b (ARGB?)
-                        int packed = (0xFF << 24) | (r << 16) | (g << 8) | b;
+                        // Pack manually to avoid ImGui crash. Revert to ABGR (Standard ImGui)
+                        // Pack: (A << 24) | (B << 16) | (G << 8) | R
+                        int packed = (0xFF << 24) | (b << 16) | (g << 8) | r;
                         AssetRegistry.minimapColors.put(i + 1, packed);
                     }
                 }
@@ -287,8 +278,10 @@ public final class GameData {
                 if (trimmed.startsWith("[") && trimmed.contains("]")) {
                     // Guardar el anterior antes de empezar uno nuevo
                     if (currentGrh != -1) {
-                        int packed = (0xFF << 24) | (r << 16) | (g << 8) | b;
-                        AssetRegistry.minimapColors.put(currentGrh, packed);
+                        if (currentGrh != -1) {
+                            int packed = (0xFF << 24) | (b << 16) | (g << 8) | r;
+                            AssetRegistry.minimapColors.put(currentGrh, packed);
+                        }
                     }
 
                     String section = trimmed.substring(1, trimmed.indexOf(']')).trim();
@@ -326,8 +319,10 @@ public final class GameData {
             }
             // Guardar el último
             if (currentGrh != -1) {
-                int packed = (0xFF << 24) | (r << 16) | (g << 8) | b;
-                AssetRegistry.minimapColors.put(currentGrh, packed);
+                if (currentGrh != -1) {
+                    int packed = (0xFF << 24) | (b << 16) | (g << 8) | r;
+                    AssetRegistry.minimapColors.put(currentGrh, packed);
+                }
             }
             Logger.info("Cargados {} colores para el minimapa desde {}", AssetRegistry.minimapColors.size(),
                     minimapPath);

@@ -19,6 +19,12 @@ public class RenderSettings {
     private boolean showGrid = false;
     private float[] gridColor = { 1.0f, 1.0f, 1.0f, 0.2f }; // Blanco semi-transparente por defecto
 
+    // Minimap filters
+    private boolean[] minimapLayers = { true, false, false, false };
+    private boolean showMinimapNPCs = true;
+    private boolean showMinimapExits = true;
+    private boolean showMinimapTriggers = true;
+
     public boolean[] getShowLayer() {
         return showLayer;
     }
@@ -97,6 +103,38 @@ public class RenderSettings {
 
     public void setGridColor(float[] gridColor) {
         this.gridColor = gridColor;
+    }
+
+    public boolean[] getMinimapLayers() {
+        return minimapLayers;
+    }
+
+    public void setMinimapLayers(boolean[] minimapLayers) {
+        this.minimapLayers = minimapLayers;
+    }
+
+    public boolean isShowMinimapNPCs() {
+        return showMinimapNPCs;
+    }
+
+    public void setShowMinimapNPCs(boolean showMinimapNPCs) {
+        this.showMinimapNPCs = showMinimapNPCs;
+    }
+
+    public boolean isShowMinimapExits() {
+        return showMinimapExits;
+    }
+
+    public void setShowMinimapExits(boolean showMinimapExits) {
+        this.showMinimapExits = showMinimapExits;
+    }
+
+    public boolean isShowMinimapTriggers() {
+        return showMinimapTriggers;
+    }
+
+    public void setShowMinimapTriggers(boolean showMinimapTriggers) {
+        this.showMinimapTriggers = showMinimapTriggers;
     }
 
 }

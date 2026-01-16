@@ -7,6 +7,7 @@ import imgui.flag.ImGuiWindowFlags;
 import org.argentumforge.engine.game.User;
 import org.argentumforge.engine.utils.AssetRegistry;
 import org.argentumforge.engine.utils.GameData;
+import org.argentumforge.engine.game.Options;
 
 /**
  * Formulario que muestra un mapa en miniatura (minimapa) del escenario actual.
@@ -18,52 +19,21 @@ public final class FMinimap extends Form {
 
     private static final int MINIMAP_SIZE = 200; // 2 pixels per tile (100x100)
     private static final int TILE_SIZE = 2;
-    private final boolean[] visibleLayers = { true, false, false, false };
 
     public FMinimap() {
     }
 
     @Override
     public void render() {
-        ImGui.setNextWindowSize(MINIMAP_SIZE + 20, MINIMAP_SIZE + 80, ImGuiCond.Always);
+        ImGui.setNextWindowSize(MINIMAP_SIZE + 20, MINIMAP_SIZE + 40, ImGuiCond.Always);
         if (ImGui.begin("Minimapa", ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse)) {
-
-            // Capas selector
-            if (ImGui.beginMenuBar()) {
-                if (ImGui.beginMenu("Capas")) {
-                    for (int i = 0; i < 4; i++) {
-                        if (ImGui.menuItem("Capa " + (i + 1), "", visibleLayers[i])) {
-                            visibleLayers[i] = !visibleLayers[i];
-                        }
-                    }
-                    ImGui.endMenu();
-                }
-                ImGui.endMenuBar();
-            }
-
-            // Botones para mayor comodidad (Capa 1 a 4)
-            ImGui.text("Ver capas:");
-            for (int i = 0; i < 4; i++) {
-                if (i > 0)
-                    ImGui.sameLine();
-                boolean active = visibleLayers[i];
-                if (active)
-                    ImGui.pushStyleColor(imgui.flag.ImGuiCol.Button, 0xFF00FF00);
-                if (ImGui.button(String.valueOf(i + 1), 40, 20)) {
-                    visibleLayers[i] = !visibleLayers[i];
-                }
-                if (active)
-                    ImGui.popStyleColor();
-            }
-
-            ImGui.separator();
 
             float mouseX = ImGui.getMousePosX();
             float mouseY = ImGui.getMousePosY();
             float windowX = ImGui.getWindowPosX();
             float windowY = ImGui.getWindowPosY();
             float contentX = windowX + 10;
-            float contentY = windowY + 70; // Ajustado por el selector de capas
+            float contentY = windowY + 30;
 
             ImDrawList drawList = ImGui.getWindowDrawList();
 
@@ -71,9 +41,8 @@ public final class FMinimap extends Form {
             drawList.addRectFilled(contentX, contentY, contentX + MINIMAP_SIZE, contentY + MINIMAP_SIZE,
                     ImGui.getColorU32(0.1f, 0.1f, 0.1f, 1.0f));
 
-            // Warning si no hay colores generados (o minimap.bin no existe)
-            boolean binExists = java.nio.file.Files.exists(java.nio.file.Path
-                    .of(org.argentumforge.engine.utils.GameData.options.getInitPath(), "minimap.bin"));
+            // Warning si no hay colores generados (o minimap.bin no existe en root)
+            boolean binExists = java.nio.file.Files.exists(java.nio.file.Path.of("minimap.bin"));
 
             if (!binExists || AssetRegistry.minimapColors.isEmpty()) {
                 ImGui.setCursorPos(20, 150);
@@ -89,7 +58,7 @@ public final class FMinimap extends Form {
                     for (int x = 1; x <= 100; x++) {
                         // Dibujar capas seleccionadas
                         for (int layer = 1; layer <= 4; layer++) {
-                            if (!visibleLayers[layer - 1])
+                            if (!Options.INSTANCE.getRenderSettings().getMinimapLayers()[layer - 1])
                                 continue;
 
                             int grh = GameData.mapData[x][y].getLayer(layer).getGrhIndex();
@@ -115,7 +84,8 @@ public final class FMinimap extends Form {
                         }
 
                         // Renderizar Traslados (Exits) - Azul
-                        if (GameData.mapData[x][y].getExitMap() > 0) {
+                        if (Options.INSTANCE.getRenderSettings().isShowMinimapExits()
+                                && GameData.mapData[x][y].getExitMap() > 0) {
                             drawList.addRectFilled(
                                     contentX + (x - 1) * TILE_SIZE,
                                     contentY + (y - 1) * TILE_SIZE,
@@ -125,7 +95,8 @@ public final class FMinimap extends Form {
                         }
 
                         // Renderizar Triggers - Violeta
-                        if (GameData.mapData[x][y].getTrigger() > 0) {
+                        if (Options.INSTANCE.getRenderSettings().isShowMinimapTriggers()
+                                && GameData.mapData[x][y].getTrigger() > 0) {
                             drawList.addRectFilled(
                                     contentX + (x - 1) * TILE_SIZE,
                                     contentY + (y - 1) * TILE_SIZE,
@@ -137,7 +108,7 @@ public final class FMinimap extends Form {
                         // Renderizar NPCs - Amarillo
                         // Usamos charIndex del mapa
                         int charIndex = GameData.mapData[x][y].getCharIndex();
-                        if (charIndex > 0) {
+                        if (Options.INSTANCE.getRenderSettings().isShowMinimapNPCs() && charIndex > 0) {
                             // Podríamos verificar si el char está activo o es usuario,
                             // pero charIndex en mapa suele estar sincronizado.
                             // El usuario se dibuja aparte, así que filtramos si es el propio usuario?

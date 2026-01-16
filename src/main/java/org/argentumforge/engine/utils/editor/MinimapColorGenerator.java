@@ -33,8 +33,8 @@ public class MinimapColorGenerator {
         progress = 0.0f;
 
         new Thread(() -> {
-            Path outputPath = Path.of(Options.INSTANCE.getInitPath(), "minimap.bin");
-            Logger.info("Iniciando generacion de colores de minimapa en: {}", outputPath);
+            Path outputPath = Path.of("minimap.bin");
+            Logger.info("Iniciando generacion de colores de minimapa en: {}", outputPath.toAbsolutePath());
 
             GrhData[] grhData = AssetRegistry.grhData;
             if (grhData == null || grhData.length == 0) {
@@ -83,11 +83,9 @@ public class MinimapColorGenerator {
                         int g = (color >> 8) & 0xFF;
                         int b = (color >> 16) & 0xFF;
 
-                        // Manual pack to match GameData change and ensure correct ImGui Format (ARGB /
-                        // ABGR mismatch fix)
-                        // Previous attempt: (0xFF << 24) | (b << 16) | (g << 8) | r
-                        // New attempt: (0xFF << 24) | (r << 16) | (g << 8) | b
-                        int packed = (0xFF << 24) | (r << 16) | (g << 8) | b;
+                        // Manual pack to match GameData change and ensure correct ImGui Format (ABGR)
+                        // Pack: (A << 24) | (B << 16) | (G << 8) | R
+                        int packed = (0xFF << 24) | (b << 16) | (g << 8) | r;
                         AssetRegistry.minimapColors.put(i, packed);
                     }
 
@@ -179,7 +177,9 @@ public class MinimapColorGenerator {
                     int g = (pixel >> 8) & 0xFF;
                     int b = pixel & 0xFF;
 
-                    boolean isTransparent = (alpha == 0) || (r == 0 && g == 0 && b == 0);
+                    // Fuzzy check for Magenta (R>245, B>245, G<10) to catch compression artifacts
+                    boolean isTransparent = (alpha == 0) || (r == 0 && g == 0 && b == 0)
+                            || (r > 245 && g < 10 && b > 245);
 
                     if (!isTransparent) {
                         rSum += r;

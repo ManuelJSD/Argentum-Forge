@@ -502,6 +502,39 @@ public final class FMain extends Form {
                     options.save();
                 }
 
+                ImGui.separator();
+
+                if (ImGui.beginMenu("Minimapa")) {
+                    if (ImGui.beginMenu("Capas")) {
+                        for (int i = 0; i < 4; i++) {
+                            if (ImGui.menuItem("Capa " + (i + 1), "", renderSettings.getMinimapLayers()[i])) {
+                                renderSettings.getMinimapLayers()[i] = !renderSettings.getMinimapLayers()[i];
+                                options.save();
+                            }
+                        }
+                        ImGui.endMenu();
+                    }
+
+                    ImGui.separator();
+
+                    if (ImGui.menuItem("NPCs", "", renderSettings.isShowMinimapNPCs())) {
+                        renderSettings.setShowMinimapNPCs(!renderSettings.isShowMinimapNPCs());
+                        options.save();
+                    }
+
+                    if (ImGui.menuItem("Traslados", "", renderSettings.isShowMinimapExits())) {
+                        renderSettings.setShowMinimapExits(!renderSettings.isShowMinimapExits());
+                        options.save();
+                    }
+
+                    if (ImGui.menuItem("Triggers", "", renderSettings.isShowMinimapTriggers())) {
+                        renderSettings.setShowMinimapTriggers(!renderSettings.isShowMinimapTriggers());
+                        options.save();
+                    }
+
+                    ImGui.endMenu();
+                }
+
                 ImGui.endMenu();
             }
 
