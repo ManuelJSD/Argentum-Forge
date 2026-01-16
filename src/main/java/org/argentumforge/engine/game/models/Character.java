@@ -278,6 +278,8 @@ public final class Character {
 
         if (charList[charIndex].getHead().getHead(charList[charIndex].getHeading().getId()).getGrhIndex() != 0) {
 
+            float scale = org.argentumforge.engine.scenes.Camera.getZoomScale();
+
             if (charList[charIndex].getBody().getWalk(charList[charIndex].getHeading().getId())
                     .getGrhIndex() != 0) {
                 drawTexture(charList[charIndex].getBody().getWalk(charList[charIndex].getHeading().getId()),
@@ -287,15 +289,16 @@ public final class Character {
             if (charList[charIndex].getHead().getHead(charList[charIndex].getHeading().getId())
                     .getGrhIndex() != 0) {
                 drawTexture(charList[charIndex].getHead().getHead(charList[charIndex].getHeading().getId()),
-                        PixelOffsetX + charList[charIndex].getBody().getHeadOffset().getX(),
-                        PixelOffsetY + charList[charIndex].getBody().getHeadOffset().getY(),
+                        PixelOffsetX + (int) (charList[charIndex].getBody().getHeadOffset().getX() * scale),
+                        PixelOffsetY + (int) (charList[charIndex].getBody().getHeadOffset().getY() * scale),
                         true, false, false, alpha, ambientcolor);
 
                 if (charList[charIndex].getHelmet().getHead(charList[charIndex].getHeading().getId())
                         .getGrhIndex() != 0) {
                     drawTexture(charList[charIndex].getHelmet().getHead(charList[charIndex].getHeading().getId()),
-                            PixelOffsetX + charList[charIndex].getBody().getHeadOffset().getX(),
-                            PixelOffsetY + charList[charIndex].getBody().getHeadOffset().getY() - 34,
+                            PixelOffsetX + (int) (charList[charIndex].getBody().getHeadOffset().getX() * scale),
+                            PixelOffsetY + (int) (charList[charIndex].getBody().getHeadOffset().getY() * scale)
+                                    - (int) (34 * scale),
                             true, false, false, alpha, ambientcolor);
                 }
 
@@ -324,9 +327,10 @@ public final class Character {
 
         // Draw FX
         if (charList[charIndex].fxIndex != 0) {
+            float scale = org.argentumforge.engine.scenes.Camera.getZoomScale();
             drawTexture(charList[charIndex].fX,
-                    PixelOffsetX + fxData[charList[charIndex].fxIndex].getOffsetX(),
-                    PixelOffsetY + fxData[charList[charIndex].fxIndex].getOffsetY(),
+                    PixelOffsetX + (int) (fxData[charList[charIndex].fxIndex].getOffsetX() * scale),
+                    PixelOffsetY + (int) (fxData[charList[charIndex].fxIndex].getOffsetY() * scale),
                     true, true, true, 1.0f, ambientcolor);
 
             // Comprobar si la animación ha terminado
@@ -356,10 +360,11 @@ public final class Character {
         // Cabeza
         if (headIndex > 0 && headIndex < AssetRegistry.headData.length && AssetRegistry.headData[headIndex] != null) {
             HeadData head = AssetRegistry.headData[headIndex];
+            float scale = org.argentumforge.engine.scenes.Camera.getZoomScale();
             if (head.getHead(heading.getId()).getGrhIndex() != 0) {
                 drawTexture(head.getHead(heading.getId()),
-                        PixelOffsetX + body.getHeadOffset().getX(),
-                        PixelOffsetY + body.getHeadOffset().getY(),
+                        PixelOffsetX + (int) (body.getHeadOffset().getX() * scale),
+                        PixelOffsetY + (int) (body.getHeadOffset().getY() * scale),
                         true, false, false, alpha, ambientcolor);
             }
         }

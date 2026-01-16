@@ -30,7 +30,7 @@ public final class Camera {
     public static final int POS_SCREEN_X = 0; // 11
     public static final int POS_SCREEN_Y = 0; // 147
 
-    public static final int TILE_PIXEL_SIZE = 32;
+    public static int TILE_PIXEL_SIZE = 32;
     public static final int TILE_BUFFER_SIZE = 7;
 
     // Rango maximo de la matriz del mapa.
@@ -57,10 +57,23 @@ public final class Camera {
         HALF_WINDOW_TILE_WIDTH = (Window.SCREEN_WIDTH / TILE_PIXEL_SIZE) / 2;
         HALF_WINDOW_TILE_HEIGHT = (Window.SCREEN_HEIGHT / TILE_PIXEL_SIZE) / 2;
 
-        minXBorder = XMinMapSize + ((Window.SCREEN_WIDTH / TILE_PIXEL_SIZE) / 2);
-        maxXBorder = XMaxMapSize - ((Window.SCREEN_WIDTH / TILE_PIXEL_SIZE) / 2);
-        minYBorder = YMinMapSize + ((Window.SCREEN_HEIGHT / TILE_PIXEL_SIZE) / 2);
-        maxYBorder = YMaxMapSize - ((Window.SCREEN_HEIGHT / TILE_PIXEL_SIZE) / 2);
+        minXBorder = XMinMapSize + HALF_WINDOW_TILE_WIDTH;
+        maxXBorder = XMaxMapSize - HALF_WINDOW_TILE_WIDTH;
+        minYBorder = YMinMapSize + HALF_WINDOW_TILE_HEIGHT;
+        maxYBorder = YMaxMapSize - HALF_WINDOW_TILE_HEIGHT;
+    }
+
+    public static float getZoomScale() {
+        return TILE_PIXEL_SIZE / 32.0f;
+    }
+
+    public static void setTileSize(int size) {
+        if (size < 16)
+            size = 16;
+        if (size > 128)
+            size = 128;
+        TILE_PIXEL_SIZE = size;
+        updateConstants();
     }
 
     private int screenminY, screenmaxY;
