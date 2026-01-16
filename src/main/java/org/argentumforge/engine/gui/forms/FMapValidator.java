@@ -1,6 +1,7 @@
 package org.argentumforge.engine.gui.forms;
 
 import imgui.ImGui;
+import imgui.flag.ImGuiTableColumnFlags;
 import imgui.flag.ImGuiTableFlags;
 import imgui.flag.ImGuiWindowFlags;
 import org.argentumforge.engine.gui.ImGUISystem;
@@ -39,10 +40,10 @@ public class FMapValidator extends Form {
                 if (ImGui.beginTable("ErrorsTable", 4,
                         ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.ScrollY)) {
 
-                    ImGui.tableSetupColumn("Tipo", 0, 80.0f);
-                    ImGui.tableSetupColumn("Posición", 0, 80.0f);
-                    ImGui.tableSetupColumn("Descripción", 0, 300.0f);
-                    ImGui.tableSetupColumn("Acción", 0, 80.0f);
+                    ImGui.tableSetupColumn("Tipo", ImGuiTableColumnFlags.WidthFixed, 80.0f);
+                    ImGui.tableSetupColumn("Posición", ImGuiTableColumnFlags.WidthFixed, 80.0f);
+                    ImGui.tableSetupColumn("Descripción", ImGuiTableColumnFlags.WidthFixed, 300.0f);
+                    ImGui.tableSetupColumn("Acción", ImGuiTableColumnFlags.WidthFixed, 80.0f);
                     ImGui.tableHeadersRow();
 
                     for (MapValidator.ValidationError error : currentErrors) {
