@@ -148,6 +148,11 @@ public final class ResourceLoader {
                         currentObj.setGrhIndex(Integer.parseInt(value));
                     } catch (NumberFormatException ignored) {
                     }
+                } else if (key.equalsIgnoreCase("ObjType") || key.equalsIgnoreCase("Type")) {
+                    try {
+                        currentObj.setType(Integer.parseInt(value));
+                    } catch (NumberFormatException ignored) {
+                    }
                 }
             }
         } catch (IOException e) {

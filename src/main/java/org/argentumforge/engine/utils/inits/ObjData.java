@@ -12,6 +12,7 @@ public final class ObjData {
     private int number;
     private String name = "";
     private int grhIndex;
+    private int type;
 
     public ObjData() {
     }
@@ -42,5 +43,13 @@ public final class ObjData {
 
     public void setGrhIndex(int grhIndex) {
         this.grhIndex = grhIndex;
+    }
+
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
     }
 }
