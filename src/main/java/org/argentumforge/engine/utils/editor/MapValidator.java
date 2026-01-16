@@ -1,9 +1,11 @@
 package org.argentumforge.engine.utils.editor;
 
 import org.argentumforge.engine.game.models.Character;
+import org.argentumforge.engine.utils.AssetRegistry;
 import org.argentumforge.engine.utils.GameData;
 import org.argentumforge.engine.utils.MapContext;
 import org.argentumforge.engine.utils.inits.MapData;
+import org.argentumforge.engine.utils.inits.ObjData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,8 +81,22 @@ public class MapValidator {
                 // Check Objects (ObjIndex)
                 if (mapData[x][y].getObjIndex() > 0) {
                     if (isBlocked) {
-                        errors.add(new ValidationError(x, y,
-                                "Objeto ubicado en tile bloqueado", "WARNING"));
+                        // Check if the object is allowed to be blocked (Trees, Signs, etc.)
+                        // We use name heuristic as Type is not available
+                        boolean suppressWarning = false;
+                        ObjData objInfo = AssetRegistry.objs.get(mapData[x][y].getObjIndex());
+                        if (objInfo != null) {
+                            String name = objInfo.getName().toUpperCase();
+                            if (name.contains("ARBOL") || name.contains("CARTEL") || name.contains("FORJA")
+                                    || name.contains("YUNQUE") || name.contains("ESTATUA")) {
+                                suppressWarning = true;
+                            }
+                        }
+
+                        if (!suppressWarning) {
+                            errors.add(new ValidationError(x, y,
+                                    "Objeto ubicado en tile bloqueado", "WARNING"));
+                        }
                     }
                 }
             }
