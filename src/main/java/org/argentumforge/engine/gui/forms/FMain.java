@@ -532,6 +532,11 @@ public final class FMain extends Form {
                         options.save();
                     }
 
+                    if (ImGui.menuItem("Bloqueos", "", renderSettings.isShowMinimapBlocks())) {
+                        renderSettings.setShowMinimapBlocks(!renderSettings.isShowMinimapBlocks());
+                        options.save();
+                    }
+
                     ImGui.endMenu();
                 }
 

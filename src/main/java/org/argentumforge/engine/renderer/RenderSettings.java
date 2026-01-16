@@ -24,6 +24,7 @@ public class RenderSettings {
     private boolean showMinimapNPCs = true;
     private boolean showMinimapExits = true;
     private boolean showMinimapTriggers = true;
+    private boolean showMinimapBlocks = false;
 
     public boolean[] getShowLayer() {
         return showLayer;
@@ -135,6 +136,14 @@ public class RenderSettings {
 
     public void setShowMinimapTriggers(boolean showMinimapTriggers) {
         this.showMinimapTriggers = showMinimapTriggers;
+    }
+
+    public boolean isShowMinimapBlocks() {
+        return showMinimapBlocks;
+    }
+
+    public void setShowMinimapBlocks(boolean showMinimapBlocks) {
+        this.showMinimapBlocks = showMinimapBlocks;
     }
 
 }
