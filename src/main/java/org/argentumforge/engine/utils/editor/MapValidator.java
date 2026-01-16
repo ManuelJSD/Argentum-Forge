@@ -81,14 +81,17 @@ public class MapValidator {
                 // Check Objects (ObjIndex)
                 if (mapData[x][y].getObjIndex() > 0) {
                     if (isBlocked) {
-                        // Check if the object is allowed to be blocked (Trees, Signs, etc.)
-                        // We use name heuristic as Type is not available
+                        // Check if the object is allowed to be blocked based on ObjType
                         boolean suppressWarning = false;
                         ObjData objInfo = AssetRegistry.objs.get(mapData[x][y].getObjIndex());
+
                         if (objInfo != null) {
-                            String name = objInfo.getName().toUpperCase();
-                            if (name.contains("ARBOL") || name.contains("CARTEL") || name.contains("FORJA")
-                                    || name.contains("YUNQUE") || name.contains("ESTATUA")) {
+                            int type = objInfo.getType();
+                            // Allowed blocking types:
+                            // 4: Arboles, 6: Puertas, 8: Carteles, 10: Foros, 15: Fogata
+                            // 20: Muebles, 22: Yacimiento, 27: Yunque, 28: Fragua
+                            if (type == 4 || type == 6 || type == 8 || type == 10 || type == 15 ||
+                                    type == 20 || type == 22 || type == 27 || type == 28) {
                                 suppressWarning = true;
                             }
                         }
