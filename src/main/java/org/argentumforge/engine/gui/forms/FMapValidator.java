@@ -7,11 +7,13 @@ import org.argentumforge.engine.gui.ImGUISystem;
 import org.argentumforge.engine.scenes.Camera;
 import org.argentumforge.engine.utils.editor.MapValidator;
 
+import imgui.type.ImBoolean;
 import java.util.List;
 
 public class FMapValidator extends Form {
 
     private List<MapValidator.ValidationError> currentErrors = null;
+    private final ImBoolean open = new ImBoolean(true);
 
     public FMapValidator() {
         this.currentErrors = MapValidator.validateCurrentMap();
@@ -21,7 +23,7 @@ public class FMapValidator extends Form {
     public void render() {
         ImGui.setNextWindowSize(600, 400, imgui.flag.ImGuiCond.FirstUseEver);
 
-        if (ImGui.begin("Validación de Mapa", ImGuiWindowFlags.NoCollapse)) {
+        if (ImGui.begin("Validación de Mapa", open, ImGuiWindowFlags.NoCollapse)) {
 
             if (ImGui.button("Re-Escanear Mapa")) {
                 this.currentErrors = MapValidator.validateCurrentMap();
@@ -68,7 +70,8 @@ public class FMapValidator extends Form {
                             // Teleport camera logic
                             // Camera operates in pixels, assuming 32x32 tiles.
                             // We center the camera on the tile.
-                            Camera.lookAt(error.x, error.y);
+                            org.argentumforge.engine.game.User.INSTANCE.getUserPos().setX(error.x);
+                            org.argentumforge.engine.game.User.INSTANCE.getUserPos().setY(error.y);
                         }
                     }
 
@@ -80,7 +83,7 @@ public class FMapValidator extends Form {
 
         // Handle window close manually if needed, or rely on ImGui close button logic
         // managing the list in ImGUISystem.
-        if (!ImGui.isWindowOpen("Validación de Mapa")) {
+        if (!open.get()) {
             ImGUISystem.INSTANCE.deleteFrmArray(this);
         }
     }
