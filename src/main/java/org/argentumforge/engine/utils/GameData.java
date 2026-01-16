@@ -79,13 +79,42 @@ public final class GameData {
         if (context == null)
             return;
 
+        // Guardar estado del contexto anterior si existe (y si es diferente al nuevo)
+        if (activeContext != null && activeContext != context) {
+            activeContext.setLastChar(org.argentumforge.engine.game.models.Character.lastChar);
+        }
+
         activeContext = context;
         mapData = context.getMapData();
         mapProperties = context.getMapProperties();
         charList = context.getCharList();
 
+        // Restaurar lastChar del nuevo contexto
+        org.argentumforge.engine.game.models.Character.lastChar = context.getLastChar();
+
         if (!openMaps.contains(context)) {
             openMaps.add(context);
+        }
+        updateWindowTitle();
+    }
+
+    public static void clearActiveContext() {
+        if (activeContext != null) {
+            activeContext.setLastChar(org.argentumforge.engine.game.models.Character.lastChar);
+        }
+        activeContext = null;
+        updateWindowTitle();
+    }
+
+    public static void updateWindowTitle() {
+        if (activeContext != null) {
+            String title = activeContext.getMapName();
+            if (activeContext.isModified()) {
+                title += " *";
+            }
+            org.argentumforge.engine.Window.INSTANCE.updateTitle(title);
+        } else {
+            org.argentumforge.engine.Window.INSTANCE.updateTitle("");
         }
     }
 

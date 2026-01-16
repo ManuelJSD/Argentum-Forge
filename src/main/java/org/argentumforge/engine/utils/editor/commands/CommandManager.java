@@ -1,6 +1,7 @@
 package org.argentumforge.engine.utils.editor.commands;
 
 import java.util.Stack;
+import org.argentumforge.engine.utils.MapContext;
 
 /**
  * Gestor de comandos que implementa la lógica de Deshacer/Rehacer.
@@ -10,9 +11,6 @@ public class CommandManager {
 
     private static CommandManager instance;
     private static final int MAX_STACK_SIZE = 100;
-
-    private final Stack<Command> undoStack = new Stack<>();
-    private final Stack<Command> redoStack = new Stack<>();
 
     private CommandManager() {
     }
@@ -32,11 +30,15 @@ public class CommandManager {
      */
     public void executeCommand(Command command) {
         command.execute();
-        undoStack.push(command);
-        redoStack.clear();
+        MapContext context = org.argentumforge.engine.utils.GameData.getActiveContext();
+        if (context != null) {
+            Stack<Command> undoStack = context.getUndoStack();
+            undoStack.push(command);
+            context.getRedoStack().clear();
 
-        if (undoStack.size() > MAX_STACK_SIZE) {
-            undoStack.remove(0);
+            if (undoStack.size() > MAX_STACK_SIZE) {
+                undoStack.remove(0);
+            }
         }
 
         // Marcar el mapa como modificado
@@ -47,13 +49,17 @@ public class CommandManager {
      * Deshace la última acción realizada.
      */
     public void undo() {
-        if (!undoStack.isEmpty()) {
-            Command command = undoStack.pop();
-            command.undo();
-            redoStack.push(command);
+        MapContext context = org.argentumforge.engine.utils.GameData.getActiveContext();
+        if (context != null) {
+            Stack<Command> undoStack = context.getUndoStack();
+            if (!undoStack.isEmpty()) {
+                Command command = undoStack.pop();
+                command.undo();
+                context.getRedoStack().push(command);
 
-            // Marcar el mapa como modificado
-            org.argentumforge.engine.utils.MapManager.markAsModified();
+                // Marcar el mapa como modificado
+                org.argentumforge.engine.utils.MapManager.markAsModified();
+            }
         }
     }
 
@@ -61,22 +67,28 @@ public class CommandManager {
      * Rehace la última acción deshecha.
      */
     public void redo() {
-        if (!redoStack.isEmpty()) {
-            Command command = redoStack.pop();
-            command.execute();
-            undoStack.push(command);
+        MapContext context = org.argentumforge.engine.utils.GameData.getActiveContext();
+        if (context != null) {
+            Stack<Command> redoStack = context.getRedoStack();
+            if (!redoStack.isEmpty()) {
+                Command command = redoStack.pop();
+                command.execute();
+                context.getUndoStack().push(command);
 
-            // Marcar el mapa como modificado
-            org.argentumforge.engine.utils.MapManager.markAsModified();
+                // Marcar el mapa como modificado
+                org.argentumforge.engine.utils.MapManager.markAsModified();
+            }
         }
     }
 
     public boolean canUndo() {
-        return !undoStack.isEmpty();
+        MapContext context = org.argentumforge.engine.utils.GameData.getActiveContext();
+        return context != null && !context.getUndoStack().isEmpty();
     }
 
     public boolean canRedo() {
-        return !redoStack.isEmpty();
+        MapContext context = org.argentumforge.engine.utils.GameData.getActiveContext();
+        return context != null && !context.getRedoStack().isEmpty();
     }
 
     /**
@@ -84,7 +96,10 @@ public class CommandManager {
      * Útil al cargar un mapa nuevo.
      */
     public void clearHistory() {
-        undoStack.clear();
-        redoStack.clear();
+        MapContext context = org.argentumforge.engine.utils.GameData.getActiveContext();
+        if (context != null) {
+            context.getUndoStack().clear();
+            context.getRedoStack().clear();
+        }
     }
 }

@@ -449,4 +449,16 @@ public enum Window {
         }
     }
 
+    public void setTitle(String newTitle) {
+        glfwSetWindowTitle(window, newTitle);
+    }
+
+    public void updateTitle(String extension) {
+        if (extension == null || extension.isEmpty()) {
+            glfwSetWindowTitle(window, title);
+        } else {
+            glfwSetWindowTitle(window, title + " - " + extension);
+        }
+    }
+
 }

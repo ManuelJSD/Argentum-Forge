@@ -3,6 +3,8 @@ package org.argentumforge.engine.utils;
 import org.argentumforge.engine.game.models.Character;
 import org.argentumforge.engine.utils.inits.MapData;
 import org.argentumforge.engine.utils.inits.MapProperties;
+import org.argentumforge.engine.utils.editor.commands.Command;
+import java.util.Stack;
 
 /**
  * Representa el contexto de un mapa abierto en el editor.
@@ -13,6 +15,10 @@ public class MapContext {
     private MapData[][] mapData;
     private MapProperties mapProperties;
     private Character[] charList;
+    private boolean modified = false;
+    private short lastChar = 0;
+    private final Stack<Command> undoStack = new Stack<>();
+    private final Stack<Command> redoStack = new Stack<>();
 
     public MapContext(String filePath, MapData[][] mapData, MapProperties mapProperties, Character[] charList) {
         this.filePath = filePath;
@@ -46,5 +52,29 @@ public class MapContext {
             return "Sin Título";
         java.io.File file = new java.io.File(filePath);
         return file.getName();
+    }
+
+    public boolean isModified() {
+        return modified;
+    }
+
+    public void setModified(boolean modified) {
+        this.modified = modified;
+    }
+
+    public short getLastChar() {
+        return lastChar;
+    }
+
+    public void setLastChar(short lastChar) {
+        this.lastChar = lastChar;
+    }
+
+    public Stack<Command> getUndoStack() {
+        return undoStack;
+    }
+
+    public Stack<Command> getRedoStack() {
+        return redoStack;
     }
 }
