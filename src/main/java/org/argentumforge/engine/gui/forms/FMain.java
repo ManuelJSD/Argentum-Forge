@@ -410,6 +410,14 @@ public final class FMain extends Form {
                 if (ImGui.menuItem("Información del Mapa")) {
                     ImGUISystem.INSTANCE.show(new FInfoMap());
                 }
+
+                if (ImGui.menuItem("Validar Mapa")) {
+                    if (org.argentumforge.engine.utils.GameData.getActiveContext() != null) {
+                        ImGUISystem.INSTANCE.show(new org.argentumforge.engine.gui.forms.FMapValidator());
+                    } else {
+                        javax.swing.JOptionPane.showMessageDialog(null, "No hay ningún mapa abierto para validar.");
+                    }
+                }
                 ImGui.endMenu();
             }
 
