@@ -13,11 +13,20 @@
 </p>
 
 ## Características Principales
-- **Sistema de Deshacer/Rehacer (Undo/Redo):** Historial completo para tiles, bloqueos, NPCs y objetos.
-- **Herramientas de Edición Avanzadas:**
-  - **Bote de Pintura (Bucket Fill):** Relleno eficiente de áreas usando algoritmo BFS.
-  - **Pinceles Especiales:** Pinceles Cuadrados, Circulares y tipo Scatter (Dispersión) para terrenos naturales.
-  - **Operaciones Masivas:** Comandos optimizados para cambios de gran escala sin pérdida de rendimiento.
+- **Edición Integral de Mapas:**
+  - **Sistema Multicapa:** Edita hasta 4 capas gráficas simultáneamente.
+  - **Gestión de Entidades:** Coloca y configura NPCs, Objetos y Triggers con previsualización en vivo.
+  - **Control de Colisiones:** Define áreas transitables y bloqueadas con precisión.
+  - **Editor de Traslados:** Gestiona conexiones entre mapas y puntos de teletransporte.
+- **Herramientas Avanzadas:**
+  - **Sistema de Deshacer/Rehacer:** Historial completo para tiles, bloqueos, NPCs y objetos.
+  - **Bote de Pintura:** Relleno eficiente de áreas usando algoritmo BFS.
+  - **Pinceles Inteligentes:** Cuadrados, Circulares y Dispersión para terrenos naturales.
+  - **Generador de Minimapas:** Creación de vistas previas del mapa en tiempo real.
+- **Pruebas y Usabilidad:**
+  - **Modo Caminata:** Prueba tu mapa instantáneamente con un personaje jugable para verificar colisiones y triggers.
+  - **Internacionalización (i18n):** Soporte nativo para Inglés, Español y Portugués.
+  - **Sistema de Audio Mejorado:** Selector de música integrado con soporte para MP3, WAV, MIDI y OGG.
 
 # Discord
 Para aquellos que quieran colaborar con el proyecto, ¡son más que bienvenidos! Pueden comunicarse con nosotros en nuestro <a href="https://discord.gg/RtsGRqJVt9">Discord.</a>

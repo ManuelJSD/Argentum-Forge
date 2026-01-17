@@ -94,7 +94,7 @@ public final class FNpcEditor extends Form {
                     org.argentumforge.engine.gui.PreviewUtils.drawNpc(data.getBody(), data.getHead(), 1.2f);
                     ImGui.sameLine();
                     ImGui.beginGroup();
-                    ImGui.text("NPC " + data.getNumber());
+                    ImGui.text(I18n.INSTANCE.get("common.npc") + " " + data.getNumber());
                     ImGui.text(data.getName());
                     ImGui.textDisabled(I18n.INSTANCE.get("editor.npc.body") + " " + data.getBody() + " "
                             + I18n.INSTANCE.get("editor.npc.head") + " " + data.getHead());
@@ -162,7 +162,7 @@ public final class FNpcEditor extends Form {
                 org.argentumforge.engine.gui.PreviewUtils.drawNpc(data.getBody(), data.getHead(), 0.8f);
 
                 if (ImGui.isItemHovered()) {
-                    ImGui.setTooltip("NPC " + npcNum + "\n" + data.getName());
+                    ImGui.setTooltip(I18n.INSTANCE.get("common.npc") + " " + npcNum + "\n" + data.getName());
                 }
 
                 ImGui.popID();
@@ -185,7 +185,7 @@ public final class FNpcEditor extends Form {
 
         for (Integer npcNumber : filteredKeys) {
             NpcData data = npcs.get(npcNumber);
-            String label = "NPC " + npcNumber + " - " + data.getName();
+            String label = I18n.INSTANCE.get("common.npc") + " " + npcNumber + " - " + data.getName();
 
             if (ImGui.selectable(label, selectedNpcNumber == npcNumber)) {
                 selectNpc(npcNumber);
