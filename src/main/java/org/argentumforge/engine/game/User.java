@@ -310,9 +310,7 @@ public enum User {
 
         // ¿Hay un personaje?
         if (charIndex > 0) {
-            if (mapData[userPos.getX()][userPos.getY()].getBlocked())
-                return false;
-
+            return false;
         }
 
         return true;

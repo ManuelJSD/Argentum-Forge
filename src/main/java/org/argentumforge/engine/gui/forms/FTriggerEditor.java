@@ -106,7 +106,7 @@ public class FTriggerEditor extends Form {
 
         if (isPlacing) {
             ImGui.textColored(0f, 1f, 0f, 1f, I18n.INSTANCE.get("editor.trigger.mode.place"));
-            ImGui.textColored(0f, 1f, 0f, 1f, "ID: " + tool.getSelectedTriggerId());
+            ImGui.textColored(0f, 1f, 0f, 1f, I18n.INSTANCE.get("common.id") + ": " + tool.getSelectedTriggerId());
         } else if (isErasing) {
             ImGui.textColored(1f, 0f, 0f, 1f, I18n.INSTANCE.get("editor.trigger.mode.erase"));
         } else {

@@ -15,11 +15,20 @@ Map editor for Argentum Online based on argentum online lwjgl3 (https://github.c
 </p>
 
 ## Key Features
-- **Undo/Redo System:** Full history for tiles, blocks, NPCs, and objects.
-- **Advanced Editing Tools:**
+- **Comprehensive Map Editing:**
+  - **Multi-Layer System:** Edit up to 4 graphic layers simultaneously.
+  - **Entity Management:** Place and configure NPCs, Objects, and Triggers with live previews.
+  - **Collision Control:** precise 'Block' tool to define walkable and non-walkable areas.
+  - **Teleport Editor:** Manage map connections and warp points.
+- **Advanced Tools:**
+  - **Undo/Redo System:** Full history for tiles, blocks, NPCs, and objects.
   - **Bucket Fill:** Fill large areas efficiently using BFS.
-  - **Special Brushes:** Square, Circle, and Scatter brushes for natural terrain creation.
-  - **Bulk Operations:** Optimized command system for massive changes.
+  - **Smart Brushes:** Square, Circle, and Scatter brushes for natural terrain creation.
+  - **Minimap Generator:** Real-time generation of map previews.
+- **Testing & Usability:**
+  - **Walk Mode:** Test your map instantly with a playable character to verify collisions and triggers.
+  - **Internationalization (i18n):** Native support for English, Spanish, and Portuguese.
+  - **Enhanced Audio System:** Integrated music selector with support for MP3, WAV, MIDI, and OGG.
 
 # Discord
 For those who want to collaborate with the project, they are more than welcome! You can communicate with us on our <a href="https://discord.gg/RtsGRqJVt9">Discord.</a>

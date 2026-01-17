@@ -99,15 +99,15 @@ public final class FMain extends Form {
             ImGui.openPopup("Procesando Colores");
         }
 
-        if (ImGui.beginPopupModal("Procesando Colores",
+        if (ImGui.beginPopupModal(I18n.INSTANCE.get("msg.processingColors"),
                 ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoTitleBar)) {
             if (!org.argentumforge.engine.utils.editor.MinimapColorGenerator.generating) {
-                ImGui.textColored(ImGui.getColorU32(0.0f, 1.0f, 0.0f, 1.0f), "¡Completado!");
-                if (ImGui.button("Cerrar", 300, 0)) {
+                ImGui.textColored(ImGui.getColorU32(0.0f, 1.0f, 0.0f, 1.0f), I18n.INSTANCE.get("msg.complete"));
+                if (ImGui.button(I18n.INSTANCE.get("common.close"), 300, 0)) {
                     ImGui.closeCurrentPopup();
                 }
             } else {
-                ImGui.text("Generando paleta de colores...");
+                ImGui.text(I18n.INSTANCE.get("msg.processingColors"));
                 ImGui.separator();
                 ImGui.progressBar(org.argentumforge.engine.utils.editor.MinimapColorGenerator.progress / 100.0f, 300,
                         20,
@@ -219,7 +219,7 @@ public final class FMain extends Form {
         ImGui.setCursorPos(10, 5); // Alineado arriba dentro de la mini-ventana
 
         // Botón Superficies
-        if (ImGui.button("Superficies", 100, 25)) {
+        if (ImGui.button(I18n.INSTANCE.get("menu.view.layer1"), 100, 25)) {
             if (ImGUISystem.INSTANCE.isFormVisible("FSurfaceEditor")) {
                 ImGUISystem.INSTANCE.deleteFrmArray(surfaceEditor);
             } else {
@@ -230,7 +230,7 @@ public final class FMain extends Form {
         ImGui.sameLine();
 
         // Botón Bloqueos
-        if (ImGui.button("Bloqueos", 100, 25)) {
+        if (ImGui.button(I18n.INSTANCE.get("menu.view.blocks"), 100, 25)) {
             if (ImGUISystem.INSTANCE.isFormVisible("FBlockEditor")) {
                 ImGUISystem.INSTANCE.deleteFrmArray(blockEditor);
             } else {
@@ -241,7 +241,7 @@ public final class FMain extends Form {
         ImGui.sameLine();
 
         // Botón Triggers
-        if (ImGui.button("Triggers", 100, 25)) {
+        if (ImGui.button(I18n.INSTANCE.get("menu.view.triggers"), 100, 25)) {
             if (ImGUISystem.INSTANCE.isFormVisible("FTriggerEditor")) {
                 ImGUISystem.INSTANCE.deleteFrmArray(triggerEditor);
             } else {
@@ -252,7 +252,7 @@ public final class FMain extends Form {
         ImGui.sameLine();
 
         // Botón NPCs
-        if (ImGui.button("NPCs", 100, 25)) {
+        if (ImGui.button(I18n.INSTANCE.get("menu.view.npcs"), 100, 25)) {
             if (ImGUISystem.INSTANCE.isFormVisible("FNpcEditor")) {
                 ImGUISystem.INSTANCE.deleteFrmArray(npcEditor);
             } else {
@@ -263,7 +263,7 @@ public final class FMain extends Form {
         ImGui.sameLine();
 
         // Botón Objetos
-        if (ImGui.button("Objetos", 100, 25)) {
+        if (ImGui.button(I18n.INSTANCE.get("menu.view.objects"), 100, 25)) {
             if (ImGUISystem.INSTANCE.isFormVisible("FObjEditor")) {
                 ImGUISystem.INSTANCE.deleteFrmArray(objEditor);
             } else {
@@ -274,7 +274,7 @@ public final class FMain extends Form {
         ImGui.sameLine();
 
         // Botón Traslados
-        if (ImGui.button("Traslados", 100, 25)) {
+        if (ImGui.button(I18n.INSTANCE.get("menu.view.transfers"), 100, 25)) {
             if (ImGUISystem.INSTANCE.isFormVisible("FTransferEditor")) {
                 ImGUISystem.INSTANCE.deleteFrmArray(transferEditor);
             } else {
@@ -285,7 +285,7 @@ public final class FMain extends Form {
         ImGui.sameLine();
 
         // Botón Minimapa
-        if (ImGui.button("Minimapa", 100, 25)) {
+        if (ImGui.button(I18n.INSTANCE.get("menu.view.minimap"), 100, 25)) {
             if (ImGUISystem.INSTANCE.isFormVisible("FMinimap")) {
                 ImGUISystem.INSTANCE.deleteFrmArray(minimap);
             } else {
@@ -388,21 +388,22 @@ public final class FMain extends Form {
 
                 ImGui.separator();
 
-                if (ImGui.menuItem("Cortar", "Ctrl+X", false,
+                if (ImGui.menuItem(I18n.INSTANCE.get("menu.edit.cut"), "Ctrl+X", false,
                         !Selection.getInstance().getSelectedEntities().isEmpty())) {
                     cutSelection();
                 }
 
-                if (ImGui.menuItem("Copiar", "Ctrl+C", false,
+                if (ImGui.menuItem(I18n.INSTANCE.get("menu.edit.copy"), "Ctrl+C", false,
                         !Selection.getInstance().getSelectedEntities().isEmpty())) {
                     copySelection();
                 }
 
-                if (ImGui.menuItem("Pegar", "Ctrl+V", false, !Clipboard.getInstance().isEmpty())) {
+                if (ImGui.menuItem(I18n.INSTANCE.get("menu.edit.paste"), "Ctrl+V", false,
+                        !Clipboard.getInstance().isEmpty())) {
                     pasteSelection();
                 }
 
-                if (ImGui.menuItem("Suprimir", "Supr", false,
+                if (ImGui.menuItem(I18n.INSTANCE.get("menu.edit.delete"), "Supr", false,
                         !Selection.getInstance().getSelectedEntities().isEmpty())) {
                     deleteSelection();
                 }

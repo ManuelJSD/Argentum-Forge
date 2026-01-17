@@ -27,8 +27,8 @@ import org.argentumforge.engine.Window;
 
 public final class Camera {
 
-    public static final int POS_SCREEN_X = 0; // 11
-    public static final int POS_SCREEN_Y = 0; // 147
+    public static int POS_SCREEN_X = 0;
+    public static int POS_SCREEN_Y = 0;
 
     public static int TILE_PIXEL_SIZE = 32;
     public static final int TILE_BUFFER_SIZE = 7;
@@ -54,8 +54,25 @@ public final class Camera {
     }
 
     public static void updateConstants() {
-        HALF_WINDOW_TILE_WIDTH = (Window.SCREEN_WIDTH / TILE_PIXEL_SIZE) / 2;
-        HALF_WINDOW_TILE_HEIGHT = (Window.SCREEN_HEIGHT / TILE_PIXEL_SIZE) / 2;
+        int tilesW = Window.SCREEN_WIDTH / TILE_PIXEL_SIZE;
+        int tilesH = Window.SCREEN_HEIGHT / TILE_PIXEL_SIZE;
+
+        HALF_WINDOW_TILE_WIDTH = tilesW / 2;
+        HALF_WINDOW_TILE_HEIGHT = tilesH / 2;
+
+        // Centering logic:
+        // 1. Remainder centering: centers the grid in the window if resolution is not
+        // multiple of 32
+        int remainderX = (Window.SCREEN_WIDTH % TILE_PIXEL_SIZE) / 2;
+        int remainderY = (Window.SCREEN_HEIGHT % TILE_PIXEL_SIZE) / 2;
+
+        // 2. Even tile count offset: If we have even tiles, center falls between tiles.
+        // Shift left by half tile (-16px) to center the character tile.
+        int evenOffsetX = (tilesW % 2 == 0) ? -(TILE_PIXEL_SIZE / 2) : 0;
+        int evenOffsetY = (tilesH % 2 == 0) ? -(TILE_PIXEL_SIZE / 2) : 0;
+
+        POS_SCREEN_X = remainderX + evenOffsetX;
+        POS_SCREEN_Y = remainderY + evenOffsetY;
 
         minXBorder = XMinMapSize + HALF_WINDOW_TILE_WIDTH;
         maxXBorder = XMaxMapSize - HALF_WINDOW_TILE_WIDTH;
@@ -130,25 +147,9 @@ public final class Camera {
         if (maxX > XMaxMapSize)
             maxX = XMaxMapSize;
 
-        if (screenminY > YMinMapSize)
-            screenminY--;
-        else {
-            screenminY = 1;
-            screenY = 1;
-        }
-
-        if (screenmaxY < YMaxMapSize)
-            screenmaxY++;
-
-        if (screenminX > XMinMapSize)
-            screenminX--;
-        else {
-            screenminX = 1;
-            screenX = 1;
-        }
-
-        if (screenmaxX < XMaxMapSize)
-            screenmaxX++;
+        // Removed legacy decrement logic that caused off-center rendering
+        // if (screenminY > YMinMapSize) screenminY--; ...
+        // if (screenminX > XMinMapSize) screenminX--; ...
     }
 
     public int getScreenminY() {
