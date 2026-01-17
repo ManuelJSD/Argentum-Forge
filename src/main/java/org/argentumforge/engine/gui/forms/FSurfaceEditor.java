@@ -14,6 +14,7 @@ import org.argentumforge.engine.utils.inits.GrhData;
 import org.argentumforge.engine.renderer.Texture;
 import org.argentumforge.engine.gui.Theme;
 import org.argentumforge.engine.gui.widgets.UIComponents;
+import org.argentumforge.engine.i18n.I18n;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,7 +61,7 @@ public class FSurfaceEditor extends Form {
         ImGui.setNextWindowSize(350, 600, ImGuiCond.FirstUseEver);
 
         // Ventana principal del editor de superficies
-        if (ImGui.begin("Editor de Superficies", ImGuiWindowFlags.None)) {
+        if (ImGui.begin(I18n.INSTANCE.get("editor.surface"), ImGuiWindowFlags.None)) {
 
             drawToolSettings();
             ImGui.separator();
@@ -68,7 +69,7 @@ public class FSurfaceEditor extends Form {
             ImGui.separator();
 
             if (ImGui.beginTabBar("SurfaceTabs")) {
-                if (ImGui.beginTabItem("Paleta")) {
+                if (ImGui.beginTabItem(I18n.INSTANCE.get("editor.surface.palette"))) {
                     drawSearchAndPagination();
                     ImGui.separator();
 
@@ -81,14 +82,14 @@ public class FSurfaceEditor extends Form {
                     ImGui.endTabItem();
                 }
 
-                if (ImGui.beginTabItem("Biblioteca")) {
-                    if (ImGui.button("Editar Biblioteca", ImGui.getContentRegionAvailX(), 25)) {
+                if (ImGui.beginTabItem(I18n.INSTANCE.get("editor.surface.library"))) {
+                    if (ImGui.button(I18n.INSTANCE.get("editor.surface.editLib"), ImGui.getContentRegionAvailX(), 25)) {
                         IM_GUI_SYSTEM.show(new FGrhLibrary());
                     }
                     ImGui.separator();
 
                     useMosaicChecked.set(surface.isUseMosaic());
-                    if (ImGui.checkbox("Colocar Mosaico Completo", useMosaicChecked)) {
+                    if (ImGui.checkbox(I18n.INSTANCE.get("editor.surface.mosaic"), useMosaicChecked)) {
                         surface.setUseMosaic(useMosaicChecked.get());
                     }
                     ImGui.separator();
@@ -152,9 +153,10 @@ public class FSurfaceEditor extends Form {
 
     private void drawLayerAndModeControls() {
         // Selector de Capas
-        ImGui.text("Capa Activa:");
+        ImGui.text(I18n.INSTANCE.get("editor.surface.layerActive") + ":");
         ImGui.sameLine();
-        String[] labels = capas.stream().map(n -> "Capa " + n).toArray(String[]::new);
+        String[] labels = capas.stream().map(n -> I18n.INSTANCE.get("menu.view.layer") + " " + n)
+                .toArray(String[]::new);
         ImGui.pushItemWidth(120);
         if (ImGui.combo("##capasCombo", selectedLayer, labels, labels.length)) {
             surface.setLayer(capas.get(selectedLayer.get()));
@@ -167,7 +169,7 @@ public class FSurfaceEditor extends Form {
         int currentMode = surface.getMode();
 
         // Botón Seleccionar (Vacio)
-        if (UIComponents.toggleButton("Seleccion", currentMode == 0)) {
+        if (UIComponents.toggleButton(I18n.INSTANCE.get("common.selection"), currentMode == 0)) {
             surface.setMode(currentMode == 0 ? 0 : 0); // Always set to 0 when clicked
             selectedGrhIndex = -1;
         }
@@ -175,7 +177,7 @@ public class FSurfaceEditor extends Form {
         ImGui.sameLine();
 
         // Botón Insertar
-        if (UIComponents.toggleButton("Insertar", currentMode == 1)) {
+        if (UIComponents.toggleButton(I18n.INSTANCE.get("common.insert"), currentMode == 1)) {
             if (selectedGrhIndex > 0) {
                 surface.setMode(currentMode == 1 ? 0 : 1);
                 if (surface.getMode() == 1) {
@@ -190,7 +192,7 @@ public class FSurfaceEditor extends Form {
         if (currentMode == 2) {
             ImGui.pushStyleColor(ImGuiCol.Button, Theme.COLOR_DANGER);
         }
-        if (ImGui.button("Borrar")) {
+        if (ImGui.button(I18n.INSTANCE.get("common.delete"))) {
             surface.setMode(currentMode == 2 ? 0 : 2);
         }
         if (currentMode == 2) {
@@ -200,44 +202,49 @@ public class FSurfaceEditor extends Form {
         ImGui.sameLine();
 
         // Botón Capturar (Pick)
-        if (UIComponents.toggleButton("Capturar", currentMode == 3)) {
+        if (UIComponents.toggleButton(I18n.INSTANCE.get("common.pick"), currentMode == 3)) {
             surface.setMode(currentMode == 3 ? 0 : 3);
         }
     }
 
     private void drawToolSettings() {
-        ImGui.text("Herramienta:");
+        ImGui.text(I18n.INSTANCE.get("editor.surface.tool") + ":");
 
-        if (ImGui.radioButton("Pincel", surface.getToolMode() == Surface.ToolMode.BRUSH)) {
+        if (ImGui.radioButton(I18n.INSTANCE.get("editor.surface.brush"),
+                surface.getToolMode() == Surface.ToolMode.BRUSH)) {
             surface.setToolMode(Surface.ToolMode.BRUSH);
         }
         ImGui.sameLine();
-        if (ImGui.radioButton("Cubo", surface.getToolMode() == Surface.ToolMode.BUCKET)) {
+        if (ImGui.radioButton(I18n.INSTANCE.get("editor.surface.bucket"),
+                surface.getToolMode() == Surface.ToolMode.BUCKET)) {
             surface.setToolMode(Surface.ToolMode.BUCKET);
         }
 
         ImGui.spacing();
 
         if (surface.getToolMode() == Surface.ToolMode.BRUSH) {
-            ImGui.text("Forma:");
-            if (ImGui.radioButton("Cuadrado", surface.getBrushShape() == Surface.BrushShape.SQUARE)) {
+            ImGui.text(I18n.INSTANCE.get("editor.surface.shape") + ":");
+            if (ImGui.radioButton(I18n.INSTANCE.get("editor.surface.square"),
+                    surface.getBrushShape() == Surface.BrushShape.SQUARE)) {
                 surface.setBrushShape(Surface.BrushShape.SQUARE);
             }
             ImGui.sameLine();
-            if (ImGui.radioButton("Circulo", surface.getBrushShape() == Surface.BrushShape.CIRCLE)) {
+            if (ImGui.radioButton(I18n.INSTANCE.get("editor.surface.circle"),
+                    surface.getBrushShape() == Surface.BrushShape.CIRCLE)) {
                 surface.setBrushShape(Surface.BrushShape.CIRCLE);
             }
             ImGui.sameLine();
-            if (ImGui.radioButton("Scatter", surface.getBrushShape() == Surface.BrushShape.SCATTER)) {
+            if (ImGui.radioButton(I18n.INSTANCE.get("editor.surface.scatter"),
+                    surface.getBrushShape() == Surface.BrushShape.SCATTER)) {
                 surface.setBrushShape(Surface.BrushShape.SCATTER);
             }
 
-            if (ImGui.sliderInt("Tamaño", selectedBrushSize.getData(), 1, 15)) {
+            if (ImGui.sliderInt(I18n.INSTANCE.get("editor.surface.size"), selectedBrushSize.getData(), 1, 15)) {
                 surface.setBrushSize(selectedBrushSize.get());
             }
 
             if (surface.getBrushShape() == Surface.BrushShape.SCATTER) {
-                if (ImGui.sliderFloat("Densidad", scatterDensityArr, 0.05f, 1.0f)) {
+                if (ImGui.sliderFloat(I18n.INSTANCE.get("editor.surface.density"), scatterDensityArr, 0.05f, 1.0f)) {
                     surface.setScatterDensity(scatterDensityArr[0]);
                 }
             }
@@ -249,7 +256,7 @@ public class FSurfaceEditor extends Form {
             return;
 
         // Buscador
-        ImGui.text("Buscar ID:");
+        ImGui.text(I18n.INSTANCE.get("editor.surface.search") + ":");
         ImGui.sameLine();
         ImGui.pushItemWidth(80);
         if (ImGui.inputInt("##search", searchGrh)) {
@@ -274,7 +281,7 @@ public class FSurfaceEditor extends Form {
         int totalGrhs = AssetRegistry.grhData.length;
         int maxPages = (totalGrhs / ITEMS_PER_PAGE);
 
-        ImGui.text("Pag: " + (currentPage + 1) + "/" + (maxPages + 1));
+        ImGui.text(I18n.INSTANCE.get("editor.surface.page") + ": " + (currentPage + 1) + "/" + (maxPages + 1));
         ImGui.sameLine();
         if (ImGui.button("<") && currentPage > 0)
             currentPage--;

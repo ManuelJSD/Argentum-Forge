@@ -11,6 +11,7 @@ import org.argentumforge.engine.gui.ImGUISystem;
 import org.argentumforge.engine.renderer.RenderSettings;
 import org.argentumforge.engine.gui.Theme;
 import org.argentumforge.engine.utils.editor.*;
+import org.argentumforge.engine.i18n.I18n;
 
 import static org.argentumforge.engine.utils.GameData.options;
 import static org.argentumforge.engine.utils.Time.FPS;
@@ -299,20 +300,23 @@ public final class FMain extends Form {
         if (selectionActive) {
             ImGui.pushStyleColor(ImGuiCol.Button, Theme.COLOR_ACCENT);
         }
-        if (ImGui.button("Selección", 100, 25)) {
+        if (ImGui.button(I18n.INSTANCE.get("common.selection"), 100, 25)) {
             Selection sel = Selection.getInstance();
             sel.setActive(!sel.isActive());
 
             if (sel.isActive()) {
-                Console.INSTANCE.addMsgToConsole("Modo Selección ACTIVADO. Pincha y arrastra NPCs u Objetos.", REGULAR,
+                Console.INSTANCE.addMsgToConsole(I18n.INSTANCE.get("msg.selectionModeOn"), REGULAR,
                         new RGBColor(0f, 1f, 0f));
                 // Desactivar otros modos
                 Surface.getInstance().setMode(0);
                 Npc.getInstance().setMode(0);
                 Obj.getInstance().setMode(0);
                 Block.getInstance().setMode(0);
+                Trigger.getInstance().setMode(0);
+                Transfer.getInstance().setMode(0);
             } else {
-                Console.INSTANCE.addMsgToConsole("Modo Selección DESACTIVADO.", REGULAR, new RGBColor(1f, 1f, 0f));
+                Console.INSTANCE.addMsgToConsole(I18n.INSTANCE.get("msg.selectionModeOff"), REGULAR,
+                        new RGBColor(1f, 1f, 0f));
             }
         }
         if (selectionActive) {
@@ -327,22 +331,22 @@ public final class FMain extends Form {
 
             RenderSettings renderSettings = options.getRenderSettings();
 
-            if (ImGui.beginMenu("Archivo")) {
+            if (ImGui.beginMenu(I18n.INSTANCE.get("menu.file"))) {
 
-                if (ImGui.menuItem("Nuevo Mapa")) {
+                if (ImGui.menuItem(I18n.INSTANCE.get("menu.file.new"))) {
                     this.newMap();
                 }
 
                 ImGui.separator();
 
-                if (ImGui.menuItem("Cargar Mapa")) {
+                if (ImGui.menuItem(I18n.INSTANCE.get("menu.file.open"))) {
                     this.loadMapAction();
                 }
 
-                if (ImGui.beginMenu("Mapas Recientes")) {
+                if (ImGui.beginMenu(I18n.INSTANCE.get("menu.file.recent"))) {
                     java.util.List<String> recentMaps = options.getRecentMaps();
                     if (recentMaps.isEmpty()) {
-                        ImGui.textDisabled("No hay mapas recientes");
+                        ImGui.textDisabled(I18n.INSTANCE.get("menu.file.recent.none"));
                     } else {
                         for (String mapPath : recentMaps) {
                             if (ImGui.menuItem(mapPath)) {
@@ -353,32 +357,32 @@ public final class FMain extends Form {
                     ImGui.endMenu();
                 }
 
-                if (ImGui.menuItem("Guardar Mapa")) {
+                if (ImGui.menuItem(I18n.INSTANCE.get("menu.file.save"))) {
                     org.argentumforge.engine.utils.MapFileUtils.saveMap();
                 }
 
                 ImGui.separator();
 
-                if (ImGui.menuItem("Opciones")) {
+                if (ImGui.menuItem(I18n.INSTANCE.get("options.title"))) {
                     ImGUISystem.INSTANCE.show(new FOptions());
                 }
 
                 ImGui.separator();
 
-                if (ImGui.menuItem("Salir")) {
+                if (ImGui.menuItem(I18n.INSTANCE.get("menu.file.exit"))) {
                     org.argentumforge.engine.Engine.closeClient();
                 }
                 ImGui.endMenu();
             }
 
-            if (ImGui.beginMenu("Editar")) {
+            if (ImGui.beginMenu(I18n.INSTANCE.get("menu.edit"))) {
                 CommandManager manager = CommandManager.getInstance();
 
-                if (ImGui.menuItem("Deshacer", "Ctrl+Z", false, manager.canUndo())) {
+                if (ImGui.menuItem(I18n.INSTANCE.get("menu.edit.undo"), "Ctrl+Z", false, manager.canUndo())) {
                     manager.undo();
                 }
 
-                if (ImGui.menuItem("Rehacer", "Ctrl+Y", false, manager.canRedo())) {
+                if (ImGui.menuItem(I18n.INSTANCE.get("menu.edit.redo"), "Ctrl+Y", false, manager.canRedo())) {
                     manager.redo();
                 }
 
@@ -428,86 +432,87 @@ public final class FMain extends Form {
              * }
              */
 
-            if (ImGui.beginMenu("Mapa")) {
-                if (ImGui.menuItem("Información del Mapa")) {
+            if (ImGui.beginMenu(I18n.INSTANCE.get("menu.map"))) {
+                if (ImGui.menuItem(I18n.INSTANCE.get("menu.map.properties"))) {
                     ImGUISystem.INSTANCE.show(new FInfoMap());
                 }
 
-                if (ImGui.menuItem("Validar Mapa")) {
+                if (ImGui.menuItem(I18n.INSTANCE.get("menu.map.validate"))) {
                     if (org.argentumforge.engine.utils.GameData.getActiveContext() != null) {
                         ImGUISystem.INSTANCE.show(new org.argentumforge.engine.gui.forms.FMapValidator());
                     } else {
-                        javax.swing.JOptionPane.showMessageDialog(null, "No hay ningún mapa abierto para validar.");
+                        javax.swing.JOptionPane.showMessageDialog(null, I18n.INSTANCE.get("msg.noActiveMap"));
                     }
                 }
                 ImGui.endMenu();
             }
 
-            if (ImGui.beginMenu("Ver")) {
-                if (ImGui.menuItem("Restablecer Zoom", "Ctrl+0")) {
+            if (ImGui.beginMenu(I18n.INSTANCE.get("menu.view"))) {
+                if (ImGui.menuItem(I18n.INSTANCE.get("menu.view.resetZoom"), "Ctrl+0")) {
                     Camera.setTileSize(32);
                 }
 
                 ImGui.separator();
 
-                if (ImGui.beginMenu("Capas")) {
-                    if (ImGui.menuItem("Capa 1 (Superficies)", "", renderSettings.getShowLayer()[0])) {
+                if (ImGui.beginMenu(I18n.INSTANCE.get("menu.view.layers"))) {
+                    if (ImGui.menuItem(I18n.INSTANCE.get("menu.view.layer1"), "", renderSettings.getShowLayer()[0])) {
                         renderSettings.getShowLayer()[0] = !renderSettings.getShowLayer()[0];
                         options.save();
                     }
-                    if (ImGui.menuItem("Capa 2 (Costas, etc)", "", renderSettings.getShowLayer()[1])) {
+                    if (ImGui.menuItem(I18n.INSTANCE.get("menu.view.layer2"), "", renderSettings.getShowLayer()[1])) {
                         renderSettings.getShowLayer()[1] = !renderSettings.getShowLayer()[1];
                         options.save();
                     }
-                    if (ImGui.menuItem("Capa 3 (Arboles, etc)", "", renderSettings.getShowLayer()[2])) {
+                    if (ImGui.menuItem(I18n.INSTANCE.get("menu.view.layer3"), "", renderSettings.getShowLayer()[2])) {
                         renderSettings.getShowLayer()[2] = !renderSettings.getShowLayer()[2];
                         options.save();
                     }
-                    if (ImGui.menuItem("Capa 4 (Techos, etc)", "", renderSettings.getShowLayer()[3])) {
+                    if (ImGui.menuItem(I18n.INSTANCE.get("menu.view.layer4"), "", renderSettings.getShowLayer()[3])) {
                         renderSettings.getShowLayer()[3] = !renderSettings.getShowLayer()[3];
                         options.save();
                     }
                     ImGui.endMenu();
                 }
 
-                if (ImGui.menuItem("Bloqueos", "", renderSettings.getShowBlock())) {
+                if (ImGui.menuItem(I18n.INSTANCE.get("menu.view.blocks"), "", renderSettings.getShowBlock())) {
                     renderSettings.setShowBlock(!renderSettings.getShowBlock());
                     options.save();
                 }
 
-                if (ImGui.menuItem("Objetos", "", renderSettings.getShowOJBs())) {
+                if (ImGui.menuItem(I18n.INSTANCE.get("menu.view.objects"), "", renderSettings.getShowOJBs())) {
                     renderSettings.setShowOJBs(!renderSettings.getShowOJBs());
                     options.save();
                 }
 
-                if (ImGui.menuItem("NPC's", "", renderSettings.getShowNPCs())) {
+                if (ImGui.menuItem(I18n.INSTANCE.get("menu.view.npcs"), "", renderSettings.getShowNPCs())) {
                     renderSettings.setShowNPCs(!renderSettings.getShowNPCs());
                     options.save();
                 }
 
-                if (ImGui.menuItem("Traslados", "", renderSettings.getShowMapTransfer())) {
+                if (ImGui.menuItem(I18n.INSTANCE.get("menu.view.transfers"), "", renderSettings.getShowMapTransfer())) {
                     renderSettings.setShowMapTransfer(!renderSettings.getShowMapTransfer());
                     options.save();
                 }
 
-                if (ImGui.menuItem("Triggers", "", renderSettings.getShowTriggers())) {
+                if (ImGui.menuItem(I18n.INSTANCE.get("menu.view.triggers"), "", renderSettings.getShowTriggers())) {
                     renderSettings.setShowTriggers(!renderSettings.getShowTriggers());
                     options.save();
                 }
 
                 ImGui.separator();
 
-                if (ImGui.menuItem("Rejilla", "G", renderSettings.isShowGrid())) {
+                if (ImGui.menuItem(I18n.INSTANCE.get("menu.view.grid"), "G", renderSettings.isShowGrid())) {
                     renderSettings.setShowGrid(!renderSettings.isShowGrid());
                     options.save();
                 }
 
                 ImGui.separator();
 
-                if (ImGui.beginMenu("Minimapa")) {
-                    if (ImGui.beginMenu("Capas")) {
+                if (ImGui.beginMenu(I18n.INSTANCE.get("menu.view.minimap"))) {
+                    if (ImGui.beginMenu(I18n.INSTANCE.get("menu.view.layers"))) {
                         for (int i = 0; i < 4; i++) {
-                            if (ImGui.menuItem("Capa " + (i + 1), "", renderSettings.getMinimapLayers()[i])) {
+                            if (ImGui.menuItem(I18n.INSTANCE.get("menu.view.layer") + " " + (i + 1), "",
+                                    renderSettings.getMinimapLayers()[i])) {
                                 renderSettings.getMinimapLayers()[i] = !renderSettings.getMinimapLayers()[i];
                                 options.save();
                             }
@@ -517,22 +522,26 @@ public final class FMain extends Form {
 
                     ImGui.separator();
 
-                    if (ImGui.menuItem("NPCs", "", renderSettings.isShowMinimapNPCs())) {
+                    if (ImGui.menuItem(I18n.INSTANCE.get("menu.view.minimap.npcs"), "",
+                            renderSettings.isShowMinimapNPCs())) {
                         renderSettings.setShowMinimapNPCs(!renderSettings.isShowMinimapNPCs());
                         options.save();
                     }
 
-                    if (ImGui.menuItem("Traslados", "", renderSettings.isShowMinimapExits())) {
+                    if (ImGui.menuItem(I18n.INSTANCE.get("menu.view.minimap.exits"), "",
+                            renderSettings.isShowMinimapExits())) {
                         renderSettings.setShowMinimapExits(!renderSettings.isShowMinimapExits());
                         options.save();
                     }
 
-                    if (ImGui.menuItem("Triggers", "", renderSettings.isShowMinimapTriggers())) {
+                    if (ImGui.menuItem(I18n.INSTANCE.get("menu.view.minimap.triggers"), "",
+                            renderSettings.isShowMinimapTriggers())) {
                         renderSettings.setShowMinimapTriggers(!renderSettings.isShowMinimapTriggers());
                         options.save();
                     }
 
-                    if (ImGui.menuItem("Bloqueos", "", renderSettings.isShowMinimapBlocks())) {
+                    if (ImGui.menuItem(I18n.INSTANCE.get("menu.view.minimap.blocks"), "",
+                            renderSettings.isShowMinimapBlocks())) {
                         renderSettings.setShowMinimapBlocks(!renderSettings.isShowMinimapBlocks());
                         options.save();
                     }
@@ -543,11 +552,11 @@ public final class FMain extends Form {
                 ImGui.endMenu();
             }
 
-            if (ImGui.beginMenu("Herramientas")) {
-                if (ImGui.menuItem("Generar Colores Minimapa")) {
+            if (ImGui.beginMenu(I18n.INSTANCE.get("menu.tools"))) {
+                if (ImGui.menuItem(I18n.INSTANCE.get("menu.tools.generateColors"))) {
                     int response = javax.swing.JOptionPane.showConfirmDialog(null,
-                            "Esta operación puede tardar unos minutos.\n¿Desea continuar?",
-                            "Generar Colores", javax.swing.JOptionPane.YES_NO_OPTION);
+                            I18n.INSTANCE.get("msg.generateColorsConfirm"),
+                            I18n.INSTANCE.get("menu.tools.generateColors"), javax.swing.JOptionPane.YES_NO_OPTION);
 
                     if (response == javax.swing.JOptionPane.YES_OPTION) {
                         MinimapColorGenerator.generateBinary();
@@ -556,14 +565,15 @@ public final class FMain extends Form {
                 ImGui.endMenu();
             }
 
-            if (ImGui.beginMenu("Miscelánea")) {
-                if (ImGui.menuItem("Modo Caminata", "", org.argentumforge.engine.game.User.INSTANCE.isWalkingmode())) {
+            if (ImGui.beginMenu(I18n.INSTANCE.get("menu.misc"))) {
+                if (ImGui.menuItem(I18n.INSTANCE.get("menu.misc.walkMode"), "",
+                        org.argentumforge.engine.game.User.INSTANCE.isWalkingmode())) {
                     org.argentumforge.engine.game.User.INSTANCE
                             .setWalkingmode(!org.argentumforge.engine.game.User.INSTANCE.isWalkingmode());
                 }
 
-                if (ImGui.beginMenu("Ambiente")) {
-                    if (ImGui.colorEdit3("Luz Ambiente", ambientColorArr)) {
+                if (ImGui.beginMenu(I18n.INSTANCE.get("menu.misc.ambient"))) {
+                    if (ImGui.colorEdit3(I18n.INSTANCE.get("menu.misc.ambient.color"), ambientColorArr)) {
                         org.argentumforge.engine.game.Weather.INSTANCE.setAmbientColor(ambientColorArr[0],
                                 ambientColorArr[1],
                                 ambientColorArr[2]);
@@ -571,19 +581,19 @@ public final class FMain extends Form {
 
                     ImGui.separator();
 
-                    if (ImGui.menuItem("Día")) {
+                    if (ImGui.menuItem(I18n.INSTANCE.get("menu.misc.day"))) {
                         ambientColorArr[0] = 1.0f;
                         ambientColorArr[1] = 1.0f;
                         ambientColorArr[2] = 1.0f;
                         org.argentumforge.engine.game.Weather.INSTANCE.setAmbientColor(1.0f, 1.0f, 1.0f);
                     }
-                    if (ImGui.menuItem("Tarde")) {
+                    if (ImGui.menuItem(I18n.INSTANCE.get("menu.misc.afternoon"))) {
                         ambientColorArr[0] = 0.8f;
                         ambientColorArr[1] = 0.5f;
                         ambientColorArr[2] = 0.3f;
                         org.argentumforge.engine.game.Weather.INSTANCE.setAmbientColor(0.8f, 0.5f, 0.3f);
                     }
-                    if (ImGui.menuItem("Noche")) {
+                    if (ImGui.menuItem(I18n.INSTANCE.get("menu.misc.night"))) {
                         ambientColorArr[0] = 0.2f;
                         ambientColorArr[1] = 0.2f;
                         ambientColorArr[2] = 0.4f;
@@ -595,7 +605,7 @@ public final class FMain extends Form {
 
                 ImGui.separator();
 
-                if (ImGui.menuItem("Biblioteca GRH", "")) {
+                if (ImGui.menuItem(I18n.INSTANCE.get("grhlib.title"), "")) {
                     if (ImGUISystem.INSTANCE.isFormVisible("FGrhLibrary")) {
                         ImGUISystem.INSTANCE.deleteFrmArray(grhLibrary);
                     } else {

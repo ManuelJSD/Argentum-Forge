@@ -8,6 +8,7 @@ import imgui.type.ImInt;
 import imgui.type.ImString;
 import org.argentumforge.engine.utils.GameData;
 import org.argentumforge.engine.utils.inits.MapProperties;
+import org.argentumforge.engine.i18n.I18n;
 
 /**
  * Ventana de edición para las propiedades generales del mapa actual.
@@ -61,44 +62,44 @@ public final class FInfoMap extends Form {
         }
 
         ImGui.setNextWindowSize(350, 300, ImGuiCond.Always);
-        if (ImGui.begin("Información del Mapa", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize)) {
+        if (ImGui.begin(I18n.INSTANCE.get("map.info.title"), ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize)) {
 
-            if (ImGui.inputText("Nombre", mapName)) {
+            if (ImGui.inputText(I18n.INSTANCE.get("map.info.name"), mapName)) {
                 GameData.mapProperties.setName(mapName.get());
             }
 
-            if (ImGui.inputInt("Música #", musicNum)) {
+            if (ImGui.inputInt(I18n.INSTANCE.get("map.info.music"), musicNum)) {
                 GameData.mapProperties.setMusicIndex(musicNum.get());
             }
 
             ImGui.separator();
 
-            if (ImGui.checkbox("Magia Sin Efecto", magiaSinEfecto)) {
+            if (ImGui.checkbox(I18n.INSTANCE.get("map.info.noMagic"), magiaSinEfecto)) {
                 GameData.mapProperties.setMagiaSinEfecto(magiaSinEfecto.get() ? 1 : 0);
             }
 
-            if (ImGui.checkbox("No Encriptar MP", noEncriptarMP)) {
+            if (ImGui.checkbox(I18n.INSTANCE.get("map.info.noEncrypt"), noEncriptarMP)) {
                 GameData.mapProperties.setNoEncriptarMP(noEncriptarMP.get() ? 1 : 0);
             }
 
-            if (ImGui.checkbox("Player Killer (PK)", pk)) {
+            if (ImGui.checkbox(I18n.INSTANCE.get("map.info.pk"), pk)) {
                 GameData.mapProperties.setPlayerKiller(pk.get() ? 1 : 0);
             }
 
-            if (ImGui.checkbox("Restringir", restringir)) {
+            if (ImGui.checkbox(I18n.INSTANCE.get("map.info.restrict"), restringir)) {
                 GameData.mapProperties.setRestringir(restringir.get() ? 1 : 0);
             }
 
             ImGui.separator();
 
-            if (ImGui.inputInt("Backup Map", backupMap)) {
+            if (ImGui.inputInt(I18n.INSTANCE.get("map.info.backup"), backupMap)) {
                 GameData.mapProperties.setBackup(backupMap.get());
             }
 
             // ComboBox para Zona
             String[] zonas = { "CIUDAD", "CAMPO", "DUNGEON" };
             String currentZona = GameData.mapProperties.getZona();
-            if (ImGui.beginCombo("Zona", currentZona)) {
+            if (ImGui.beginCombo(I18n.INSTANCE.get("map.info.zone"), currentZona)) {
                 for (String z : zonas) {
                     boolean isSelected = currentZona.equalsIgnoreCase(z);
                     if (ImGui.selectable(z, isSelected)) {
@@ -114,7 +115,7 @@ public final class FInfoMap extends Form {
             // ComboBox para Terreno
             String[] terrenos = { "NIEVE", "DESIERTO", "BOSQUE" };
             String currentTerreno = GameData.mapProperties.getTerreno();
-            if (ImGui.beginCombo("Terreno", currentTerreno)) {
+            if (ImGui.beginCombo(I18n.INSTANCE.get("map.info.terrain"), currentTerreno)) {
                 for (String t : terrenos) {
                     boolean isSelected = currentTerreno.equalsIgnoreCase(t);
                     if (ImGui.selectable(t, isSelected)) {
@@ -130,7 +131,7 @@ public final class FInfoMap extends Form {
             ImGui.dummy(0, 10);
             ImGui.separator();
 
-            if (ImGui.button("Cerrar", ImGui.getWindowWidth() - 15, 25)) {
+            if (ImGui.button(I18n.INSTANCE.get("common.close"), ImGui.getWindowWidth() - 15, 25)) {
                 this.close();
             }
 
