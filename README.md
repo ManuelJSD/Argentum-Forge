@@ -67,7 +67,7 @@ https://github.com/ManuelJSandalio/Argentum-Forge.git
 
 # Image
 
-<img width="1918" height="1082" alt="image" src="https://github.com/user-attachments/assets/b707175c-fff1-40e7-8aec-44073298927d" />
+<img width="1918" height="1078" alt="image" src="https://github.com/user-attachments/assets/f188b837-b803-4686-81f7-ed8f9d9b0b6e" />
 
 <h1>How to Contribute:</h1>
 <br/>
