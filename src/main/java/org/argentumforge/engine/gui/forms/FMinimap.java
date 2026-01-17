@@ -8,6 +8,7 @@ import org.argentumforge.engine.game.User;
 import org.argentumforge.engine.utils.AssetRegistry;
 import org.argentumforge.engine.utils.GameData;
 import org.argentumforge.engine.game.Options;
+import org.argentumforge.engine.i18n.I18n;
 
 /**
  * Formulario que muestra un mapa en miniatura (minimapa) del escenario actual.
@@ -26,7 +27,7 @@ public final class FMinimap extends Form {
     @Override
     public void render() {
         ImGui.setNextWindowSize(MINIMAP_SIZE + 20, MINIMAP_SIZE + 40, ImGuiCond.Always);
-        if (ImGui.begin("Minimapa", ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse)) {
+        if (ImGui.begin(I18n.INSTANCE.get("minimap.title"), ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse)) {
 
             float mouseX = ImGui.getMousePosX();
             float mouseY = ImGui.getMousePosY();
@@ -46,9 +47,9 @@ public final class FMinimap extends Form {
 
             if (!binExists || AssetRegistry.minimapColors.isEmpty()) {
                 ImGui.setCursorPos(20, 150);
-                ImGui.textColored(ImGui.getColorU32(1.0f, 0.0f, 0.0f, 1.0f), "¡Colores no generados!");
+                ImGui.textColored(ImGui.getColorU32(1.0f, 0.0f, 0.0f, 1.0f), I18n.INSTANCE.get("minimap.noColors"));
                 ImGui.setCursorPos(20, 170);
-                if (ImGui.button("Generar ahora")) {
+                if (ImGui.button(I18n.INSTANCE.get("minimap.generateNow"))) {
                     org.argentumforge.engine.utils.editor.MinimapColorGenerator.generateBinary();
                 }
             }

@@ -148,6 +148,7 @@ public final class GameData {
 
         reader = new BinaryDataReader();
         options.load();
+        org.argentumforge.engine.i18n.I18n.INSTANCE.loadLanguage(options.getLanguage());
 
         if (checkResources()) {
             loadNpcs();

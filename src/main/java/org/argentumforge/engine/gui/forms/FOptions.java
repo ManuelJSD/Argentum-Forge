@@ -38,9 +38,10 @@ public final class FOptions extends Form {
         ImGui.setNextWindowSize(400, 360, ImGuiCond.Always);
         ImGui.begin("Configuración", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize);
 
-        if (ImGui.checkbox("Pantalla Completa", options.isFullscreen())) {
+        if (ImGui.checkbox(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.graphics") + " (Fullscreen)",
+                options.isFullscreen())) {
             options.setFullscreen(!options.isFullscreen());
-            Window.INSTANCE.toggleWindow();
+            org.argentumforge.engine.Window.INSTANCE.toggleWindow();
         }
 
         // Selector de Resolucion
@@ -67,7 +68,7 @@ public final class FOptions extends Form {
 
                     options.setScreenWidth(newWidth);
                     options.setScreenHeight(newHeight);
-                    Window.INSTANCE.updateResolution(newWidth, newHeight);
+                    org.argentumforge.engine.Window.INSTANCE.updateResolution(newWidth, newHeight);
                     options.save();
                 }
                 if (isSelected) {
@@ -77,9 +78,9 @@ public final class FOptions extends Form {
             ImGui.endCombo();
         }
 
-        if (ImGui.checkbox("Sincronizacion Vertical", options.isVsync())) {
+        if (ImGui.checkbox("VSYNC", options.isVsync())) {
             options.setVsync(!options.isVsync());
-            Window.INSTANCE.toggleWindow();
+            org.argentumforge.engine.Window.INSTANCE.toggleWindow();
         }
 
         ImGui.separator();
@@ -98,6 +99,36 @@ public final class FOptions extends Form {
         if (ImGui.checkbox("Cursores graficos", options.isCursorGraphic())) {
             options.setCursorGraphic(!options.isCursorGraphic());
         }
+
+        ImGui.separator();
+
+        // Language Selector
+        java.util.List<String> availableLanguages = org.argentumforge.engine.i18n.I18n.INSTANCE.getAvailableLanguages();
+        String currentLanguage = options.getLanguage();
+        int currentLangIndex = availableLanguages.indexOf(currentLanguage);
+        if (currentLangIndex == -1)
+            currentLangIndex = 0;
+
+        ImGui.text(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.language") + ":");
+        ImGui.setNextItemWidth(200);
+        if (ImGui.beginCombo("##language",
+                org.argentumforge.engine.i18n.I18n.INSTANCE.getLanguageName(currentLanguage))) {
+            for (int i = 0; i < availableLanguages.size(); i++) {
+                String lang = availableLanguages.get(i);
+                boolean isSelected = (i == currentLangIndex);
+                if (ImGui.selectable(org.argentumforge.engine.i18n.I18n.INSTANCE.getLanguageName(lang), isSelected)) {
+                    options.setLanguage(lang);
+                    org.argentumforge.engine.i18n.I18n.INSTANCE.loadLanguage(lang);
+                    options.save();
+                }
+                if (isSelected) {
+                    ImGui.setItemDefaultFocus();
+                }
+            }
+            ImGui.endCombo();
+        }
+        ImGui.textColored(ImGui.getColorU32(1.0f, 1.0f, 0.0f, 1.0f),
+                "* " + org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.restart"));
 
         ImGui.separator();
         ImGui.text("Transparencia Previsualizacion (Ghost):");
@@ -119,13 +150,13 @@ public final class FOptions extends Form {
         float centerX = (ImGui.getWindowWidth() - buttonWidth) / 2;
 
         ImGui.setCursorPosX(centerX);
-        if (ImGui.button("Configurar Teclas", buttonWidth, 25)) {
+        if (ImGui.button(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.keys"), buttonWidth, 25)) {
             playSound(SND_CLICK);
             org.argentumforge.engine.gui.ImGUISystem.INSTANCE.show(new FBindKeys());
         }
 
         ImGui.setCursorPosX(centerX);
-        if (ImGui.button("Editar Rutas", buttonWidth, 25)) {
+        if (ImGui.button(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.paths"), buttonWidth, 25)) {
             playSound(SND_CLICK);
             org.argentumforge.engine.gui.ImGUISystem.INSTANCE.show(new FRoutes());
         }
@@ -133,7 +164,7 @@ public final class FOptions extends Form {
         ImGui.separator();
 
         ImGui.setCursorPosX(centerX);
-        if (ImGui.button("Cerrar", buttonWidth, 25)) {
+        if (ImGui.button(org.argentumforge.engine.i18n.I18n.INSTANCE.get("common.close"), buttonWidth, 25)) {
             options.save();
             this.close();
         }

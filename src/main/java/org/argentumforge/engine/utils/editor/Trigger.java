@@ -64,6 +64,18 @@ public class Trigger {
         this.isActive = active;
         if (!active) {
             selectedTriggerId = 0;
+            this.mode = 0;
+        }
+    }
+
+    public int getMode() {
+        return mode;
+    }
+
+    public void setMode(int mode) {
+        this.mode = mode;
+        if (mode > 0) {
+            this.isActive = true;
         }
     }
 

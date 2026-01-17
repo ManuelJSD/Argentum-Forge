@@ -21,7 +21,7 @@ public enum Options {
     private boolean fullscreen = false;
     private boolean vsync = true;
     private boolean cursorGraphic = true;
-    private String language = "es";
+    private String language = "es_ES";
     private String graphicsPath = "resources/graficos";
     private String datsPath = "resources/dats";
     private String initPath = "resources/inits";
@@ -293,7 +293,15 @@ public enum Options {
             case "Fullscreen" -> fullscreen = Boolean.parseBoolean(value);
             case "VSYNC" -> vsync = Boolean.parseBoolean(value);
             case "CursorGraphic" -> cursorGraphic = Boolean.parseBoolean(value);
-            case "Language" -> language = value;
+            case "Language" -> {
+                if ("es".equalsIgnoreCase(value)) {
+                    language = "es_ES";
+                } else if ("en".equalsIgnoreCase(value)) {
+                    language = "en_US";
+                } else {
+                    language = value;
+                }
+            }
             case "ScreenWidth" -> screenWidth = Integer.parseInt(value);
             case "ScreenHeight" -> screenHeight = Integer.parseInt(value);
             case "ClientWidth" -> clientWidth = Integer.parseInt(value);
