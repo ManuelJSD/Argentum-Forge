@@ -8,6 +8,7 @@ import imgui.type.ImString;
 import org.argentumforge.engine.utils.editor.GrhLibraryManager;
 import org.argentumforge.engine.utils.editor.models.GrhCategory;
 import org.argentumforge.engine.utils.editor.models.GrhIndexRecord;
+import org.argentumforge.engine.i18n.I18n;
 
 import java.util.List;
 
@@ -33,13 +34,14 @@ public class FGrhLibrary extends Form {
     @Override
     public void render() {
         ImGui.setNextWindowSize(700, 500, imgui.flag.ImGuiCond.Always);
-        if (ImGui.begin("Gestion de Biblioteca GRH", pOpen, ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize)) {
+        if (ImGui.begin(I18n.INSTANCE.get("grhlib.manageTitle"), pOpen,
+                ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize)) {
 
             ImGui.columns(2, "LibraryColumns", true);
             ImGui.setColumnWidth(0, 250);
 
             // Buscador Global
-            ImGui.text("Buscar:");
+            ImGui.text(I18n.INSTANCE.get("common.search") + ":");
             ImGui.sameLine();
             if (ImGui.inputText("##search", searchQuery)) {
                 // El filtrado ocurre en tiempo real en los bucles de renderizado
@@ -47,7 +49,7 @@ public class FGrhLibrary extends Form {
             ImGui.separator();
 
             // Columna Izquierda: Categorías
-            ImGui.text("Categorías");
+            ImGui.text(I18n.INSTANCE.get("grhlib.categories"));
             if (ImGui.beginChild("CategoriesList", 0, 300, true)) {
                 List<GrhCategory> categories = GrhLibraryManager.getInstance().getCategories();
                 String filter = searchQuery.get().toLowerCase();
@@ -83,7 +85,7 @@ public class FGrhLibrary extends Form {
             }
             ImGui.popItemWidth();
             ImGui.sameLine();
-            if (ImGui.button("Nueva")) {
+            if (ImGui.button(I18n.INSTANCE.get("grhlib.new"))) {
                 if (!newCategoryName.get().isEmpty()) {
                     GrhLibraryManager.getInstance().getCategories().add(new GrhCategory(newCategoryName.get()));
                     newCategoryName.set("");
@@ -91,7 +93,7 @@ public class FGrhLibrary extends Form {
                 }
             }
             ImGui.sameLine();
-            if (ImGui.button("Eliminar")) {
+            if (ImGui.button(I18n.INSTANCE.get("common.delete"))) {
                 if (selectedCategory != null) {
                     GrhLibraryManager.getInstance().getCategories().remove(selectedCategory);
                     selectedCategory = null;
@@ -101,7 +103,7 @@ public class FGrhLibrary extends Form {
             }
 
             if (selectedCategory != null) {
-                ImGui.text("Renombrar:");
+                ImGui.text(I18n.INSTANCE.get("grhlib.rename"));
                 ImGui.pushItemWidth(100);
                 if (ImGui.inputText("##editCat", editCategoryName)) {
                     selectedCategory.setName(editCategoryName.get());
@@ -114,7 +116,7 @@ public class FGrhLibrary extends Form {
 
             // Columna Derecha: Registros de la Categoría
             if (selectedCategory != null) {
-                ImGui.text("Registros en: " + selectedCategory.getName());
+                ImGui.text(I18n.INSTANCE.get("grhlib.records") + " en: " + selectedCategory.getName());
                 if (ImGui.beginChild("RecordsList", 0, 150, true)) {
                     String filter = searchQuery.get().toLowerCase();
                     for (GrhIndexRecord rec : selectedCategory.getRecords()) {
@@ -133,7 +135,7 @@ public class FGrhLibrary extends Form {
                 }
                 ImGui.endChild();
 
-                if (ImGui.button("Añadir Registro")) {
+                if (ImGui.button(I18n.INSTANCE.get("grhlib.addRecord"))) {
                     GrhIndexRecord newRec = new GrhIndexRecord("Nuevo Registro", 0);
                     selectedCategory.addRecord(newRec);
                     selectedRecord = newRec;
@@ -141,7 +143,7 @@ public class FGrhLibrary extends Form {
                     GrhLibraryManager.getInstance().save();
                 }
                 ImGui.sameLine();
-                if (ImGui.button("Subir") && selectedRecord != null) {
+                if (ImGui.button(I18n.INSTANCE.get("grhlib.moveUp")) && selectedRecord != null) {
                     int idx = selectedCategory.getRecords().indexOf(selectedRecord);
                     if (idx > 0) {
                         selectedCategory.getRecords().remove(idx);
@@ -150,7 +152,7 @@ public class FGrhLibrary extends Form {
                     }
                 }
                 ImGui.sameLine();
-                if (ImGui.button("Bajar") && selectedRecord != null) {
+                if (ImGui.button(I18n.INSTANCE.get("grhlib.moveDown")) && selectedRecord != null) {
                     int idx = selectedCategory.getRecords().indexOf(selectedRecord);
                     if (idx < selectedCategory.getRecords().size() - 1) {
                         selectedCategory.getRecords().remove(idx);
@@ -161,18 +163,18 @@ public class FGrhLibrary extends Form {
 
                 if (selectedRecord != null) {
                     ImGui.separator();
-                    ImGui.text("Editar: " + selectedRecord.getName());
+                    ImGui.text(I18n.INSTANCE.get("common.edit") + ": " + selectedRecord.getName());
 
-                    if (ImGui.inputText("Nombre", editRecordName))
+                    if (ImGui.inputText(I18n.INSTANCE.get("common.name"), editRecordName))
                         selectedRecord.setName(editRecordName.get());
-                    if (ImGui.inputInt("GRH Index", editRecordGrh))
+                    if (ImGui.inputInt(I18n.INSTANCE.get("grhlib.grhIndex"), editRecordGrh))
                         selectedRecord.setGrhIndex(editRecordGrh.get());
-                    if (ImGui.inputInt("Capa (1-4)", editRecordLayer))
+                    if (ImGui.inputInt(I18n.INSTANCE.get("grhlib.layer"), editRecordLayer))
                         selectedRecord.setLayer(editRecordLayer.get());
-                    if (ImGui.checkbox("Auto-Bloqueo", editRecordAutoBlock))
+                    if (ImGui.checkbox(I18n.INSTANCE.get("grhlib.autoBlock"), editRecordAutoBlock))
                         selectedRecord.setAutoBlock(editRecordAutoBlock.get());
                     // Mosaico
-                    ImGui.text("Mosaico:");
+                    ImGui.text(I18n.INSTANCE.get("grhlib.mosaic") + ":");
                     ImGui.sameLine();
                     if (ImGui.button("-##W", 25, 25)) {
                         editRecordWidth.set(Math.max(1, editRecordWidth.get() - 1));
@@ -203,11 +205,11 @@ public class FGrhLibrary extends Form {
                     ImGui.sameLine();
                     ImGui.text("H");
 
-                    if (ImGui.button("Guardar Cambios")) {
+                    if (ImGui.button(I18n.INSTANCE.get("grhlib.save"))) {
                         GrhLibraryManager.getInstance().save();
                     }
                     ImGui.sameLine();
-                    if (ImGui.button("Eliminar Registro")) {
+                    if (ImGui.button(I18n.INSTANCE.get("grhlib.deleteRecord"))) {
                         selectedCategory.getRecords().remove(selectedRecord);
                         selectedRecord = null;
                         GrhLibraryManager.getInstance().save();
@@ -216,7 +218,7 @@ public class FGrhLibrary extends Form {
                     // Preview del GRH
                     if (selectedRecord.getGrhIndex() > 0) {
                         ImGui.separator();
-                        ImGui.text("Preview:");
+                        ImGui.text(I18n.INSTANCE.get("editor.npc.preview") + ":");
                         if (selectedRecord.getWidth() > 1 || selectedRecord.getHeight() > 1) {
                             org.argentumforge.engine.gui.PreviewUtils.drawGrhMosaic(selectedRecord.getGrhIndex(),
                                     selectedRecord.getWidth(), selectedRecord.getHeight(), 128, 128);
@@ -227,7 +229,7 @@ public class FGrhLibrary extends Form {
                     }
                 }
             } else {
-                ImGui.text("Selecciona una categoría");
+                ImGui.text(I18n.INSTANCE.get("grhlib.selectCategory"));
             }
 
             ImGui.columns(1);

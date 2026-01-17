@@ -5,6 +5,7 @@ import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.type.ImInt;
 import org.argentumforge.engine.utils.editor.Transfer;
+import org.argentumforge.engine.i18n.I18n;
 
 import static org.argentumforge.engine.utils.GameData.mapData;
 
@@ -33,15 +34,15 @@ public class FTransferEditor extends Form {
     @Override
     public void render() {
         ImGui.setNextWindowSize(320, 310, imgui.flag.ImGuiCond.Once);
-        ImGui.begin("Editor de Traslados", imgui.flag.ImGuiWindowFlags.NoResize);
+        ImGui.begin(I18n.INSTANCE.get("editor.transfer.title"), imgui.flag.ImGuiWindowFlags.NoResize);
 
         // === SECCIÓN: DESTINO ===
-        ImGui.text("Destino:");
+        ImGui.text(I18n.INSTANCE.get("editor.transfer.destination"));
         ImGui.separator();
         ImGui.spacing();
 
         // Campo Mapa
-        ImGui.text("Mapa:");
+        ImGui.text(I18n.INSTANCE.get("editor.transfer.map"));
         ImGui.sameLine(80);
         ImGui.setNextItemWidth(150);
         if (ImGui.inputInt("##MapInput", inputMap, 1, 10, ImGuiInputTextFlags.None)) {
@@ -84,7 +85,7 @@ public class FTransferEditor extends Form {
         ImGui.spacing();
 
         // === SECCIÓN: MODO ===
-        ImGui.text("Modo:");
+        ImGui.text(I18n.INSTANCE.get("editor.transfer.mode"));
         ImGui.spacing();
 
         // Botón Insertar Traslado
@@ -95,7 +96,7 @@ public class FTransferEditor extends Form {
             ImGui.pushStyleColor(ImGuiCol.ButtonActive, 0xFF008800); // Verde más oscuro
         }
 
-        if (ImGui.button("Insertar Traslado", 280, 30)) {
+        if (ImGui.button(I18n.INSTANCE.get("editor.transfer.insert"), 280, 30)) {
             if (isInserting) {
                 // Desactivar
                 transfer.setActive(false);
@@ -121,7 +122,7 @@ public class FTransferEditor extends Form {
             ImGui.pushStyleColor(ImGuiCol.ButtonActive, 0xFF000088); // Rojo más oscuro
         }
 
-        if (ImGui.button("Quitar Traslado", 280, 30)) {
+        if (ImGui.button(I18n.INSTANCE.get("editor.transfer.remove"), 280, 30)) {
             if (isRemoving) {
                 // Desactivar
                 transfer.setActive(false);
@@ -141,21 +142,21 @@ public class FTransferEditor extends Form {
         ImGui.spacing();
 
         // === SECCIÓN: OPCIONES AVANZADAS ===
-        ImGui.text("Opciones:");
+        ImGui.text(I18n.INSTANCE.get("editor.transfer.options"));
         ImGui.spacing();
 
         // Checkbox Unión Manual
-        if (ImGui.checkbox("Unión Manual", manualUnionEnabled)) {
+        if (ImGui.checkbox(I18n.INSTANCE.get("editor.transfer.manualUnion"), manualUnionEnabled)) {
             manualUnionEnabled = !manualUnionEnabled;
             transfer.setManualUnion(manualUnionEnabled);
         }
 
         if (ImGui.isItemHovered()) {
-            ImGui.setTooltip("Calcula automáticamente las coordenadas\nde destino según el borde del mapa");
+            ImGui.setTooltip(I18n.INSTANCE.get("editor.transfer.manualUnionTooltip"));
         }
 
         ImGui.sameLine(160);
-        if (ImGui.button("Unión Automática")) {
+        if (ImGui.button(I18n.INSTANCE.get("editor.transfer.autoUnion"))) {
             org.argentumforge.engine.gui.ImGUISystem.INSTANCE.show(new FAutoUnion());
         }
 
@@ -168,14 +169,14 @@ public class FTransferEditor extends Form {
             ImGui.spacing();
 
             if (transfer.getMode() == 1) {
-                ImGui.textColored(0f, 1f, 0f, 1f, "MODO: INSERTAR");
-                ImGui.text("Destino: Mapa " + transfer.getDestinationMap() +
-                        " (" + transfer.getDestinationX() + ", " + transfer.getDestinationY() + ")");
+                ImGui.textColored(0f, 1f, 0f, 1f, I18n.INSTANCE.get("editor.transfer.mode.insert"));
+                ImGui.text(I18n.INSTANCE.get("editor.transfer.destInfo", transfer.getDestinationMap(),
+                        transfer.getDestinationX(), transfer.getDestinationY()));
                 if (manualUnionEnabled) {
-                    ImGui.textColored(1f, 1f, 0f, 1f, "Unión manual activa");
+                    ImGui.textColored(1f, 1f, 0f, 1f, I18n.INSTANCE.get("editor.transfer.manualUnionActive"));
                 }
             } else {
-                ImGui.textColored(1f, 0f, 0f, 1f, "MODO: QUITAR");
+                ImGui.textColored(1f, 0f, 0f, 1f, I18n.INSTANCE.get("editor.transfer.mode.remove"));
             }
         }
 

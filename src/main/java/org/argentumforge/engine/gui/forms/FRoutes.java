@@ -23,16 +23,17 @@ public class FRoutes extends Form {
         ImGui.setNextWindowFocus();
         ImGui.setNextWindowSize(400, 220, ImGuiCond.Always);
 
-        if (ImGui.begin("Configuración de Rutas", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize)) {
+        if (ImGui.begin(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.paths.title"),
+                ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize)) {
 
-            renderPathSelector("Gráficos", graphicsPath);
-            renderPathSelector("Dats", datsPath);
-            renderPathSelector("Inits", initPath);
-            renderPathSelector("Música", musicPath);
+            renderPathSelector(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.paths.graphics"), graphicsPath);
+            renderPathSelector(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.paths.dats"), datsPath);
+            renderPathSelector(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.paths.inits"), initPath);
+            renderPathSelector(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.paths.music"), musicPath);
 
             ImGui.separator();
 
-            if (ImGui.button("Guardar")) {
+            if (ImGui.button(org.argentumforge.engine.i18n.I18n.INSTANCE.get("common.save"))) {
                 options.setGraphicsPath(graphicsPath.get());
                 options.setDatsPath(datsPath.get());
                 options.setInitPath(initPath.get());
@@ -42,7 +43,7 @@ public class FRoutes extends Form {
                 this.close();
             }
             ImGui.sameLine();
-            if (ImGui.button("Cancelar")) {
+            if (ImGui.button(org.argentumforge.engine.i18n.I18n.INSTANCE.get("common.cancel"))) {
                 this.close();
             }
 
@@ -70,7 +71,7 @@ public class FRoutes extends Form {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         fileChooser.setCurrentDirectory(new File(currentPath.isEmpty() ? "." : currentPath));
-        fileChooser.setDialogTitle("Seleccionar Carpeta");
+        fileChooser.setDialogTitle(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.paths.selectFolder"));
 
         int result = fileChooser.showOpenDialog(null);
         if (result == JFileChooser.APPROVE_OPTION) {

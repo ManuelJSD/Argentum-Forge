@@ -12,6 +12,7 @@ import org.argentumforge.engine.game.console.FontStyle;
 import org.argentumforge.engine.renderer.RGBColor;
 import org.argentumforge.engine.gui.Theme;
 import org.argentumforge.engine.gui.widgets.UIComponents;
+import org.argentumforge.engine.i18n.I18n;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -47,23 +48,24 @@ public final class FObjEditor extends Form {
     @Override
     public void render() {
         ImGui.setNextWindowSize(350, 550, ImGuiCond.FirstUseEver);
-        if (ImGui.begin("Editor de Objetos", ImGuiWindowFlags.None)) {
+        if (ImGui.begin(I18n.INSTANCE.get("editor.object"), ImGuiWindowFlags.None)) {
 
             // Sincronizar selección si cambió externamente (por pick)
             if (objEditor.getObjNumber() != selectedObjNumber) {
                 selectedObjNumber = objEditor.getObjNumber();
             }
 
-            ImGui.text("Objetos:");
-            ImGui.sameLine(ImGui.getWindowWidth() - 100);
-            if (ImGui.button(isGridView ? "Ver Lista" : "Ver Rejilla")) {
+            ImGui.text(I18n.INSTANCE.get("editor.object.objects"));
+            ImGui.sameLine(ImGui.getWindowWidth() - 110);
+            if (ImGui.button(
+                    isGridView ? I18n.INSTANCE.get("editor.npc.viewList") : I18n.INSTANCE.get("editor.npc.viewGrid"))) {
                 isGridView = !isGridView;
                 currentPage = 0;
             }
             ImGui.separator();
 
             ImGui.pushItemWidth(-1);
-            if (ImGui.inputTextWithHint("##BuscarObj", "ID o Nombre...", searchFilter)) {
+            if (ImGui.inputTextWithHint("##BuscarObj", I18n.INSTANCE.get("editor.npc.searchHint"), searchFilter)) {
                 currentPage = 0;
             }
             ImGui.popItemWidth();
@@ -84,7 +86,7 @@ public final class FObjEditor extends Form {
     }
 
     private void drawPreview() {
-        ImGui.text("Previsualizacion:");
+        ImGui.text(I18n.INSTANCE.get("editor.npc.preview"));
         if (ImGui.beginChild("ObjPreview", 0, 100, true)) {
             if (selectedObjNumber > 0 && objs != null) {
                 ObjData data = objs.get(selectedObjNumber);
@@ -98,7 +100,7 @@ public final class FObjEditor extends Form {
                     ImGui.endGroup();
                 }
             } else {
-                ImGui.textDisabled("Selecciona un objeto para ver su previa");
+                ImGui.textDisabled(I18n.INSTANCE.get("editor.object.previewNone"));
             }
         }
         ImGui.endChild();
@@ -107,7 +109,7 @@ public final class FObjEditor extends Form {
     private void drawObjGrid() {
         ImGui.beginChild("ObjGridChild", 0, 300, true);
         if (objs == null || objs.isEmpty()) {
-            ImGui.textDisabled("Objetos no cargados");
+            ImGui.textDisabled(I18n.INSTANCE.get("editor.object.notLoaded"));
             ImGui.endChild();
             return;
         }
@@ -119,7 +121,7 @@ public final class FObjEditor extends Form {
         if (currentPage > maxPages)
             currentPage = maxPages;
 
-        ImGui.text("Pag: " + (currentPage + 1) + "/" + (maxPages + 1));
+        ImGui.text(I18n.INSTANCE.get("editor.npc.page") + " " + (currentPage + 1) + "/" + (maxPages + 1));
         ImGui.sameLine();
         if (ImGui.button("<##prevObjGrid") && currentPage > 0)
             currentPage--;
@@ -173,7 +175,7 @@ public final class FObjEditor extends Form {
         ImGui.beginChild("ObjListChild", 0, 200, true);
 
         if (objs == null || objs.isEmpty()) {
-            ImGui.textDisabled("Objetos no cargados");
+            ImGui.textDisabled(I18n.INSTANCE.get("editor.object.notLoaded"));
             ImGui.endChild();
             return;
         }
@@ -225,7 +227,7 @@ public final class FObjEditor extends Form {
         // Autoseleccionar modo Colocar si no está en Colocar o Quitar o Capturar
         if (objEditor.getMode() < 1 || objEditor.getMode() > 3) {
             objEditor.setMode(1);
-            Console.INSTANCE.addMsgToConsole("Modo: Colocar Objeto (" + selectedObjNumber + ") activado.",
+            Console.INSTANCE.addMsgToConsole(I18n.INSTANCE.get("msg.object.placeMode", selectedObjNumber),
                     FontStyle.REGULAR, new RGBColor(1, 1, 1));
         }
 
@@ -241,10 +243,10 @@ public final class FObjEditor extends Form {
         if (currentMode == 2) {
             ImGui.pushStyleColor(ImGuiCol.Button, Theme.COLOR_DANGER);
         }
-        if (ImGui.button("Quitar", 85, 30)) {
+        if (ImGui.button(I18n.INSTANCE.get("editor.npc.remove"), 85, 30)) {
             objEditor.setMode(currentMode == 2 ? 0 : 2);
             if (objEditor.getMode() == 2) {
-                Console.INSTANCE.addMsgToConsole("Modo: Quitar Objeto activado.", FontStyle.REGULAR,
+                Console.INSTANCE.addMsgToConsole(I18n.INSTANCE.get("msg.object.removeMode"), FontStyle.REGULAR,
                         new RGBColor(1, 1, 1));
             }
         }
@@ -254,21 +256,22 @@ public final class FObjEditor extends Form {
 
         ImGui.sameLine();
 
-        if (UIComponents.toggleButton("Capturar", currentMode == 3, 85, 30)) {
+        if (UIComponents.toggleButton(I18n.INSTANCE.get("editor.npc.capture"), currentMode == 3, 85, 30)) {
             objEditor.setMode(currentMode == 3 ? 0 : 3);
             if (objEditor.getMode() == 3) {
-                Console.INSTANCE.addMsgToConsole("Modo: Capturar Objeto activado.", FontStyle.REGULAR,
+                Console.INSTANCE.addMsgToConsole(I18n.INSTANCE.get("msg.object.captureMode"), FontStyle.REGULAR,
                         new RGBColor(1, 1, 1));
             }
         }
 
         ImGui.sameLine();
 
-        if (UIComponents.toggleButton("Colocar", currentMode == 1 && selectedObjNumber > 0, 85, 30)) {
+        if (UIComponents.toggleButton(I18n.INSTANCE.get("editor.npc.place"), currentMode == 1 && selectedObjNumber > 0,
+                85, 30)) {
             objEditor.setMode(currentMode == 1 ? 0 : 1);
             if (objEditor.getMode() == 1) {
                 objEditor.setObjNumber(selectedObjNumber);
-                Console.INSTANCE.addMsgToConsole("Modo: Colocar Objeto (" + selectedObjNumber + ") activado.",
+                Console.INSTANCE.addMsgToConsole(I18n.INSTANCE.get("msg.object.placeMode", selectedObjNumber),
                         FontStyle.REGULAR, new RGBColor(1, 1, 1));
             }
         }
@@ -277,8 +280,8 @@ public final class FObjEditor extends Form {
             ObjData selected = objs.get(selectedObjNumber);
             if (selected != null) {
                 ImGui.separator();
-                ImGui.textDisabled("Seleccionado: OBJ " + selected.getNumber());
-                ImGui.textDisabled("Nombre: " + selected.getName());
+                ImGui.textDisabled(I18n.INSTANCE.get("editor.npc.selected") + " OBJ " + selected.getNumber());
+                ImGui.textDisabled(I18n.INSTANCE.get("editor.npc.name") + " " + selected.getName());
             }
         }
     }

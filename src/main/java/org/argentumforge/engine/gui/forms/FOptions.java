@@ -36,7 +36,8 @@ public final class FOptions extends Form {
     @Override
     public void render() {
         ImGui.setNextWindowSize(400, 360, ImGuiCond.Always);
-        ImGui.begin("Configuración", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize);
+        ImGui.begin(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.title"),
+                ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize);
 
         if (ImGui.checkbox(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.graphics") + " (Fullscreen)",
                 options.isFullscreen())) {
@@ -58,7 +59,8 @@ public final class FOptions extends Form {
         }
 
         ImGui.setNextItemWidth(200);
-        if (ImGui.beginCombo("Resolucion", resolutions[currentResIndex])) {
+        if (ImGui.beginCombo(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.resolution"),
+                resolutions[currentResIndex])) {
             for (int i = 0; i < resolutions.length; i++) {
                 boolean isSelected = (currentResIndex == i);
                 if (ImGui.selectable(resolutions[i], isSelected)) {
@@ -85,18 +87,19 @@ public final class FOptions extends Form {
 
         ImGui.separator();
 
-        if (ImGui.checkbox("Musica", options.isMusic())) {
+        if (ImGui.checkbox(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.music"), options.isMusic())) {
             options.setMusic(!options.isMusic());
             stopMusic();
         }
 
-        if (ImGui.checkbox("Audio", options.isSound())) {
+        if (ImGui.checkbox(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.sound"), options.isSound())) {
             options.setSound(!options.isSound());
         }
 
         ImGui.separator();
 
-        if (ImGui.checkbox("Cursores graficos", options.isCursorGraphic())) {
+        if (ImGui.checkbox(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.cursorGraphic"),
+                options.isCursorGraphic())) {
             options.setCursorGraphic(!options.isCursorGraphic());
         }
 
@@ -131,7 +134,7 @@ public final class FOptions extends Form {
                 "* " + org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.restart"));
 
         ImGui.separator();
-        ImGui.text("Transparencia Previsualizacion (Ghost):");
+        ImGui.text(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.ghostOpacity") + ":");
         float[] ghostAlpha = { options.getRenderSettings().getGhostOpacity() };
         if (ImGui.sliderFloat("##ghostAlpha", ghostAlpha, 0.0f, 1.0f)) {
             options.getRenderSettings().setGhostOpacity(ghostAlpha[0]);
