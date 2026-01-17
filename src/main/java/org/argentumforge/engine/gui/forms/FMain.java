@@ -348,7 +348,9 @@ public final class FMain extends Form {
                     if (recentMaps.isEmpty()) {
                         ImGui.textDisabled(I18n.INSTANCE.get("menu.file.recent.none"));
                     } else {
-                        for (String mapPath : recentMaps) {
+                        // Create a copy to avoid ConcurrentModificationException when loading a map
+                        // modifies the list
+                        for (String mapPath : new java.util.ArrayList<>(recentMaps)) {
                             if (ImGui.menuItem(mapPath)) {
                                 org.argentumforge.engine.utils.MapManager.loadMap(mapPath);
                             }
