@@ -83,6 +83,8 @@ dependencies {
     runtimeOnly "org.lwjgl:lwjgl-stb::$lwjglNatives"
     implementation "org.joml:joml:${jomlVersion}"
     implementation 'com.google.code.gson:gson:2.10.1'
+    implementation 'javazoom:jlayer:1.0.1'
+    implementation 'com.googlecode.soundlibs:mp3spi:1.9.5.4'
     if (lwjglNatives == "natives-macos" || lwjglNatives == "natives-macos-arm64") runtimeOnly "org.lwjgl:lwjgl-vulkan::$lwjglNatives"
 }
 

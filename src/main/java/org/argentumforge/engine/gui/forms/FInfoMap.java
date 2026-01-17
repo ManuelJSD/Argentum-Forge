@@ -6,9 +6,16 @@ import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import imgui.type.ImString;
+import org.argentumforge.engine.game.Options;
 import org.argentumforge.engine.utils.GameData;
 import org.argentumforge.engine.utils.inits.MapProperties;
 import org.argentumforge.engine.i18n.I18n;
+import org.argentumforge.engine.audio.Sound;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Ventana de edición para las propiedades generales del mapa actual.
@@ -30,6 +37,12 @@ public final class FInfoMap extends Form {
 
     /** Referencia a las propiedades cargadas para detectar cambios. */
     private MapProperties lastProps;
+
+    private boolean showMusicSelector = false;
+    private List<File> musicFiles = new ArrayList<>();
+    private List<File> filteredMusicFiles = new ArrayList<>();
+    private final ImString musicFilter = new ImString(50);
+    private String currentlyPreviewing = "";
 
     public FInfoMap() {
         refreshData();
@@ -68,8 +81,19 @@ public final class FInfoMap extends Form {
                 GameData.mapProperties.setName(mapName.get());
             }
 
+            ImGui.pushItemWidth(ImGui.getWindowWidth() * 0.5f);
             if (ImGui.inputInt(I18n.INSTANCE.get("map.info.music"), musicNum)) {
                 GameData.mapProperties.setMusicIndex(musicNum.get());
+            }
+            ImGui.popItemWidth();
+            ImGui.sameLine();
+            if (ImGui.button("...")) {
+                scanMusicFiles();
+                showMusicSelector = true;
+            }
+
+            if (showMusicSelector) {
+                renderMusicSelector();
             }
 
             ImGui.separator();
@@ -137,5 +161,100 @@ public final class FInfoMap extends Form {
 
             ImGui.end();
         }
+    }
+
+    private void scanMusicFiles() {
+        String path = Options.INSTANCE.getMusicPath();
+        File dir = new File(path);
+        musicFiles.clear();
+        if (dir.exists() && dir.isDirectory()) {
+            File[] files = dir.listFiles((d, name) -> {
+                String lower = name.toLowerCase();
+                return lower.endsWith(".mp3") || lower.endsWith(".ogg") || lower.endsWith(".wav")
+                        || lower.endsWith(".mid") || lower.endsWith(".midi");
+            });
+            if (files != null) {
+                for (File f : files)
+                    musicFiles.add(f);
+            }
+        }
+        updateFilteredMusic();
+    }
+
+    private void updateFilteredMusic() {
+        String filter = musicFilter.get().toLowerCase();
+        filteredMusicFiles = musicFiles.stream()
+                .filter(f -> f.getName().toLowerCase().contains(filter))
+                .collect(Collectors.toList());
+    }
+
+    private void renderMusicSelector() {
+        ImGui.setNextWindowSize(300, 400, ImGuiCond.FirstUseEver);
+        ImBoolean pOpen = new ImBoolean(true);
+        if (ImGui.begin("Selector de Música", pOpen, ImGuiWindowFlags.NoCollapse)) {
+            if (!pOpen.get()) {
+                showMusicSelector = false;
+            }
+
+            if (ImGui.inputText("Filtrar", musicFilter)) {
+                updateFilteredMusic();
+            }
+
+            ImGui.beginChild("MusicList", 0, -60, true);
+            for (File f : filteredMusicFiles) {
+                boolean isSelected = musicNum.get() == getIndexFromFilename(f.getName());
+                if (ImGui.selectable(f.getName(), isSelected)) {
+                    int idx = getIndexFromFilename(f.getName());
+                    musicNum.set(idx);
+                    GameData.mapProperties.setMusicIndex(idx);
+                }
+            }
+            ImGui.endChild();
+
+            ImGui.separator();
+
+            String selectedName = getFilenameFromIndex(musicNum.get());
+            ImGui.text("Seleccionado: " + (selectedName.isEmpty() ? musicNum.get() : selectedName));
+
+            if (ImGui.button("Reproducir")) {
+                if (!selectedName.isEmpty()) {
+                    Sound.stopMusic();
+                    Sound.playMusic(selectedName);
+                    currentlyPreviewing = selectedName;
+                }
+            }
+            ImGui.sameLine();
+            if (ImGui.button("Detener")) {
+                Sound.stopMusic();
+                currentlyPreviewing = "";
+            }
+
+            ImGui.end();
+        } else {
+            showMusicSelector = false;
+        }
+    }
+
+    private int getIndexFromFilename(String name) {
+        StringBuilder sb = new StringBuilder();
+        for (char c : name.toCharArray()) {
+            if (Character.isDigit(c))
+                sb.append(c);
+            else
+                break;
+        }
+        try {
+            return sb.length() > 0 ? Integer.parseInt(sb.toString()) : 0;
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
+
+    private String getFilenameFromIndex(int index) {
+        for (File f : musicFiles) {
+            if (getIndexFromFilename(f.getName()) == index)
+                return f.getName();
+        }
+        return "";
     }
 }
