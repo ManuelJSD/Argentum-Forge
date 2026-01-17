@@ -12,6 +12,7 @@ import org.argentumforge.engine.game.console.FontStyle;
 import org.argentumforge.engine.renderer.RGBColor;
 import org.argentumforge.engine.gui.Theme;
 import org.argentumforge.engine.gui.widgets.UIComponents;
+import org.argentumforge.engine.i18n.I18n;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -47,23 +48,24 @@ public final class FNpcEditor extends Form {
     @Override
     public void render() {
         ImGui.setNextWindowSize(350, 550, ImGuiCond.FirstUseEver);
-        if (ImGui.begin("Editor de NPCs", ImGuiWindowFlags.None)) {
+        if (ImGui.begin(I18n.INSTANCE.get("editor.npc"), ImGuiWindowFlags.None)) {
 
             // Sincronizar selección si el editor lógico cambió (por cuenta gotas)
             if (npcEditor.getNpcNumber() != selectedNpcNumber) {
                 selectedNpcNumber = npcEditor.getNpcNumber();
             }
 
-            ImGui.text("NPCs:");
-            ImGui.sameLine(ImGui.getWindowWidth() - 100);
-            if (ImGui.button(isGridView ? "Ver Lista" : "Ver Rejilla")) {
+            ImGui.text(I18n.INSTANCE.get("editor.npc.npcs"));
+            ImGui.sameLine(ImGui.getWindowWidth() - 110);
+            if (ImGui.button(
+                    isGridView ? I18n.INSTANCE.get("editor.npc.viewList") : I18n.INSTANCE.get("editor.npc.viewGrid"))) {
                 isGridView = !isGridView;
                 currentPage = 0;
             }
             ImGui.separator();
 
             ImGui.pushItemWidth(-1);
-            if (ImGui.inputTextWithHint("##BuscarNPC", "ID o Nombre...", searchFilter)) {
+            if (ImGui.inputTextWithHint("##BuscarNPC", I18n.INSTANCE.get("editor.npc.searchHint"), searchFilter)) {
                 currentPage = 0;
             }
             ImGui.popItemWidth();
@@ -84,7 +86,7 @@ public final class FNpcEditor extends Form {
     }
 
     private void drawPreview() {
-        ImGui.text("Previsualizacion:");
+        ImGui.text(I18n.INSTANCE.get("editor.npc.preview"));
         if (ImGui.beginChild("NpcPreview", 0, 100, true)) {
             if (selectedNpcNumber > 0 && npcs != null) {
                 org.argentumforge.engine.utils.inits.NpcData data = npcs.get(selectedNpcNumber);
@@ -94,11 +96,12 @@ public final class FNpcEditor extends Form {
                     ImGui.beginGroup();
                     ImGui.text("NPC " + data.getNumber());
                     ImGui.text(data.getName());
-                    ImGui.textDisabled("Body: " + data.getBody() + " Head: " + data.getHead());
+                    ImGui.textDisabled(I18n.INSTANCE.get("editor.npc.body") + " " + data.getBody() + " "
+                            + I18n.INSTANCE.get("editor.npc.head") + " " + data.getHead());
                     ImGui.endGroup();
                 }
             } else {
-                ImGui.textDisabled("Selecciona un NPC para ver su previa");
+                ImGui.textDisabled(I18n.INSTANCE.get("editor.npc.previewNone"));
             }
         }
         ImGui.endChild();
@@ -107,7 +110,7 @@ public final class FNpcEditor extends Form {
     private void drawNpcGrid() {
         ImGui.beginChild("NpcGridChild", 0, 300, true);
         if (npcs == null || npcs.isEmpty()) {
-            ImGui.textDisabled("NPCs no cargados");
+            ImGui.textDisabled(I18n.INSTANCE.get("editor.npc.notLoaded"));
             ImGui.endChild();
             return;
         }
@@ -120,7 +123,7 @@ public final class FNpcEditor extends Form {
         if (currentPage > maxPages)
             currentPage = maxPages;
 
-        ImGui.text("Pag: " + (currentPage + 1) + "/" + (maxPages + 1));
+        ImGui.text(I18n.INSTANCE.get("editor.npc.page") + " " + (currentPage + 1) + "/" + (maxPages + 1));
         ImGui.sameLine();
         if (ImGui.button("<##prevGrid") && currentPage > 0)
             currentPage--;
@@ -173,7 +176,7 @@ public final class FNpcEditor extends Form {
         ImGui.beginChild("NpcListChild", 0, 200, true);
 
         if (npcs == null || npcs.isEmpty()) {
-            ImGui.textDisabled("NPCs no cargados");
+            ImGui.textDisabled(I18n.INSTANCE.get("editor.npc.notLoaded"));
             ImGui.endChild();
             return;
         }
@@ -227,7 +230,7 @@ public final class FNpcEditor extends Form {
         // Autoseleccionar modo Colocar si no está ya en Colocar o Quitar
         if (npcEditor.getMode() != 1 && npcEditor.getMode() != 2) {
             npcEditor.setMode(1);
-            Console.INSTANCE.addMsgToConsole("Modo: Colocar NPC (" + selectedNpcNumber + ") activado.",
+            Console.INSTANCE.addMsgToConsole(I18n.INSTANCE.get("msg.npc.placeMode", selectedNpcNumber),
                     FontStyle.REGULAR, new RGBColor(1, 1, 1));
         }
 
@@ -244,10 +247,10 @@ public final class FNpcEditor extends Form {
         if (currentMode == 2) {
             ImGui.pushStyleColor(ImGuiCol.Button, Theme.COLOR_DANGER);
         }
-        if (ImGui.button("Quitar", 110, 30)) {
+        if (ImGui.button(I18n.INSTANCE.get("editor.npc.remove"), 110, 30)) {
             npcEditor.setMode(currentMode == 2 ? 0 : 2);
             if (npcEditor.getMode() == 2) {
-                Console.INSTANCE.addMsgToConsole("Modo: Quitar NPC activado. Clic en el mapa para eliminar.",
+                Console.INSTANCE.addMsgToConsole(I18n.INSTANCE.get("msg.npc.removeMode"),
                         FontStyle.REGULAR, new RGBColor(1, 1, 1));
             }
         }
@@ -257,23 +260,24 @@ public final class FNpcEditor extends Form {
 
         ImGui.sameLine();
 
-        if (UIComponents.toggleButton("Capturar", currentMode == 3, 60, 30)) {
+        if (UIComponents.toggleButton(I18n.INSTANCE.get("editor.npc.capture"), currentMode == 3, 60, 30)) {
             npcEditor.setMode(currentMode == 3 ? 0 : 3);
             if (npcEditor.getMode() == 3) {
                 Console.INSTANCE.addMsgToConsole(
-                        "Modo: Capturar NPC activado. Clic en un NPC del mapa para seleccionarlo.",
+                        I18n.INSTANCE.get("msg.npc.captureMode"),
                         FontStyle.REGULAR, new RGBColor(1, 1, 1));
             }
         }
 
         ImGui.sameLine();
 
-        if (UIComponents.toggleButton("Colocar", currentMode == 1 && selectedNpcNumber > 0, 110, 30)) {
+        if (UIComponents.toggleButton(I18n.INSTANCE.get("editor.npc.place"), currentMode == 1 && selectedNpcNumber > 0,
+                110, 30)) {
             npcEditor.setMode(currentMode == 1 ? 0 : 1);
             if (npcEditor.getMode() == 1) {
                 npcEditor.setNpcNumber(selectedNpcNumber);
                 Console.INSTANCE.addMsgToConsole(
-                        "Modo: Colocar NPC (" + selectedNpcNumber + ") activado. Clic en el mapa para colocar.",
+                        I18n.INSTANCE.get("msg.npc.placeMode", selectedNpcNumber),
                         FontStyle.REGULAR, new RGBColor(1, 1, 1));
             }
         }
@@ -282,10 +286,11 @@ public final class FNpcEditor extends Form {
             NpcData selected = npcs.get(selectedNpcNumber);
             if (selected != null) {
                 ImGui.separator();
-                ImGui.textDisabled("Seleccionado:");
-                ImGui.textDisabled("Nro: " + selected.getNumber());
-                ImGui.textDisabled("Nombre: " + selected.getName());
-                ImGui.textDisabled("Cabeza: " + selected.getHead() + "  Cuerpo: " + selected.getBody());
+                ImGui.textDisabled(I18n.INSTANCE.get("editor.npc.selected"));
+                ImGui.textDisabled(I18n.INSTANCE.get("editor.npc.number") + " " + selected.getNumber());
+                ImGui.textDisabled(I18n.INSTANCE.get("editor.npc.name") + " " + selected.getName());
+                ImGui.textDisabled(I18n.INSTANCE.get("editor.npc.head") + " " + selected.getHead() + " "
+                        + I18n.INSTANCE.get("editor.npc.body") + " " + selected.getBody());
             }
         }
     }

@@ -6,6 +6,8 @@ import imgui.flag.ImGuiWindowFlags;
 import org.argentumforge.engine.game.models.Key;
 import org.argentumforge.engine.listeners.KeyHandler;
 
+import org.argentumforge.engine.i18n.I18n;
+
 import static org.argentumforge.engine.audio.Sound.SND_CLICK;
 import static org.argentumforge.engine.audio.Sound.playSound;
 import static org.lwjgl.glfw.GLFW.*;
@@ -63,7 +65,8 @@ public class FBindKeys extends Form {
         ImGui.setNextWindowFocus();
         ImGui.setNextWindowSize(400, 400, ImGuiCond.Always);
 
-        if (ImGui.begin("Configuración de Teclas", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize)) {
+        if (ImGui.begin(I18n.INSTANCE.get("options.keys.title"),
+                ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize)) {
 
             // Use columns to separate Labels (Left) and Buttons (Right)
             ImGui.columns(2, "BindKeysCols", false); // false = no border resize
@@ -73,28 +76,28 @@ public class FBindKeys extends Form {
             float windowWidth = ImGui.getWindowWidth();
             ImGui.setColumnWidth(0, windowWidth - 140);
 
-            renderGroupHeader("Movimiento");
-            renderKeyBindRow("Arriba", Key.UP);
-            renderKeyBindRow("Abajo", Key.DOWN);
-            renderKeyBindRow("Izquierda", Key.LEFT);
-            renderKeyBindRow("Derecha", Key.RIGHT);
+            renderGroupHeader(I18n.INSTANCE.get("options.keys.movement"));
+            renderKeyBindRow(I18n.INSTANCE.get("options.keys.up"), Key.UP);
+            renderKeyBindRow(I18n.INSTANCE.get("options.keys.down"), Key.DOWN);
+            renderKeyBindRow(I18n.INSTANCE.get("options.keys.left"), Key.LEFT);
+            renderKeyBindRow(I18n.INSTANCE.get("options.keys.right"), Key.RIGHT);
             ImGui.dummy(0, 10);
 
-            renderGroupHeader("Opciones Personales");
-            renderKeyBindRow("Musica", Key.TOGGLE_MUSIC);
-            renderKeyBindRow("Sonido", Key.TOGGLE_SOUND);
+            renderGroupHeader(I18n.INSTANCE.get("options.keys.personal"));
+            renderKeyBindRow(I18n.INSTANCE.get("options.keys.music"), Key.TOGGLE_MUSIC);
+            renderKeyBindRow(I18n.INSTANCE.get("options.keys.sound"), Key.TOGGLE_SOUND);
             ImGui.dummy(0, 10);
 
-            renderGroupHeader("Otras Teclas");
-            renderKeyBindRow("Capturar Pantalla", Key.TAKE_SCREENSHOT);
-            renderKeyBindRow("Mostrar Opciones", Key.SHOW_OPTIONS);
-            renderKeyBindRow("Mostrar Debug", Key.DEBUG_SHOW);
-            renderKeyBindRow("Modo Caminata", Key.TOGGLE_WALKING_MODE);
+            renderGroupHeader(I18n.INSTANCE.get("options.keys.other"));
+            renderKeyBindRow(I18n.INSTANCE.get("options.keys.screenshot"), Key.TAKE_SCREENSHOT);
+            renderKeyBindRow(I18n.INSTANCE.get("options.keys.showOptions"), Key.SHOW_OPTIONS);
+            renderKeyBindRow(I18n.INSTANCE.get("options.keys.showDebug"), Key.DEBUG_SHOW);
+            renderKeyBindRow(I18n.INSTANCE.get("options.keys.walkMode"), Key.TOGGLE_WALKING_MODE);
 
-            renderGroupHeader("Herramientas de Selección");
-            renderKeyBindRow("Selección Múltiple", Key.MULTI_SELECT);
+            renderGroupHeader(I18n.INSTANCE.get("options.keys.selectionTools"));
+            renderKeyBindRow(I18n.INSTANCE.get("options.keys.multiSelect"), Key.MULTI_SELECT);
 
-            renderKeyBindRow("Salir", Key.EXIT_GAME);
+            renderKeyBindRow(I18n.INSTANCE.get("options.keys.exit"), Key.EXIT_GAME);
 
             ImGui.columns(1); // End columns
 
@@ -108,13 +111,13 @@ public class FBindKeys extends Form {
 
             ImGui.setCursorPosX((windowWidth - totalWidth) / 2);
 
-            if (ImGui.button("Cargar Default", buttonWidth, 30)) {
+            if (ImGui.button(I18n.INSTANCE.get("options.keys.loadDefault"), buttonWidth, 30)) {
                 buttonDefault();
             }
 
             ImGui.sameLine();
 
-            if (ImGui.button("Guardar y Salir", buttonWidth, 30)) {
+            if (ImGui.button(I18n.INSTANCE.get("options.keys.saveAndExit"), buttonWidth, 30)) {
                 buttonSave();
             }
 
@@ -142,7 +145,7 @@ public class FBindKeys extends Form {
         String actual = getKeyName(key.getKeyCode()).toUpperCase();
 
         if (key.getPreparedToBind()) {
-            actual = "PRES. TECLA";
+            actual = I18n.INSTANCE.get("options.keys.pressKey");
         }
 
         if (ImGui.button(actual, buttonWidth, 0)) {

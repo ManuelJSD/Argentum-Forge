@@ -5,6 +5,7 @@ import imgui.flag.ImGuiCond;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImInt;
 import org.argentumforge.engine.utils.editor.Transfer;
+import org.argentumforge.engine.i18n.I18n;
 
 /**
  * Ventana para la unión automática de mapas adyacentes.
@@ -27,7 +28,8 @@ public final class FAutoUnion extends Form {
     @Override
     public void render() {
         ImGui.setNextWindowSize(550, 420, ImGuiCond.Once);
-        if (ImGui.begin("Union con Mapas Adyacentes", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize)) {
+        if (ImGui.begin(I18n.INSTANCE.get("editor.autoUnion.title"),
+                ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize)) {
 
             // === DIBUJO DEL ÁREA CENTRAL (Representación del Mapa) ===
             float winWidth = ImGui.getWindowWidth();
@@ -97,18 +99,18 @@ public final class FAutoUnion extends Form {
             ImGui.popItemWidth();
             ImGui.setCursorPos(boxWidth - 140, boxHeight / 2);
             ImGui.sameLine();
-            if (ImGui.checkbox("Aplicar##E", eastApply))
+            if (ImGui.checkbox(I18n.INSTANCE.get("editor.autoUnion.apply") + "##E", eastApply))
                 eastApply = !eastApply;
 
             // --- Sur ---
             ImGui.setCursorPos(boxWidth / 2 - 60, boxHeight - 50);
-            ImGui.text("Mapa");
+            ImGui.text(I18n.INSTANCE.get("editor.autoUnion.map"));
             ImGui.sameLine();
             ImGui.pushItemWidth(50);
-            ImGui.inputInt("##SMap", southMap, 0, 0);
+            ImGui.inputInt("##SMap", southMap, 0, 0); // Note: IDs might vary but content is the same
             ImGui.popItemWidth();
             ImGui.sameLine();
-            if (ImGui.checkbox("Aplicar##S", southApply))
+            if (ImGui.checkbox(I18n.INSTANCE.get("editor.autoUnion.apply") + "##S", southApply))
                 southApply = !southApply;
 
             ImGui.endChild();
@@ -120,7 +122,7 @@ public final class FAutoUnion extends Form {
 
             // Botón Default (Azul)
             ImGui.pushStyleColor(imgui.flag.ImGuiCol.Button, 0xFF882222);
-            if (ImGui.button("Default", 90, 30)) {
+            if (ImGui.button(I18n.INSTANCE.get("editor.autoUnion.default"), 90, 30)) {
                 northMap.set(0);
                 southMap.set(0);
                 eastMap.set(0);
@@ -131,12 +133,12 @@ public final class FAutoUnion extends Form {
 
             ImGui.sameLine();
             ImGui.setCursorPosY(footerY + 5);
-            ImGui.textColored(1f, 1f, 1f, 0.8f, "NOTA: Mapa 0, borra el traslados.");
+            ImGui.textColored(1f, 1f, 1f, 0.8f, I18n.INSTANCE.get("editor.autoUnion.note"));
 
             // Botón Aplicar (Verde) y Cancelar (Rojo)
             ImGui.setCursorPos(winWidth - 210, footerY);
             ImGui.pushStyleColor(imgui.flag.ImGuiCol.Button, 0xFF008800);
-            if (ImGui.button("Aplicar", 90, 30)) {
+            if (ImGui.button(I18n.INSTANCE.get("common.apply"), 90, 30)) {
                 int n = northApply ? northMap.get() : -1;
                 int s = southApply ? southMap.get() : -1;
                 int e = eastApply ? eastMap.get() : -1;
@@ -147,16 +149,16 @@ public final class FAutoUnion extends Form {
 
             ImGui.sameLine();
             ImGui.pushStyleColor(imgui.flag.ImGuiCol.Button, 0xFF000088);
-            if (ImGui.button("Cancelar", 90, 30)) {
+            if (ImGui.button(I18n.INSTANCE.get("common.cancel"), 90, 30)) {
                 this.close();
             }
             ImGui.popStyleColor();
 
             // Leyenda de Colores
             ImGui.setCursorPos(20, footerY + 50);
-            ImGui.textColored(1.0f, 0.4f, 0.4f, 1.0f, "Leyenda: Posición X del mapa");
+            ImGui.textColored(1.0f, 0.4f, 0.4f, 1.0f, I18n.INSTANCE.get("editor.autoUnion.legendX"));
             ImGui.sameLine();
-            ImGui.textColored(0.4f, 0.4f, 1.0f, 1.0f, " | Posición Y del mapa");
+            ImGui.textColored(0.4f, 0.4f, 1.0f, 1.0f, I18n.INSTANCE.get("editor.autoUnion.legendY"));
 
             ImGui.end();
         }

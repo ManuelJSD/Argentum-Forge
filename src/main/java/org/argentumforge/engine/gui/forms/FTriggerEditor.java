@@ -7,6 +7,7 @@ import imgui.type.ImString;
 import org.argentumforge.engine.utils.editor.Trigger;
 import org.argentumforge.engine.utils.editor.TriggerManager;
 import org.argentumforge.engine.utils.editor.models.TriggerData;
+import org.argentumforge.engine.i18n.I18n;
 
 import java.util.List;
 
@@ -28,13 +29,13 @@ public class FTriggerEditor extends Form {
     @Override
     public void render() {
         ImGui.setNextWindowSize(460, 350, imgui.flag.ImGuiCond.Once);
-        ImGui.begin("Editor de Triggers", imgui.flag.ImGuiWindowFlags.NoResize);
+        ImGui.begin(I18n.INSTANCE.get("editor.trigger"), imgui.flag.ImGuiWindowFlags.NoResize);
 
         // --- COLUMNA IZQUIERDA: Lista y Gestión ---
         ImGui.beginGroup();
 
         // 1. Lista
-        ImGui.text("Lista de Triggers:");
+        ImGui.text(I18n.INSTANCE.get("editor.trigger.list"));
         ImGui.beginChild("TriggerList", 220, 180, true);
         List<TriggerData> triggers = manager.getTriggers();
         for (int i = 0; i < triggers.size(); i++) {
@@ -59,8 +60,8 @@ public class FTriggerEditor extends Form {
         ImGui.spacing();
 
         // 2. Gestión (Debajo de la lista)
-        ImGui.text("Gestión:");
-        if (ImGui.button("Nuevo Trigger", 220, 25)) {
+        ImGui.text(I18n.INSTANCE.get("editor.trigger.management"));
+        if (ImGui.button(I18n.INSTANCE.get("editor.trigger.new"), 220, 25)) {
             manager.addTrigger("Nuevo Trigger");
         }
 
@@ -69,12 +70,12 @@ public class FTriggerEditor extends Form {
         if (hasSelection) {
             ImGui.setNextItemWidth(220); // Fijar ancho para evitar desplazamiento de columna derecha
             ImGui.inputText("##EditName", editName, ImGuiInputTextFlags.None);
-            if (ImGui.button("Renombrar", 108, 0)) {
+            if (ImGui.button(I18n.INSTANCE.get("editor.trigger.rename"), 108, 0)) {
                 TriggerData t = triggers.get(selectedIndex);
                 manager.updateTrigger(t.getId(), editName.get());
             }
             ImGui.sameLine();
-            if (ImGui.button("Eliminar", 108, 0)) {
+            if (ImGui.button(I18n.INSTANCE.get("common.delete"), 108, 0)) {
                 TriggerData t = triggers.get(selectedIndex);
                 manager.removeTrigger(t.getId());
                 selectedIndex = -1;
@@ -84,7 +85,7 @@ public class FTriggerEditor extends Form {
                 }
             }
         } else {
-            ImGui.textDisabled("(Selecciona para editar)");
+            ImGui.textDisabled(I18n.INSTANCE.get("editor.trigger.editPrompt"));
         }
 
         ImGui.endGroup();
@@ -95,7 +96,7 @@ public class FTriggerEditor extends Form {
 
         // --- COLUMNA DERECHA: Herramienta ---
         ImGui.beginGroup();
-        ImGui.text("Herramienta:");
+        ImGui.text(I18n.INSTANCE.get("editor.trigger.tool"));
 
         ImGui.spacing();
 
@@ -104,12 +105,12 @@ public class FTriggerEditor extends Form {
         boolean isErasing = tool.isActive() && tool.getSelectedTriggerId() == 0;
 
         if (isPlacing) {
-            ImGui.textColored(0f, 1f, 0f, 1f, "MODO: COLOCAR");
+            ImGui.textColored(0f, 1f, 0f, 1f, I18n.INSTANCE.get("editor.trigger.mode.place"));
             ImGui.textColored(0f, 1f, 0f, 1f, "ID: " + tool.getSelectedTriggerId());
         } else if (isErasing) {
-            ImGui.textColored(1f, 0f, 0f, 1f, "MODO: BORRADOR");
+            ImGui.textColored(1f, 0f, 0f, 1f, I18n.INSTANCE.get("editor.trigger.mode.erase"));
         } else {
-            ImGui.textDisabled("Inactiva");
+            ImGui.textDisabled(I18n.INSTANCE.get("editor.trigger.mode.inactive"));
         }
 
         ImGui.spacing();
@@ -120,7 +121,7 @@ public class FTriggerEditor extends Form {
             if (active) {
                 ImGui.pushStyleColor(imgui.flag.ImGuiCol.Button, 0xFF00FF00); // Verde
             }
-            if (ImGui.button("Colocar", 160, 30)) {
+            if (ImGui.button(I18n.INSTANCE.get("editor.trigger.place"), 160, 30)) {
                 if (active) {
                     tool.setActive(false);
                 } else {
@@ -132,7 +133,7 @@ public class FTriggerEditor extends Form {
                 ImGui.popStyleColor();
         } else {
             ImGui.beginDisabled();
-            ImGui.button("Colocar", 160, 30);
+            ImGui.button(I18n.INSTANCE.get("editor.trigger.place"), 160, 30);
             ImGui.endDisabled();
         }
 
@@ -142,7 +143,7 @@ public class FTriggerEditor extends Form {
         if (isErasing) {
             ImGui.pushStyleColor(imgui.flag.ImGuiCol.Button, 0xFF0000FF); // Rojo
         }
-        if (ImGui.button("Borrador", 160, 30)) {
+        if (ImGui.button(I18n.INSTANCE.get("editor.trigger.eraser"), 160, 30)) {
             if (isErasing) {
                 tool.setActive(false);
             } else {
@@ -158,17 +159,19 @@ public class FTriggerEditor extends Form {
         ImGui.spacing();
 
         // --- Herramientas de Pincel ---
-        ImGui.text("Forma:");
-        if (ImGui.radioButton("Cuadrado", tool.getBrushShape() == Trigger.BrushShape.SQUARE)) {
+        ImGui.text(I18n.INSTANCE.get("editor.block.shape"));
+        if (ImGui.radioButton(I18n.INSTANCE.get("editor.surface.square"),
+                tool.getBrushShape() == Trigger.BrushShape.SQUARE)) {
             tool.setBrushShape(Trigger.BrushShape.SQUARE);
         }
         ImGui.sameLine();
-        if (ImGui.radioButton("Circulo", tool.getBrushShape() == Trigger.BrushShape.CIRCLE)) {
+        if (ImGui.radioButton(I18n.INSTANCE.get("editor.surface.circle"),
+                tool.getBrushShape() == Trigger.BrushShape.CIRCLE)) {
             tool.setBrushShape(Trigger.BrushShape.CIRCLE);
         }
 
         ImGui.spacing();
-        ImGui.text("Tamaño:");
+        ImGui.text(I18n.INSTANCE.get("editor.surface.size") + ":");
 
         int currentBrush = tool.getBrushSize();
         int activeColor = 0xFF00FF00;

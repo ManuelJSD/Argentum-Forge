@@ -9,6 +9,7 @@ import imgui.type.ImInt;
 import org.argentumforge.engine.gui.PreviewUtils;
 import org.argentumforge.engine.utils.editor.Surface;
 import org.argentumforge.engine.utils.AssetRegistry;
+import org.argentumforge.engine.i18n.I18n;
 
 /**
  * Formulario que muestra una paleta visual de todos los GRHs disponibles.
@@ -34,7 +35,7 @@ public class FPalette extends Form {
 
         // El error de assertion ocurre si no se llama a End() cuando Begin() retorna
         // false (ventana colapsada)
-        boolean isOpen = ImGui.begin("Paleta de Tiles", ImGuiWindowFlags.None);
+        boolean isOpen = ImGui.begin(I18n.INSTANCE.get("editor.palette.title"), ImGuiWindowFlags.None);
 
         if (isOpen) {
             drawSearch();
@@ -50,13 +51,13 @@ public class FPalette extends Form {
     }
 
     private void drawSearch() {
-        if (ImGui.button("Seleccionar (Vacio)")) {
+        if (ImGui.button(I18n.INSTANCE.get("editor.palette.selectEmpty"))) {
             selectedGrh = -1;
             Surface.getInstance().setSurfaceIndex(1); // Tile vacio por defecto
             Surface.getInstance().setMode(0); // Modo seleccion/neutro
         }
         ImGui.sameLine();
-        ImGui.text("Buscar ID:");
+        ImGui.text(I18n.INSTANCE.get("editor.palette.searchId"));
         ImGui.sameLine();
         ImGui.pushItemWidth(100);
         if (ImGui.inputInt("##search", searchGrh)) {
@@ -72,7 +73,7 @@ public class FPalette extends Form {
 
         if (searchGrh.get() > 0) {
             ImGui.sameLine();
-            if (ImGui.button("Limpiar")) {
+            if (ImGui.button(I18n.INSTANCE.get("editor.palette.clear"))) {
                 searchGrh.set(0);
             }
         }
@@ -85,20 +86,20 @@ public class FPalette extends Form {
         int totalGrhs = AssetRegistry.grhData.length;
         int maxPages = (totalGrhs / ITEMS_PER_PAGE);
 
-        ImGui.text("Pagina: " + (currentPage + 1) + " / " + (maxPages + 1));
+        ImGui.text(I18n.INSTANCE.get("editor.palette.page") + ": " + (currentPage + 1) + " / " + (maxPages + 1));
         ImGui.sameLine();
-        if (ImGui.button("<") && currentPage > 0) {
+        if (ImGui.button(I18n.INSTANCE.get("editor.palette.previousPage")) && currentPage > 0) {
             currentPage--;
         }
         ImGui.sameLine();
-        if (ImGui.button(">") && currentPage < maxPages) {
+        if (ImGui.button(I18n.INSTANCE.get("editor.palette.nextPage")) && currentPage < maxPages) {
             currentPage++;
         }
     }
 
     private void drawGrid() {
         if (AssetRegistry.grhData == null) {
-            ImGui.textColored(1f, 0f, 0f, 1f, "Error: grhData no cargado");
+            ImGui.textColored(1f, 0f, 0f, 1f, I18n.INSTANCE.get("editor.palette.loadError"));
             return;
         }
 
