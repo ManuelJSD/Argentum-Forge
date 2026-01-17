@@ -64,7 +64,7 @@ https://github.com/Lorwik/Argentum-Forge.git
 
 # Imágenes
 
-<img width="1918" height="1082" alt="image" src="https://github.com/user-attachments/assets/4d30b682-89c0-4d06-9b88-e2bfb0ecbe2e" />
+<img width="1918" height="1078" alt="image" src="https://github.com/user-attachments/assets/131cdca3-03a6-4c0d-a855-1e0b5a07da51" />
 
 <h1>Agradecimientos:</h1>
 <br/>
