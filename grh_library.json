@@ -1,6 +1,19 @@
 [
   {
-    "name": "Terrenos",
+    "name": "Agua",
+    "records": [
+      {
+        "name": "Agua",
+        "grhIndex": 1505,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      }
+    ]
+  },
+  {
+    "name": "Pasto",
     "records": [
       {
         "name": "(PRD) Terreno",
@@ -725,6 +738,221 @@
         "autoBlock": false,
         "width": 1,
         "height": 1
+      }
+    ]
+  },
+  {
+    "name": "Costa Pasto",
+    "records": [
+      {
+        "name": "Angulo Abajo Der.",
+        "grhIndex": 7315,
+        "layer": 2,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Angulo Arriba Izq.",
+        "grhIndex": 7299,
+        "layer": 2,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Angulo Abajo Izq.",
+        "grhIndex": 7303,
+        "layer": 2,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Angulo Arriba Der.",
+        "grhIndex": 7311,
+        "layer": 2,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Esquina Abajo Izq.",
+        "grhIndex": 7283,
+        "layer": 2,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Esquina Arriba Izq.",
+        "grhIndex": 7287,
+        "layer": 2,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Esquina Abajo Der.",
+        "grhIndex": 7291,
+        "layer": 2,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Esquina Arriba Der.",
+        "grhIndex": 7295,
+        "layer": 2,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Arriba",
+        "grhIndex": 7323,
+        "layer": 2,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Abajo",
+        "grhIndex": 7327,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Izquierda",
+        "grhIndex": 7307,
+        "layer": 2,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Derecha",
+        "grhIndex": 7319,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      }
+    ]
+  },
+  {
+    "name": "Costa Desierto",
+    "records": [
+      {
+        "name": "Esquina Arriba Izq.",
+        "grhIndex": 7335,
+        "layer": 2,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Esquina Abajo Izq.",
+        "grhIndex": 7331,
+        "layer": 2,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Esquina Arriba Der.",
+        "grhIndex": 7343,
+        "layer": 2,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Esquina Abajo Izq.",
+        "grhIndex": 7331,
+        "layer": 2,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Angulo Arriba Izq.",
+        "grhIndex": 7347,
+        "layer": 2,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Angulo Abajo Izq.",
+        "grhIndex": 7351,
+        "layer": 2,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Angulo Arriba Der.",
+        "grhIndex": 7363,
+        "layer": 2,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Angulo Abajo Der.",
+        "grhIndex": 7367,
+        "layer": 2,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Arriba",
+        "grhIndex": 7355,
+        "layer": 2,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Izquierda",
+        "grhIndex": 7359,
+        "layer": 2,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Abajo",
+        "grhIndex": 7375,
+        "layer": 2,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Derecha",
+        "grhIndex": 7371,
+        "layer": 2,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      }
+    ]
+  },
+  {
+    "name": "Desierto",
+    "records": [
+      {
+        "name": "Arena",
+        "grhIndex": 7704,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
       }
     ]
   }

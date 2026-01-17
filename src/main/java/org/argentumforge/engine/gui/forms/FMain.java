@@ -219,7 +219,7 @@ public final class FMain extends Form {
         ImGui.setCursorPos(10, 5); // Alineado arriba dentro de la mini-ventana
 
         // Botón Superficies
-        if (ImGui.button(I18n.INSTANCE.get("menu.view.layer1"), 100, 25)) {
+        if (ImGui.button(I18n.INSTANCE.get("toolbar.surface"), 110, 25)) {
             if (ImGUISystem.INSTANCE.isFormVisible("FSurfaceEditor")) {
                 ImGUISystem.INSTANCE.deleteFrmArray(surfaceEditor);
             } else {
