@@ -6,6 +6,8 @@ import static org.argentumforge.engine.Engine.batch;
 import static org.argentumforge.engine.scenes.Camera.TILE_PIXEL_SIZE;
 import static org.argentumforge.engine.utils.AssetRegistry.grhData;
 import static org.argentumforge.engine.utils.Time.deltaTime;
+import org.argentumforge.engine.Engine;
+import org.argentumforge.engine.renderer.Surface;
 import static org.lwjgl.opengl.GL11.*;
 
 /**
@@ -325,22 +327,14 @@ public final class Drawn {
      * Dibuja un rectángulo de color sólido sin textura.
      * Útil para overlays y efectos visuales.
      */
+    /**
+     * Dibuja un rectángulo coloreado en pantalla utilizando el sistema de batching.
+     */
     public static void drawColoredRect(int x, int y, int width, int height, RGBColor color, float alpha) {
-        glDisable(GL_TEXTURE_2D);
-        glBegin(GL_QUADS);
-
-        float scale = org.argentumforge.engine.scenes.Camera.getZoomScale();
-        float dWidth = width * scale;
-        float dHeight = height * scale;
-
-        glColor4f(color.getRed(), color.getGreen(), color.getBlue(), alpha);
-        glVertex2d(x, y + dHeight);
-        glVertex2d(x, y);
-        glVertex2d(x + dWidth, y);
-        glVertex2d(x + dWidth, y + dHeight);
-
-        glEnd();
-        glEnable(GL_TEXTURE_2D);
+        if (color == null) {
+            color = new RGBColor(1.0f, 1.0f, 1.0f);
+        }
+        Engine.batch.draw(Surface.INSTANCE.getWhiteTexture(), x, y, 0, 0, 1, 1, width, height, true, alpha, color);
     }
 
 }

@@ -1,7 +1,9 @@
 package org.argentumforge.engine.renderer;
 
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import org.lwjgl.BufferUtils;
 
 import static org.lwjgl.opengl.GL11.*;
 
@@ -33,24 +35,52 @@ public class BatchRenderer {
         Texture texture;
     }
 
-    private List<Quad> quads = new ArrayList<>();
+    private final List<Quad> quads = new ArrayList<>();
+    private int activeQuads = 0;
+
+    // Búfer para datos de vértices: pos(2), tex(2), color(4) = 8 floats por vértice
+    // 4 vértices por Quad = 32 floats por Quad
+    private static final int STRIDE = 8;
+    private static final int QUAD_SIZE = 4 * STRIDE;
+    private FloatBuffer vertexBuffer;
+    private int maxQuads = 1000;
+
+    public BatchRenderer() {
+        vertexBuffer = BufferUtils.createFloatBuffer(maxQuads * QUAD_SIZE);
+    }
+
+    private void ensureCapacity(int quadsNeeded) {
+        if (quadsNeeded > maxQuads) {
+            maxQuads = quadsNeeded + 500;
+            vertexBuffer = BufferUtils.createFloatBuffer(maxQuads * QUAD_SIZE);
+        }
+    }
 
     /**
      * Vaciamos nuestro array de quads con texturas para que se prepare a dibujar
      * una nueva imagen.
      */
     public void begin() {
-        quads.clear();
+        activeQuads = 0;
     }
 
     /**
-     * Preparamos las cosas para el dibujado, creando un nuevo quad con su
-     * informacion de textura, recorte, pos de recorte
+     * Preparamos las cosas para el dibujado, creando o reutilizando un quad con
+     * su informacion de textura, recorte, pos de recorte
      * color y demas...
      */
     public void draw(Texture texture, float x, float y, float srcX, float srcY, float srcWidth, float srcHeight,
             float destWidth, float destHeight, boolean blend, float alpha, RGBColor color) {
-        Quad quad = new Quad();
+
+        Quad quad;
+        if (activeQuads < quads.size()) {
+            quad = quads.get(activeQuads);
+        } else {
+            quad = new Quad();
+            quads.add(quad);
+        }
+        activeQuads++;
+
         quad.x = x;
         quad.y = y;
         quad.srcWidth = srcWidth;
@@ -67,54 +97,118 @@ public class BatchRenderer {
         quad.a = alpha;
         quad.texture = texture;
         quad.blend = blend;
-
-        quads.add(quad);
     }
 
     /**
-     * Recorre nuestro array de quads y dibuja todas las texturas una sola vez.
+     * Recorre nuestro array de quads y dibuja todas las texturas optimizadamente.
      */
     public void end() {
+        if (activeQuads == 0)
+            return;
+
+        ensureCapacity(activeQuads);
+
+        glEnableClientState(GL_VERTEX_ARRAY);
+        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+        glEnableClientState(GL_COLOR_ARRAY);
+
         Texture lastTexture = null;
+        int batchStart = 0;
+        int quadsInBatch = 0;
+        boolean lastBlend = false;
 
-        for (Quad quad : quads) {
-            if (lastTexture != quad.texture) {
-                if (lastTexture != null) {
-                    glEnd();
+        for (int i = 0; i <= activeQuads; i++) {
+            Quad quad = (i < activeQuads) ? quads.get(i) : null;
+
+            // Detectar cambio de estado (textura o blend) o fin de lista
+            if (i == activeQuads || (lastTexture != null && (lastTexture != quad.texture || lastBlend != quad.blend))) {
+                // Dibujar lote acumulado
+                if (quadsInBatch > 0) {
+                    renderBatch(batchStart, quadsInBatch, lastTexture, lastBlend);
                 }
-
-                quad.texture.bind();
-
-                if (quad.blend) {
-                    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-                } else {
-                    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-                }
-
-                glBegin(GL_QUADS);
-                lastTexture = quad.texture;
+                batchStart = i;
+                quadsInBatch = 0;
             }
 
-            float u0 = quad.srcX / quad.texWidth;
-            float v0 = (quad.srcY + quad.srcHeight) / quad.texHeight;
-            float u1 = (quad.srcX + quad.srcWidth) / quad.texWidth;
-            float v1 = quad.srcY / quad.texHeight;
-
-            glColor4f(quad.r, quad.g, quad.b, quad.a);
-
-            glTexCoord2f(u0, v0);
-            glVertex2f(quad.x, quad.y + quad.destHeight);
-            glTexCoord2f(u0, v1);
-            glVertex2f(quad.x, quad.y);
-            glTexCoord2f(u1, v1);
-            glVertex2f(quad.x + quad.destWidth, quad.y);
-            glTexCoord2f(u1, v0);
-            glVertex2f(quad.x + quad.destWidth, quad.y + quad.destHeight);
+            if (quad != null) {
+                fillQuadData(i, quad);
+                lastTexture = quad.texture;
+                lastBlend = quad.blend;
+                quadsInBatch++;
+            }
         }
 
-        if (lastTexture != null) {
-            glEnd();
+        glDisableClientState(GL_COLOR_ARRAY);
+        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+        glDisableClientState(GL_VERTEX_ARRAY);
+    }
+
+    private void fillQuadData(int index, Quad quad) {
+        int offset = index * QUAD_SIZE;
+
+        float u0 = quad.srcX / quad.texWidth;
+        float v0 = (quad.srcY + quad.srcHeight) / quad.texHeight;
+        float u1 = (quad.srcX + quad.srcWidth) / quad.texWidth;
+        float v1 = quad.srcY / quad.texHeight;
+
+        // Vértice 0 (Top-Left en coordenadas de mapa, pero invertido para GL)
+        vertexBuffer.put(offset + 0, quad.x);
+        vertexBuffer.put(offset + 1, quad.y + quad.destHeight);
+        vertexBuffer.put(offset + 2, u0);
+        vertexBuffer.put(offset + 3, v0);
+        putColor(offset + 4, quad);
+
+        // Vértice 1 (Bottom-Left)
+        vertexBuffer.put(offset + 8, quad.x);
+        vertexBuffer.put(offset + 9, quad.y);
+        vertexBuffer.put(offset + 10, u0);
+        vertexBuffer.put(offset + 11, v1);
+        putColor(offset + 12, quad);
+
+        // Vértice 2 (Bottom-Right)
+        vertexBuffer.put(offset + 16, quad.x + quad.destWidth);
+        vertexBuffer.put(offset + 17, quad.y);
+        vertexBuffer.put(offset + 18, u1);
+        vertexBuffer.put(offset + 19, v1);
+        putColor(offset + 20, quad);
+
+        // Vértice 3 (Top-Right)
+        vertexBuffer.put(offset + 24, quad.x + quad.destWidth);
+        vertexBuffer.put(offset + 25, quad.y + quad.destHeight);
+        vertexBuffer.put(offset + 26, u1);
+        vertexBuffer.put(offset + 27, v0);
+        putColor(offset + 28, quad);
+    }
+
+    private void putColor(int offset, Quad quad) {
+        vertexBuffer.put(offset, quad.r);
+        vertexBuffer.put(offset + 1, quad.g);
+        vertexBuffer.put(offset + 2, quad.b);
+        vertexBuffer.put(offset + 3, quad.a);
+    }
+
+    private void renderBatch(int start, int count, Texture texture, boolean blend) {
+        texture.bind();
+        if (blend) {
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+        } else {
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         }
+
+        vertexBuffer.position(start * QUAD_SIZE);
+
+        // Pointer offset: pos(0-1), tex(2-3), color(4-7)
+        glVertexPointer(2, GL_FLOAT, STRIDE * 4, vertexBuffer);
+
+        vertexBuffer.position(start * QUAD_SIZE + 2);
+        glTexCoordPointer(2, GL_FLOAT, STRIDE * 4, vertexBuffer);
+
+        vertexBuffer.position(start * QUAD_SIZE + 4);
+        glColorPointer(4, GL_FLOAT, STRIDE * 4, vertexBuffer);
+
+        glDrawArrays(GL_QUADS, 0, count * 4);
+
+        vertexBuffer.position(0);
     }
 
 }
