@@ -144,8 +144,7 @@ public final class GameScene extends Scene {
         mapRenderer = new MapRenderer(camera);
         inputManager = new EditorInputManager(camera);
 
-        whiteTexture = new Texture();
-        whiteTexture.createWhitePixel();
+        whiteTexture = org.argentumforge.engine.renderer.Surface.INSTANCE.getWhiteTexture();
 
         ImGUISystem.INSTANCE.addFrm(frmMain);
     }
