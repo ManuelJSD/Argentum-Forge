@@ -65,12 +65,6 @@ public class ShortcutManager {
     }
 
     private void handleGlobalShortcuts() {
-        // Rejilla: G
-        if (KeyHandler.isKeyJustPressed(GLFW_KEY_G)) {
-            Options.INSTANCE.getRenderSettings().setShowGrid(!Options.INSTANCE.getRenderSettings().isShowGrid());
-            Options.INSTANCE.save();
-        }
-
         // Usando el sistema de bindeos para teclas de acción (Debug, etc)
         final Key key = Key.getKey(KeyHandler.getLastKeyPressed());
         if (key != null && KeyHandler.isActionKeyJustPressed(key)) {
@@ -83,6 +77,41 @@ public class ShortcutManager {
                     break;
                 case TOGGLE_WALKING_MODE:
                     User.INSTANCE.setWalkingmode(!User.INSTANCE.isWalkingmode());
+                    break;
+                case TOGGLE_GRID:
+                    Options.INSTANCE.getRenderSettings()
+                            .setShowGrid(!Options.INSTANCE.getRenderSettings().isShowGrid());
+                    Options.INSTANCE.save();
+                    break;
+                case TOOL_BRUSH:
+                    org.argentumforge.engine.utils.editor.Surface.getInstance().setMode(1);
+                    org.argentumforge.engine.utils.editor.Surface.getInstance()
+                            .setToolMode(org.argentumforge.engine.utils.editor.Surface.ToolMode.BRUSH);
+                    org.argentumforge.engine.game.console.Console.INSTANCE.addMsgToConsole("Herramienta: Pincel",
+                            org.argentumforge.engine.game.console.FontStyle.REGULAR,
+                            new org.argentumforge.engine.renderer.RGBColor(1f, 1f, 1f));
+                    break;
+                case TOOL_BUCKET:
+                    org.argentumforge.engine.utils.editor.Surface.getInstance().setMode(1);
+                    org.argentumforge.engine.utils.editor.Surface.getInstance()
+                            .setToolMode(org.argentumforge.engine.utils.editor.Surface.ToolMode.BUCKET);
+                    org.argentumforge.engine.game.console.Console.INSTANCE.addMsgToConsole(
+                            "Herramienta: Cubo de Relleno",
+                            org.argentumforge.engine.game.console.FontStyle.REGULAR,
+                            new org.argentumforge.engine.renderer.RGBColor(1f, 1f, 1f));
+                    break;
+                case TOOL_ERASER:
+                    org.argentumforge.engine.utils.editor.Surface.getInstance().setMode(2);
+                    org.argentumforge.engine.game.console.Console.INSTANCE.addMsgToConsole("Herramienta: Borrar",
+                            org.argentumforge.engine.game.console.FontStyle.REGULAR,
+                            new org.argentumforge.engine.renderer.RGBColor(1f, 0.5f, 0.5f));
+                    break;
+                case TOOL_PICK:
+                    org.argentumforge.engine.utils.editor.Surface.getInstance().setMode(3);
+                    org.argentumforge.engine.game.console.Console.INSTANCE.addMsgToConsole(
+                            "Herramienta: Capturar (Pick)",
+                            org.argentumforge.engine.game.console.FontStyle.REGULAR,
+                            new org.argentumforge.engine.renderer.RGBColor(0.5f, 1f, 0.5f));
                     break;
                 default:
                     break;
