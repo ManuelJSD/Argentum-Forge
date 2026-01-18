@@ -140,6 +140,11 @@ public final class FOptions extends Form {
             options.getRenderSettings().setGhostOpacity(ghostAlpha[0]);
         }
 
+        if (ImGui.checkbox(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.visual.breathing"),
+                options.getRenderSettings().isShowNpcBreathing())) {
+            options.getRenderSettings().setShowNpcBreathing(!options.getRenderSettings().isShowNpcBreathing());
+        }
+
         // Add some spacing before buttons
         ImGui.dummy(0, 20);
 

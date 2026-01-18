@@ -53,9 +53,53 @@ public final class Drawn {
      */
     public static void geometryBoxRender(int grh_index, int x, int y, int src_width, int src_height, float sX, float sY,
             boolean blend, float alpha, RGBColor color) {
+        geometryBoxRender(grh_index, x, y, src_width, src_height, sX, sY, blend, alpha, color, 1.0f, 1.0f);
+    }
+
+    public static void geometryBoxRender(int grh_index, int x, int y, int src_width, int src_height, float sX, float sY,
+            boolean blend, float alpha, RGBColor color, float scaleX, float scaleY) {
         final Texture texture = Surface.INSTANCE.getTexture(grhData[grh_index].getFileNum());
-        float scale = org.argentumforge.engine.scenes.Camera.getZoomScale();
-        batch.draw(texture, x, y, sX, sY, src_width, src_height, src_width * scale, src_height * scale, blend, alpha,
+        float globalScale = org.argentumforge.engine.scenes.Camera.getZoomScale();
+
+        // Ajustar Y para que el escalado sea desde abajo (pivot bottom-center o
+        // bottom-left)
+        // Por defecto batch.draw dibuja desde top-left o bottom-left? Depende de la
+        // coord system.
+        // En este engine parece (0,0) top-left.
+        // Si escalo Y > 1.0, el sprite crece hacia abajo.
+        // Si queremos respiración (crecer hacia arriba desde los pies), necesitamos
+        // ajustar Y.
+        // El ajuste sería: y - (height * globalScale * scaleY - height * globalScale)
+        // O más simple: drawHeight = src_height * globalScale * scaleY.
+
+        float drawWidth = src_width * globalScale * scaleX;
+        float drawHeight = src_height * globalScale * scaleY;
+
+        // Ajuste para centrado horizontal si escala X cambia (opcional, por ahora
+        // asumimos X=1.0)
+        // Ajuste para pivote vertical (pies):
+        // Si scaleY cambia, la imagen crece. Si crece hacia abajo y la posicion (x,y)
+        // es top-left, los pies bajan.
+        // Queremos que los pies se mantengan fijos.
+        // Normalmente (x,y) es top-left del tile/sprite.
+        // Si el sprite es mas alto que el tile (personajes altos), se dibuja hacia
+        // arriba?
+        // En `drawTexture` hay logica de centrado `center`.
+
+        // Dado que no quiero romper todo, aplicaré el scale tal cual y veré si flota.
+        // Si flota, corregiré en Character.java ajustando Y.
+
+        // Corrección de pivote inferior (asumiendo Y crece hacia abajo en pantalla y
+        // dibujamos desde top-left):
+        // Si scaleY > 1, height aumenta.
+        // Para que los pies queden igual, debemos subir Y (restar) la diferencia de
+        // altura.
+        float heightDiff = drawHeight - (src_height * globalScale);
+
+        // PERO 'y' aquí ya viene calculado desde drawTexture.
+        // Aplicaré el scale directo.
+
+        batch.draw(texture, x, y - heightDiff, sX, sY, src_width, src_height, drawWidth, drawHeight, blend, alpha,
                 color);
     }
 
@@ -74,6 +118,11 @@ public final class Drawn {
      */
     public static void drawTexture(GrhInfo grh, int x, int y, boolean center, boolean animate, boolean blend,
             float alpha, RGBColor color) {
+        drawTexture(grh, x, y, center, animate, blend, alpha, color, 1.0f, 1.0f);
+    }
+
+    public static void drawTexture(GrhInfo grh, int x, int y, boolean center, boolean animate, boolean blend,
+            float alpha, RGBColor color, float scaleX, float scaleY) {
         if (grh.getGrhIndex() == 0 || grhData[grh.getGrhIndex()].getNumFrames() == 0)
             return;
         if (animate && grh.isStarted()) {
@@ -106,7 +155,7 @@ public final class Drawn {
                 grhData[currentGrhIndex].getPixelWidth(),
                 grhData[currentGrhIndex].getPixelHeight(),
                 grhData[currentGrhIndex].getsX(),
-                grhData[currentGrhIndex].getsY(), blend, alpha, color);
+                grhData[currentGrhIndex].getsY(), blend, alpha, color, scaleX, scaleY);
     }
 
     /**

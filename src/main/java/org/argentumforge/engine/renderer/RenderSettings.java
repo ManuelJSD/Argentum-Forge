@@ -18,6 +18,7 @@ public class RenderSettings {
     private float ghostOpacity = 0.5f;
     private boolean showGrid = false;
     private float[] gridColor = { 1.0f, 1.0f, 1.0f, 0.2f }; // Blanco semi-transparente por defecto
+    private boolean showNpcBreathing = true;
 
     // Minimap filters
     private boolean[] minimapLayers = { true, false, false, false };
@@ -104,6 +105,14 @@ public class RenderSettings {
 
     public void setGridColor(float[] gridColor) {
         this.gridColor = gridColor;
+    }
+
+    public boolean isShowNpcBreathing() {
+        return showNpcBreathing;
+    }
+
+    public void setShowNpcBreathing(boolean showNpcBreathing) {
+        this.showNpcBreathing = showNpcBreathing;
     }
 
     public boolean[] getMinimapLayers() {
