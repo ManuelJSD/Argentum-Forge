@@ -7,7 +7,7 @@ import org.argentumforge.engine.utils.AssetRegistry;
 
 import static org.argentumforge.engine.game.models.Direction.DOWN;
 import static org.argentumforge.engine.renderer.Drawn.drawTexture;
-import static org.argentumforge.engine.renderer.FontRenderer.*;
+
 import static org.argentumforge.engine.utils.GameData.*;
 import static org.argentumforge.engine.utils.AssetRegistry.*;
 import static org.argentumforge.engine.utils.Time.timerTicksPerFrame;
@@ -205,7 +205,13 @@ public final class Character {
     public static void drawCharacter(int charIndex, int PixelOffsetX, int PixelOffsetY, float alpha,
             RGBColor ambientcolor) {
         boolean moved = false;
-        RGBColor color = new RGBColor();
+
+        // Calcular factor de respiración
+        float breathingScale = 1.0f;
+        if (org.argentumforge.engine.game.Options.INSTANCE.getRenderSettings().isShowNpcBreathing()) {
+            // Oscilación suave
+            breathingScale = 1.0f + (float) (Math.sin(System.currentTimeMillis() / 200.0) * 0.025f);
+        }
 
         if (charList[charIndex].getMoving()) {
             if (charList[charIndex].getScrollDirectionX() != 0) {
@@ -283,37 +289,50 @@ public final class Character {
             if (charList[charIndex].getBody().getWalk(charList[charIndex].getHeading().getId())
                     .getGrhIndex() != 0) {
                 drawTexture(charList[charIndex].getBody().getWalk(charList[charIndex].getHeading().getId()),
-                        PixelOffsetX, PixelOffsetY, true, true, false, alpha, ambientcolor);
+                        PixelOffsetX, PixelOffsetY, true, true, false, alpha, ambientcolor, 1.0f, breathingScale);
             }
 
             if (charList[charIndex].getHead().getHead(charList[charIndex].getHeading().getId())
                     .getGrhIndex() != 0) {
+                // La cabeza también respira (aunque menos notorio si solo se mueve, pero si el
+                // cuerpo se estira, la cabeza debe acompañar)
+                // Usualmente la cabeza NO se estira, solo se desplaza verticalmente.
+                // Aquí solo aplico scale al offset Y. La cabeza mantiene su aspecto (scale
+                // 1.0f, 1.0f).
+                // Opcional: breathingScale también para la cabeza? Queda raro (cara larga).
+                // Mejor solo desplazar.
                 drawTexture(charList[charIndex].getHead().getHead(charList[charIndex].getHeading().getId()),
                         PixelOffsetX + (int) (charList[charIndex].getBody().getHeadOffset().getX() * scale),
-                        PixelOffsetY + (int) (charList[charIndex].getBody().getHeadOffset().getY() * scale),
+                        PixelOffsetY
+                                + (int) (charList[charIndex].getBody().getHeadOffset().getY() * scale * breathingScale),
                         true, false, false, alpha, ambientcolor);
 
                 if (charList[charIndex].getHelmet().getHead(charList[charIndex].getHeading().getId())
                         .getGrhIndex() != 0) {
                     drawTexture(charList[charIndex].getHelmet().getHead(charList[charIndex].getHeading().getId()),
                             PixelOffsetX + (int) (charList[charIndex].getBody().getHeadOffset().getX() * scale),
-                            PixelOffsetY + (int) (charList[charIndex].getBody().getHeadOffset().getY() * scale)
-                                    - (int) (34 * scale),
+                            PixelOffsetY
+                                    + (int) (charList[charIndex].getBody().getHeadOffset().getY() * scale
+                                            * breathingScale)
+                                    - (int) (34 * scale), // -34 hardcoded? Mantenemos, quizás debería escalar su
+                                                          // offset?
                             true, false, false, alpha, ambientcolor);
                 }
 
                 if (charList[charIndex].getWeapon().getWeaponWalk(charList[charIndex].getHeading().getId())
                         .getGrhIndex() != 0) {
+                    // Arma respira? Mejor sí para que no flote separada del cuerpo.
                     drawTexture(
                             charList[charIndex].getWeapon().getWeaponWalk(charList[charIndex].getHeading().getId()),
-                            PixelOffsetX, PixelOffsetY, true, true, false, alpha, ambientcolor);
+                            PixelOffsetX, PixelOffsetY, true, true, false, alpha, ambientcolor, 1.0f, breathingScale);
                 }
 
                 if (charList[charIndex].getShield().getShieldWalk(charList[charIndex].getHeading().getId())
                         .getGrhIndex() != 0) {
+                    // Escudo también respira.
                     drawTexture(
                             charList[charIndex].getShield().getShieldWalk(charList[charIndex].getHeading().getId()),
-                            PixelOffsetX, PixelOffsetY, true, true, false, alpha, ambientcolor);
+                            PixelOffsetX, PixelOffsetY, true, true, false, alpha, ambientcolor, 1.0f, breathingScale);
                 }
 
             }
@@ -321,11 +340,11 @@ public final class Character {
         } else {
             if (charList[charIndex].getBody().getWalk(charList[charIndex].getHeading().getId()).getGrhIndex() > 0) {
                 drawTexture(charList[charIndex].getBody().getWalk(charList[charIndex].getHeading().getId()),
-                        PixelOffsetX, PixelOffsetY, true, true, false, alpha, ambientcolor);
+                        PixelOffsetX, PixelOffsetY, true, true, false, alpha, ambientcolor, 1.0f, breathingScale);
             }
         }
 
-        // Draw FX
+        // Draw FX (sin respiración)
         if (charList[charIndex].fxIndex != 0) {
             float scale = org.argentumforge.engine.scenes.Camera.getZoomScale();
             drawTexture(charList[charIndex].fX,
