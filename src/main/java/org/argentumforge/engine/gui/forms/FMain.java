@@ -22,6 +22,7 @@ import org.argentumforge.engine.game.models.Key;
 import org.argentumforge.engine.listeners.KeyHandler;
 import org.argentumforge.engine.listeners.MouseListener;
 import org.argentumforge.engine.scenes.GameScene;
+import org.argentumforge.engine.listeners.EditorInputManager;
 import org.argentumforge.engine.scenes.Camera;
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -673,13 +674,13 @@ public final class FMain extends Form {
         if (clip.isEmpty())
             return;
 
-        if (!GameScene.inGameArea())
+        if (!EditorInputManager.inGameArea())
             return;
 
         int mx = (int) MouseListener.getX() - Camera.POS_SCREEN_X;
         int my = (int) MouseListener.getY() - Camera.POS_SCREEN_Y;
-        int tx = GameScene.getTileMouseX(mx);
-        int ty = GameScene.getTileMouseY(my);
+        int tx = EditorInputManager.getTileMouseX(mx);
+        int ty = EditorInputManager.getTileMouseY(my);
 
         CommandManager.getInstance().executeCommand(new PasteEntitiesCommand(clip.getItems(), tx, ty));
     }

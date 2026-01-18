@@ -1,6 +1,17 @@
 plugins {
     id 'java'
+    id 'application'
     id 'com.github.johnrengelman.shadow' version '8.1.1'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+dependencyLocking {
+    lockAllConfigurations()
 }
 
 group = 'org.argentumforge'
@@ -96,9 +107,13 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
-test {
-    useJUnitPlatform()
-    jvmArgs '--enable-native-access=ALL-UNNAMED', '--add-modules=jdk.incubator.vector'
+// test {
+//     useJUnitPlatform()
+//     jvmArgs '--enable-native-access=ALL-UNNAMED', '--add-modules=jdk.incubator.vector'
+// }
+
+application {
+    mainClass = 'org.argentumforge.Main'
 }
 
 jar {
