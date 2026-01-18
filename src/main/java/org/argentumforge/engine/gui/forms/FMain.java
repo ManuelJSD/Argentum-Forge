@@ -364,6 +364,20 @@ public final class FMain extends Form {
                     org.argentumforge.engine.utils.MapFileUtils.saveMap();
                 }
 
+                if (ImGui.menuItem(I18n.INSTANCE.get("menu.file.export"))) {
+                    javax.swing.JFileChooser fileChooser = new javax.swing.JFileChooser();
+                    fileChooser.setDialogTitle("Exportar Mapa como Imagen");
+                    fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Imagen PNG", "png"));
+                    if (fileChooser.showSaveDialog(null) == javax.swing.JFileChooser.APPROVE_OPTION) {
+                        String path = fileChooser.getSelectedFile().getAbsolutePath();
+                        if (!path.toLowerCase().endsWith(".png")) {
+                            path += ".png";
+                        }
+                        org.argentumforge.engine.utils.MapExporter.exportMap(path);
+                        javax.swing.JOptionPane.showMessageDialog(null, "Mapa exportado correctamente a:\n" + path);
+                    }
+                }
+
                 ImGui.separator();
 
                 if (ImGui.menuItem(I18n.INSTANCE.get("options.title"))) {
