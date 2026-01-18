@@ -167,7 +167,7 @@ public final class FMinimap extends Form {
                     int hoverY = (int) (localY / TILE_SIZE) + 1;
 
                     if (hoverX >= 1 && hoverX <= 100 && hoverY >= 1 && hoverY <= 100) {
-                        ImGui.setTooltip("X: " + hoverX + ", Y: " + hoverY);
+                        ImGui.setTooltip(I18n.INSTANCE.get("common.coordFormat", hoverX, hoverY));
                     }
                 }
             }
