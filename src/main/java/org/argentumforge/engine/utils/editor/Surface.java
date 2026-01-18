@@ -2,6 +2,7 @@ package org.argentumforge.engine.utils.editor;
 
 import static org.argentumforge.engine.utils.GameData.initGrh;
 import static org.argentumforge.engine.utils.GameData.mapData;
+import org.argentumforge.engine.listeners.KeyHandler;
 
 /**
  * Clase singleton para gestionar la edición de superficies (capas de suelo) en
@@ -19,7 +20,7 @@ public class Surface {
     }
 
     public enum ToolMode {
-        BRUSH, BUCKET
+        BRUSH, BUCKET, MAGIC_WAND
     }
 
     private int mode; // 0 = ninguno, 1 = colocar, 2 = borrar, 3 = capturar (pick)
@@ -158,11 +159,75 @@ public class Surface {
             return;
         }
 
+        if (toolMode == ToolMode.MAGIC_WAND) {
+            this.magic_wand_select(x, y);
+            return;
+        }
+
         if (toolMode == ToolMode.BUCKET) {
             this.bucket_fill(x, y);
         } else {
             this.brush_edit(x, y);
         }
+    }
+
+    private void magic_wand_select(int x, int y) {
+        if (mapData[x][y] == null)
+            return;
+
+        Selection selection = Selection.getInstance();
+        selection.setActive(true);
+        if (!KeyHandler.isKeyPressed(org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_SHIFT)) {
+            selection.getSelectedEntities().clear();
+        }
+
+        short targetGrh = mapData[x][y].getLayer(layer).getGrhIndex();
+
+        java.util.Queue<int[]> queue = new java.util.LinkedList<>();
+        queue.add(new int[] { x, y });
+
+        boolean[][] visited = new boolean[mapData.length][mapData[0].length];
+        visited[x][y] = true;
+
+        while (!queue.isEmpty()) {
+            int[] pos = queue.poll();
+            int currX = pos[0];
+            int currY = pos[1];
+
+            // Añadir a selección (Tile)
+            boolean alreadySelected = false;
+            for (Selection.SelectedEntity se : selection.getSelectedEntities()) {
+                if (se.x == currX && se.y == currY && se.type == Selection.EntityType.TILE) {
+                    alreadySelected = true;
+                    break;
+                }
+            }
+            if (!alreadySelected) {
+                selection.getSelectedEntities()
+                        .add(new Selection.SelectedEntity(Selection.EntityType.TILE, 0, currX, currY));
+            }
+
+            int[][] neighbors = { { currX + 1, currY }, { currX - 1, currY }, { currX, currY + 1 },
+                    { currX, currY - 1 } };
+            for (int[] next : neighbors) {
+                int nextX = next[0];
+                int nextY = next[1];
+
+                if (nextX >= 0 && nextX < mapData.length && nextY >= 0 && nextY < mapData[0].length) {
+                    if (!visited[nextX][nextY] && mapData[nextX][nextY] != null
+                            && mapData[nextX][nextY].getLayer(layer).getGrhIndex() == targetGrh) {
+                        visited[nextX][nextY] = true;
+                        queue.add(next);
+                    }
+                }
+            }
+        }
+
+        selection.startAreaSelect(x, y); // Solo para activar estado visual si necesario, aunque aquí ya tenemos
+                                         // entidades
+        selection.cancelDrag(); // Reset drag state pero mantener seleccion
+        // Forzamos "active" pero no "dragging" ni "areaSelecting"
+        // El selection manager pinta cuadros sobre selectedEntities automáticamente
     }
 
     private void pick(int x, int y) {

@@ -570,6 +570,23 @@ public final class FMain extends Form {
                 ImGui.endMenu();
             }
 
+            if (ImGui.beginMenu(I18n.INSTANCE.get("menu.map"))) {
+                if (ImGui.menuItem(I18n.INSTANCE.get("menu.edit.goto"), "F4")) {
+                    ImGUISystem.INSTANCE.show(new FGoTo());
+                }
+
+                ImGui.separator();
+
+                // Otras opciones de mapa futuras (Validar, Propiedades)
+                if (ImGui.menuItem(I18n.INSTANCE.get("menu.map.validate"))) {
+                    // Lógica de validación TODO
+                    // org.argentumforge.engine.utils.MapValidator.validate();
+                    javax.swing.JOptionPane.showMessageDialog(null, "Próximamente...");
+                }
+
+                ImGui.endMenu();
+            }
+
             if (ImGui.beginMenu(I18n.INSTANCE.get("menu.tools"))) {
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.tools.generateColors"))) {
                     int response = javax.swing.JOptionPane.showConfirmDialog(null,
@@ -637,6 +654,7 @@ public final class FMain extends Form {
 
             ImGui.endMainMenuBar();
         }
+
     }
 
     private void loadMapAction() {
