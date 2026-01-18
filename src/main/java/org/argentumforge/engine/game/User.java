@@ -276,6 +276,23 @@ public enum User {
     private void resetState() {
     }
 
+    public void teleport(int x, int y) {
+        if (x < minXBorder || x > maxXBorder || y < minYBorder || y > maxYBorder)
+            return;
+
+        userPos.setX(x);
+        userPos.setY(y);
+        addToUserPos.setX(0); // Reset smooth movement offset if any
+        addToUserPos.setY(0);
+        underCeiling = checkUnderCeiling();
+
+        // Si hay char index asociado, actualizar su posición
+        if (userCharIndex > 0) {
+            charList[userCharIndex].getPos().setX(x);
+            charList[userCharIndex].getPos().setY(y);
+        }
+    }
+
     public boolean isWalkingmode() {
         return walkingmode;
     }

@@ -103,6 +103,7 @@ public class FBindKeys extends Form {
             renderKeyBindRow(I18n.INSTANCE.get("options.keys.bucket"), Key.TOOL_BUCKET);
             renderKeyBindRow(I18n.INSTANCE.get("options.keys.eraser"), Key.TOOL_ERASER);
             renderKeyBindRow(I18n.INSTANCE.get("options.keys.picker"), Key.TOOL_PICK);
+            renderKeyBindRow(I18n.INSTANCE.get("options.keys.magicWand"), Key.TOOL_MAGIC_WAND);
 
             renderKeyBindRow(I18n.INSTANCE.get("options.keys.exit"), Key.EXIT_GAME);
 

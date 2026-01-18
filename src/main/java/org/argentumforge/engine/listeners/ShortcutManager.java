@@ -113,6 +113,18 @@ public class ShortcutManager {
                             org.argentumforge.engine.game.console.FontStyle.REGULAR,
                             new org.argentumforge.engine.renderer.RGBColor(0.5f, 1f, 0.5f));
                     break;
+                case TOOL_MAGIC_WAND:
+                    org.argentumforge.engine.utils.editor.Surface.getInstance().setMode(1); // Modo edicion
+                    org.argentumforge.engine.utils.editor.Surface.getInstance()
+                            .setToolMode(org.argentumforge.engine.utils.editor.Surface.ToolMode.MAGIC_WAND);
+                    org.argentumforge.engine.game.console.Console.INSTANCE.addMsgToConsole(
+                            "Herramienta: Varita Mágica",
+                            org.argentumforge.engine.game.console.FontStyle.REGULAR,
+                            new org.argentumforge.engine.renderer.RGBColor(0.8f, 0.4f, 1f));
+                    break;
+                case GOTO_POS:
+                    ImGUISystem.INSTANCE.show(new org.argentumforge.engine.gui.forms.FGoTo());
+                    break;
                 default:
                     break;
             }
