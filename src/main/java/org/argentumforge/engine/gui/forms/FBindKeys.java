@@ -93,9 +93,16 @@ public class FBindKeys extends Form {
             renderKeyBindRow(I18n.INSTANCE.get("options.keys.showOptions"), Key.SHOW_OPTIONS);
             renderKeyBindRow(I18n.INSTANCE.get("options.keys.showDebug"), Key.DEBUG_SHOW);
             renderKeyBindRow(I18n.INSTANCE.get("options.keys.walkMode"), Key.TOGGLE_WALKING_MODE);
+            renderKeyBindRow(I18n.INSTANCE.get("options.keys.toggleGrid"), Key.TOGGLE_GRID);
 
             renderGroupHeader(I18n.INSTANCE.get("options.keys.selectionTools"));
             renderKeyBindRow(I18n.INSTANCE.get("options.keys.multiSelect"), Key.MULTI_SELECT);
+
+            renderGroupHeader(I18n.INSTANCE.get("options.keys.tools"));
+            renderKeyBindRow(I18n.INSTANCE.get("options.keys.brush"), Key.TOOL_BRUSH);
+            renderKeyBindRow(I18n.INSTANCE.get("options.keys.bucket"), Key.TOOL_BUCKET);
+            renderKeyBindRow(I18n.INSTANCE.get("options.keys.eraser"), Key.TOOL_ERASER);
+            renderKeyBindRow(I18n.INSTANCE.get("options.keys.picker"), Key.TOOL_PICK);
 
             renderKeyBindRow(I18n.INSTANCE.get("options.keys.exit"), Key.EXIT_GAME);
 

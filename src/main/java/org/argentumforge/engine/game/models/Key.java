@@ -37,7 +37,16 @@ public enum Key {
     DEBUG_SHOW(GLFW_KEY_F1),
     TOGGLE_WALKING_MODE(GLFW_KEY_F3),
     MULTI_SELECT(GLFW_KEY_LEFT_SHIFT),
-    EXIT_GAME(GLFW_KEY_ESCAPE);
+    EXIT_GAME(GLFW_KEY_ESCAPE),
+
+    // Herramientas de Editor
+    TOOL_BRUSH(GLFW_KEY_B),
+    TOOL_BUCKET(GLFW_KEY_F),
+    TOOL_ERASER(GLFW_KEY_E),
+    TOOL_PICK(GLFW_KEY_P),
+
+    // Vistas
+    TOGGLE_GRID(GLFW_KEY_G);
 
     private static final String KEYS_CONFIG_FILE = "resources/keys.properties";
     private static final Logger LOGGER = Logger.getLogger(Key.class.getName());
