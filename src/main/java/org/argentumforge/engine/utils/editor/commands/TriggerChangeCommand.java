@@ -1,29 +1,34 @@
 package org.argentumforge.engine.utils.editor.commands;
 
+import java.util.Map;
 import static org.argentumforge.engine.utils.GameData.mapData;
 
 /**
- * Comando para registrar y revertir cambios en los triggers de un tile.
+ * Comando para registrar y revertir cambios en los triggers de múltiples tiles.
  */
 public class TriggerChangeCommand implements Command {
-    private final int x, y;
-    private final short oldTrigger;
-    private final short newTrigger;
+    private final Map<TilePos, Short> oldStates;
+    private final Map<TilePos, Short> newStates;
 
-    public TriggerChangeCommand(int x, int y, short oldTrigger, short newTrigger) {
-        this.x = x;
-        this.y = y;
-        this.oldTrigger = oldTrigger;
-        this.newTrigger = newTrigger;
+    public static record TilePos(int x, int y) {
+    }
+
+    public TriggerChangeCommand(Map<TilePos, Short> oldStates, Map<TilePos, Short> newStates) {
+        this.oldStates = oldStates;
+        this.newStates = newStates;
     }
 
     @Override
     public void execute() {
-        mapData[x][y].setTrigger(newTrigger);
+        for (Map.Entry<TilePos, Short> entry : newStates.entrySet()) {
+            mapData[entry.getKey().x][entry.getKey().y].setTrigger(entry.getValue());
+        }
     }
 
     @Override
     public void undo() {
-        mapData[x][y].setTrigger(oldTrigger);
+        for (Map.Entry<TilePos, Short> entry : oldStates.entrySet()) {
+            mapData[entry.getKey().x][entry.getKey().y].setTrigger(entry.getValue());
+        }
     }
 }

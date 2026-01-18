@@ -33,6 +33,9 @@ public class Trigger {
         if (!isActive || mapData == null)
             return;
 
+        java.util.Map<org.argentumforge.engine.utils.editor.commands.TriggerChangeCommand.TilePos, Short> oldStates = new java.util.HashMap<>();
+        java.util.Map<org.argentumforge.engine.utils.editor.commands.TriggerChangeCommand.TilePos, Short> newStates = new java.util.HashMap<>();
+
         int offset = brushSize / 2;
         double radiusSq = Math.pow(brushSize / 2.0, 2);
 
@@ -51,12 +54,18 @@ public class Trigger {
                     // Aplicar trigger mediante comando (soporta undo/redo y dirty flag)
                     short oldTrigger = (short) mapData[i][j].getTrigger();
                     if (oldTrigger != (short) selectedTriggerId) {
-                        org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
-                                new org.argentumforge.engine.utils.editor.commands.TriggerChangeCommand(i, j,
-                                        oldTrigger, (short) selectedTriggerId));
+                        org.argentumforge.engine.utils.editor.commands.TriggerChangeCommand.TilePos pos = new org.argentumforge.engine.utils.editor.commands.TriggerChangeCommand.TilePos(
+                                i, j);
+                        oldStates.put(pos, oldTrigger);
+                        newStates.put(pos, (short) selectedTriggerId);
                     }
                 }
             }
+        }
+
+        if (!oldStates.isEmpty()) {
+            org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
+                    new org.argentumforge.engine.utils.editor.commands.TriggerChangeCommand(oldStates, newStates));
         }
     }
 

@@ -76,7 +76,7 @@ public class Block {
             return;
 
         java.util.Map<org.argentumforge.engine.utils.editor.commands.BlockChangeCommand.TilePos, Boolean> oldStates = new java.util.HashMap<>();
-        boolean targetState = (mode == 1);
+        java.util.Map<org.argentumforge.engine.utils.editor.commands.BlockChangeCommand.TilePos, Boolean> newStates = new java.util.HashMap<>();
 
         int offset = brushSize / 2;
         double radiusSq = Math.pow(brushSize / 2.0, 2);
@@ -103,43 +103,18 @@ public class Block {
                     }
 
                     if (next != current) {
-                        oldStates.put(
-                                new org.argentumforge.engine.utils.editor.commands.BlockChangeCommand.TilePos(i, j),
-                                current);
+                        org.argentumforge.engine.utils.editor.commands.BlockChangeCommand.TilePos pos = new org.argentumforge.engine.utils.editor.commands.BlockChangeCommand.TilePos(
+                                i, j);
+                        oldStates.put(pos, current);
+                        newStates.put(pos, next);
                     }
                 }
             }
         }
 
         if (!oldStates.isEmpty()) {
-            boolean actualTarget = mode == 3 ? !oldStates.values().iterator().next() : targetState;
-            // Para el modo invertir (3), el targetState es variable por tile, pero el
-            // comando asume uno solo.
-            // Refactorizamos el comando para soportar estados por tile si el modo es 3.
-            // Por simplicidad en esta iteración, si es modo 3, usamos el primer valor
-            // invertido como referencia si el pincel es 1.
-            // Si el pincel es mayor a 1, el modo invertir es raro de predecir.
-
             org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
-                    new org.argentumforge.engine.utils.editor.commands.BlockChangeCommand(oldStates, actualTarget));
-        }
-    }
-
-    /**
-     * Bloquea un tile en las coordenadas especificadas.
-     */
-    private void block(int x, int y) {
-        if (mapData != null && x >= 0 && x < mapData.length && y >= 0 && y < mapData[0].length) {
-            mapData[x][y].setBlocked(true);
-        }
-    }
-
-    /**
-     * Desbloquea un tile en las coordenadas especificadas.
-     */
-    private void unblock(int x, int y) {
-        if (mapData != null && x >= 0 && x < mapData.length && y >= 0 && y < mapData[0].length) {
-            mapData[x][y].setBlocked(false);
+                    new org.argentumforge.engine.utils.editor.commands.BlockChangeCommand(oldStates, newStates));
         }
     }
 
@@ -148,35 +123,36 @@ public class Block {
      * Basado en un área de visión estándar de 13x11 (o similar configurable).
      */
     public void blockBorders() {
-        if (mapData == null)
-            return;
-
-        // Tamaños configurados del cliente (viewport)
-        int clientWidth = org.argentumforge.engine.utils.GameData.options.getClientWidth();
-        int clientHeight = org.argentumforge.engine.utils.GameData.options.getClientHeight();
-
-        int minXBorder = clientWidth / 2;
-        int maxXBorder = mapData.length - (clientWidth / 2) - 1;
-        int minYBorder = clientHeight / 2;
-        int maxYBorder = mapData[0].length - (clientHeight / 2) - 1;
-
-        for (int x = 0; x < mapData.length; x++) {
-            for (int y = 0; y < mapData[0].length; y++) {
-                if (mapData[x][y] != null) {
-                    if (x <= minXBorder || x >= maxXBorder || y <= minYBorder || y >= maxYBorder) {
-                        mapData[x][y].setBlocked(true);
-                    }
-                }
-            }
-        }
+        applyGlobalAction(true, true);
     }
 
     /**
      * Limpia los bloqueos de los bordes del mapa.
      */
     public void unblockBorders() {
+        applyGlobalAction(false, true);
+    }
+
+    /**
+     * Bloquea todos los tiles del mapa.
+     */
+    public void blockAll() {
+        applyGlobalAction(true, false);
+    }
+
+    /**
+     * Desbloquea todos los tiles del mapa.
+     */
+    public void unblockAll() {
+        applyGlobalAction(false, false);
+    }
+
+    private void applyGlobalAction(boolean targetState, boolean bordersOnly) {
         if (mapData == null)
             return;
+
+        java.util.Map<org.argentumforge.engine.utils.editor.commands.BlockChangeCommand.TilePos, Boolean> oldStates = new java.util.HashMap<>();
+        java.util.Map<org.argentumforge.engine.utils.editor.commands.BlockChangeCommand.TilePos, Boolean> newStates = new java.util.HashMap<>();
 
         int clientWidth = org.argentumforge.engine.utils.GameData.options.getClientWidth();
         int clientHeight = org.argentumforge.engine.utils.GameData.options.getClientHeight();
@@ -189,41 +165,23 @@ public class Block {
         for (int x = 0; x < mapData.length; x++) {
             for (int y = 0; y < mapData[0].length; y++) {
                 if (mapData[x][y] != null) {
-                    if (x <= minXBorder || x >= maxXBorder || y <= minYBorder || y >= maxYBorder) {
-                        mapData[x][y].setBlocked(false);
+                    boolean isBorder = x <= minXBorder || x >= maxXBorder || y <= minYBorder || y >= maxYBorder;
+                    if (!bordersOnly || isBorder) {
+                        boolean current = mapData[x][y].getBlocked();
+                        if (current != targetState) {
+                            org.argentumforge.engine.utils.editor.commands.BlockChangeCommand.TilePos pos = new org.argentumforge.engine.utils.editor.commands.BlockChangeCommand.TilePos(
+                                    x, y);
+                            oldStates.put(pos, current);
+                            newStates.put(pos, targetState);
+                        }
                     }
                 }
             }
         }
-    }
 
-    /**
-     * Bloquea todos los tiles del mapa.
-     */
-    public void blockAll() {
-        if (mapData == null)
-            return;
-        for (int x = 0; x < mapData.length; x++) {
-            for (int y = 0; y < mapData[0].length; y++) {
-                if (mapData[x][y] != null) {
-                    mapData[x][y].setBlocked(true);
-                }
-            }
-        }
-    }
-
-    /**
-     * Desbloquea todos los tiles del mapa.
-     */
-    public void unblockAll() {
-        if (mapData == null)
-            return;
-        for (int x = 0; x < mapData.length; x++) {
-            for (int y = 0; y < mapData[0].length; y++) {
-                if (mapData[x][y] != null) {
-                    mapData[x][y].setBlocked(false);
-                }
-            }
+        if (!oldStates.isEmpty()) {
+            org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
+                    new org.argentumforge.engine.utils.editor.commands.BlockChangeCommand(oldStates, newStates));
         }
     }
 }
