@@ -9,20 +9,20 @@ import static org.argentumforge.engine.utils.GameData.mapData;
  */
 public class BlockChangeCommand implements Command {
     private final Map<TilePos, Boolean> oldStates;
-    private final boolean newState;
+    private final Map<TilePos, Boolean> newStates;
 
     public static record TilePos(int x, int y) {
     }
 
-    public BlockChangeCommand(Map<TilePos, Boolean> oldStates, boolean newState) {
+    public BlockChangeCommand(Map<TilePos, Boolean> oldStates, Map<TilePos, Boolean> newStates) {
         this.oldStates = oldStates;
-        this.newState = newState;
+        this.newStates = newStates;
     }
 
     @Override
     public void execute() {
-        for (TilePos pos : oldStates.keySet()) {
-            mapData[pos.x][pos.y].setBlocked(newState);
+        for (Map.Entry<TilePos, Boolean> entry : newStates.entrySet()) {
+            mapData[entry.getKey().x][entry.getKey().y].setBlocked(entry.getValue());
         }
     }
 

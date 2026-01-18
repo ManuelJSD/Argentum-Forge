@@ -165,27 +165,6 @@ public class Surface {
         }
     }
 
-    private void insert(int x, int y) {
-        short oldGrh = mapData[x][y].getLayer(layer).getGrhIndex();
-        if (oldGrh == (short) surfaceIndex)
-            return;
-
-        org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
-                new org.argentumforge.engine.utils.editor.commands.TileChangeCommand(x, y, layer, oldGrh,
-                        (short) surfaceIndex));
-    }
-
-    private void delete(int x, int y) {
-        short oldGrh = mapData[x][y].getLayer(layer).getGrhIndex();
-        short targetGrh = (short) (layer == 1 ? 1 : 0);
-
-        if (oldGrh == targetGrh)
-            return;
-
-        org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
-                new org.argentumforge.engine.utils.editor.commands.TileChangeCommand(x, y, layer, oldGrh, targetGrh));
-    }
-
     private void pick(int x, int y) {
         if (mapData != null && x >= 0 && x < mapData.length && y >= 0 && y < mapData[0].length) {
             int grhIdx = mapData[x][y].getLayer(layer).getGrhIndex();
@@ -203,6 +182,9 @@ public class Surface {
 
         java.util.Map<org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos, Short> oldTiles = new java.util.HashMap<>();
         java.util.Map<org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos, Short> newTiles = new java.util.HashMap<>();
+        java.util.Map<org.argentumforge.engine.utils.editor.commands.BlockChangeCommand.TilePos, Boolean> oldBlocks = new java.util.HashMap<>();
+        java.util.Map<org.argentumforge.engine.utils.editor.commands.BlockChangeCommand.TilePos, Boolean> newBlocks = new java.util.HashMap<>();
+
         int half = brushSize / 2;
 
         if (useMosaic && (mosaicWidth > 1 || mosaicHeight > 1)) {
@@ -215,14 +197,28 @@ public class Surface {
                         short targetGrhWithMosaic = (short) (surfaceIndex + (dy * mosaicWidth) + dx);
                         short currentGrh = mapData[mapX][mapY].getLayer(layer).getGrhIndex();
                         if (currentGrh != targetGrhWithMosaic) {
-                            org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos pos = new org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos(
-                                    mapX, mapY);
-                            oldTiles.put(pos, currentGrh);
-                            newTiles.put(pos, targetGrhWithMosaic);
+                            oldTiles.put(
+                                    new org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos(
+                                            mapX, mapY),
+                                    currentGrh);
+                            newTiles.put(
+                                    new org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos(
+                                            mapX, mapY),
+                                    targetGrhWithMosaic);
                         }
 
-                        if (autoBlock) {
-                            Block.getInstance().block_edit(mapX, mapY);
+                        if (autoBlock && mode == 1) {
+                            boolean currentBlock = mapData[mapX][mapY].getBlocked();
+                            if (!currentBlock) {
+                                oldBlocks.put(
+                                        new org.argentumforge.engine.utils.editor.commands.BlockChangeCommand.TilePos(
+                                                mapX, mapY),
+                                        false);
+                                newBlocks.put(
+                                        new org.argentumforge.engine.utils.editor.commands.BlockChangeCommand.TilePos(
+                                                mapX, mapY),
+                                        true);
+                            }
                         }
                     }
                 }
@@ -263,17 +259,34 @@ public class Surface {
                         }
 
                         if (autoBlock && mode == 1) {
-                            Block.getInstance().block_edit(i, j);
+                            boolean currentBlock = mapData[i][j].getBlocked();
+                            if (!currentBlock) {
+                                oldBlocks.put(
+                                        new org.argentumforge.engine.utils.editor.commands.BlockChangeCommand.TilePos(i,
+                                                j),
+                                        false);
+                                newBlocks.put(
+                                        new org.argentumforge.engine.utils.editor.commands.BlockChangeCommand.TilePos(i,
+                                                j),
+                                        true);
+                            }
                         }
                     }
                 }
             }
         }
 
-        if (!oldTiles.isEmpty()) {
-            org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
-                    new org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand(layer, oldTiles,
-                            newTiles));
+        if (!oldTiles.isEmpty() || !oldBlocks.isEmpty()) {
+            org.argentumforge.engine.utils.editor.commands.MacroCommand macro = new org.argentumforge.engine.utils.editor.commands.MacroCommand();
+            if (!oldTiles.isEmpty()) {
+                macro.addCommand(new org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand(layer,
+                        oldTiles, newTiles));
+            }
+            if (!oldBlocks.isEmpty()) {
+                macro.addCommand(
+                        new org.argentumforge.engine.utils.editor.commands.BlockChangeCommand(oldBlocks, newBlocks));
+            }
+            org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(macro);
         }
     }
 
@@ -289,6 +302,9 @@ public class Surface {
 
         java.util.Map<org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos, Short> oldTiles = new java.util.HashMap<>();
         java.util.Map<org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos, Short> newTiles = new java.util.HashMap<>();
+        java.util.Map<org.argentumforge.engine.utils.editor.commands.BlockChangeCommand.TilePos, Boolean> oldBlocks = new java.util.HashMap<>();
+        java.util.Map<org.argentumforge.engine.utils.editor.commands.BlockChangeCommand.TilePos, Boolean> newBlocks = new java.util.HashMap<>();
+
         java.util.Queue<int[]> queue = new java.util.LinkedList<>();
         queue.add(new int[] { x, y });
 
@@ -313,8 +329,15 @@ public class Surface {
                     targetGrhWithMosaic);
 
             if (autoBlock && mode == 1) {
-                Block.getInstance().setMode(1);
-                Block.getInstance().block_edit(currX, currY);
+                boolean currentBlock = mapData[currX][currY].getBlocked();
+                if (!currentBlock) {
+                    oldBlocks.put(
+                            new org.argentumforge.engine.utils.editor.commands.BlockChangeCommand.TilePos(currX, currY),
+                            false);
+                    newBlocks.put(
+                            new org.argentumforge.engine.utils.editor.commands.BlockChangeCommand.TilePos(currX, currY),
+                            true);
+                }
             }
 
             int[][] neighbors = { { currX + 1, currY }, { currX - 1, currY }, { currX, currY + 1 },
@@ -332,10 +355,17 @@ public class Surface {
             }
         }
 
-        if (!oldTiles.isEmpty()) {
-            org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
-                    new org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand(layer, oldTiles,
-                            newTiles));
+        if (!oldTiles.isEmpty() || !oldBlocks.isEmpty()) {
+            org.argentumforge.engine.utils.editor.commands.MacroCommand macro = new org.argentumforge.engine.utils.editor.commands.MacroCommand();
+            if (!oldTiles.isEmpty()) {
+                macro.addCommand(new org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand(layer,
+                        oldTiles, newTiles));
+            }
+            if (!oldBlocks.isEmpty()) {
+                macro.addCommand(
+                        new org.argentumforge.engine.utils.editor.commands.BlockChangeCommand(oldBlocks, newBlocks));
+            }
+            org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(macro);
         }
     }
 

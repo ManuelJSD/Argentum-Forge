@@ -22,6 +22,9 @@ public class AutoTiler {
         if (GameData.mapData == null)
             return;
 
+        java.util.Map<org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos, Short> oldTiles = new java.util.HashMap<>();
+        java.util.Map<org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos, Short> newTiles = new java.util.HashMap<>();
+
         for (int x = Camera.XMinMapSize; x <= Camera.XMaxMapSize; x++) {
             for (int y = Camera.YMinMapSize; y <= Camera.YMaxMapSize; y++) {
                 short currentGrh = GameData.mapData[x][y].getLayer(layer).getGrhIndex();
@@ -33,11 +36,21 @@ public class AutoTiler {
                     if (bitmask > 0) {
                         // This land tile borders water, apply coast tile
                         short coastTile = getCoastTile(coastGrhStart, bitmask);
-                        GameData.mapData[x][y].getLayer(layer).setGrhIndex(0);
-                        GameData.initGrh(GameData.mapData[x][y].getLayer(layer), coastTile, false);
+                        oldTiles.put(
+                                new org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos(x, y),
+                                currentGrh);
+                        newTiles.put(
+                                new org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos(x, y),
+                                coastTile);
                     }
                 }
             }
+        }
+
+        if (!newTiles.isEmpty()) {
+            org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
+                    new org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand(layer, oldTiles,
+                            newTiles));
         }
     }
 
@@ -128,6 +141,9 @@ public class AutoTiler {
         if (GameData.mapData == null || mosaicWidth <= 1 || mosaicHeight <= 1)
             return;
 
+        java.util.Map<org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos, Short> oldTiles = new java.util.HashMap<>();
+        java.util.Map<org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos, Short> newTiles = new java.util.HashMap<>();
+
         for (int x = Camera.XMinMapSize; x <= Camera.XMaxMapSize; x++) {
             for (int y = Camera.YMinMapSize; y <= Camera.YMaxMapSize; y++) {
                 short currentGrh = GameData.mapData[x][y].getLayer(layer).getGrhIndex();
@@ -138,10 +154,22 @@ public class AutoTiler {
                     int relY = y % mosaicHeight;
                     short mosaicGrh = (short) (baseGrh + (relY * mosaicWidth) + relX);
 
-                    GameData.mapData[x][y].getLayer(layer).setGrhIndex(0);
-                    GameData.initGrh(GameData.mapData[x][y].getLayer(layer), mosaicGrh, false);
+                    if (currentGrh != mosaicGrh) {
+                        oldTiles.put(
+                                new org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos(x, y),
+                                currentGrh);
+                        newTiles.put(
+                                new org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos(x, y),
+                                mosaicGrh);
+                    }
                 }
             }
+        }
+
+        if (!newTiles.isEmpty()) {
+            org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
+                    new org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand(layer, oldTiles,
+                            newTiles));
         }
     }
 }
