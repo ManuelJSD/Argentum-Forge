@@ -140,6 +140,73 @@ tasks.jar {
     enabled = false
 }
 
+task packageWin(type: Exec) {
+    dependsOn tasks.shadowJar
+    group = "distribution"
+    description = "Generates a Windows executable using jpackage"
+
+    workingDir project.projectDir
+
+    // Detección dinámica de jpackage basada en el entorno de ejecución de Gradle
+    def javaHome = System.getProperty("java.home")
+    def jpackageExecutable = OperatingSystem.current().isWindows() ? "jpackage.exe" : "jpackage"
+    def jpackagePath = "${javaHome}/bin/${jpackageExecutable}"
+
+    // Permite al usuario sobrescribir la ruta con -PjpackagePath="/ruta/a/jpackage"
+    if (project.hasProperty('jpackagePath')) {
+        jpackagePath = project.getProperty('jpackagePath')
+    }
+
+    def inputDir = "build/libs"
+    def outputDir = "build/dist"
+    def jarName = "ArgentumForge-${project.version}.jar"
+    def mainClass = "org.argentumforge.Main"
+    def iconPath = "resources/icon.ico"
+
+    // Verificación de seguridad
+    doFirst {
+        if (!new File(jpackagePath).exists()) {
+            throw new GradleException("No se encontró jpackage en: ${jpackagePath}. Por favor, asegúrate de estar usando un JDK y no solo un JRE, o especifica la ruta con -PjpackagePath")
+        }
+        delete outputDir
+    }
+
+    commandLine jpackagePath,
+            '--type', 'app-image',
+            '--dest', outputDir,
+            '--name', 'ArgentumForge',
+            '--input', inputDir,
+            '--main-jar', jarName,
+            '--main-class', mainClass,
+            '--icon', iconPath,
+            '--description', 'Argentum Forge Map Editor',
+            '--vendor', 'Argentum Forge Team'
+
+    doLast {
+        def appFolder = "${outputDir}/ArgentumForge"
+        
+        println "Copiando recursos externos a ${appFolder}..."
+        
+        copy {
+            from "resources"
+            into "${appFolder}/resources"
+        }
+        
+        copy {
+            from "lang"
+            into "${appFolder}/lang"
+        }
+        
+        copy {
+            from "."
+            include "grh_library.json", "Triggers.json"
+            into appFolder
+        }
+        
+        println "Empaquetado completado con éxito."
+    }
+}
+
 spotless {
     java {
         target 'src/*/java/**/*.java'
