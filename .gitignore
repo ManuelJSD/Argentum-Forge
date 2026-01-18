@@ -49,6 +49,8 @@ resources/gui.ini
 ### options.ini ###
 resources/options.ini
 
+minimap.bin
+
 *.log
 
 *~

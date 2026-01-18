@@ -9,6 +9,7 @@ import org.argentumforge.engine.gui.forms.FMain;
 import org.argentumforge.engine.gui.forms.FOptions;
 import org.argentumforge.engine.listeners.KeyHandler;
 import org.argentumforge.engine.listeners.MouseListener;
+import org.argentumforge.engine.listeners.EditorInputManager;
 import org.argentumforge.engine.renderer.RenderSettings;
 import org.argentumforge.engine.utils.editor.Surface;
 import org.argentumforge.engine.utils.editor.Block;
@@ -26,6 +27,7 @@ import org.argentumforge.engine.utils.inits.NpcData;
 import org.argentumforge.engine.utils.inits.ObjData;
 import org.argentumforge.engine.gui.forms.FTransferEditor;
 import org.argentumforge.engine.renderer.Drawn;
+import org.argentumforge.engine.renderer.MapRenderer;
 
 import static org.argentumforge.engine.game.IntervalTimer.INT_SENTRPU;
 import static org.argentumforge.engine.game.models.Character.drawCharacter;
@@ -84,8 +86,11 @@ public final class GameScene extends Scene {
     /** Acumulador de desplazamiento en Y para animaciones suaves de movimiento. */
     private float offSetCounterY = 0;
 
-    /** Nivel de transparencia de la capa de techos (0.0f a 1.0f). */
-    private float alphaCeiling = 1.0f;
+    /** Renderizador de las capas del mapa. */
+    private MapRenderer mapRenderer;
+
+    /** Gestor de entrada del editor. */
+    private EditorInputManager inputManager;
 
     /** Formulario principal de la interfaz de usuario. */
     private FMain frmMain;
@@ -135,6 +140,9 @@ public final class GameScene extends Scene {
         selection = Selection.getInstance();
         trigger = Trigger.getInstance();
         transfer = Transfer.getInstance();
+
+        mapRenderer = new MapRenderer(camera);
+        inputManager = new EditorInputManager(camera);
 
         whiteTexture = new Texture();
         whiteTexture.createWhitePixel();
@@ -189,119 +197,7 @@ public final class GameScene extends Scene {
      */
     @Override
     public void mouseEvents() {
-        // Bloqueamos si ImGui está capturando el ratón activamente (sobre una ventana o
-        // widget)
-        // EXCEPTO si solo la ventana principal FMain está activa, permitiendo
-        // click-through al mapa.
-        if (imgui.ImGui.getIO().getWantCaptureMouse()) {
-            if (!ImGUISystem.INSTANCE.isMainLast()) {
-                return;
-            }
-        }
-
-        // ¿Estamos haciendo clic dentro del área de renderizado del juego?
-        if (inGameArea()) {
-            int x = getTileMouseX((int) MouseListener.getX() - POS_SCREEN_X);
-            int y = getTileMouseY((int) MouseListener.getY() - POS_SCREEN_Y);
-
-            // Herramienta de Selección (Drag & Drop + Marquee)
-            if (selection.isActive()) {
-                boolean multiSelectPressed = KeyHandler.isActionKeyPressed(Key.MULTI_SELECT);
-
-                if (MouseListener.mouseButtonDown(GLFW_MOUSE_BUTTON_LEFT)) {
-                    if (!selection.isDragging() && !selection.isAreaSelecting()) {
-                        selection.tryGrab(x, y, multiSelectPressed);
-                    } else if (selection.isAreaSelecting()) {
-                        selection.updateAreaSelect(x, y);
-                    }
-                } else if (MouseListener.mouseButtonReleased(GLFW_MOUSE_BUTTON_LEFT)) {
-                    if (selection.isDragging()) {
-                        selection.finalizeMove(x, y);
-                    } else if (selection.isAreaSelecting()) {
-                        selection.finalizeAreaSelect();
-                    }
-                }
-                return; // Prioridad absoluta
-            }
-
-            if (MouseListener.mouseButtonDown(GLFW_MOUSE_BUTTON_LEFT)) {
-                // Editar superficies o bloqueos según el modo activo
-                surface.surface_edit(x, y);
-                block.block_edit(x, y);
-                npc.npc_edit(x, y);
-                obj.obj_edit(x, y);
-                trigger.trigger_edit(x, y);
-                transfer.transfer_edit(x, y);
-            }
-
-            // Clic derecho para capturar coordenadas de traslado
-            if (MouseListener.mouseButtonDown(GLFW_MOUSE_BUTTON_RIGHT)) {
-                if (x >= 1 && x <= 100 && y >= 1 && y <= 100 && transfer.isActive() && mapData[x][y].getExitMap() > 0) {
-                    int destMap = mapData[x][y].getExitMap();
-                    int destX = mapData[x][y].getExitX();
-                    int destY = mapData[x][y].getExitY();
-
-                    transfer.captureCoordinates(destMap, destX, destY);
-                    System.out.println("Traslado capturado: Mapa=" + destMap + " X=" + destX + " Y=" + destY);
-
-                    // Actualizar campos del editor si está abierto
-                    org.argentumforge.engine.gui.forms.FTransferEditor editor = (org.argentumforge.engine.gui.forms.FTransferEditor) ImGUISystem.INSTANCE
-                            .getForm(org.argentumforge.engine.gui.forms.FTransferEditor.class);
-                    if (editor != null) {
-                        editor.updateInputFields(destMap, destX, destY);
-                    }
-                }
-            }
-
-            // Doble clic para navegar al mapa de destino
-            if (MouseListener.mouseButtonDoubleClick(GLFW_MOUSE_BUTTON_LEFT)) {
-                if (x >= 1 && x <= 100 && y >= 1 && y <= 100 && mapData[x][y].getExitMap() > 0) {
-                    int destMap = mapData[x][y].getExitMap();
-                    int destX = mapData[x][y].getExitX();
-                    int destY = mapData[x][y].getExitY();
-
-                    System.out.println("Navegando a traslado: Mapa=" + destMap + " X=" + destX + " Y=" + destY);
-
-                    // Cargar el mapa de destino en la misma ubicación que el mapa actual
-                    String lastPath = org.argentumforge.engine.utils.GameData.options.getLastMapPath();
-                    java.io.File currentFile = new java.io.File(lastPath);
-                    String mapDir = currentFile.getParent();
-
-                    if (mapDir == null) {
-                        mapDir = org.argentumforge.engine.utils.GameData.options.getMapsPath();
-                    }
-
-                    String mapPath = mapDir + java.io.File.separator + "Mapa" + destMap + ".map";
-
-                    java.io.File mapFile = new java.io.File(mapPath);
-                    if (mapFile.exists()) {
-                        org.argentumforge.engine.utils.GameData.loadMap(mapPath);
-
-                        // Posicionar al usuario y la cámara en las coordenadas de destino
-                        user.getUserPos().setX(destX);
-                        user.getUserPos().setY(destY);
-                        camera.update(destX, destY);
-
-                        Console.INSTANCE.addMsgToConsole(
-                                "Navegado a Mapa " + destMap + " (" + destX + ", " + destY + ")",
-                                REGULAR,
-                                new RGBColor(0f, 1f, 1f));
-                    } else {
-                        Console.INSTANCE.addMsgToConsole(
-                                "Error: No se encontró el mapa " + destMap + " en " + mapPath,
-                                REGULAR,
-                                new RGBColor(1f, 0f, 0f));
-                    }
-                }
-            }
-        }
-
-        // Manejar Zoom con la rueda del ratón
-        float scrollY = MouseListener.getScrollY();
-        if (scrollY != 0) {
-            int newSize = Camera.TILE_PIXEL_SIZE + (int) (scrollY * 4);
-            Camera.setTileSize(newSize);
-        }
+        inputManager.updateMouse();
     }
 
     /**
@@ -309,7 +205,14 @@ public final class GameScene extends Scene {
      */
     @Override
     public void keyEvents() {
-        this.checkBindedKeys();
+        inputManager.updateKeys();
+    }
+
+    /**
+     * Renderiza los overlays de ImGui delegando al MapRenderer.
+     */
+    public void renderImGuiOverlays() {
+        mapRenderer.renderImGuiOverlays((int) offSetCounterX, (int) offSetCounterY);
     }
 
     /**
@@ -318,44 +221,6 @@ public final class GameScene extends Scene {
     @Override
     public void close() {
         visible = false;
-    }
-
-    /**
-     * Verifica las teclas especiales bindeadas (Debug, Opciones, Modo Caminata,
-     * etc).
-     * También delega la verificación de teclas de movimiento a
-     * {@link #checkWalkKeys}.
-     */
-    private void checkBindedKeys() {
-        // Delegamos el manejo de atajos al ShortcutManager
-        org.argentumforge.engine.listeners.ShortcutManager.getInstance().update();
-
-        // El movimiento sigue gestionándose aquí por ahora ya que es específico de la
-        // escena
-        checkWalkKeys();
-    }
-
-    /**
-     * Verifica las teclas de movimiento presionadas y mueve al usuario en la
-     * dirección correspondiente.
-     * Solo procesa el movimiento si el usuario no se está moviendo actualmente.
-     */
-    private void checkWalkKeys() {
-        if (!user.isUserMoving()) {
-
-            if (KeyHandler.getEffectiveMovementKey() != -1) {
-                int keyCode = KeyHandler.getEffectiveMovementKey();
-                if (keyCode == Key.UP.getKeyCode())
-                    user.moveTo(Direction.UP);
-                else if (keyCode == Key.DOWN.getKeyCode())
-                    user.moveTo(Direction.DOWN);
-                else if (keyCode == Key.LEFT.getKeyCode())
-                    user.moveTo(Direction.LEFT);
-                else if (keyCode == Key.RIGHT.getKeyCode())
-                    user.moveTo(Direction.RIGHT);
-            }
-
-        }
     }
 
     /**
@@ -374,403 +239,23 @@ public final class GameScene extends Scene {
 
         RenderSettings renderSettings = options.getRenderSettings();
 
-        renderFirstLayer(renderSettings, pixelOffsetX, pixelOffsetY);
-        renderSecondLayer(renderSettings, pixelOffsetX, pixelOffsetY);
-        renderThirdLayer(renderSettings, pixelOffsetX, pixelOffsetY);
-        renderFourthLayer(renderSettings, pixelOffsetX, pixelOffsetY);
-        renderBlockOverlays(renderSettings, pixelOffsetX, pixelOffsetY);
-        // renderTriggerOverlays removed - called via FMain/ImGui now
-        renderTranslationOverlays(renderSettings, pixelOffsetX, pixelOffsetY);
+        mapRenderer.render(pixelOffsetX, pixelOffsetY);
+
         renderGrid(renderSettings, pixelOffsetX, pixelOffsetY);
         renderEditorPreviews(pixelOffsetX, pixelOffsetY);
-    }
-
-    /**
-     * Renderiza la primera capa del mapa (capa base/suelo).
-     * Esta es la capa más baja y contiene los gráficos del terreno base.
-     *
-     * @param pixelOffsetX Desplazamiento en píxeles en el eje X para animaciones de
-     *                     movimiento
-     * @param pixelOffsetY Desplazamiento en píxeles en el eje Y para animaciones de
-     *                     movimiento
-     */
-    private void renderFirstLayer(RenderSettings renderSettings, final int pixelOffsetX, final int pixelOffsetY) {
-        // Si la visualización de la Capa 1 esta activa...
-        if (renderSettings.getShowLayer()[0]) {
-            camera.setScreenY(camera.getMinYOffset() - TILE_BUFFER_SIZE);
-            for (int y = camera.getMinY(); y <= camera.getMaxY(); y++) {
-                camera.setScreenX(camera.getMinXOffset() - TILE_BUFFER_SIZE);
-                for (int x = camera.getMinX(); x <= camera.getMaxX(); x++) {
-                    if (mapData[x][y].getLayer(1).getGrhIndex() != 0) {
-                        drawTexture(mapData[x][y].getLayer(1),
-                                POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX,
-                                POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY,
-                                true, true, false, 1.0f, weather.getWeatherColor());
-                    }
-
-                    camera.incrementScreenX();
-                }
-                camera.incrementScreenY();
-            }
-        }
-    }
-
-    /**
-     * Renderiza la segunda capa del mapa.
-     * Incluye elementos decorativos y objetos de tamaño 32x32 píxeles.
-     *
-     * @param pixelOffsetX Desplazamiento en píxeles en el eje X para animaciones de
-     *                     movimiento
-     * @param pixelOffsetY Desplazamiento en píxeles en el eje Y para animaciones de
-     *                     movimiento
-     */
-    private void renderSecondLayer(RenderSettings renderSettings, final int pixelOffsetX, final int pixelOffsetY) {
-        if (!renderSettings.getShowLayer()[1] && !renderSettings.getShowOJBs())
-            return;
-
-        camera.setScreenY(camera.getMinYOffset() - TILE_BUFFER_SIZE);
-        for (int y = camera.getMinY(); y <= camera.getMaxY(); y++) {
-            camera.setScreenX(camera.getMinXOffset() - TILE_BUFFER_SIZE);
-            for (int x = camera.getMinX(); x <= camera.getMaxX(); x++) {
-                if (renderSettings.getShowLayer()[1]) {
-                    if (mapData[x][y].getLayer(2).getGrhIndex() != 0) {
-                        drawTexture(mapData[x][y].getLayer(2),
-                                POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX,
-                                POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY,
-                                true, true, false, 1.0f, weather.getWeatherColor());
-                    }
-                }
-
-                if (renderSettings.getShowOJBs()) {
-                    if (mapData[x][y].getObjGrh().getGrhIndex() != 0) {
-                        if (grhData[mapData[x][y].getObjGrh().getGrhIndex()].getPixelWidth() == TILE_PIXEL_SIZE &&
-                                grhData[mapData[x][y].getObjGrh().getGrhIndex()].getPixelHeight() == TILE_PIXEL_SIZE) {
-
-                            // No renderizar el objeto original si se está arrastrando desde esta posición
-                            boolean isDragged = false;
-                            if (selection.isDragging()) {
-                                for (SelectedEntity se : selection.getSelectedEntities()) {
-                                    if (se.x == x && se.y == y && se.type == Selection.EntityType.OBJECT) {
-                                        isDragged = true;
-                                        break;
-                                    }
-                                }
-                            }
-
-                            if (!isDragged) {
-                                drawTexture(mapData[x][y].getObjGrh(),
-                                        POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX,
-                                        POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY,
-                                        true, true, false, 1.0f, weather.getWeatherColor());
-                            }
-                        }
-                    }
-                }
-
-                camera.incrementScreenX();
-            }
-            camera.incrementScreenY();
-        }
-    }
-
-    /**
-     * Renderiza la tercera capa del mapa.
-     * Incluye personajes, NPCs y objetos de tamaño mayor a 32x32 píxeles.
-     * En modo cámara libre, oculta el personaje del usuario pero mantiene visibles
-     * los NPCs.
-     *
-     * @param pixelOffsetX Desplazamiento en píxeles en el eje X para animaciones de
-     *                     movimiento
-     * @param pixelOffsetY Desplazamiento en píxeles en el eje Y para animaciones de
-     *                     movimiento
-     */
-    private void renderThirdLayer(RenderSettings renderSettings, final int pixelOffsetX, final int pixelOffsetY) {
-        // LAYER 3, CHARACTERS & OBJECTS > 32x32
-        camera.setScreenY(camera.getMinYOffset() - TILE_BUFFER_SIZE);
-        for (int y = camera.getMinY(); y <= camera.getMaxY(); y++) {
-            camera.setScreenX(camera.getMinXOffset() - TILE_BUFFER_SIZE);
-            for (int x = camera.getMinX(); x <= camera.getMaxX(); x++) {
-
-                if (renderSettings.getShowOJBs()) {
-                    if (mapData[x][y].getObjGrh().getGrhIndex() != 0) {
-                        if (grhData[mapData[x][y].getObjGrh().getGrhIndex()].getPixelWidth() != TILE_PIXEL_SIZE &&
-                                grhData[mapData[x][y].getObjGrh().getGrhIndex()].getPixelHeight() != TILE_PIXEL_SIZE) {
-
-                            // No renderizar el objeto original si se está arrastrando desde esta posición
-                            boolean isDragged = false;
-                            if (selection.isDragging()) {
-                                for (SelectedEntity se : selection.getSelectedEntities()) {
-                                    if (se.x == x && se.y == y && se.type == Selection.EntityType.OBJECT) {
-                                        isDragged = true;
-                                        break;
-                                    }
-                                }
-                            }
-
-                            if (!isDragged) {
-                                drawTexture(mapData[x][y].getObjGrh(),
-                                        POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX,
-                                        POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY,
-                                        true, true, false, 1.0f, weather.getWeatherColor());
-                            }
-                        }
-                    }
-                }
-
-                // Solo renderizar personajes cuando el modo caminata está activo, o renderizar
-                // NPCs siempre
-                if (mapData[x][y].getCharIndex() != 0) {
-                    final int charIndex = mapData[x][y].getCharIndex();
-
-                    // No renderizar el NPC original si se está arrastrando desde esta posición
-                    boolean isDragged = false;
-                    if (selection.isDragging()) {
-                        for (SelectedEntity se : selection.getSelectedEntities()) {
-                            if (se.x == x && se.y == y && se.type == Selection.EntityType.NPC) {
-                                isDragged = true;
-                                break;
-                            }
-                        }
-                    }
-
-                    if (!isDragged) {
-                        final boolean isUserChar = charIndex == user.getUserCharIndex();
-                        if (isUserChar) {
-                            if (user.isWalkingmode()) {
-                                drawCharacter(charIndex,
-                                        POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX,
-                                        POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY,
-                                        1.0f,
-                                        weather.getWeatherColor());
-                            }
-                        } else {
-                            if (renderSettings.getShowNPCs()) {
-                                drawCharacter(charIndex,
-                                        POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX,
-                                        POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY,
-                                        1.0f,
-                                        weather.getWeatherColor());
-                            }
-                        }
-                    }
-                }
-
-                if (renderSettings.getShowLayer()[2]) {
-                    if (mapData[x][y].getLayer(3).getGrhIndex() != 0) {
-                        drawTexture(mapData[x][y].getLayer(3),
-                                POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX,
-                                POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY,
-                                true, true, false, 1.0f, weather.getWeatherColor());
-                    }
-                }
-
-                camera.incrementScreenX();
-            }
-            camera.incrementScreenY();
-        }
-    }
-
-    /**
-     * Renderiza la cuarta capa del mapa (techos).
-     * Esta capa se desvanece cuando el usuario está debajo de un techo para mejorar
-     * la visibilidad.
-     * El nivel de transparencia es controlado por {@code alphaCeiling}.
-     *
-     * @param pixelOffsetX Desplazamiento en píxeles en el eje X para animaciones de
-     *                     movimiento
-     * @param pixelOffsetY Desplazamiento en píxeles en el eje Y para animaciones de
-     *                     movimiento
-     */
-    private void renderFourthLayer(RenderSettings renderSettings, final int pixelOffsetX, final int pixelOffsetY) {
-        if (renderSettings.getShowLayer()[3]) {
-            this.checkEffectCeiling();
-            if (alphaCeiling > 0.0f) {
-                camera.setScreenY(camera.getMinYOffset() - TILE_BUFFER_SIZE);
-                for (int y = camera.getMinY(); y <= camera.getMaxY(); y++) {
-                    camera.setScreenX(camera.getMinXOffset() - TILE_BUFFER_SIZE);
-                    for (int x = camera.getMinX(); x <= camera.getMaxX(); x++) {
-
-                        if (mapData[x][y].getLayer(4).getGrhIndex() > 0) {
-                            drawTexture(mapData[x][y].getLayer(4),
-                                    POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX,
-                                    POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY,
-                                    true, true, false, alphaCeiling, weather.getWeatherColor());
-                        }
-
-                        camera.incrementScreenX();
-                    }
-                    camera.incrementScreenY();
-                }
-            }
-        }
-    }
-
-    /**
-     * Renderiza overlays rojos sobre los tiles bloqueados del
-     * mapa.
-     * Solo se renderiza cuando el modo de visualización de bloqueos está activado.
-     */
-    private void renderBlockOverlays(RenderSettings renderSettings, final int pixelOffsetX, final int pixelOffsetY) {
-        if (renderSettings.getShowBlock()) {
-            // Grafico que vamos a utilizar para representar los bloqueos
-            int grhBlock = 4;
-
-            camera.setScreenY(camera.getMinYOffset() - TILE_BUFFER_SIZE);
-            for (int y = camera.getMinY(); y <= camera.getMaxY(); y++) {
-                camera.setScreenX(camera.getMinXOffset() - TILE_BUFFER_SIZE);
-                for (int x = camera.getMinX(); x <= camera.getMaxX(); x++) {
-
-                    // Si el tile está bloqueado, dibujamos el Grh 4 con opacidad variable
-                    if (mapData[x][y].getBlocked()) {
-                        org.argentumforge.engine.renderer.Drawn.drawGrhIndex(grhBlock,
-                                POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX,
-                                POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY,
-                                renderSettings.getBlockOpacity(),
-                                null);
-                    }
-
-                    camera.incrementScreenX();
-                }
-                camera.incrementScreenY();
-            }
-        }
-    }
-
-    /**
-     * Renderiza overlays amarillos sobre los tiles con triggers.
-     * Muestra el ID del trigger si es posible.
-     */
-    public void renderImGuiOverlays() {
-        RenderSettings renderSettings = org.argentumforge.engine.game.Options.INSTANCE.getRenderSettings();
-        // Renderizar si la opcion esta activa O si la herramienta de edicion esta
-        // activa
-        if (org.argentumforge.engine.utils.editor.Trigger.getInstance().isActive()
-                || renderSettings.getShowTriggers()) {
-
-            // Recalcular offsets para ImGui overlay
-            int pixelOffsetX = (int) offSetCounterX;
-            int pixelOffsetY = (int) offSetCounterY;
-
-            camera.setScreenY(camera.getMinYOffset() - TILE_BUFFER_SIZE);
-
-            // Usamos el listado de dibujo de fondo para que los números queden detrás de
-            // las ventanas UI
-            imgui.ImDrawList drawList = imgui.ImGui.getBackgroundDrawList();
-
-            if (mapData == null)
-                return;
-
-            for (int y = camera.getMinY(); y <= camera.getMaxY(); y++) {
-                camera.setScreenX(camera.getMinXOffset() - TILE_BUFFER_SIZE);
-                for (int x = camera.getMinX(); x <= camera.getMaxX(); x++) {
-
-                    if (mapData[x][y].getTrigger() > 0) {
-                        int screenX = POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX;
-                        int screenY = POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY;
-
-                        String idText = String.valueOf(mapData[x][y].getTrigger());
-                        float textWidth = imgui.ImGui.calcTextSize(idText).x;
-                        float textX = screenX + (TILE_PIXEL_SIZE - textWidth) / 2;
-                        float textY = screenY + (TILE_PIXEL_SIZE - 14) / 2;
-
-                        // Sombra Negra (offset +1)
-                        drawList.addText(textX + 1, textY + 1, 0xFF000000, idText);
-                        // Texto Blanco (con opacidad completa)
-                        drawList.addText(textX, textY, 0xFFFFFFFF, idText);
-                    }
-                    camera.incrementScreenX();
-                }
-                camera.incrementScreenY();
-            }
-        }
-    }
-
-    /**
-     * Renderiza overlays rojos sobre los tiles de traslado del mapa
-     * Solo se renderiza cuando el modo de visualización de traslados está activado.
-     */
-    private void renderTranslationOverlays(RenderSettings renderSettings, final int pixelOffsetX,
-            final int pixelOffsetY) {
-        if (renderSettings.getShowMapTransfer()) {
-            // Grafico que vamos a utilizar para representar los traslados
-            int grhTrans = 3;
-
-            camera.setScreenY(camera.getMinYOffset() - TILE_BUFFER_SIZE);
-            for (int y = camera.getMinY(); y <= camera.getMaxY(); y++) {
-                camera.setScreenX(camera.getMinXOffset() - TILE_BUFFER_SIZE);
-                for (int x = camera.getMinX(); x <= camera.getMaxX(); x++) {
-
-                    // Si el tile está bloqueado, dibujamos el Grh 4
-                    if (mapData[x][y].getExitMap() > 0) {
-                        drawGrhIndex(grhTrans,
-                                POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX,
-                                POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY,
-                                null);
-                    }
-
-                    camera.incrementScreenX();
-                }
-                camera.incrementScreenY();
-            }
-        }
-    }
-
-    /**
-     * Detecta si el usuario esta debajo del techo. Si es asi, se desvanecera y en
-     * caso contrario re aparece.
-     */
-    private void checkEffectCeiling() {
-        if (user.isUnderCeiling()) {
-            if (alphaCeiling > 0.0f)
-                alphaCeiling -= 0.5f * deltaTime;
-        } else {
-            if (alphaCeiling < 1.0f)
-                alphaCeiling += 0.5f * deltaTime;
-        }
-    }
-
-    /**
-     * Detecta si tenemos el mouse adentro del "render MainViewPic".
-     */
-    public static boolean inGameArea() {
-        if (MouseListener.getX() < POS_SCREEN_X || MouseListener.getX() > POS_SCREEN_X + Window.SCREEN_WIDTH)
-            return false;
-        if (MouseListener.getY() < POS_SCREEN_Y || MouseListener.getY() > POS_SCREEN_Y + Window.SCREEN_HEIGHT)
-            return false;
-        return true;
-    }
-
-    /**
-     * @param mouseX: Posicion X del mouse en la pantalla
-     * @return: Devuelve la posicion en tile del eje X del mouse. Se utiliza al
-     *          hacer click izquierdo por el mapa, para
-     *          interactuar con NPCs, etc.
-     */
-    public static int getTileMouseX(int mouseX) {
-        return (User.INSTANCE.getUserPos().getX() + mouseX / Camera.TILE_PIXEL_SIZE - Camera.HALF_WINDOW_TILE_WIDTH);
-    }
-
-    /**
-     * @param mouseY: Posicion X del mouse en la pantalla
-     * @return: Devuelve la posicion en tile del eje Y del mouse. Se utiliza al
-     *          hacer click izquierdo por el mapa, para
-     *          interactuar con NPCs, etc.
-     */
-    public static int getTileMouseY(int mouseY) {
-        return (User.INSTANCE.getUserPos().getY() + mouseY / Camera.TILE_PIXEL_SIZE - Camera.HALF_WINDOW_TILE_HEIGHT);
     }
 
     /**
      * Renderiza una previsualización de lo que el usuario está a punto de colocar.
      */
     private void renderEditorPreviews(int pixelOffsetX, int pixelOffsetY) {
-        if (!inGameArea())
+        if (!EditorInputManager.inGameArea())
             return;
 
         int mouseX = (int) MouseListener.getX() - POS_SCREEN_X;
         int mouseY = (int) MouseListener.getY() - POS_SCREEN_Y;
-        int tileX = getTileMouseX(mouseX);
-        int tileY = getTileMouseY(mouseY);
+        int tileX = EditorInputManager.getTileMouseX(mouseX);
+        int tileY = EditorInputManager.getTileMouseY(mouseY);
 
         // Previsualizar Superficies
         if (surface.getMode() == 1 && surface.getSurfaceIndex() > 0) {
