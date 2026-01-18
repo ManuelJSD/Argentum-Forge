@@ -116,7 +116,7 @@ public class FGrhLibrary extends Form {
 
             // Columna Derecha: Registros de la Categoría
             if (selectedCategory != null) {
-                ImGui.text(I18n.INSTANCE.get("grhlib.records") + " en: " + selectedCategory.getName());
+                ImGui.text(I18n.INSTANCE.get("grhlib.recordsIn", selectedCategory.getName()));
                 if (ImGui.beginChild("RecordsList", 0, 150, true)) {
                     String filter = searchQuery.get().toLowerCase();
                     for (GrhIndexRecord rec : selectedCategory.getRecords()) {
@@ -136,7 +136,7 @@ public class FGrhLibrary extends Form {
                 ImGui.endChild();
 
                 if (ImGui.button(I18n.INSTANCE.get("grhlib.addRecord"))) {
-                    GrhIndexRecord newRec = new GrhIndexRecord("Nuevo Registro", 0);
+                    GrhIndexRecord newRec = new GrhIndexRecord(I18n.INSTANCE.get("grhlib.newRecord"), 0);
                     selectedCategory.addRecord(newRec);
                     selectedRecord = newRec;
                     syncEditFields();

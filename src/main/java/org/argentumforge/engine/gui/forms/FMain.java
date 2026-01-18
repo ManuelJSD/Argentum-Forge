@@ -96,7 +96,7 @@ public final class FMain extends Form {
 
         // Global Progress Modal for Minimap Generation
         if (org.argentumforge.engine.utils.editor.MinimapColorGenerator.generating) {
-            ImGui.openPopup("Procesando Colores");
+            ImGui.openPopup(I18n.INSTANCE.get("msg.processingColors"));
         }
 
         if (ImGui.beginPopupModal(I18n.INSTANCE.get("msg.processingColors"),
@@ -658,7 +658,8 @@ public final class FMain extends Form {
         int refY = sel.getSelectedEntities().get(0).y;
 
         Clipboard.getInstance().copy(sel.getSelectedEntities(), refX, refY);
-        Console.INSTANCE.addMsgToConsole("Copiadas " + sel.getSelectedEntities().size() + " entidades.", REGULAR,
+        Console.INSTANCE.addMsgToConsole(I18n.INSTANCE.get("msg.clipboard.copied", sel.getSelectedEntities().size()),
+                REGULAR,
                 new RGBColor(0f, 1f, 1f));
     }
 

@@ -70,29 +70,29 @@ public final class FAutoUnion extends Form {
 
             // --- Norte ---
             ImGui.setCursorPos(boxWidth / 2 - 60, 20);
-            ImGui.text("Mapa");
+            ImGui.text(I18n.INSTANCE.get("editor.autoUnion.map"));
             ImGui.sameLine();
             ImGui.pushItemWidth(50);
             ImGui.inputInt("##NMap", northMap, 0, 0);
             ImGui.popItemWidth();
             ImGui.sameLine();
-            if (ImGui.checkbox("Aplicar##N", northApply))
+            if (ImGui.checkbox(I18n.INSTANCE.get("editor.autoUnion.apply") + "##N", northApply))
                 northApply = !northApply;
 
             // --- Oeste ---
             ImGui.setCursorPos(15, boxHeight / 2 - 20);
-            ImGui.text("Mapa");
+            ImGui.text(I18n.INSTANCE.get("editor.autoUnion.map"));
             ImGui.sameLine();
             ImGui.pushItemWidth(50);
             ImGui.inputInt("##WMap", westMap, 0, 0);
             ImGui.popItemWidth();
             ImGui.setCursorPos(15, boxHeight / 2);
-            if (ImGui.checkbox("Aplicar##W", westApply))
+            if (ImGui.checkbox(I18n.INSTANCE.get("editor.autoUnion.apply") + "##W", westApply))
                 westApply = !westApply;
 
             // --- Este ---
             ImGui.setCursorPos(boxWidth - 140, boxHeight / 2 - 20);
-            ImGui.text("Mapa");
+            ImGui.text(I18n.INSTANCE.get("editor.autoUnion.map"));
             ImGui.sameLine();
             ImGui.pushItemWidth(50);
             ImGui.inputInt("##EMap", eastMap, 0, 0);

@@ -62,7 +62,7 @@ public class FTriggerEditor extends Form {
         // 2. Gestión (Debajo de la lista)
         ImGui.text(I18n.INSTANCE.get("editor.trigger.management"));
         if (ImGui.button(I18n.INSTANCE.get("editor.trigger.new"), 220, 25)) {
-            manager.addTrigger("Nuevo Trigger");
+            manager.addTrigger(I18n.INSTANCE.get("editor.trigger.defaultName"));
         }
 
         boolean hasSelection = selectedIndex >= 0 && selectedIndex < triggers.size();

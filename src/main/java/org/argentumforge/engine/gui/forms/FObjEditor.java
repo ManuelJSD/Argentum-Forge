@@ -94,9 +94,9 @@ public final class FObjEditor extends Form {
                     org.argentumforge.engine.gui.PreviewUtils.drawGrh(data.getGrhIndex(), 1.5f);
                     ImGui.sameLine();
                     ImGui.beginGroup();
-                    ImGui.text("OBJ " + data.getNumber());
+                    ImGui.text(I18n.INSTANCE.get("common.object") + " " + data.getNumber());
                     ImGui.text(data.getName());
-                    ImGui.textDisabled("Grh: " + data.getGrhIndex());
+                    ImGui.textDisabled(I18n.INSTANCE.get("common.grh") + ": " + data.getGrhIndex());
                     ImGui.endGroup();
                 }
             } else {
@@ -161,7 +161,7 @@ public final class FObjEditor extends Form {
                 }
 
                 if (ImGui.isItemHovered()) {
-                    ImGui.setTooltip("OBJ " + objNum + "\n" + data.getName());
+                    ImGui.setTooltip(I18n.INSTANCE.get("common.object") + " " + objNum + "\n" + data.getName());
                 }
 
                 ImGui.popID();
@@ -184,7 +184,7 @@ public final class FObjEditor extends Form {
 
         for (Integer objNum : filteredKeys) {
             ObjData data = objs.get(objNum);
-            String label = "OBJ " + objNum + " - " + data.getName();
+            String label = I18n.INSTANCE.get("common.object") + " " + objNum + " - " + data.getName();
 
             if (ImGui.selectable(label, selectedObjNumber == objNum)) {
                 selectObj(objNum);
