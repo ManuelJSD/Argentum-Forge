@@ -11,9 +11,6 @@ import org.argentumforge.engine.i18n.I18n;
 
 import java.util.List;
 
-import static org.argentumforge.engine.gui.ImGUISystem.INSTANCE;
-import static org.lwjgl.glfw.GLFW.glfwSetWindowShouldClose;
-
 public class FTriggerEditor extends Form {
 
     private final TriggerManager manager;

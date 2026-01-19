@@ -15,7 +15,6 @@ import java.nio.file.Path;
 import java.util.*;
 
 import static org.argentumforge.engine.game.models.Character.eraseAllChars;
-import static org.argentumforge.engine.renderer.FontRenderer.loadFonts;
 
 /**
  * <p>
@@ -161,7 +160,7 @@ public final class GameData {
             loadWeapons();
             loadShields();
             loadFxs();
-            loadFonts();
+
             // loadMessages(options.getLanguage()); -> Eliminado ya que el sistema de
             // mensajes fue borrado
         }

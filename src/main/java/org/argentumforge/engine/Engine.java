@@ -38,6 +38,8 @@ public final class Engine {
 
     /** Flag que indica si el programa esta corriendo. */
     private static boolean prgRun = true;
+    /** Versión del programa. */
+    public static final String VERSION = "1.0.0-beta";
     /** Ventana principal del motor grafico. */
     private final Window window = Window.INSTANCE;
     /** Sistema de interfaz grafica de usuario. */

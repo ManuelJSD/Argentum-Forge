@@ -2,12 +2,10 @@ package org.argentumforge.engine.scenes;
 
 import org.argentumforge.engine.Window;
 import org.argentumforge.engine.game.*;
-import org.argentumforge.engine.game.models.Direction;
-import org.argentumforge.engine.game.models.Key;
+
 import org.argentumforge.engine.gui.ImGUISystem;
 import org.argentumforge.engine.gui.forms.FMain;
-import org.argentumforge.engine.gui.forms.FOptions;
-import org.argentumforge.engine.listeners.KeyHandler;
+
 import org.argentumforge.engine.listeners.MouseListener;
 import org.argentumforge.engine.listeners.EditorInputManager;
 import org.argentumforge.engine.renderer.RenderSettings;
@@ -20,26 +18,23 @@ import org.argentumforge.engine.utils.editor.Trigger;
 import org.argentumforge.engine.utils.editor.Transfer;
 import org.argentumforge.engine.renderer.Texture;
 import org.argentumforge.engine.Engine;
-import org.argentumforge.engine.game.console.Console;
+
 import org.argentumforge.engine.game.models.Character;
 import org.argentumforge.engine.utils.AssetRegistry;
 import org.argentumforge.engine.utils.inits.NpcData;
 import org.argentumforge.engine.utils.inits.ObjData;
-import org.argentumforge.engine.gui.forms.FTransferEditor;
+
 import org.argentumforge.engine.renderer.Drawn;
 import org.argentumforge.engine.renderer.MapRenderer;
 
+import static org.argentumforge.engine.utils.Time.timerTicksPerFrame;
+
 import static org.argentumforge.engine.game.IntervalTimer.INT_SENTRPU;
-import static org.argentumforge.engine.game.models.Character.drawCharacter;
-import static org.argentumforge.engine.renderer.Drawn.drawTexture;
+
 import static org.argentumforge.engine.renderer.Drawn.drawGrhIndex;
 import static org.argentumforge.engine.scenes.Camera.*;
 import static org.argentumforge.engine.utils.GameData.*;
 import static org.argentumforge.engine.utils.AssetRegistry.*;
-import static org.argentumforge.engine.utils.Time.deltaTime;
-import static org.argentumforge.engine.utils.Time.timerTicksPerFrame;
-import static org.argentumforge.engine.game.console.FontStyle.REGULAR;
-import static org.lwjgl.glfw.GLFW.*;
 import org.argentumforge.engine.renderer.RGBColor;
 import org.argentumforge.engine.utils.editor.Selection.SelectedEntity;
 

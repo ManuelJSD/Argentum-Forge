@@ -3,14 +3,12 @@ package org.argentumforge.engine.audio;
 import org.argentumforge.engine.Window;
 
 import java.io.File;
-import java.nio.IntBuffer;
-import java.nio.ShortBuffer;
+
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.argentumforge.engine.utils.GameData.options;
 import static org.lwjgl.openal.AL10.*;
-import static org.lwjgl.system.MemoryStack.*;
 import static org.lwjgl.system.libc.LibCStdlib.free;
 
 import javax.sound.midi.*;

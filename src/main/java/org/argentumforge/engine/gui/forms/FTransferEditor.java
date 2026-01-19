@@ -7,8 +7,6 @@ import imgui.type.ImInt;
 import org.argentumforge.engine.utils.editor.Transfer;
 import org.argentumforge.engine.i18n.I18n;
 
-import static org.argentumforge.engine.utils.GameData.mapData;
-
 /**
  * Formulario de edición de traslados (teleports) en el mapa.
  * <p>

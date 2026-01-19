@@ -45,7 +45,7 @@ public final class IntroScene extends Scene {
         super.init();
         this.alphaInterface = 0.0f;
         this.canChangeTo = SceneType.MAIN_SCENE;
-        this.ArgentumForgeLogo = Surface.INSTANCE.createTexture("gui.ao", "argentumforge", true);
+        this.ArgentumForgeLogo = Surface.INSTANCE.createTexture("argentumforge", true);
     }
 
     @Override

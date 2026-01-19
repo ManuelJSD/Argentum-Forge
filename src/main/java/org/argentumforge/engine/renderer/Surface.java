@@ -3,8 +3,6 @@ package org.argentumforge.engine.renderer;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.lwjgl.opengl.GL11.glDeleteTextures;
-
 /**
  * Gestiona un conjunto de texturas (instancias de la clase {@code Texture})
  * mediante un mapa de identificadores numericos.
@@ -77,6 +75,10 @@ public enum Surface {
         texture.loadTexture(texture, "graphics.ao", String.valueOf(fileNum), false);
         textures.put(fileNum, texture);
         return texture;
+    }
+
+    public Texture createTexture(String file, boolean isGUI) {
+        return createTexture("gui.ao", file, isGUI);
     }
 
     /**

@@ -1,7 +1,6 @@
 package org.argentumforge.engine.game;
 
 import org.argentumforge.engine.renderer.RGBColor;
-import org.argentumforge.engine.game.Options;
 
 /**
  * Gestiona el clima y los efectos de iluminación ambiental del motor.

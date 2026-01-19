@@ -3,7 +3,6 @@ package org.argentumforge.engine.gui.forms;
 import imgui.ImGui;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImInt;
-import imgui.type.ImString;
 import org.argentumforge.engine.utils.GameData;
 import org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand;
 import org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos;
@@ -17,7 +16,6 @@ import org.argentumforge.engine.scenes.Camera;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 public class FMapGenerator extends Form {
 

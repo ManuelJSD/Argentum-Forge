@@ -3,13 +3,9 @@ package org.argentumforge.engine.gui.forms;
 import imgui.ImGui;
 import imgui.flag.ImGuiTableColumnFlags;
 import imgui.flag.ImGuiTableFlags;
-import imgui.ImGui;
-import imgui.flag.ImGuiTableColumnFlags;
-import imgui.flag.ImGuiTableFlags;
 import imgui.flag.ImGuiWindowFlags;
 import org.argentumforge.engine.game.Options;
 import org.argentumforge.engine.gui.ImGUISystem;
-import org.argentumforge.engine.scenes.Camera;
 import org.argentumforge.engine.utils.editor.MapValidator;
 
 import imgui.type.ImBoolean;
