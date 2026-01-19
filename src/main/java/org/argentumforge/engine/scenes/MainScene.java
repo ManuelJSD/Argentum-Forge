@@ -2,7 +2,7 @@ package org.argentumforge.engine.scenes;
 
 import org.argentumforge.engine.game.User;
 import org.argentumforge.engine.gui.ImGUISystem;
-import org.argentumforge.engine.gui.forms.FConnect;
+import org.argentumforge.engine.gui.forms.FLauncher;
 import org.argentumforge.engine.listeners.KeyHandler;
 
 import static org.argentumforge.engine.Engine.closeClient;
@@ -32,13 +32,13 @@ import static org.argentumforge.engine.game.models.Key.EXIT_GAME;
  *
  * @see Scene
  * @see GameScene
- * @see FConnect
+ * @see FLauncher
  * @see User
  */
 
 public final class MainScene extends Scene {
 
-    private final FConnect frmConnect = new FConnect();
+    private final FLauncher frmConnect = new FLauncher();
 
     @Override
     public void init() {

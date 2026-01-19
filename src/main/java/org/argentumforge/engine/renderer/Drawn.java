@@ -7,7 +7,7 @@ import static org.argentumforge.engine.scenes.Camera.TILE_PIXEL_SIZE;
 import static org.argentumforge.engine.utils.AssetRegistry.grhData;
 import static org.argentumforge.engine.utils.Time.deltaTime;
 import org.argentumforge.engine.Engine;
-import org.argentumforge.engine.renderer.Surface;
+
 import static org.lwjgl.opengl.GL11.*;
 
 /**

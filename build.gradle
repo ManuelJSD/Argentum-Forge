@@ -16,7 +16,7 @@ java {
 // }
 
 group = 'org.argentumforge'
-version = '0.1.0-alpha'
+version = '1.0.0-beta'
 
 import org.gradle.internal.os.OperatingSystem
 
@@ -119,7 +119,12 @@ application {
 
 jar {
     manifest {
-        attributes 'Main-Class': 'org.argentumforge.Main'
+        attributes(
+            'Main-Class': 'org.argentumforge.Main',
+            'Implementation-Title': 'Argentum Forge',
+            'Implementation-Version': project.version,
+            'Implementation-Vendor': 'Argentum Forge Team'
+        )
     }
 }
 

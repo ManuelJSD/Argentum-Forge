@@ -15,7 +15,11 @@ import java.io.IOException;
 import static org.argentumforge.engine.utils.GameData.charList;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ENTER;
 
-public final class FConnect extends Form {
+/**
+ * FLauncher es el formulario principal de inicio del editor.
+ * Permite crear nuevos mapas, cargar existentes o salir de la aplicación.
+ */
+public final class FLauncher extends Form {
 
     // Botones gráficos de 3 estados
     private ImageButton3State btnNuevoMapa;
@@ -23,37 +27,45 @@ public final class FConnect extends Form {
     private ImageButton3State btnExit;
     private boolean connectPressed = false;
 
-    public FConnect() {
+    public FLauncher() {
         try {
             this.backgroundImage = loadTexture("VentanaInicio");
-            // Instanciación de botones con 3 estados (usa los tamaños y posiciones
-            // existentes)
+
+            // Ajustamos el tamaño de los botones (antes 766x144) para que no sean tan
+            // masivos
+            int bWidth = 766;
+            int bHeight = 144;
+
             btnNuevoMapa = new ImageButton3State(
                     loadTexture("BotonNuevoMapa"),
                     loadTexture("BotonNuevoMapaRollover"),
                     loadTexture("BotonNuevoMapaClick"),
-                    145, 460, 766, 144);
+                    0, 0, bWidth, bHeight);
+
             btnCargarMapa = new ImageButton3State(
                     loadTexture("BotonCargarMapa"),
                     loadTexture("BotonCargarMapaRollover"),
                     loadTexture("BotonCargarMapaClick"),
-                    145, 628, 766, 144);
+                    0, 0, bWidth, bHeight);
+
             btnExit = new ImageButton3State(
                     loadTexture("BotonSalir"),
                     loadTexture("BotonSalirRollover"),
                     loadTexture("BotonSalirClick"),
-                    145, 800, 766, 144);
+                    0, 0, bWidth, bHeight);
+
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            // Si fallan las texturas específicas (como BotonCargarMapa que falta),
+            // el constructor fallará.
+            System.err.println("Error loading launcher textures: " + e.getMessage());
         }
     }
 
     @Override
     public void render() {
-        ImGui.setNextWindowSize(Window.INSTANCE.getWidth() + 10, Window.INSTANCE.getHeight() + 5, ImGuiCond.Always);
-        ImGui.setNextWindowPos(-5, -1, ImGuiCond.Once);
+        ImGui.setNextWindowSize(Window.INSTANCE.getWidth(), Window.INSTANCE.getHeight(), ImGuiCond.Always);
+        ImGui.setNextWindowPos(0, 0, ImGuiCond.Always);
 
-        // Start Custom window
         ImGui.begin(this.getClass().getSimpleName(), ImGuiWindowFlags.NoTitleBar |
                 ImGuiWindowFlags.NoMove |
                 ImGuiWindowFlags.NoFocusOnAppearing |
@@ -63,62 +75,70 @@ public final class FConnect extends Form {
                 ImGuiWindowFlags.NoSavedSettings |
                 ImGuiWindowFlags.NoBringToFrontOnFocus);
 
-        // Obtener dimensiones de la textura (tamaño original)
-        int bgWidth = backgroundImage; // ImGui usa el ID de textura, necesitamos obtener el tamaño real
-        int bgHeight = backgroundImage;
-
-        // Por ahora, asumimos que la imagen es 1024x1024 (tamaño original)
-        // Centrar la imagen en la ventana
+        // Dimensiones de la imagen de fondo (diseñado para 1024x1024 o similar)
         int imageWidth = 1024;
         int imageHeight = 1024;
         int x = (Window.INSTANCE.getWidth() - imageWidth) / 2;
         int y = (Window.INSTANCE.getHeight() - imageHeight) / 2;
 
-        ImGui.getWindowDrawList().addImage(backgroundImage, x, y, x + imageWidth, y + imageHeight);
+        if (backgroundImage != 0) {
+            ImGui.getWindowDrawList().addImage(backgroundImage, x, y, x + imageWidth, y + imageHeight);
+        }
 
-        // Calcular posiciones dinámicas para los botones (relativas a la imagen
-        // centrada)
-        int centerX = x + (imageWidth - 766) / 2;
-        int yNuevo = y + (int) (imageHeight * 0.45f);
-        int yCargar = y + (int) (imageHeight * 0.61f);
-        int ySalir = y + (int) (imageHeight * 0.78f);
+        // --- AJUSTE DE POSICIONES SEGUN IMAGEN DEL USUARIO ---
+        int buttonWidth = 766;
+        int centerX = x + (imageWidth - buttonWidth) / 2;
 
-        // Botones gráficos de 3 estados
-        if (btnNuevoMapa.render(centerX, yNuevo) || ImGui.isKeyPressed(GLFW_KEY_ENTER))
-            this.buttonConnect();
+        // Alineamos con los slots del fondo (aprox 44% de altura)
+        int yStart = y + 448;
+        int spacing = 168; // 144 + 24 de gap
 
-        if (btnCargarMapa.render(centerX, yCargar))
-            this.buttonLoadMapAction();
+        // Renderizado de botones si no son nulos
+        if (btnNuevoMapa != null) {
+            if (btnNuevoMapa.render(centerX, yStart) || ImGui.isKeyPressed(GLFW_KEY_ENTER))
+                this.buttonConnect();
+        }
 
-        if (btnExit.render(centerX, ySalir))
-            this.buttonExitGame();
+        if (btnCargarMapa != null) {
+            if (btnCargarMapa.render(centerX, yStart + spacing))
+                this.buttonLoadMapAction();
+        }
+
+        if (btnExit != null) {
+            if (btnExit.render(centerX, yStart + spacing * 2))
+                this.buttonExitGame();
+        }
+
+        // --- INFORMACIÓN DE VERSIÓN ---
+        // Intentamos detectar la versión automáticamente del paquete
+        String verStr = Engine.class.getPackage().getImplementationVersion();
+        if (verStr == null || verStr.isEmpty())
+            verStr = Engine.VERSION;
+        String version = "v" + verStr;
+
+        // Margen ajustado para situar la versión dentro del recuadro inferior izquierdo
+        int marginX = 90;
+        int marginBottom = 22;
+
+        // Versión (Izquierda)
+        ImGui.setCursorPos(x + marginX, y + imageHeight - marginBottom);
+        ImGui.textColored(0.7f, 0.7f, 0.7f, 1.0f, version);
 
         ImGui.end();
     }
 
     private void buttonConnect() {
-        // Simular conexión exitosa (cargar mapa por defecto si no se cargó otro)
         simulateEditorConnection(true);
     }
 
     private void buttonLoadMapAction() {
         if (org.argentumforge.engine.utils.MapFileUtils.openAndLoadMap()) {
-            // Proceed to game, skipping default map load
             simulateEditorConnection(false);
         }
     }
 
-    /**
-     * Simula una conexión exitosa para modo editor (sin servidor).
-     * Inicializa todos los datos necesarios para que GameScene funcione localmente.
-     * 
-     * @param newMap Si es true, inicia un nuevo mapa. Si es false,
-     *               asume que ya se cargó un mapa.
-     */
     private void simulateEditorConnection(boolean newMap) {
         User user = User.INSTANCE;
-
-        // 1. Configurar posición inicial del usuario
         int startX = 50;
         int startY = 50;
         short charIndex = 1;
@@ -128,27 +148,21 @@ public final class FConnect extends Form {
         user.setUserMap((short) 1);
         user.setUserCharIndex(charIndex);
 
-        // 2. Cargar mapa inicial (DEBE hacerse ANTES de configurar el personaje en
-        // mapData)
         if (newMap) {
             GameData.createEmptyMap();
         }
 
-        // 3. Configurar el personaje en charList
         charList[charIndex].getPos().setX(startX);
         charList[charIndex].getPos().setY(startY);
         charList[charIndex].setHeading(Direction.DOWN);
-        charList[charIndex].setiBody(1); // ID del cuerpo gráfico
-        charList[charIndex].setiHead(1); // ID de la cabeza gráfica
-        charList[charIndex].setActive(true); // Marcar como activo
+        charList[charIndex].setiBody(1);
+        charList[charIndex].setiHead(1);
+        charList[charIndex].setActive(true);
 
-        // 4. Registrar el personaje en el mapa (CRÍTICO)
-        // Check bounds just in case the loaded map is small
         if (startX >= 1 && startX <= 100 && startY >= 1 && startY <= 100) {
             GameData.mapData[startX][startY].setCharIndex(charIndex);
         }
 
-        // 5. Marcar para cambiar de escena
         this.connectPressed = true;
     }
 
@@ -159,5 +173,4 @@ public final class FConnect extends Form {
     private void buttonExitGame() {
         Engine.closeClient();
     }
-
 }

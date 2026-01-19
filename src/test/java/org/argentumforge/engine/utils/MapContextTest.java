@@ -1,8 +1,5 @@
 package org.argentumforge.engine.utils;
 
-import org.argentumforge.engine.game.models.Character;
-import org.argentumforge.engine.utils.inits.MapData;
-import org.argentumforge.engine.utils.inits.MapProperties;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

@@ -3,7 +3,7 @@ package org.argentumforge.engine.renderer;
 import org.argentumforge.engine.game.Options;
 import org.argentumforge.engine.game.Weather;
 import org.argentumforge.engine.scenes.Camera;
-import org.argentumforge.engine.utils.inits.MapData;
+
 import org.argentumforge.engine.utils.editor.Selection;
 import org.argentumforge.engine.utils.editor.Selection.SelectedEntity;
 import org.argentumforge.engine.game.User;

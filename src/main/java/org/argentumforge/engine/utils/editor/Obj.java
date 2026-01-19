@@ -1,7 +1,7 @@
 package org.argentumforge.engine.utils.editor;
 
 import org.argentumforge.engine.utils.AssetRegistry;
-import org.argentumforge.engine.utils.GameData;
+
 import org.argentumforge.engine.utils.inits.ObjData;
 
 import static org.argentumforge.engine.utils.GameData.initGrh;

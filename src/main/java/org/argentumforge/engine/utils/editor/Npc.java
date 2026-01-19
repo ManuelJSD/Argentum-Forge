@@ -1,6 +1,5 @@
 package org.argentumforge.engine.utils.editor;
 
-import org.argentumforge.engine.game.models.Character;
 import static org.argentumforge.engine.utils.GameData.mapData;
 
 /**
