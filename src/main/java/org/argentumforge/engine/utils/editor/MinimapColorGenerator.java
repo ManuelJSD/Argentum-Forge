@@ -39,6 +39,7 @@ public class MinimapColorGenerator {
             GrhData[] grhData = AssetRegistry.grhData;
             if (grhData == null || grhData.length == 0) {
                 Logger.warn("No hay datos de graficos cargados.");
+                generating = false;
                 return;
             }
 

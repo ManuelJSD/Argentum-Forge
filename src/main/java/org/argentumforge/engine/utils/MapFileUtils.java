@@ -21,25 +21,44 @@ public class MapFileUtils {
      *         contrario.
      */
     public static boolean openAndLoadMap() {
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setDialogTitle("Seleccionar Mapa");
-        fileChooser.setFileFilter(new FileNameExtensionFilter("Archivos de Mapa (*.map)", "map"));
+        final File[] selectedFileBox = { null };
+        try {
+            SwingUtilities.invokeAndWait(() -> {
+                try {
+                    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+                } catch (Exception e) {
+                    // Ignorar
+                }
 
-        fileChooser.setCurrentDirectory(new File(Options.INSTANCE.getLastMapPath()));
+                JFileChooser fileChooser = new JFileChooser();
+                fileChooser.setDialogTitle("Seleccionar Mapa");
+                fileChooser.setFileFilter(new FileNameExtensionFilter("Archivos de Mapa (*.map)", "map"));
 
-        int result = fileChooser.showOpenDialog(null);
+                String lastPath = Options.INSTANCE.getLastMapPath();
+                if (lastPath != null && !lastPath.isEmpty()) {
+                    fileChooser.setCurrentDirectory(new File(lastPath));
+                }
 
-        if (result == JFileChooser.APPROVE_OPTION) {
-            File selectedFile = fileChooser.getSelectedFile();
-            // Guardar el último directorio utilizado
-            Options.INSTANCE.setLastMapPath(selectedFile.getParent());
-            Options.INSTANCE.save();
-            // Cargar el mapa
-            GameData.loadMap(selectedFile.getAbsolutePath());
+                int returnVal = fileChooser.showOpenDialog(null);
+
+                if (returnVal == JFileChooser.APPROVE_OPTION) {
+                    File f = fileChooser.getSelectedFile();
+                    // Guardar el último directorio utilizado
+                    Options.INSTANCE.setLastMapPath(f.getParent());
+                    Options.INSTANCE.save();
+                    selectedFileBox[0] = f;
+                }
+            });
+        } catch (Exception e) {
+            org.tinylog.Logger.error(e, "Error al abrir dialogo de seleccion de mapa");
+        }
+
+        if (selectedFileBox[0] != null) {
+            // Cargar el mapa en el hilo principal (Render Thread) para evitar deadlocks
+            GameData.loadMap(selectedFileBox[0].getAbsolutePath());
             org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().clearHistory();
             return true;
         }
-
         return false;
     }
 
@@ -47,32 +66,50 @@ public class MapFileUtils {
      * Abre un diálogo de selección de archivo para guardar el mapa actual.
      */
     public static void saveMap() {
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setDialogTitle("Guardar Mapa");
-        fileChooser.setFileFilter(new FileNameExtensionFilter("Archivos de Mapa (*.map)", "map"));
+        final File[] selectedFileBox = { null };
+        try {
+            SwingUtilities.invokeAndWait(() -> {
+                try {
+                    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+                } catch (Exception e) {
+                    // Ignorar
+                }
 
-        String lastPath = Options.INSTANCE.getLastMapPath();
-        if (lastPath != null && !lastPath.isEmpty()) {
-            fileChooser.setCurrentDirectory(new File(lastPath));
+                JFileChooser fileChooser = new JFileChooser();
+                fileChooser.setDialogTitle("Guardar Mapa");
+                fileChooser.setFileFilter(new FileNameExtensionFilter("Archivos de Mapa (*.map)", "map"));
+
+                String lastPath = Options.INSTANCE.getLastMapPath();
+                if (lastPath != null && !lastPath.isEmpty()) {
+                    fileChooser.setCurrentDirectory(new File(lastPath));
+                }
+
+                int returnVal = fileChooser.showSaveDialog(null);
+
+                if (returnVal == JFileChooser.APPROVE_OPTION) {
+                    File f = fileChooser.getSelectedFile();
+                    String path = f.getAbsolutePath();
+
+                    // Asegurar la extensión .map
+                    if (!path.toLowerCase().endsWith(".map")) {
+                        path += ".map";
+                    }
+
+                    // Guardar el último directorio utilizado
+                    Options.INSTANCE.setLastMapPath(f.getParent());
+                    Options.INSTANCE.save();
+
+                    // Usamos el archivo con la extensión corregida
+                    selectedFileBox[0] = new File(path);
+                }
+            });
+        } catch (Exception e) {
+            org.tinylog.Logger.error(e, "Error al guardar mapa");
         }
 
-        int result = fileChooser.showSaveDialog(null);
-
-        if (result == JFileChooser.APPROVE_OPTION) {
-            File selectedFile = fileChooser.getSelectedFile();
-            String path = selectedFile.getAbsolutePath();
-
-            // Asegurar la extensión .map
-            if (!path.toLowerCase().endsWith(".map")) {
-                path += ".map";
-            }
-
-            // Guardar el último directorio utilizado
-            Options.INSTANCE.setLastMapPath(selectedFile.getParent());
-            Options.INSTANCE.save();
-
-            // Guardar el mapa
-            GameData.saveMap(path);
+        if (selectedFileBox[0] != null) {
+            // Guardar el mapa en el hilo principal
+            GameData.saveMap(selectedFileBox[0].getAbsolutePath());
         }
     }
 }

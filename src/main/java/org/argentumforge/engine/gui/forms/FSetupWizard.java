@@ -21,7 +21,8 @@ public final class FSetupWizard extends Form {
     private static final int STEP_WELCOME = 0;
     private static final int STEP_ROUTES = 1;
     private static final int STEP_PREFERENCES = 2;
-    private static final int STEP_CONFIRMATION = 3;
+    private static final int STEP_MINIMAP = 3;
+    private static final int STEP_CONFIRMATION = 4;
 
     private int currentStep = STEP_WELCOME;
     private final Runnable onComplete;
@@ -41,11 +42,16 @@ public final class FSetupWizard extends Form {
     private final String[] resolutions = { "1366x768", "1920x1080", "2560x1440", "1280x720" };
 
     private final ImInt languageIndex = new ImInt(0);
-    private final String[] languages = { "es_ES", "en_US" };
-    private final String[] languageNames = { "Español", "English" };
+    private final String[] languages;
+    private final String[] languageNames;
 
     private final ImInt clientWidth = new ImInt(13);
     private final ImInt clientHeight = new ImInt(11);
+
+    private final ImBoolean generateMinimap = new ImBoolean(true);
+    private final ImBoolean graphicCursor = new ImBoolean(false);
+    private final ImBoolean windowOpen = new ImBoolean(true);
+    private boolean showExitConfirmation = false;
 
     private String errorMessage = "";
 
@@ -59,6 +65,42 @@ public final class FSetupWizard extends Form {
         this.onComplete = onComplete;
         this.isFirstRun = isFirstRun;
 
+        // Detectar idiomas disponibles en la carpeta lang/
+        java.util.List<String> langList = new java.util.ArrayList<>();
+        java.util.List<String> langNameList = new java.util.ArrayList<>();
+
+        java.io.File langDir = new java.io.File("lang");
+        if (langDir.exists() && langDir.isDirectory()) {
+            java.io.File[] files = langDir.listFiles((dir, name) -> name.endsWith(".properties"));
+            if (files != null) {
+                for (java.io.File file : files) {
+                    String fileName = file.getName();
+                    String langCode = fileName.replace(".properties", "");
+                    langList.add(langCode);
+
+                    // Mapear códigos a nombres legibles
+                    String displayName = switch (langCode) {
+                        case "es_ES" -> "Español";
+                        case "en_US" -> "English";
+                        case "pt_BR" -> "Português (Brasil)";
+                        default -> langCode; // Fallback al código si no está mapeado
+                    };
+                    langNameList.add(displayName);
+                }
+            }
+        }
+
+        // Si no se encontraron idiomas, usar fallback
+        if (langList.isEmpty()) {
+            langList.add("es_ES");
+            langList.add("en_US");
+            langNameList.add("Español");
+            langNameList.add("English");
+        }
+
+        this.languages = langList.toArray(new String[0]);
+        this.languageNames = langNameList.toArray(new String[0]);
+
         // Cargar valores actuales de Options si existen
         Options opts = Options.INSTANCE;
         graphicsPath.set(opts.getGraphicsPath());
@@ -68,6 +110,7 @@ public final class FSetupWizard extends Form {
         musicEnabled.set(opts.isMusic());
         soundEnabled.set(opts.isSound());
         fullscreen.set(opts.isFullscreen());
+        graphicCursor.set(opts.isCursorGraphic());
         clientWidth.set(opts.getClientWidth());
         clientHeight.set(opts.getClientHeight());
 
@@ -92,20 +135,31 @@ public final class FSetupWizard extends Form {
 
     @Override
     public void render() {
-        ImGui.setNextWindowSize(700, 500, ImGuiCond.FirstUseEver);
-        ImGui.setNextWindowPos(
-                (org.argentumforge.engine.Window.INSTANCE.getWidth() - 700) / 2f,
-                (org.argentumforge.engine.Window.INSTANCE.getHeight() - 500) / 2f,
-                ImGuiCond.FirstUseEver);
+        // Tamaño adaptativo según el paso actual
+        int windowHeight = switch (currentStep) {
+            case STEP_WELCOME -> 250;
+            case STEP_ROUTES -> 350;
+            case STEP_PREFERENCES -> 420;
+            case STEP_MINIMAP -> 320;
+            case STEP_CONFIRMATION -> 380;
+            default -> 400;
+        };
 
-        int flags = ImGuiWindowFlags.NoCollapse;
+        ImGui.setNextWindowSize(650, windowHeight, ImGuiCond.Always);
+        ImGui.setNextWindowPos(
+                (org.argentumforge.engine.Window.INSTANCE.getWidth() - 650) / 2f,
+                (org.argentumforge.engine.Window.INSTANCE.getHeight() - windowHeight) / 2f,
+                ImGuiCond.Always);
+
+        int flags = ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize;
         // No se puede evitar que cierren con X en ImGui, pero se puede ignorar
 
-        if (ImGui.begin(I18n.INSTANCE.get("wizard.title"), flags)) {
+        if (ImGui.begin(I18n.INSTANCE.get("wizard.title"), windowOpen, flags)) {
             switch (currentStep) {
                 case STEP_WELCOME -> renderWelcome();
                 case STEP_ROUTES -> renderRoutes();
                 case STEP_PREFERENCES -> renderPreferences();
+                case STEP_MINIMAP -> renderMinimap();
                 case STEP_CONFIRMATION -> renderConfirmation();
             }
 
@@ -120,6 +174,18 @@ public final class FSetupWizard extends Form {
             renderNavigation();
         }
         ImGui.end();
+
+        // Detectar si el usuario cerró la ventana con la X
+        if (!windowOpen.get()) {
+            if (isFirstRun) {
+                // Durante primera ejecución, mostrar confirmación
+                windowOpen.set(true); // Reabrir la ventana
+                showExitConfirmation = true;
+            } else {
+                // Durante ejecución manual, simplemente cerrar
+                this.close();
+            }
+        }
     }
 
     private void renderWelcome() {
@@ -185,6 +251,28 @@ public final class FSetupWizard extends Form {
 
         // Pantalla completa
         ImGui.checkbox(I18n.INSTANCE.get("wizard.prefs.fullscreen"), fullscreen);
+
+        // Cursor gráfico
+        ImGui.checkbox(I18n.INSTANCE.get("wizard.prefs.graphicCursor"), graphicCursor);
+    }
+
+    private void renderMinimap() {
+        ImGui.text(I18n.INSTANCE.get("wizard.minimap.title"));
+        ImGui.separator();
+        ImGui.spacing();
+
+        ImGui.textWrapped(I18n.INSTANCE.get("wizard.minimap.description"));
+        ImGui.spacing();
+        ImGui.spacing();
+
+        ImGui.checkbox(I18n.INSTANCE.get("wizard.minimap.generate"), generateMinimap);
+
+        if (!generateMinimap.get()) {
+            ImGui.spacing();
+            ImGui.pushStyleColor(imgui.flag.ImGuiCol.Text, 1.0f, 1.0f, 0.0f, 1.0f);
+            ImGui.textWrapped(I18n.INSTANCE.get("wizard.minimap.skip"));
+            ImGui.popStyleColor();
+        }
     }
 
     private void renderConfirmation() {
@@ -201,6 +289,8 @@ public final class FSetupWizard extends Form {
         ImGui.bulletText(I18n.INSTANCE.get("wizard.prefs.resolution") + " " + resolutions[resolutionIndex.get()]);
         ImGui.bulletText(
                 I18n.INSTANCE.get("wizard.prefs.clientSize") + " " + clientWidth.get() + "x" + clientHeight.get());
+        ImGui.spacing();
+        ImGui.bulletText(I18n.INSTANCE.get("wizard.minimap.generate") + ": " + (generateMinimap.get() ? "Sí" : "No"));
     }
 
     private void renderNavigation() {
@@ -246,6 +336,35 @@ public final class FSetupWizard extends Form {
             if (ImGui.button(I18n.INSTANCE.get("common.cancel"), buttonWidth, 0)) {
                 this.close();
             }
+        }
+
+        // Modal de confirmación de salida
+        renderExitConfirmation();
+    }
+
+    private void renderExitConfirmation() {
+        if (showExitConfirmation) {
+            ImGui.openPopup(I18n.INSTANCE.get("wizard.exit.title"));
+        }
+
+        if (ImGui.beginPopupModal(I18n.INSTANCE.get("wizard.exit.title"), ImGuiWindowFlags.AlwaysAutoResize)) {
+            ImGui.text(I18n.INSTANCE.get("wizard.exit.message"));
+            ImGui.spacing();
+            ImGui.separator();
+            ImGui.spacing();
+
+            if (ImGui.button(I18n.INSTANCE.get("wizard.exit.confirm"), 120, 0)) {
+                System.exit(0);
+            }
+
+            ImGui.sameLine();
+
+            if (ImGui.button(I18n.INSTANCE.get("common.cancel"), 120, 0)) {
+                showExitConfirmation = false;
+                ImGui.closeCurrentPopup();
+            }
+
+            ImGui.endPopup();
         }
     }
 
@@ -309,6 +428,7 @@ public final class FSetupWizard extends Form {
         opts.setMusic(musicEnabled.get());
         opts.setSound(soundEnabled.get());
         opts.setFullscreen(fullscreen.get());
+        opts.setCursorGraphic(graphicCursor.get());
         opts.setClientWidth(clientWidth.get());
         opts.setClientHeight(clientHeight.get());
         opts.setLanguage(languages[languageIndex.get()]);
@@ -320,6 +440,14 @@ public final class FSetupWizard extends Form {
 
         // Guardar en archivo
         opts.save();
+
+        // Recargar recursos con las nuevas rutas para que estén disponibles
+        org.argentumforge.engine.utils.GameData.init();
+
+        // Generar colores del minimapa si está marcado
+        if (generateMinimap.get()) {
+            org.argentumforge.engine.utils.editor.MinimapColorGenerator.generateBinary();
+        }
 
         // Cerrar wizard
         this.close();
