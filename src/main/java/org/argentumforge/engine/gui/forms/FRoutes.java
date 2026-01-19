@@ -70,7 +70,15 @@ public class FRoutes extends Form {
     private String selectFolder(String currentPath) {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        fileChooser.setCurrentDirectory(new File(currentPath.isEmpty() ? "." : currentPath));
+
+        // Solo establecer directorio actual si la ruta no está vacía y existe
+        if (currentPath != null && !currentPath.isEmpty()) {
+            File dir = new File(currentPath);
+            if (dir.exists() && dir.isDirectory()) {
+                fileChooser.setCurrentDirectory(dir);
+            }
+        }
+
         fileChooser.setDialogTitle(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.paths.selectFolder"));
 
         int result = fileChooser.showOpenDialog(null);

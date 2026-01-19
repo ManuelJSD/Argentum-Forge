@@ -557,6 +557,16 @@ public final class FMain extends Form {
             }
 
             if (ImGui.beginMenu(I18n.INSTANCE.get("menu.tools"))) {
+                if (ImGui.menuItem(I18n.INSTANCE.get("menu.tools.setupWizard"))) {
+                    FSetupWizard wizard = new FSetupWizard(() -> {
+                        // Al finalizar, recargar recursos si cambiaron las rutas
+                        org.argentumforge.engine.utils.GameData.init();
+                    }, false);
+                    ImGUISystem.INSTANCE.show(wizard);
+                }
+
+                ImGui.separator();
+
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.tools.generateColors"))) {
                     int response = javax.swing.JOptionPane.showConfirmDialog(null,
                             I18n.INSTANCE.get("msg.generateColorsConfirm"),

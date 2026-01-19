@@ -40,6 +40,8 @@ public final class Engine {
     private static Scene currentScene;
     /** Renderizador por lotes para el dibujado eficiente de graficos. */
     public static BatchRenderer batch;
+    /** Flag que indica si el motor está esperando la configuración inicial. */
+    private static boolean isWaitingForSetup = false;
 
     public static Scene getCurrentScene() {
         return currentScene;
@@ -67,17 +69,55 @@ public final class Engine {
                 System.getProperty("os.arch"));
         Logger.info("Java version: {}", System.getProperty("java.version"));
 
+        // IMPORTANTE: Verificar primera ejecución ANTES de GameData.init()
+        // porque GameData.init() llama a options.load() que crea el archivo
+        boolean firstRun = options.isFirstRun();
+
         GameData.init();
-        window.init();
-        guiSystem.init();
+
+        // Si es primera ejecución, mostrar wizard
+        if (firstRun) {
+            window.init();
+            guiSystem.init();
+
+            org.argentumforge.engine.gui.forms.FSetupWizard wizard = new org.argentumforge.engine.gui.forms.FSetupWizard(
+                    this::completeInitialization, true);
+            ImGUISystem.INSTANCE.show(wizard);
+
+            isWaitingForSetup = true;
+            return;
+        }
+
+        completeInitialization();
+    }
+
+    /**
+     * Completa la inicialización después del wizard o si no es primera ejecución.
+     */
+    private void completeInitialization() {
+        boolean justCompletedWizard = isWaitingForSetup;
+
+        if (!isWaitingForSetup) {
+            window.init();
+            guiSystem.init();
+        }
+
+        // Si acabamos de completar el wizard, recargar recursos con las nuevas rutas
+        if (justCompletedWizard) {
+            GameData.init(); // Recargar con las rutas configuradas
+        }
+
         Surface.INSTANCE.init();
         batch = new BatchRenderer();
 
-        if (!GameData.checkResources()) {
+        // Solo verificar recursos si NO acabamos de completar el wizard
+        // (el wizard ya configuró las rutas correctamente)
+        if (!justCompletedWizard && !GameData.checkResources()) {
             ImGUISystem.INSTANCE.show(new org.argentumforge.engine.gui.forms.FRoutes());
         }
 
         changeScene(INTRO_SCENE);
+        isWaitingForSetup = false;
         // playMusic("intro.ogg");
     }
 
@@ -118,8 +158,14 @@ public final class Engine {
             glfwPollEvents();
 
             if (!window.isMinimized()) {
-                glClearColor(currentScene.getBackground().getRed(), currentScene.getBackground().getGreen(),
-                        currentScene.getBackground().getBlue(), 1.0f);
+                // Solo procesar escena si existe (puede ser null mientras se muestra el wizard)
+                if (currentScene != null) {
+                    glClearColor(currentScene.getBackground().getRed(), currentScene.getBackground().getGreen(),
+                            currentScene.getBackground().getBlue(), 1.0f);
+                } else {
+                    // Color por defecto mientras se espera el wizard
+                    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+                }
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
                 if (deltaTime >= 0)
@@ -177,6 +223,12 @@ public final class Engine {
      * y delega el dibujado a la escena activa y al sistema ImGui.
      */
     private void render() {
+        // Si no hay escena (ej: esperando el wizard), solo renderizar GUI
+        if (currentScene == null) {
+            guiSystem.renderGUI();
+            return;
+        }
+
         Window.INSTANCE.setupGameProjection();
 
         if (!currentScene.isVisible())

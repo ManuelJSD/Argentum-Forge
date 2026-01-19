@@ -22,10 +22,10 @@ public enum Options {
     private boolean vsync = true;
     private boolean cursorGraphic = true;
     private String language = "es_ES";
-    private String graphicsPath = "resources/graficos";
-    private String datsPath = "resources/dats";
-    private String initPath = "resources/inits";
-    private String musicPath = "resources/musica";
+    private String graphicsPath = "";
+    private String datsPath = "";
+    private String initPath = "";
+    private String musicPath = "";
     private int screenWidth = 1366;
     private int screenHeight = 768;
     private int clientWidth = 13;
@@ -67,6 +67,16 @@ public enum Options {
                     OPTIONS_FILE_PATH);
             save();
         }
+    }
+
+    /**
+     * Verifica si es la primera ejecución del editor.
+     * 
+     * @return true si options.ini no existe, false en caso contrario
+     */
+    public boolean isFirstRun() {
+        File optionsFile = new File(OPTIONS_FILE_PATH);
+        return !optionsFile.exists();
     }
 
     /**
