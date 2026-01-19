@@ -6,8 +6,6 @@ import org.argentumforge.engine.renderer.Surface;
 import org.argentumforge.engine.utils.inits.*;
 import org.tinylog.Logger;
 
-import static org.argentumforge.engine.utils.AssetRegistry.*;
-
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -17,32 +15,9 @@ import java.util.*;
 import static org.argentumforge.engine.game.models.Character.eraseAllChars;
 
 /**
- * <p>
- * Clase central de almacenamiento y gestión de datos del editor de mapas.
- * {@code GameData} contiene las referencias a todos los recursos,
- * estados y configuraciones necesarios para el funcionamiento de la
- * herramienta.
- * <p>
- * Esta clase es de tipo utilidad (utility class) y no debe ser instanciada.
- * Provee métodos estáticos para cargar, inicializar y
- * acceder a los diferentes elementos como gráficos, personajes (NPCs),
- * objetos y configuraciones de mapas.
- * <p>
- * Entre sus responsabilidades principales se encuentran:
- * <ul>
- * <li>Gestionar los arrays estáticos de datos (cuerpos, cabezas, gráficos,
- * etc.)</li>
- * <li>Cargar los recursos desde archivos locales configurados</li>
- * <li>Inicializar los datos necesarios al inicio del editor</li>
- * <li>Proporcionar métodos de acceso a los datos para su visualización y
- * edición</li>
- * <li>Mantener el estado global del mapa actual, incluyendo entidades y
- * triggers</li>
- * </ul>
- * <p>
- * La clase implementa un sistema de carga secuencial de recursos durante la
- * inicialización, garantizando que todos los datos necesarios estén
- * disponibles.
+ * Repositorio central de recursos y datos del editor.
+ * Maneja la carga de índices (GRH, NPCs, etc.) y mantiene el estado del mapa
+ * activo (MapContext).
  */
 
 public final class GameData {

@@ -10,12 +10,9 @@ import org.argentumforge.engine.listeners.MouseListener;
 import org.argentumforge.engine.listeners.EditorInputManager;
 import org.argentumforge.engine.renderer.RenderSettings;
 import org.argentumforge.engine.utils.editor.Surface;
-import org.argentumforge.engine.utils.editor.Block;
 import org.argentumforge.engine.utils.editor.Npc;
 import org.argentumforge.engine.utils.editor.Obj;
 import org.argentumforge.engine.utils.editor.Selection;
-import org.argentumforge.engine.utils.editor.Trigger;
-import org.argentumforge.engine.utils.editor.Transfer;
 import org.argentumforge.engine.renderer.Texture;
 import org.argentumforge.engine.Engine;
 
@@ -39,29 +36,9 @@ import org.argentumforge.engine.renderer.RGBColor;
 import org.argentumforge.engine.utils.editor.Selection.SelectedEntity;
 
 /**
- * <p>
- * {@code GameScene} es la escena principal del editor, responsable de
- * renderizar el mapa
- * y gestionar las herramientas de edición en tiempo real.
- * <p>
- * Funcionalidades principales:
- * <ul>
- * <li>Renderizado del mapa con sus múltiples capas y visualización técnica
- * (bloqueos, traslados).</li>
- * <li>Gestión de las herramientas de edición (Superficies, Bloqueos, NPCs,
- * Objetos).</li>
- * <li>Visualización de NPCs y Objetos colocados en el mapa.</li>
- * <li>Control de cámara y navegación por el mundo.</li>
- * <li>Modo "Caminata" para previsualizar colisiones y movimiento.</li>
- * </ul>
- * <p>
- * El método {@link GameScene#render()} coordina el dibujado por capas para
- * garantizar
- * la correcta superposición de elementos visuales.
- *
- * @see Scene
- * @see FMain
- * @see Camera
+ * Escena principal del editor.
+ * Maneja el renderizado del mapa, la lógica de las herramientas y la entrada
+ * del usuario.
  */
 
 public final class GameScene extends Scene {
@@ -93,9 +70,6 @@ public final class GameScene extends Scene {
     /** Editor de superficies. */
     private Surface surface;
 
-    /** Editor de bloqueos. */
-    private Block block;
-
     /** Editor de NPCs. */
     private Npc npc;
 
@@ -104,15 +78,6 @@ public final class GameScene extends Scene {
 
     /** Herramienta de seleccion y movimiento. */
     private Selection selection;
-
-    /** Herramienta de Triggers. */
-    private Trigger trigger;
-
-    /** Herramienta de Traslados. */
-    private Transfer transfer;
-
-    /** Flag auxiliar para el borrado de capas (uso interno del editor). */
-    private boolean DeleteLayer;
 
     private Texture whiteTexture;
 
@@ -129,12 +94,9 @@ public final class GameScene extends Scene {
         weather = Weather.INSTANCE;
         frmMain = new FMain();
         surface = Surface.getInstance();
-        block = Block.getInstance();
         npc = Npc.getInstance();
         obj = Obj.getInstance();
         selection = Selection.getInstance();
-        trigger = Trigger.getInstance();
-        transfer = Transfer.getInstance();
 
         mapRenderer = new MapRenderer(camera);
         inputManager = new EditorInputManager(camera);

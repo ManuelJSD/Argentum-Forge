@@ -20,18 +20,10 @@ import static org.lwjgl.glfw.GLFW.glfwSwapBuffers;
 import static org.lwjgl.opengl.GL11.*;
 
 /**
- * Clase principal que representa el motor grafico del proyecto.
- * <p>
- * Esta clase gestiona la inicializacion, ejecucion y finalizacion de los
- * componentes esenciales del motor. Es responsable de
- * coordinar el renderizado, la logica principal, el manejo de eventos y la
- * comunicacion con el servidor.
- * <p>
- * El ciclo de vida del motor incluye tres etapas principales: inicializacion de
- * recursos mediante el metodo {@code init()},
- * ejecucion del bucle principal con {@code loop()} y cierre de recursos junto
- * con la terminacion del programa a traves del metodo
- * {@code close()}.
+ * Motor gráfico principal.
+ * Gestiona el ciclo de vida de la aplicación: inicialización de recursos
+ * (LWJGL, ImGui),
+ * bucle principal de renderizado y lógica, y limpieza al cerrar.
  */
 
 public final class Engine {
@@ -54,13 +46,9 @@ public final class Engine {
     }
 
     /**
-     * Finaliza el cliente del motor grafico cerrando los recursos necesarios y
-     * deteniendo su ejecucion.
-     * <p>
-     * Este metodo garantiza que las opciones actuales sean almacenadas invocando el
-     * metodo {@code options.save()}.
-     * Adicionalmente, ajusta el estado del programa a inactivo configurando
-     * {@code prgRun} a {@code false}.
+     * Cierra la sesión de edición de forma segura.
+     * Verifica cambios sin guardar y guarda las preferencias de usuario antes de
+     * salir.
      */
     public static void closeClient() {
         if (!org.argentumforge.engine.utils.MapManager.checkUnsavedChanges()) {
@@ -94,17 +82,8 @@ public final class Engine {
     }
 
     /**
-     * Metodo principal para iniciar el motor grafico.
-     * <p>
-     * Este metodo coordina el flujo principal de ejecucion del motor. Primero,
-     * inicializa los elementos necesarios como la
-     * ventana, gestor de texturas, escenas, y otros componentes fundamentales
-     * llamando al metodo {@code init()}. A continuacion,
-     * se ejecuta el bucle principal del juego mediante el metodo {@code loop()},
-     * que gestiona los eventos, la logica, el
-     * renderizado y la comunicacion con el servidor. Finalmente, se limpian y
-     * cierran los recursos utilizados llamando al metodo
-     * {@code close()}.
+     * Inicia la ejecución del motor.
+     * Secuencia: {@code init()} -> {@code loop()} -> {@code close()}.
      */
     public void start() {
         init();
@@ -123,36 +102,14 @@ public final class Engine {
     }
 
     /**
-     * Metodo principal del ciclo de ejecucion del motor grafico.
-     * <p>
-     * Este metodo es el encargado de gestionar el flujo principal del renderizado y
-     * la logica del programa mientras este se
-     * encuentra en ejecucion. Realiza las siguientes tareas:
-     * <ul>
-     * <li>Inicializa el tiempo al inicio del bucle llamando a
-     * {@code Time.initTime()}.
-     * <li>Itera mientras el programa esta activo, verificando continuamente eventos
-     * de la ventana con {@code glfwPollEvents()}.
-     * <li>Si la ventana no esta minimizada:
-     * <ul>
-     * <li>Establece el color de fondo del renderizado basandose en los valores RGB
-     * de la escena actual.
-     * <li>Renderiza la escena actual si {@code deltaTime >= 0}.
-     * <li>Muestra el contenido renderizado actualizando los buffers con
-     * {@code glfwSwapBuffers}.
-     * <li>Actualiza los timers llamando a {@code Time.updateTime()}.
-     * </ul>
-     * <li>Resetea el estado de botones del raton con
-     * {@code MouseListener.resetReleasedButtons()}.
-     * <li>Gestiona la comunicacion con el servidor enviando y recibiendo bytes
-     * utilizando
-     * {@code SocketConnection.INSTANCE.write()} y
-     * {@code SocketConnection.INSTANCE.read()} respectivamente.
-     * </ul>
-     * <p>
-     * Este bucle mantiene el motor grafico activo hasta que el estado de ejecucion
-     * del programa {@code prgRun} cambie a
-     * {@code false}.
+     * Bucle principal de la aplicación.
+     * Se ejecuta continuamente mientras {@code prgRun} sea true.
+     * Tareas principales por frame:
+     * - Procesar eventos de ventana (Input).
+     * - Limpiar buffer de pantalla.
+     * - Renderizar escena y GUI si la ventana está activa.
+     * - Actualizar timers y deltaTime.
+     * - Gestionar eventos de mouse y teclado.
      */
     private void loop() {
         Time.initTime();
@@ -215,18 +172,9 @@ public final class Engine {
     }
 
     /**
-     * <b>Renderizado general</b>
-     * <p>
-     * Luego checkea si nuestra escena es visible, todas las escenas guardan un
-     * atributo de la posible escena en la que deba ir
-     * cada una. Por ejemplo: En la escena de "IntroScene.java" tiene guardado para
-     * que su siguente escena sea la de la clase
-     * "MainScene" donde se va mostrar el "frmConectar". Si estas escenas no son
-     * visibles, quiere decir que estan listas para ser
-     * cambiadas a otra, por eso se llama a la funcion "changeScene".
-     * <p>
-     * Por ultimo, dibuja la escena en la que estemos y renderiza nuestra GUI del
-     * framework "Dear ImGUI".
+     * Gestiona el renderizado del frame actual.
+     * Verifica si es necesario cambiar de escena (si la actual no es visible)
+     * y delega el dibujado a la escena activa y al sistema ImGui.
      */
     private void render() {
         Window.INSTANCE.setupGameProjection();

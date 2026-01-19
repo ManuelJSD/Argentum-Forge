@@ -16,12 +16,12 @@ import static org.argentumforge.engine.utils.GameData.charList;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ENTER;
 
 /**
- * FLauncher es el formulario principal de inicio del editor.
- * Permite crear nuevos mapas, cargar existentes o salir de la aplicación.
+ * Launcher del editor.
+ * Maneja la creación de nuevos mapas, carga de existentes y salida.
  */
 public final class FLauncher extends Form {
 
-    // Botones gráficos de 3 estados
+    // Botones de menú principal
     private ImageButton3State btnNuevoMapa;
     private ImageButton3State btnCargarMapa;
     private ImageButton3State btnExit;
@@ -31,8 +31,7 @@ public final class FLauncher extends Form {
         try {
             this.backgroundImage = loadTexture("VentanaInicio");
 
-            // Ajustamos el tamaño de los botones (antes 766x144) para que no sean tan
-            // masivos
+            // Configuración de botones (766x144 px)
             int bWidth = 766;
             int bHeight = 144;
 
@@ -85,13 +84,13 @@ public final class FLauncher extends Form {
             ImGui.getWindowDrawList().addImage(backgroundImage, x, y, x + imageWidth, y + imageHeight);
         }
 
-        // --- AJUSTE DE POSICIONES SEGUN IMAGEN DEL USUARIO ---
+        // --- Layout de Botones ---
         int buttonWidth = 766;
         int centerX = x + (imageWidth - buttonWidth) / 2;
 
         // Alineamos con los slots del fondo (aprox 44% de altura)
         int yStart = y + 448;
-        int spacing = 168; // 144 + 24 de gap
+        int spacing = 168;
 
         // Renderizado de botones si no son nulos
         if (btnNuevoMapa != null) {
