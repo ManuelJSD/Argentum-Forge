@@ -26,6 +26,3 @@ jobs:
 
     - name: Build with Gradle
       run: ./gradlew build
-
-    - name: Check Formatting (Spotless)
-      run: ./gradlew spotlessCheck

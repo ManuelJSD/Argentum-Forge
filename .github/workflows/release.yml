@@ -1,0 +1,146 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # Triggers on version tags like v1.0.0, v1.2.3, etc.
+
+permissions:
+  contents: write  # Required to create releases and upload assets
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest  # Windows runner for jpackage
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+      
+      - name: Extract version from tag
+        id: version
+        shell: bash
+        run: |
+          # Remove 'v' prefix from tag (v1.0.0 -> 1.0.0)
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+      
+      - name: Update version in build.gradle
+        shell: bash
+        run: |
+          VERSION=${{ steps.version.outputs.version }}
+          sed -i "s/version = '.*'/version = '$VERSION'/" build.gradle
+          echo "Updated build.gradle version to $VERSION"
+      
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+        shell: bash
+      
+      - name: Build JAR with Gradle
+        run: ./gradlew shadowJar
+      
+      - name: Verify JAR exists
+        shell: bash
+        run: |
+          JAR_PATH="build/libs/ArgentumForge-${{ steps.version.outputs.version }}.jar"
+          if [ ! -f "$JAR_PATH" ]; then
+            echo "Error: JAR not found at $JAR_PATH"
+            ls -la build/libs/
+            exit 1
+          fi
+          echo "JAR found: $JAR_PATH"
+      
+      - name: Build Windows executable with jpackage
+        shell: bash
+        run: |
+          VERSION=${{ steps.version.outputs.version }}
+          
+          # Run jpackage to create Windows app-image
+          "$JAVA_HOME/bin/jpackage" \
+            --type app-image \
+            --dest build/dist \
+            --name ArgentumForge \
+            --input build/libs \
+            --main-jar "ArgentumForge-${VERSION}.jar" \
+            --main-class org.argentumforge.Main \
+            --icon resources/icon.ico \
+            --description "Argentum Forge Map Editor" \
+            --vendor "Argentum Forge Team"
+          
+          # Copy external resources to the app folder
+          APP_FOLDER="build/dist/ArgentumForge"
+          
+          echo "Copying external resources to $APP_FOLDER..."
+          
+          cp -r resources "$APP_FOLDER/"
+          cp -r lang "$APP_FOLDER/"
+          cp grh_library.json "$APP_FOLDER/" || echo "grh_library.json not found, skipping"
+          cp Triggers.json "$APP_FOLDER/" || echo "Triggers.json not found, skipping"
+          
+          echo "Packaging complete!"
+      
+      - name: Create ZIP of Windows executable
+        shell: bash
+        run: |
+          cd build/dist
+          7z a -tzip "ArgentumForge-${{ steps.version.outputs.version }}-windows.zip" ArgentumForge/
+          cd ../..
+          mv "build/dist/ArgentumForge-${{ steps.version.outputs.version }}-windows.zip" .
+      
+      - name: Generate checksums
+        shell: bash
+        run: |
+          VERSION=${{ steps.version.outputs.version }}
+          
+          # SHA256 checksums for verification
+          sha256sum "build/libs/ArgentumForge-${VERSION}.jar" > checksums.txt
+          sha256sum "ArgentumForge-${VERSION}-windows.zip" >> checksums.txt
+          
+          echo "Checksums generated:"
+          cat checksums.txt
+      
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            build/libs/ArgentumForge-${{ steps.version.outputs.version }}.jar
+            ArgentumForge-${{ steps.version.outputs.version }}-windows.zip
+            checksums.txt
+          body: |
+            ## 🎉 Argentum Forge ${{ steps.version.outputs.version }}
+            
+            ### 📦 Archivos Disponibles
+            
+            #### ☕ **JAR Multiplataforma** (Requiere Java 17+)
+            - `ArgentumForge-${{ steps.version.outputs.version }}.jar`
+            - **Cómo ejecutar**: `java -jar ArgentumForge-${{ steps.version.outputs.version }}.jar`
+            - **Plataformas**: Windows, Linux, macOS
+            - **Requisitos**: [Java 17 o superior](https://adoptium.net/)
+            
+            #### 🪟 **Ejecutable Windows** (Sin dependencias)
+            - `ArgentumForge-${{ steps.version.outputs.version }}-windows.zip`
+            - **Cómo ejecutar**: Descomprime y ejecuta `ArgentumForge.exe`
+            - **Plataformas**: Windows 10/11
+            - **Requisitos**: Ninguno (Java incluido)
+            
+            #### 🔐 **Verificación de Integridad**
+            - `checksums.txt` - Checksums SHA256 para verificar la integridad de los archivos
+            
+            ---
+            
+            ### 📝 Notas
+            - Para usuarios sin conocimientos técnicos, se recomienda la versión Windows
+            - Para usuarios avanzados o en otras plataformas, usar el JAR
+            
+            **Instalación completa**: Ver [README.md](https://github.com/${{ github.repository }}/blob/main/README.md)
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
