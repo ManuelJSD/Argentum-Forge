@@ -16,7 +16,6 @@ import java.util.*;
 
 import static org.argentumforge.engine.game.models.Character.eraseAllChars;
 import static org.argentumforge.engine.renderer.FontRenderer.loadFonts;
-import static org.argentumforge.scripts.Compressor.readResource;
 
 /**
  * <p>
@@ -904,9 +903,18 @@ public final class GameData {
      * @param numMap Número del mapa a cargar.
      */
     public static void loadMap(int numMap) {
-        byte[] data = readResource("resources/maps.ao", "mapa" + numMap);
+        Path mapPath = Path.of("resources", "maps", "mapa" + numMap + ".map");
+        byte[] data = null;
+        try {
+            if (Files.exists(mapPath)) {
+                data = Files.readAllBytes(mapPath);
+            }
+        } catch (IOException e) {
+            System.err.println("Error reading map file: " + e.getMessage());
+        }
+
         if (data == null) {
-            System.err.println("Could not load mapa" + numMap + " data!");
+            System.err.println("Could not load mapa" + numMap + " data from: " + mapPath);
             return;
         }
         MapManager.initMap(data);

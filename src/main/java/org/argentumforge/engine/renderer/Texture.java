@@ -4,17 +4,15 @@ import org.lwjgl.BufferUtils;
 import org.tinylog.Logger;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-
-import static org.argentumforge.scripts.Compressor.readResource;
-import static org.lwjgl.opengl.GL11.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import static org.lwjgl.opengl.GL11.*;
 import org.argentumforge.engine.game.Options;
 
 /**
@@ -56,11 +54,19 @@ public class Texture {
             if (compressedFile.equals("graphics.ao")) {
                 resourceData = loadLocalGraphic(file);
             } else {
-                resourceData = readResource("resources/" + compressedFile, file);
+                // Remove .ao extension if present to look for local file
+                String localFolder = compressedFile.replace(".ao", "");
+                Path localPath = findLocalFile("resources", localFolder, file);
+                if (localPath != null && Files.exists(localPath)) {
+                    resourceData = Files.readAllBytes(localPath);
+                } else {
+                    resourceData = null;
+                }
             }
 
             if (resourceData == null) {
-                Logger.error("No se pudieron cargar los datos de: " + file);
+                Logger.error("No se pudieron cargar los datos de: " + file
+                        + " (probado con .jpg, .png, .bmp en folder local)");
                 return;
             }
 
@@ -133,7 +139,7 @@ public class Texture {
     private byte[] loadLocalGraphic(String fileNum) {
         String graphicsPath = Options.INSTANCE.getGraphicsPath();
 
-        // Intentar con PNG primero
+        // 1. Intentar con PNG en disco
         Path pngPath = Path.of(graphicsPath, fileNum + ".png");
         if (Files.exists(pngPath)) {
             try {
@@ -142,7 +148,7 @@ public class Texture {
             }
         }
 
-        // Intentar con BMP en segundo lugar
+        // 2. Intentar con BMP en disco
         Path bmpPath = Path.of(graphicsPath, fileNum + ".bmp");
         if (Files.exists(bmpPath)) {
             try {
@@ -151,10 +157,35 @@ public class Texture {
             }
         }
 
-        // Fallback final al recurso original si es necesario?
-        // El usuario pidió que se carguen desde la carpeta seleccionada,
-        // pero tal vez mantener readResource como último recurso sea más seguro?
-        // Sigamos lo que pidió el usuario.
+        // 3. Fallback: Intentar cargar como recurso embebido (dentro del JAR)
+        // Buscamos en /graphics/ o /fonts/graphics/ según convenga
+        try (java.io.InputStream is = Texture.class.getResourceAsStream("/graphics/" + fileNum + ".png")) {
+            if (is != null)
+                return is.readAllBytes();
+        } catch (IOException ignored) {
+        }
+
+        try (java.io.InputStream is = Texture.class.getResourceAsStream("/graphics/" + fileNum + ".bmp")) {
+            if (is != null)
+                return is.readAllBytes();
+        } catch (IOException ignored) {
+        }
+
+        return null;
+    }
+
+    private Path findLocalFile(String base, String folder, String filename) {
+        Path directPath = Path.of(base, folder, filename);
+        if (Files.exists(directPath))
+            return directPath;
+
+        // Probar extensiones comunes
+        String[] extensions = { ".jpg", ".png", ".bmp" };
+        for (String ext : extensions) {
+            Path p = Path.of(base, folder, filename + ext);
+            if (Files.exists(p))
+                return p;
+        }
         return null;
     }
 

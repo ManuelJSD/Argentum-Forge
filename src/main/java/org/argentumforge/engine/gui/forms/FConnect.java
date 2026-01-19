@@ -32,17 +32,17 @@ public final class FConnect extends Form {
                     loadTexture("BotonNuevoMapa"),
                     loadTexture("BotonNuevoMapaRollover"),
                     loadTexture("BotonNuevoMapaClick"),
-                    137, 462, 766, 144);
+                    145, 460, 766, 144);
             btnCargarMapa = new ImageButton3State(
                     loadTexture("BotonCargarMapa"),
                     loadTexture("BotonCargarMapaRollover"),
                     loadTexture("BotonCargarMapaClick"),
-                    137, 625, 766, 144);
+                    145, 628, 766, 144);
             btnExit = new ImageButton3State(
                     loadTexture("BotonSalir"),
                     loadTexture("BotonSalirRollover"),
                     loadTexture("BotonSalirClick"),
-                    137, 800, 766, 144);
+                    145, 800, 766, 144);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
