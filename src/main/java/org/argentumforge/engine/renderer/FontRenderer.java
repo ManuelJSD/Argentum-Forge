@@ -8,7 +8,10 @@ import java.util.Map;
 
 import static org.argentumforge.engine.renderer.Drawn.drawGrhIndex;
 import static org.argentumforge.engine.utils.AssetRegistry.grhData;
-import static org.argentumforge.scripts.Compressor.readResource;
+import org.argentumforge.engine.game.Options;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.io.IOException;
 
 /**
  * Clase utilitaria que maneja la carga y renderizado de fuentes de texto.
@@ -46,32 +49,82 @@ public class FontRenderer {
     private static Font[] fonts;
 
     public static void loadFonts() {
-        byte[] data = readResource("resources/inits.ao", "fonts");
+        byte[] data = null;
+
+        // 1. Intentar cargar como recurso embebido (dentro del JAR)
+        try (java.io.InputStream is = FontRenderer.class.getResourceAsStream("/fonts.bin")) {
+            if (is != null) {
+                data = is.readAllBytes();
+            }
+        } catch (IOException ignored) {
+        }
+
+        // 2. Intentar cargar desde la carpeta resources/fonts/ (Ubicación preferida por
+        // el usuario)
         if (data == null) {
-            System.err.println("Could not load fonts data!");
+            Path fontsPath = Path.of("resources", "fonts", "fonts.bin");
+            if (Files.exists(fontsPath)) {
+                try {
+                    data = Files.readAllBytes(fontsPath);
+                } catch (IOException ignored) {
+                }
+            }
+        }
+
+        // 3. Si no está allí, probar en resources/ directamente (Legacy/Temporal)
+        if (data == null) {
+            Path fontsPath = Path.of("resources", "fonts.bin");
+            if (Files.exists(fontsPath)) {
+                try {
+                    data = Files.readAllBytes(fontsPath);
+                } catch (IOException ignored) {
+                }
+            }
+        }
+
+        // 4. Fallback al InitPath configurado (Fuentes.bin)
+        if (data == null) {
+            String initPath = Options.INSTANCE.getInitPath();
+            Path fontsPath = Path.of(initPath, "Fuentes.bin");
+            if (Files.exists(fontsPath)) {
+                try {
+                    data = Files.readAllBytes(fontsPath);
+                } catch (IOException ignored) {
+                }
+            }
+        }
+
+        // 4. Ultimo fallback a resources/inits/fonts.bin
+        if (data == null) {
+            Path fontsPath = Path.of("resources", "inits", "fonts.bin");
+            if (Files.exists(fontsPath)) {
+                try {
+                    data = Files.readAllBytes(fontsPath);
+                } catch (IOException ignored) {
+                }
+            }
+        }
+
+        if (data == null) {
+            System.err.println("No se pudieron cargar los datos de fuentes desde ninguna ubicación.");
             return;
         }
 
         reader.init(data, ByteOrder.BIG_ENDIAN);
-
+        // ... rest of the logic remains the same
         int cantFontTypes = reader.readInt();
         fonts = new Font[cantFontTypes];
 
         for (int i = 0; i < cantFontTypes; i++) {
             fonts[i] = new Font();
             fonts[i].size = reader.readInt();
-            // Inicializa el mapa de caracteres
             fonts[i].characters = new HashMap<>();
-            // Cargar los caracteres ASCII (0-255) en el mapa
             for (int k = 0; k < 256; k++) {
                 int grh = reader.readInt();
                 if (grh > 0)
                     fonts[i].characters.put((char) k, grh);
             }
         }
-
-        // debugPrintAvailableChars();
-
     }
 
     /**

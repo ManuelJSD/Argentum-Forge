@@ -11,9 +11,9 @@ java {
     }
 }
 
-dependencyLocking {
-    lockAllConfigurations()
-}
+// dependencyLocking {
+//     lockAllConfigurations()
+// }
 
 group = 'org.argentumforge'
 version = '0.1.0-alpha'
