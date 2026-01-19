@@ -145,6 +145,19 @@ tasks.jar {
     enabled = false
 }
 
+// Fix implicit dependencies for distribution tasks
+tasks.distZip {
+    dependsOn tasks.shadowJar
+}
+
+tasks.distTar {
+    dependsOn tasks.shadowJar
+}
+
+tasks.startScripts {
+    dependsOn tasks.shadowJar
+}
+
 task packageWin(type: Exec) {
     dependsOn tasks.shadowJar
     group = "distribution"
