@@ -237,8 +237,8 @@ spotless {
     }
 }
 
-// Temporarily disable spotlessCheck due to Java 17+ compatibility issues
+// Temporarily disable spotlessJavaCheck due to Java 17+ compatibility issues
 // Developers should run './gradlew spotlessApply' manually before committing
-tasks.named('spotlessCheck') {
+tasks.named('spotlessJavaCheck') {
     enabled = false
 }
