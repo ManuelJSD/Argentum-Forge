@@ -2,36 +2,14 @@ package org.argentumforge.engine.game;
 
 import org.argentumforge.engine.game.models.*;
 
-import org.argentumforge.engine.utils.AssetRegistry;
-
 import static org.argentumforge.engine.game.models.Character.*;
 import static org.argentumforge.engine.game.models.Direction.*;
 import static org.argentumforge.engine.scenes.Camera.*;
 import static org.argentumforge.engine.utils.GameData.*;
 
 /**
- * <p>
- * Representa el usuario controlado por el jugador. Centraliza toda la
- * informacion, logica de movimiento y estados del personaje
- * principal.
- * <p>
- * Esta clase maneja aspectos fundamentales como la posicion del usuario en el
- * mapa, direccion de movimiento, atributos y
- * estadisticas, inventario, hechizos y todas las interacciones con el entorno
- * de juego. Actua como una entidad central que
- * coordina las acciones del jugador con el resto del mundo virtual.
- * <p>
- * Entre sus responsabilidades principales se encuentran:
- * <ul>
- * <li>Control del movimiento y posicionamiento del usuario</li>
- * <li>Gestión de la posición en el mapa</li>
- * <li>Control de estados especiales (bajo techo, etc.)</li>
- * <li>Interacción con el entorno y otros personajes</li>
- * </ul>
- * <p>
- * La clase representa el nucleo de la experiencia de juego, siendo el punto de
- * conexion entre las acciones del jugador y su
- * representacion en el mundo virtual.
+ * Entidad del usuario principal.
+ * Gestiona la posición, estado y movimiento del jugador en el mundo.
  */
 
 public enum User {
@@ -271,9 +249,6 @@ public enum User {
 
     public void setUserMap(short userMap) {
         this.userMap = userMap;
-    }
-
-    private void resetState() {
     }
 
     public void teleport(int x, int y) {

@@ -42,7 +42,7 @@ public final class FInfoMap extends Form {
     private List<File> musicFiles = new ArrayList<>();
     private List<File> filteredMusicFiles = new ArrayList<>();
     private final ImString musicFilter = new ImString(50);
-    private String currentlyPreviewing = "";
+    private final ImString musicFilter = new ImString(50);
 
     public FInfoMap() {
         refreshData();
@@ -220,13 +220,13 @@ public final class FInfoMap extends Form {
                 if (!selectedName.isEmpty()) {
                     Sound.stopMusic();
                     Sound.playMusic(selectedName);
-                    currentlyPreviewing = selectedName;
+                    Sound.playMusic(selectedName);
                 }
             }
             ImGui.sameLine();
             if (ImGui.button("Detener")) {
                 Sound.stopMusic();
-                currentlyPreviewing = "";
+                Sound.stopMusic();
             }
 
             ImGui.end();

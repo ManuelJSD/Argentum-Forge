@@ -1,8 +1,5 @@
 package org.argentumforge.engine.gui.forms;
 
-import imgui.type.ImBoolean;
-import imgui.type.ImFloat;
-
 import imgui.ImGui;
 import imgui.flag.*;
 import org.argentumforge.engine.Window;
@@ -27,29 +24,9 @@ import org.argentumforge.engine.scenes.Camera;
 import static org.lwjgl.glfw.GLFW.*;
 
 /**
- * Formulario principal que proporciona la interfaz de usuario del editor de
- * mapas.
- * <p>
- * La clase {@code FMain} representa la pantalla principal del editor.
- * Esta clase extiende {@link Form} y actúa como el núcleo de la interfaz
- * gráfica de la herramienta.
- * <p>
- * Funcionalidades principales:
- * <ul>
- * <li>Visualización y gestión del viewport del mapa.</li>
- * <li>Acceso a herramientas de edición de superficies, bloqueos, NPCs y
- * objetos.</li>
- * <li>Integración de la consola de mensajes del sistema para logs del
- * editor.</li>
- * <li>Menú principal para carga, guardado y configuración ambiental.</li>
- * <li>Visualización de FPS para monitoreo de performance.</li>
- * </ul>
- * <p>
- * La clase está organizada en métodos privados que separan la lógica de
- * renderizado en secciones específicas para mejorar la legibilidad y el
- * mantenimiento.
- * <p>
- * <b>Nota:</b> Todos los elementos gráficos se dibujan usando ImGui.
+ * Interfaz principal del editor.
+ * Gestiona el menú superior, la barra de herramientas y los sub-ventanas de
+ * edición (Superficies, Bloqueos, etc.).
  */
 
 public final class FMain extends Form {
@@ -168,15 +145,6 @@ public final class FMain extends Form {
             }
         }
         ImGui.end();
-    }
-
-    /**
-     * Dibuja un botón invisible en la posición y tamaño indicados. Devuelve true si
-     * fue presionado.
-     */
-    private boolean drawButton(int x, int y, int w, int h, String label) {
-        ImGui.setCursorPos(x, y);
-        return ImGui.invisibleButton(label, w, h);
     }
 
     // FPS
