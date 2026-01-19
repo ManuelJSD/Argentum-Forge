@@ -31,6 +31,7 @@ public class Main {
     }
 
     private static void showErrorDialog(Throwable t) {
+        t.printStackTrace(); // Imprimir en consola para depuración
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
         t.printStackTrace(pw);

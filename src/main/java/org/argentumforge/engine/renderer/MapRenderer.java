@@ -33,6 +33,8 @@ public class MapRenderer {
     }
 
     public void render(int pixelOffsetX, int pixelOffsetY) {
+        if (mapData == null)
+            return;
         RenderSettings renderSettings = Options.INSTANCE.getRenderSettings();
 
         renderFirstLayer(renderSettings, pixelOffsetX, pixelOffsetY);

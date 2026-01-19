@@ -126,6 +126,7 @@ public final class GameData {
             } else {
                 activeContext = null;
                 mapData = null;
+                org.argentumforge.engine.utils.MapManager.createEmptyMap(100, 100);
             }
         }
     }
