@@ -42,7 +42,6 @@ public final class FInfoMap extends Form {
     private List<File> musicFiles = new ArrayList<>();
     private List<File> filteredMusicFiles = new ArrayList<>();
     private final ImString musicFilter = new ImString(50);
-    private final ImString musicFilter = new ImString(50);
 
     public FInfoMap() {
         refreshData();

@@ -1,5 +1,6 @@
 package org.argentumforge.engine.gui.forms;
 
+import imgui.type.ImBoolean;
 import imgui.ImGui;
 import imgui.flag.*;
 import org.argentumforge.engine.Window;
