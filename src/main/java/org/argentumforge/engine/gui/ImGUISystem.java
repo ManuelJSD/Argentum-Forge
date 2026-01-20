@@ -102,7 +102,7 @@ public enum ImGUISystem {
         loadImGUIFonts(io);
 
         // Iniciamos ImGUI en OpenGL
-        imGuiGl3.init();
+        imGuiGl3.init("#version 150");
     }
 
     private void setKeyboardMapping(ImGuiIO io) {

@@ -2,7 +2,7 @@ package org.argentumforge.engine.utils;
 
 import org.argentumforge.engine.game.Options;
 import org.argentumforge.engine.game.models.Character;
-import org.argentumforge.engine.renderer.Surface;
+import org.argentumforge.engine.renderer.TextureManager;
 import org.argentumforge.engine.utils.inits.*;
 import org.tinylog.Logger;
 
@@ -929,7 +929,7 @@ public final class GameData {
             }
         }
 
-        Surface.INSTANCE.deleteAllTextures();
+        //Surface.INSTANCE.deleteAllTextures();
         eraseAllChars();
     }
 

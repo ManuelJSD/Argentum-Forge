@@ -1,10 +1,11 @@
 package org.argentumforge.engine.scenes;
 
 import org.argentumforge.engine.listeners.KeyHandler;
-import org.argentumforge.engine.renderer.Surface;
+import org.argentumforge.engine.renderer.RGBColor;
 import org.argentumforge.engine.renderer.Texture;
+import org.argentumforge.engine.renderer.TextureManager;
 
-import static org.argentumforge.engine.renderer.Drawn.geometryBoxRenderGUI;
+import static org.argentumforge.engine.renderer.Drawn.geometryBoxRender;
 import static org.argentumforge.engine.utils.Time.deltaTime;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ENTER;
 
@@ -45,7 +46,7 @@ public final class IntroScene extends Scene {
         super.init();
         this.alphaInterface = 0.0f;
         this.canChangeTo = SceneType.MAIN_SCENE;
-        this.ArgentumForgeLogo = Surface.INSTANCE.createTexture("argentumforge", true);
+        this.ArgentumForgeLogo = TextureManager.createTexture("gui", "argentumforge");
     }
 
     @Override
@@ -105,7 +106,7 @@ public final class IntroScene extends Scene {
         int x = (org.argentumforge.engine.Window.INSTANCE.getWidth() - imageWidth) / 2;
         int y = (org.argentumforge.engine.Window.INSTANCE.getHeight() - imageHeight) / 2;
 
-        geometryBoxRenderGUI(ArgentumForgeLogo, x, y, imageWidth, imageHeight, alphaInterface);
+        geometryBoxRender(ArgentumForgeLogo, x, y, imageWidth, imageHeight, 0, 0, false, alphaInterface, new RGBColor());
     }
 
     @Override

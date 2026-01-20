@@ -1,8 +1,8 @@
 package org.argentumforge.engine.gui;
 
 import imgui.ImGui;
-import org.argentumforge.engine.renderer.Surface;
 import org.argentumforge.engine.renderer.Texture;
+import org.argentumforge.engine.renderer.TextureManager;
 import org.argentumforge.engine.utils.AssetRegistry;
 import org.argentumforge.engine.utils.inits.BodyData;
 import org.argentumforge.engine.utils.inits.GrhData;
@@ -26,16 +26,23 @@ public final class PreviewUtils {
             return;
         }
 
+        TextureManager.requestTexture(grhIndex); // precargamos
+        Texture tex;
+
+
         int currentGrh = grhIndex;
         if (grhData[grhIndex].getNumFrames() > 1) {
             currentGrh = grhData[grhIndex].getFrame(1); // Frames en AO son 1-indexed
+            tex = TextureManager.getTexture(grhData[grhData[grhIndex].getFrame(1)].getFileNum());
+        } else {
+            tex = TextureManager.getTexture(grhData[grhIndex].getFileNum());
         }
 
         GrhData data = grhData[currentGrh];
         if (data.getFileNum() <= 0)
             return;
 
-        Texture tex = Surface.INSTANCE.getTexture(data.getFileNum());
+
         if (tex == null)
             return;
 
@@ -64,7 +71,9 @@ public final class PreviewUtils {
         if (data.getFileNum() <= 0)
             return;
 
-        Texture tex = Surface.INSTANCE.getTexture(data.getFileNum());
+
+        TextureManager.requestTexture(currentGrh); // precargamos
+        Texture tex = TextureManager.getTexture(grhData[currentGrh].getFileNum());
         if (tex == null)
             return;
 
@@ -142,7 +151,10 @@ public final class PreviewUtils {
                     continue;
 
                 GrhData data = grhData[currentGrh];
-                Texture tex = Surface.INSTANCE.getTexture(data.getFileNum());
+
+                TextureManager.requestTexture(currentGrh); // precargamos
+                Texture tex = TextureManager.getTexture(grhData[currentGrh].getFileNum());
+
                 if (tex != null) {
                     float u0 = data.getsX() / (float) tex.getTex_width();
                     float v0 = (data.getsY() + data.getPixelHeight()) / (float) tex.getTex_height();
@@ -216,7 +228,10 @@ public final class PreviewUtils {
             return;
 
         GrhData data = grhData[frameIndex];
-        Texture tex = Surface.INSTANCE.getTexture(data.getFileNum());
+
+        TextureManager.requestTexture(grhIndex); // precargamos
+        Texture tex = TextureManager.getTexture(grhData[frameIndex].getFileNum());
+
         if (tex == null)
             return;
 

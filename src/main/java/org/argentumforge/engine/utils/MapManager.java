@@ -3,7 +3,6 @@ package org.argentumforge.engine.utils;
 import org.argentumforge.engine.game.Options;
 import org.argentumforge.engine.game.models.Character;
 import org.argentumforge.engine.game.models.Direction;
-import org.argentumforge.engine.renderer.Surface;
 import org.argentumforge.engine.utils.inits.*;
 import org.tinylog.Logger;
 import java.io.*;
@@ -327,7 +326,7 @@ public final class MapManager {
         }
 
         // Limpiar recursos de renderizado y entidades anteriores
-        Surface.INSTANCE.deleteAllTextures();
+        //Surface.INSTANCE.deleteAllTextures();
         eraseAllChars();
     }
 
