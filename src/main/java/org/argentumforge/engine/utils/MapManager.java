@@ -3,6 +3,8 @@ package org.argentumforge.engine.utils;
 import org.argentumforge.engine.game.Options;
 import org.argentumforge.engine.game.models.Character;
 import org.argentumforge.engine.game.models.Direction;
+import org.argentumforge.engine.gui.ImGUISystem;
+import org.argentumforge.engine.gui.forms.FMessage;
 import org.argentumforge.engine.utils.inits.*;
 import org.tinylog.Logger;
 import java.io.*;
@@ -187,11 +189,10 @@ public final class MapManager {
             markAsSaved();
 
             Logger.info("Mapa guardado exitosamente en: {}", filePath);
-            javax.swing.JOptionPane.showMessageDialog(null, "Mapa guardado correctamente.");
+            ImGUISystem.INSTANCE.show(new FMessage("Mapa guardado correctamente."));
         } catch (IOException e) {
             Logger.error(e, "Error al guardar el mapa en: {}", filePath);
-            javax.swing.JOptionPane.showMessageDialog(null, "Error al guardar el mapa:\n" + e.getMessage(), "Error",
-                    javax.swing.JOptionPane.ERROR_MESSAGE);
+            ImGUISystem.INSTANCE.show(new FMessage("Error al guardar el mapa:\n" + e.getMessage()));
         }
     }
 

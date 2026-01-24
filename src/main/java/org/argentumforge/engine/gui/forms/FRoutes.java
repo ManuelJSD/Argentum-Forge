@@ -6,11 +6,14 @@ import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImString;
 import org.argentumforge.engine.game.Options;
+import org.argentumforge.engine.gui.widgets.ImGuiFolderPicker;
 
-import javax.swing.*;
+
 import java.io.File;
 
 public class FRoutes extends Form {
+    private ImGuiFolderPicker folderPicker;
+    private ImString pendingTarget;
 
     private final Options options = Options.INSTANCE;
     private final ImString graphicsPath = new ImString(options.getGraphicsPath(), 256);
@@ -20,7 +23,6 @@ public class FRoutes extends Form {
 
     @Override
     public void render() {
-        ImGui.setNextWindowFocus();
         ImGui.setNextWindowSize(400, 220, ImGuiCond.Always);
 
         if (ImGui.begin(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.paths.title"),
@@ -47,45 +49,46 @@ public class FRoutes extends Form {
                 this.close();
             }
 
+
             ImGui.end();
+
+
+            if (folderPicker != null && folderPicker.isOpen()) {
+                folderPicker.render();
+
+                File selected = folderPicker.getSelectedDir();
+                if (selected != null && pendingTarget != null) {
+                    pendingTarget.set(selected.getAbsolutePath());
+                    pendingTarget = null;
+                    folderPicker = null;
+                }
+            }
+
         }
     }
 
     private void renderPathSelector(String label, ImString path) {
         ImGui.text(label);
         ImGui.pushID(label);
-        if (ImGui.inputText("##" + label, path, ImGuiInputTextFlags.ReadOnly)) {
-            // Read only field
-        }
+
+        ImGui.pushItemWidth(280);
+        ImGui.inputText("##path", path, ImGuiInputTextFlags.ReadOnly);
+        ImGui.popItemWidth();
+
         ImGui.sameLine();
+
         if (ImGui.button("...")) {
-            String selectedPath = selectFolder(path.get());
-            if (selectedPath != null) {
-                path.set(selectedPath);
-            }
+            File startDir =
+                    (path.get() != null && !path.get().isEmpty())
+                            ? new File(path.get())
+                            : new File(System.getProperty("user.home"));
+
+            folderPicker = new ImGuiFolderPicker(startDir);
+            folderPicker.open();
+            pendingTarget = path;
         }
+
         ImGui.popID();
-    }
-
-    private String selectFolder(String currentPath) {
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-
-        // Solo establecer directorio actual si la ruta no está vacía y existe
-        if (currentPath != null && !currentPath.isEmpty()) {
-            File dir = new File(currentPath);
-            if (dir.exists() && dir.isDirectory()) {
-                fileChooser.setCurrentDirectory(dir);
-            }
-        }
-
-        fileChooser.setDialogTitle(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.paths.selectFolder"));
-
-        int result = fileChooser.showOpenDialog(null);
-        if (result == JFileChooser.APPROVE_OPTION) {
-            return fileChooser.getSelectedFile().getAbsolutePath();
-        }
-        return null;
     }
 
 }

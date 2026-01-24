@@ -5,11 +5,12 @@ plugins {
     id 'com.diffplug.spotless' version '6.25.0'
 }
 
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
-    }
-}
+// Lo quito porque sino no puedo testiar en macOS xDDDD
+// java {
+//    toolchain {
+//        languageVersion = JavaLanguageVersion.of(17)
+//    }
+//}
 
 // dependencyLocking {
 //     lockAllConfigurations()

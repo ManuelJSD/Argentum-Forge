@@ -6,6 +6,8 @@ import imgui.flag.*;
 import org.argentumforge.engine.Window;
 import org.argentumforge.engine.game.console.Console;
 import org.argentumforge.engine.gui.ImGUISystem;
+import org.argentumforge.engine.gui.widgets.ImGuiFilePicker;
+import org.argentumforge.engine.gui.widgets.ImGuiFolderPicker;
 import org.argentumforge.engine.renderer.RenderSettings;
 import org.argentumforge.engine.gui.Theme;
 import org.argentumforge.engine.utils.editor.*;
@@ -22,6 +24,9 @@ import org.argentumforge.engine.listeners.MouseListener;
 import org.argentumforge.engine.scenes.GameScene;
 import org.argentumforge.engine.listeners.EditorInputManager;
 import org.argentumforge.engine.scenes.Camera;
+
+import java.io.File;
+
 import static org.lwjgl.glfw.GLFW.*;
 
 /**
@@ -31,6 +36,21 @@ import static org.lwjgl.glfw.GLFW.*;
  */
 
 public final class FMain extends Form {
+
+    private File pendingFile;
+
+    private enum PendingAction {
+        SAVE_MAP,
+        EXPORT_MAP
+    }
+
+    private PendingAction pendingAction;
+    private boolean showOverwritePopup = false;
+
+    private ImGuiFilePicker openMapPicker;
+    private ImGuiFolderPicker saveMapPicker;
+    private ImGuiFolderPicker exportMapPicker;
+
 
     private static final int TRANSPARENT_COLOR = Theme.TRANSPARENT;
 
@@ -63,6 +83,7 @@ public final class FMain extends Form {
     @Override
     public void render() {
         drawMenuBar();
+        renderFilePickers();
         drawTabs();
         this.renderFPS();
         this.drawButtons();
@@ -93,7 +114,122 @@ public final class FMain extends Form {
                         String.format("%.0f%%", org.argentumforge.engine.utils.editor.MinimapColorGenerator.progress));
             }
             ImGui.endPopup();
+
         }
+    }
+
+    private void renderFilePickers() {
+
+        // OPEN MAP
+        if (openMapPicker != null && openMapPicker.isOpen()) {
+            openMapPicker.render();
+
+            if (openMapPicker.hasResult()) {
+                File f = openMapPicker.getSelectedFile();
+                options.addRecentMap(f.getAbsolutePath());
+                options.setLastMapPath(f.getParent());
+                options.save();
+
+                org.argentumforge.engine.utils.MapManager.loadMap(f.getAbsolutePath());
+                openMapPicker = null;
+            }
+        }
+
+        // SAVE MAP
+        if (saveMapPicker != null && saveMapPicker.isOpen()) {
+            saveMapPicker.render();
+
+            File f = saveMapPicker.getResultFile();
+            if (f != null) {
+                pendingFile = f;
+                pendingAction = PendingAction.SAVE_MAP;
+
+                if (f.exists()) {
+                    showOverwritePopup = true;
+                } else {
+                    org.argentumforge.engine.utils.GameData.saveMap(f.getAbsolutePath());
+                    options.setLastMapPath(f.getParent());
+                    options.save();
+                }
+
+                saveMapPicker = null;
+            }
+        }
+
+        // EXPORT MAP
+        if (exportMapPicker != null && exportMapPicker.isOpen()) {
+            exportMapPicker.render();
+
+            File f = exportMapPicker.getResultFile();
+            if (f != null) {
+                pendingFile = f;
+                pendingAction = PendingAction.EXPORT_MAP;
+
+                if (f.exists()) {
+                    showOverwritePopup = true;
+                } else {
+                    org.argentumforge.engine.utils.MapExporter.exportMap(f.getAbsolutePath());
+                }
+
+                exportMapPicker = null;
+            }
+        }
+
+        confirmOverwrite();
+    }
+
+    private void confirmOverwrite() {
+        if (showOverwritePopup) {
+            ImGui.openPopup("ConfirmOverwrite");
+            showOverwritePopup = false;
+        }
+
+        if (ImGui.beginPopupModal("ConfirmOverwrite",
+                ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoMove)) {
+
+            ImGui.text("El archivo ya existe.");
+            ImGui.text("¿Desea reemplazarlo?");
+            ImGui.separator();
+
+            if (ImGui.button("Reemplazar", 120, 0)) {
+
+                if (pendingAction == PendingAction.SAVE_MAP) {
+                    org.argentumforge.engine.utils.GameData.saveMap(pendingFile.getAbsolutePath());
+                    options.setLastMapPath(pendingFile.getParent());
+                    options.save();
+                }
+
+                if (pendingAction == PendingAction.EXPORT_MAP) {
+                    org.argentumforge.engine.utils.MapExporter.exportMap(pendingFile.getAbsolutePath());
+                }
+
+                pendingFile = null;
+                ImGui.closeCurrentPopup();
+            }
+
+            ImGui.sameLine();
+
+            if (ImGui.button("Cancelar", 120, 0)) {
+                pendingFile = null;
+                ImGui.closeCurrentPopup();
+            }
+
+            ImGui.endPopup();
+        }
+    }
+
+    private File getLastMapDir() {
+        String last = options.getLastMapPath();
+        return (last != null && !last.isEmpty())
+                ? new File(last)
+                : new File(System.getProperty("user.home"));
+    }
+
+    private File ensureExtension(File f, String ext) {
+        if (!f.getName().toLowerCase().endsWith("." + ext)) {
+            return new File(f.getAbsolutePath() + "." + ext);
+        }
+        return f;
     }
 
     private void drawTabs() {
@@ -310,8 +446,14 @@ public final class FMain extends Form {
                 ImGui.separator();
 
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.file.open"))) {
-                    this.loadMapAction();
+                    File startDir = getLastMapDir();
+                    openMapPicker = new ImGuiFilePicker(startDir, "map");
+                    openMapPicker.open();
                 }
+
+//                if (ImGui.menuItem(I18n.INSTANCE.get("menu.file.open"))) {
+//                    this.loadMapAction();
+//                }
 
                 if (ImGui.beginMenu(I18n.INSTANCE.get("menu.file.recent"))) {
                     java.util.List<String> recentMaps = options.getRecentMaps();
@@ -330,22 +472,44 @@ public final class FMain extends Form {
                 }
 
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.file.save"))) {
-                    org.argentumforge.engine.utils.MapFileUtils.saveMap();
+                    String defaultName = org.argentumforge.engine.utils.GameData
+                            .getActiveContext()
+                            .getMapName();
+
+                    saveMapPicker = new ImGuiFolderPicker(
+                            getLastMapDir(),
+                            defaultName,
+                            "map"
+                    );
+                    saveMapPicker.open();
                 }
 
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.file.export"))) {
-                    javax.swing.JFileChooser fileChooser = new javax.swing.JFileChooser();
-                    fileChooser.setDialogTitle("Exportar Mapa como Imagen");
-                    fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Imagen PNG", "png"));
-                    if (fileChooser.showSaveDialog(null) == javax.swing.JFileChooser.APPROVE_OPTION) {
-                        String path = fileChooser.getSelectedFile().getAbsolutePath();
-                        if (!path.toLowerCase().endsWith(".png")) {
-                            path += ".png";
-                        }
-                        org.argentumforge.engine.utils.MapExporter.exportMap(path);
-                        javax.swing.JOptionPane.showMessageDialog(null, "Mapa exportado correctamente a:\n" + path);
-                    }
+                    String defaultName = org.argentumforge.engine.utils.GameData
+                            .getActiveContext()
+                            .getMapName();
+
+                    exportMapPicker = new ImGuiFolderPicker(
+                            getLastMapDir(),
+                            defaultName,
+                            "png"
+                    );
+                    exportMapPicker.open();
                 }
+
+//                if (ImGui.menuItem(I18n.INSTANCE.get("menu.file.export"))) {
+//                    javax.swing.JFileChooser fileChooser = new javax.swing.JFileChooser();
+//                    fileChooser.setDialogTitle("Exportar Mapa como Imagen");
+//                    fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Imagen PNG", "png"));
+//                    if (fileChooser.showSaveDialog(null) == javax.swing.JFileChooser.APPROVE_OPTION) {
+//                        String path = fileChooser.getSelectedFile().getAbsolutePath();
+//                        if (!path.toLowerCase().endsWith(".png")) {
+//                            path += ".png";
+//                        }
+//                        org.argentumforge.engine.utils.MapExporter.exportMap(path);
+//                        javax.swing.JOptionPane.showMessageDialog(null, "Mapa exportado correctamente a:\n" + path);
+//                    }
+//                }
 
                 ImGui.separator();
 
@@ -636,9 +800,6 @@ public final class FMain extends Form {
 
     }
 
-    private void loadMapAction() {
-        org.argentumforge.engine.utils.MapFileUtils.openAndLoadMap();
-    }
 
     private void newMap() {
         org.argentumforge.engine.utils.MapManager.createEmptyMap(100, 100);

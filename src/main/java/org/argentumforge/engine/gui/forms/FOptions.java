@@ -3,7 +3,6 @@ package org.argentumforge.engine.gui.forms;
 import imgui.ImGui;
 import imgui.flag.ImGuiCond;
 import imgui.flag.ImGuiWindowFlags;
-import org.argentumforge.engine.Window;
 import static org.argentumforge.engine.audio.Sound.*;
 import static org.argentumforge.engine.utils.GameData.options;
 

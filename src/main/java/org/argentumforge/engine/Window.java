@@ -233,7 +233,6 @@ public enum Window {
             glViewport(0, 0, fWidth.get(0), fHeight.get(0));
         }
 
-        glOrtho(0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 1, -1);
         glEnable(GL_ALPHA);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_BLEND);
@@ -312,15 +311,6 @@ public enum Window {
             glfwGetFramebufferSize(window, fWidth, fHeight);
             glViewport(0, 0, fWidth.get(0), fHeight.get(0));
         }
-
-        // Configurar matriz de proyección
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-        glOrtho(0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 1, -1);
-
-        // Resetear matriz de modelo-vista
-        glMatrixMode(GL_MODELVIEW);
-        glLoadIdentity();
 
         renderer.updateProjection(0, SCREEN_WIDTH, SCREEN_HEIGHT, 0);
     }

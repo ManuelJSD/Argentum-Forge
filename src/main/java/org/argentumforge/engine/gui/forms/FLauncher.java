@@ -7,9 +7,11 @@ import org.argentumforge.engine.Engine;
 import org.argentumforge.engine.Window;
 import org.argentumforge.engine.game.User;
 import org.argentumforge.engine.game.models.Direction;
+import org.argentumforge.engine.gui.widgets.ImGuiFilePicker;
 import org.argentumforge.engine.gui.widgets.ImageButton3State;
 import org.argentumforge.engine.utils.GameData;
 
+import java.io.File;
 import java.io.IOException;
 
 import static org.argentumforge.engine.utils.GameData.charList;
@@ -20,6 +22,7 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_ENTER;
  * Maneja la creación de nuevos mapas, carga de existentes y salida.
  */
 public final class FLauncher extends Form {
+    private ImGuiFilePicker mapPicker;
 
     // Botones de menú principal
     private ImageButton3State btnNuevoMapa;
@@ -124,6 +127,23 @@ public final class FLauncher extends Form {
         ImGui.textColored(0.7f, 0.7f, 0.7f, 1.0f, version);
 
         ImGui.end();
+
+        if (mapPicker != null && mapPicker.isOpen()) {
+            mapPicker.render();
+
+            if (mapPicker.hasResult()) {
+                File map = mapPicker.getSelectedFile();
+
+                org.argentumforge.engine.game.Options.INSTANCE
+                        .setLastMapPath(map.getParent());
+                org.argentumforge.engine.game.Options.INSTANCE.save();
+
+                GameData.loadMap(map.getAbsolutePath());
+                simulateEditorConnection(false);
+
+                mapPicker = null;
+            }
+        }
     }
 
     private void buttonConnect() {
@@ -131,10 +151,16 @@ public final class FLauncher extends Form {
     }
 
     private void buttonLoadMapAction() {
-        if (org.argentumforge.engine.utils.MapFileUtils.openAndLoadMap()) {
-            simulateEditorConnection(false);
+        File startDir = null;
+        String last = org.argentumforge.engine.game.Options.INSTANCE.getLastMapPath();
+        if (last != null && !last.isEmpty()) {
+            startDir = new File(last);
         }
+
+        mapPicker = new ImGuiFilePicker(startDir, "map");
+        mapPicker.open();
     }
+
 
     private void simulateEditorConnection(boolean newMap) {
         User user = User.INSTANCE;

@@ -21,8 +21,6 @@ import org.tinylog.Logger;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static org.argentumforge.engine.Window.SCREEN_HEIGHT;
-import static org.argentumforge.engine.Window.SCREEN_WIDTH;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL12.GL_CLAMP_TO_EDGE;
 
