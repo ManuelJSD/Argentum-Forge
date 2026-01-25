@@ -1,5 +1,7 @@
 package org.argentumforge.engine.utils;
 
+import imgui.ImGui;
+import imgui.flag.ImGuiWindowFlags;
 import org.argentumforge.engine.game.Options;
 import org.argentumforge.engine.game.models.Character;
 import org.argentumforge.engine.game.models.Direction;
@@ -21,8 +23,28 @@ import static org.argentumforge.engine.game.models.Character.eraseAllChars;
  */
 public final class MapManager {
 
+    private static boolean askUnsavedPopup = false;
+    private static Runnable onConfirmExit = null;
+    private static MapContext pendingCloseContext;
+
     private MapManager() {
         // Clase de utilidad
+    }
+
+    public static void requestCloseContext(
+            org.argentumforge.engine.utils.MapContext context) {
+
+        if (!context.isModified()) {
+            GameData.closeMap(context);
+            return;
+        }
+
+        pendingCloseContext = context;
+
+        requestCheckUnsavedChanges(() -> {
+            GameData.closeMap(pendingCloseContext);
+            pendingCloseContext = null;
+        });
     }
 
     /**
@@ -55,37 +77,56 @@ public final class MapManager {
         }
     }
 
-    /**
-     * Verifica si hay cambios sin guardar y pregunta al usuario si desea continuar.
-     * 
-     * @return true si es seguro continuar, false si el usuario canceló.
-     */
-    public static boolean checkUnsavedChanges() {
-        if (!hasUnsavedChanges())
+
+    public static boolean requestCheckUnsavedChanges(Runnable onConfirm) {
+        if (!hasUnsavedChanges()) {
+            onConfirm.run();
             return true;
+        }
 
-        int result = javax.swing.JOptionPane.showConfirmDialog(
-                null,
-                "Hay cambios sin guardar en el mapa actual.\n¿Desea guardarlos antes de continuar?",
-                "Cambios sin guardar",
-                javax.swing.JOptionPane.YES_NO_CANCEL_OPTION,
-                javax.swing.JOptionPane.WARNING_MESSAGE);
+        askUnsavedPopup = true;
+        onConfirmExit = onConfirm;
+        return false;
+    }
 
-        if (result == javax.swing.JOptionPane.YES_OPTION) {
-            // Intentar guardar en la última ruta conocida
-            String lastPath = org.argentumforge.engine.game.Options.INSTANCE.getLastMapPath();
-            if (lastPath != null && !lastPath.isEmpty() && new java.io.File(lastPath).exists()) {
-                saveMap(lastPath);
-                return true;
-            } else {
-                javax.swing.JOptionPane.showMessageDialog(null,
-                        "No se pudo autoguardar. Por favor, guarde el mapa manualmente.");
-                return false;
+    public static void renderUnsavedChangesPopup() {
+        if (!askUnsavedPopup) return;
+
+        ImGui.openPopup("UnsavedChanges");
+        askUnsavedPopup = false;
+    }
+
+    public static void drawUnsavedChangesPopup() {
+        if (ImGui.beginPopupModal("UnsavedChanges",
+                ImGuiWindowFlags.AlwaysAutoResize)) {
+
+            ImGui.text("Hay cambios sin guardar en el mapa actual.");
+            ImGui.text("¿Desea guardarlos antes de continuar?");
+            ImGui.separator();
+
+            if (ImGui.button("Guardar")) {
+                String lastPath = Options.INSTANCE.getLastMapPath();
+                if (lastPath != null && !lastPath.isEmpty()) {
+                    saveMap(lastPath);
+                    if (onConfirmExit != null) onConfirmExit.run();
+                }
+                ImGui.closeCurrentPopup();
             }
-        } else if (result == javax.swing.JOptionPane.NO_OPTION) {
-            return true; // Descartar cambios
-        } else {
-            return false; // Cancelar
+
+            ImGui.sameLine();
+
+            if (ImGui.button("No guardar")) {
+                if (onConfirmExit != null) onConfirmExit.run();
+                ImGui.closeCurrentPopup();
+            }
+
+            ImGui.sameLine();
+
+            if (ImGui.button("Cancelar")) {
+                ImGui.closeCurrentPopup();
+            }
+
+            ImGui.endPopup();
         }
     }
 

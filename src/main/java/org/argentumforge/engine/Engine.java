@@ -8,6 +8,7 @@ import org.argentumforge.engine.renderer.Renderer;
 import org.argentumforge.engine.renderer.TextureManager;
 import org.argentumforge.engine.scenes.*;
 import org.argentumforge.engine.utils.GameData;
+import org.argentumforge.engine.utils.MapManager;
 import org.argentumforge.engine.utils.Platform;
 import org.argentumforge.engine.utils.Time;
 import org.lwjgl.Version;
@@ -56,11 +57,10 @@ public final class Engine {
      * salir.
      */
     public static void closeClient() {
-        if (!org.argentumforge.engine.utils.MapManager.checkUnsavedChanges()) {
-            return;
-        }
-        options.save();
-        prgRun = false;
+        MapManager.requestCheckUnsavedChanges(() -> {
+            options.save();
+            prgRun = false;
+        });
     }
 
     /**
