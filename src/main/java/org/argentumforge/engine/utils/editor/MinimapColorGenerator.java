@@ -1,6 +1,8 @@
 package org.argentumforge.engine.utils.editor;
 
 import org.argentumforge.engine.game.Options;
+import org.argentumforge.engine.gui.ImGUISystem;
+import org.argentumforge.engine.gui.forms.FMessage;
 import org.argentumforge.engine.utils.AssetRegistry;
 import org.argentumforge.engine.utils.inits.GrhData;
 import org.tinylog.Logger;
@@ -104,10 +106,9 @@ public class MinimapColorGenerator {
                 }
 
                 Logger.info("Generacion completada. {} colores guardados.", processed);
-                javax.swing.JOptionPane.showMessageDialog(null,
-                        "Se generaron los colores del minimapa exitosamente.\nArchivo guardado en: "
-                                + outputPath.toAbsolutePath(),
-                        "Generador de Minimapa", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+
+                ImGUISystem.INSTANCE.show(new FMessage("Se generaron los colores del minimapa exitosamente.\nArchivo guardado en: "
+                        + outputPath.toAbsolutePath()));
 
             } catch (IOException e) {
                 Logger.error(e, "Error al generar minimap.bin");

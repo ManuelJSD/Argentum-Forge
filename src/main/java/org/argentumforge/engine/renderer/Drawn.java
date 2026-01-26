@@ -2,13 +2,10 @@ package org.argentumforge.engine.renderer;
 
 import org.argentumforge.engine.utils.inits.GrhInfo;
 
-import static org.argentumforge.engine.Engine.batch;
+import static org.argentumforge.engine.Engine.renderer;
 import static org.argentumforge.engine.scenes.Camera.TILE_PIXEL_SIZE;
 import static org.argentumforge.engine.utils.AssetRegistry.grhData;
 import static org.argentumforge.engine.utils.Time.deltaTime;
-import org.argentumforge.engine.Engine;
-
-import static org.lwjgl.opengl.GL11.*;
 
 /**
  * <p>
@@ -53,12 +50,29 @@ public final class Drawn {
      */
     public static void geometryBoxRender(int grh_index, int x, int y, int src_width, int src_height, float sX, float sY,
             boolean blend, float alpha, RGBColor color) {
+
+        /*
+            TODO: Hago esto porque sino tengo que leer 3kk de lineas de codigo para precargar cada textura que se desea
+            dibujar.
+
+            En fin, hay que optimizar nuestro TextureManager para liberar la memoria y quitar texturas que no seran
+            dibujadas. Esto del TextureManager y la precarga se debe hacer porque en OpenGL Moderno, tenemos que
+            prepararlas antes de dibujar porque sino se glitchean las texturas.
+         */
+        TextureManager.requestTexture(grhData[grh_index].getFileNum()); // TODO: test
+
         geometryBoxRender(grh_index, x, y, src_width, src_height, sX, sY, blend, alpha, color, 1.0f, 1.0f);
     }
 
     public static void geometryBoxRender(int grh_index, int x, int y, int src_width, int src_height, float sX, float sY,
             boolean blend, float alpha, RGBColor color, float scaleX, float scaleY) {
-        final Texture texture = Surface.INSTANCE.getTexture(grhData[grh_index].getFileNum());
+
+        // hay que precargar todas las texturas xd....
+        TextureManager.requestTexture(grh_index); // test
+
+        Texture tex = TextureManager.getTexture(grhData[grh_index].getFileNum());
+        if (tex == null) return; // todavía no está lista
+
         float globalScale = org.argentumforge.engine.scenes.Camera.getZoomScale();
 
         // Ajustar Y para que el escalado sea desde abajo (pivot bottom-center o
@@ -99,8 +113,7 @@ public final class Drawn {
         // PERO 'y' aquí ya viene calculado desde drawTexture.
         // Aplicaré el scale directo.
 
-        batch.draw(texture, x, y - heightDiff, sX, sY, src_width, src_height, drawWidth, drawHeight, blend, alpha,
-                color);
+        renderer.draw(tex, x, y - heightDiff, sX, sY, src_width, src_height, drawWidth, drawHeight, blend, alpha, color);
     }
 
     /**
@@ -108,9 +121,11 @@ public final class Drawn {
      */
     public static void geometryBoxRender(Texture texture, int x, int y, int src_width, int src_height, float sX,
             float sY, boolean blend, float alpha, RGBColor color) {
+
         float scale = org.argentumforge.engine.scenes.Camera.getZoomScale();
-        batch.draw(texture, x, y, sX, sY, src_width, src_height, src_width * scale, src_height * scale, blend, alpha,
-                color);
+
+        if (texture == null) return;
+        renderer.draw(texture, x, y, sX, sY, src_width, src_height, src_width * scale, src_height * scale, blend, alpha, color);
     }
 
     /**
@@ -180,210 +195,5 @@ public final class Drawn {
                 grhData[grhIndex].getsY(), false, alpha, color);
     }
 
-    /**
-     * ===============================================================
-     * Dibujado sin batch (lo hago para el frmCrearPersonaje).
-     * ===============================================================
-     */
-
-    /**
-     * Dibuja una textura en la pantalla
-     */
-    public static void drawTextureNoBatch(GrhInfo grh, int x, int y, boolean center, boolean animate, boolean blend,
-            float alpha, RGBColor color) {
-        if (grh.getGrhIndex() == 0 || grhData[grh.getGrhIndex()].getNumFrames() == 0)
-            return;
-        if (animate && grh.isStarted()) {
-            grh.setFrameCounter(
-                    grh.getFrameCounter() + (deltaTime * grhData[grh.getGrhIndex()].getNumFrames() / grh.getSpeed()));
-            if (grh.getFrameCounter() > grhData[grh.getGrhIndex()].getNumFrames()) {
-                grh.setFrameCounter((grh.getFrameCounter() % grhData[grh.getGrhIndex()].getNumFrames()) + 1);
-                if (grh.getLoops() != -1) {
-                    if (grh.getLoops() > 0)
-                        grh.setLoops(grh.getLoops() - 1);
-                    else
-                        grh.setStarted(false);
-                }
-            }
-        }
-
-        final int currentGrhIndex = grhData[grh.getGrhIndex()].getFrame((int) (grh.getFrameCounter()));
-
-        if (center) {
-            if (grhData[currentGrhIndex].getTileWidth() != 1)
-                x = x - (int) (grhData[currentGrhIndex].getTileWidth() * TILE_PIXEL_SIZE / 2) + TILE_PIXEL_SIZE / 2;
-            if (grhData[currentGrhIndex].getTileHeight() != 1)
-                y = y - (int) (grhData[currentGrhIndex].getTileHeight() * TILE_PIXEL_SIZE) + TILE_PIXEL_SIZE;
-        }
-
-        if (currentGrhIndex == 0 || grhData[currentGrhIndex].getFileNum() == 0)
-            return;
-
-        geometryBoxRenderNoBatch(currentGrhIndex, x, y,
-                grhData[currentGrhIndex].getPixelWidth(),
-                grhData[currentGrhIndex].getPixelHeight(),
-                grhData[currentGrhIndex].getsX(),
-                grhData[currentGrhIndex].getsY(), blend, alpha, color);
-    }
-
-    /**
-     * Dibujamos sin animacion
-     */
-    public static void drawGrhIndexNoBatch(int grhIndex, int x, int y, RGBColor color) {
-        if (color == null)
-            color = new RGBColor(1.0f, 1.0f, 1.0f);
-        geometryBoxRenderNoBatch(grhIndex, x, y,
-                grhData[grhIndex].getPixelWidth(),
-                grhData[grhIndex].getPixelHeight(),
-                grhData[grhIndex].getsX(),
-                grhData[grhIndex].getsY(), false, 1.0f, color);
-    }
-
-    public static void geometryBoxRenderNoBatch(int grh_index, int x, int y, int src_width, int src_height, float sX,
-            float sY, boolean blend, float alpha, RGBColor color) {
-        if (blend)
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-
-        final Texture texture = Surface.INSTANCE.getTexture(grhData[grh_index].getFileNum());
-        final float src_right = sX + src_width;
-        final float src_bottom = sY + src_height;
-
-        texture.bind();
-        glBegin(GL_QUADS);
-
-        {
-            float scale = org.argentumforge.engine.scenes.Camera.getZoomScale();
-            float dWidth = src_width * scale;
-            float dHeight = src_height * scale;
-
-            // 0----0
-            // | |
-            // 1----0
-            glColor4f(color.getRed(), color.getGreen(), color.getBlue(), alpha);
-            glTexCoord2f(sX / texture.getTex_width(), (src_bottom) / texture.getTex_height());
-            glVertex2d(x, y + dHeight);
-
-            // 1----0
-            // | |
-            // 0----0
-            glColor4f(color.getRed(), color.getGreen(), color.getBlue(), alpha);
-            glTexCoord2f(sX / texture.getTex_width(), sY / texture.getTex_height());
-            glVertex2d(x, y);
-
-            // 0----1
-            // | |
-            // 0----0
-            glColor4f(color.getRed(), color.getGreen(), color.getBlue(), alpha);
-            glTexCoord2f((src_right) / texture.getTex_width(), sY / texture.getTex_height());
-            glVertex2d(x + dWidth, y);
-
-            // 0----0
-            // | |
-            // 0----1
-            glColor4f(color.getRed(), color.getGreen(), color.getBlue(), alpha);
-            glTexCoord2f((src_right) / texture.getTex_width(), (src_bottom) / texture.getTex_height());
-            glVertex2d(x + dWidth, y + dHeight);
-        }
-
-        texture.unbind();
-        glEnd();
-
-        if (blend)
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    }
-
-    public static void geometryBoxRenderGUI(Texture texture, int x, int y, float alpha) {
-        texture.bind();
-        glBegin(GL_QUADS);
-
-        {
-            // 0----0
-            // | |,
-            // 1----0
-            glColor4f(1.0f, 1.0f, 1.0f, alpha);
-            glTexCoord2f(0, 1);
-            glVertex2d(x, y + texture.getTex_height());
-
-            // 1----0
-            // | |
-            // 0----0
-            glColor4f(1.0f, 1.0f, 1.0f, alpha);
-            glTexCoord2f(0, 0);
-            glVertex2d(x, y);
-
-            // 0----1
-            // | |
-            // 0----0
-            glColor4f(1.0f, 1.0f, 1.0f, alpha);
-            glTexCoord2f(1, 0);
-            glVertex2d(x + texture.getTex_width(), y);
-
-            // 0----0
-            // | |
-            // 0----1
-            glColor4f(1.0f, 1.0f, 1.0f, alpha);
-            glTexCoord2f(1, 1);
-            glVertex2d(x + texture.getTex_width(), y + texture.getTex_height());
-        }
-
-        texture.unbind();
-        glEnd();
-    }
-
-    /**
-     * Versión sobrecargada que permite especificar ancho y alto personalizados.
-     * Útil para escalar texturas a diferentes tamaños de ventana.
-     */
-    public static void geometryBoxRenderGUI(Texture texture, int x, int y, int width, int height, float alpha) {
-        texture.bind();
-        glBegin(GL_QUADS);
-
-        {
-            // 0----0
-            // | |
-            // 1----0
-            glColor4f(1.0f, 1.0f, 1.0f, alpha);
-            glTexCoord2f(0, 1);
-            glVertex2d(x, y + height);
-
-            // 1----0
-            // | |
-            // 0----0
-            glColor4f(1.0f, 1.0f, 1.0f, alpha);
-            glTexCoord2f(0, 0);
-            glVertex2d(x, y);
-
-            // 0----1
-            // | |
-            // 0----0
-            glColor4f(1.0f, 1.0f, 1.0f, alpha);
-            glTexCoord2f(1, 0);
-            glVertex2d(x + width, y);
-
-            // 0----0
-            // | |
-            // 0----1
-            glColor4f(1.0f, 1.0f, 1.0f, alpha);
-            glTexCoord2f(1, 1);
-            glVertex2d(x + width, y + height);
-        }
-
-        texture.unbind();
-        glEnd();
-    }
-
-    /**
-     * Dibuja un rectángulo de color sólido sin textura.
-     * Útil para overlays y efectos visuales.
-     */
-    /**
-     * Dibuja un rectángulo coloreado en pantalla utilizando el sistema de batching.
-     */
-    public static void drawColoredRect(int x, int y, int width, int height, RGBColor color, float alpha) {
-        if (color == null) {
-            color = new RGBColor(1.0f, 1.0f, 1.0f);
-        }
-        Engine.batch.draw(Surface.INSTANCE.getWhiteTexture(), x, y, 0, 0, 1, 1, width, height, true, alpha, color);
-    }
 
 }

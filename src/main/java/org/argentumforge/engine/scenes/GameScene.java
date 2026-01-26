@@ -8,12 +8,11 @@ import org.argentumforge.engine.gui.forms.FMain;
 
 import org.argentumforge.engine.listeners.MouseListener;
 import org.argentumforge.engine.listeners.EditorInputManager;
-import org.argentumforge.engine.renderer.RenderSettings;
+import org.argentumforge.engine.renderer.*;
 import org.argentumforge.engine.utils.editor.Surface;
 import org.argentumforge.engine.utils.editor.Npc;
 import org.argentumforge.engine.utils.editor.Obj;
 import org.argentumforge.engine.utils.editor.Selection;
-import org.argentumforge.engine.renderer.Texture;
 import org.argentumforge.engine.Engine;
 
 import org.argentumforge.engine.game.models.Character;
@@ -21,9 +20,7 @@ import org.argentumforge.engine.utils.AssetRegistry;
 import org.argentumforge.engine.utils.inits.NpcData;
 import org.argentumforge.engine.utils.inits.ObjData;
 
-import org.argentumforge.engine.renderer.Drawn;
-import org.argentumforge.engine.renderer.MapRenderer;
-
+import static org.argentumforge.engine.Engine.renderer;
 import static org.argentumforge.engine.utils.Time.timerTicksPerFrame;
 
 import static org.argentumforge.engine.game.IntervalTimer.INT_SENTRPU;
@@ -32,7 +29,7 @@ import static org.argentumforge.engine.renderer.Drawn.drawGrhIndex;
 import static org.argentumforge.engine.scenes.Camera.*;
 import static org.argentumforge.engine.utils.GameData.*;
 import static org.argentumforge.engine.utils.AssetRegistry.*;
-import org.argentumforge.engine.renderer.RGBColor;
+
 import org.argentumforge.engine.utils.editor.Selection.SelectedEntity;
 
 /**
@@ -101,7 +98,7 @@ public final class GameScene extends Scene {
         mapRenderer = new MapRenderer(camera);
         inputManager = new EditorInputManager(camera);
 
-        whiteTexture = org.argentumforge.engine.renderer.Surface.INSTANCE.getWhiteTexture();
+        whiteTexture = TextureManager.getWhiteTexture();
 
         ImGUISystem.INSTANCE.addFrm(frmMain);
     }
@@ -276,9 +273,7 @@ public final class GameScene extends Scene {
                         + (sTileY - camera.getMinY() + camera.getMinYOffset() - TILE_BUFFER_SIZE) * TILE_PIXEL_SIZE
                         + pixelOffsetY;
 
-                Engine.batch.draw(whiteTexture, screenX, screenY, 0, 0, 1, 1, TILE_PIXEL_SIZE, TILE_PIXEL_SIZE, true,
-                        0.2f,
-                        new RGBColor(0.0f, 1.0f, 0.0f));
+                renderer.draw(whiteTexture, screenX, screenY, 0, 0, 1, 1, TILE_PIXEL_SIZE, TILE_PIXEL_SIZE, true, 0.2f, new RGBColor(0f, 1f, 0f));
             }
         }
 
@@ -330,9 +325,9 @@ public final class GameScene extends Scene {
                             + (dragTileY - camera.getMinY() + camera.getMinYOffset() - TILE_BUFFER_SIZE)
                                     * TILE_PIXEL_SIZE
                             + pixelOffsetY;
-                    Engine.batch.draw(whiteTexture, screenX, screenY, 0, 0, 1, 1, TILE_PIXEL_SIZE, TILE_PIXEL_SIZE,
-                            true,
-                            0.3f, new RGBColor(1.0f, 1.0f, 1.0f));
+
+
+                    renderer.draw(whiteTexture, screenX, screenY, 0, 0, 1, 1, TILE_PIXEL_SIZE, TILE_PIXEL_SIZE, true, 0.3f, new RGBColor(1f, 1f, 1f));
                 }
             }
         }
@@ -355,11 +350,11 @@ public final class GameScene extends Scene {
             int screenY = POS_SCREEN_Y
                     + (minY - camera.getMinY() + camera.getMinYOffset() - TILE_BUFFER_SIZE) * TILE_PIXEL_SIZE
                     + pixelOffsetY;
+
             int width = (maxX - minX + 1) * TILE_PIXEL_SIZE;
             int height = (maxY - minY + 1) * TILE_PIXEL_SIZE;
 
-            Engine.batch.draw(whiteTexture, screenX, screenY, 0, 0, 1, 1, width, height, true, 0.3f,
-                    new RGBColor(0.2f, 0.5f, 1.0f));
+            renderer.draw(whiteTexture, screenX, screenY, 0, 0, 1, 1, width, height, true, 0.3f, new RGBColor(0.2f, 0.5f, 1.0f));
         }
     }
 

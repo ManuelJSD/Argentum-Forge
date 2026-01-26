@@ -264,7 +264,7 @@ public enum Options {
         return recentMaps;
     }
 
-    private void addRecentMap(String path) {
+    public void addRecentMap(String path) {
         if (path == null || path.isEmpty())
             return;
         recentMaps.remove(path);

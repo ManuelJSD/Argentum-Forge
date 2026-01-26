@@ -7,6 +7,7 @@ import imgui.type.ImString;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import org.argentumforge.engine.game.Options;
+import org.argentumforge.engine.gui.widgets.ImGuiFolderPicker;
 import org.argentumforge.engine.i18n.I18n;
 import org.argentumforge.engine.utils.FileChooserUtil;
 
@@ -17,6 +18,9 @@ import java.io.File;
  * Guía al usuario a través de la configuración de rutas y preferencias básicas.
  */
 public final class FSetupWizard extends Form {
+
+    private ImGuiFolderPicker folderPicker;
+    private ImString pendingPathTarget;
 
     private static final int STEP_WELCOME = 0;
     private static final int STEP_ROUTES = 1;
@@ -173,6 +177,7 @@ public final class FSetupWizard extends Form {
             ImGui.separator();
             renderNavigation();
         }
+
         ImGui.end();
 
         // Detectar si el usuario cerró la ventana con la X
@@ -184,6 +189,17 @@ public final class FSetupWizard extends Form {
             } else {
                 // Durante ejecución manual, simplemente cerrar
                 this.close();
+            }
+        }
+
+        if (folderPicker != null && folderPicker.isOpen()) {
+            folderPicker.render();
+
+            File selected = folderPicker.getSelectedDir();
+            if (selected != null && pendingPathTarget != null) {
+                pendingPathTarget.set(selected.getAbsolutePath());
+                pendingPathTarget = null;
+                folderPicker = null;
             }
         }
     }
@@ -212,12 +228,18 @@ public final class FSetupWizard extends Form {
         ImGui.inputText("##" + labelKey, pathField);
         ImGui.popItemWidth();
         ImGui.sameLine();
-        if (ImGui.button(I18n.INSTANCE.get("wizard.routes.browse") + "##" + labelKey, 60, 0)) {
-            String selected = FileChooserUtil.selectFolder(I18n.INSTANCE.get(labelKey));
-            if (selected != null) {
-                pathField.set(selected);
-            }
+
+
+        if (ImGui.button(I18n.INSTANCE.get("wizard.routes.browse") + "##" + labelKey)) {
+            folderPicker = new ImGuiFolderPicker(
+                    pathField.get().isEmpty()
+                            ? new File(System.getProperty("user.home"))
+                            : new File(pathField.get())
+            );
+            folderPicker.open();
+            pendingPathTarget = pathField;
         }
+
         ImGui.spacing();
     }
 

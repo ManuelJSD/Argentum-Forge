@@ -8,6 +8,7 @@ import imgui.flag.ImGuiTableFlags;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import org.argentumforge.engine.gui.PreviewUtils;
+import org.argentumforge.engine.renderer.TextureManager;
 import org.argentumforge.engine.utils.editor.Surface;
 import org.argentumforge.engine.utils.AssetRegistry;
 import org.argentumforge.engine.utils.inits.GrhData;
@@ -319,7 +320,10 @@ public class FSurfaceEditor extends Form {
 
                     int currentGrh = data.getNumFrames() > 1 ? data.getFrame(0) : i;
                     GrhData frameData = AssetRegistry.grhData[currentGrh];
-                    Texture tex = org.argentumforge.engine.renderer.Surface.INSTANCE.getTexture(frameData.getFileNum());
+
+                    TextureManager.requestTexture(currentGrh); // precargamos
+                    Texture tex = TextureManager.getTexture(AssetRegistry.grhData[currentGrh].getFileNum());
+
 
                     boolean isSelected = (selectedGrhIndex == i);
                     if (isSelected)

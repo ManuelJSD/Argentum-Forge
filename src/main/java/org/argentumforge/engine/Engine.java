@@ -4,10 +4,12 @@ import org.argentumforge.engine.audio.Sound;
 import org.argentumforge.engine.gui.ImGUISystem;
 import org.argentumforge.engine.listeners.KeyHandler;
 import org.argentumforge.engine.listeners.MouseListener;
-import org.argentumforge.engine.renderer.BatchRenderer;
-import org.argentumforge.engine.renderer.Surface;
+import org.argentumforge.engine.renderer.Renderer;
+import org.argentumforge.engine.renderer.TextureManager;
 import org.argentumforge.engine.scenes.*;
 import org.argentumforge.engine.utils.GameData;
+import org.argentumforge.engine.utils.MapManager;
+import org.argentumforge.engine.utils.Platform;
 import org.argentumforge.engine.utils.Time;
 import org.lwjgl.Version;
 import org.tinylog.Logger;
@@ -38,8 +40,10 @@ public final class Engine {
     private final ImGUISystem guiSystem = ImGUISystem.INSTANCE;
     /** Escena actual que esta siendo renderizada y actualizada en el motor. */
     private static Scene currentScene;
-    /** Renderizador por lotes para el dibujado eficiente de graficos. */
-    public static BatchRenderer batch;
+
+    // Renderizado >.<
+    public static Renderer renderer;
+
     /** Flag que indica si el motor está esperando la configuración inicial. */
     private static boolean isWaitingForSetup = false;
 
@@ -53,21 +57,24 @@ public final class Engine {
      * salir.
      */
     public static void closeClient() {
-        if (!org.argentumforge.engine.utils.MapManager.checkUnsavedChanges()) {
-            return;
-        }
-        options.save();
-        prgRun = false;
+        MapManager.requestCheckUnsavedChanges(() -> {
+            options.save();
+            prgRun = false;
+        });
     }
 
     /**
      * Inicializa los componentes esenciales del motor grafico.
      */
     public void init() {
+        Platform.init(); // What SO are we using?
+
         Logger.info("Starting LWJGL {}!", Version.getVersion());
         Logger.info("Running on {} / v{} [{}]", System.getProperty("os.name"), System.getProperty("os.version"),
                 System.getProperty("os.arch"));
         Logger.info("Java version: {}", System.getProperty("java.version"));
+
+
 
         // IMPORTANTE: Verificar primera ejecución ANTES de GameData.init()
         // porque GameData.init() llama a options.load() que crea el archivo
@@ -79,6 +86,7 @@ public final class Engine {
         if (firstRun) {
             window.init();
             guiSystem.init();
+
 
             org.argentumforge.engine.gui.forms.FSetupWizard wizard = new org.argentumforge.engine.gui.forms.FSetupWizard(
                     this::completeInitialization, true);
@@ -107,8 +115,7 @@ public final class Engine {
             GameData.init(); // Recargar con las rutas configuradas
         }
 
-        Surface.INSTANCE.init();
-        batch = new BatchRenderer();
+        renderer = new Renderer();
 
         // Solo verificar recursos si NO acabamos de completar el wizard
         // (el wizard ya configuró las rutas correctamente)
@@ -118,7 +125,6 @@ public final class Engine {
 
         changeScene(INTRO_SCENE);
         isWaitingForSetup = false;
-        // playMusic("intro.ogg");
     }
 
     /**
@@ -158,6 +164,8 @@ public final class Engine {
             glfwPollEvents();
 
             if (!window.isMinimized()) {
+                TextureManager.processPending();
+
                 // Solo procesar escena si existe (puede ser null mientras se muestra el wizard)
                 if (currentScene != null) {
                     glClearColor(currentScene.getBackground().getRed(), currentScene.getBackground().getGreen(),
@@ -234,11 +242,10 @@ public final class Engine {
         if (!currentScene.isVisible())
             changeScene(currentScene.getChangeScene());
 
-        batch.begin();
         currentScene.mouseEvents();
         currentScene.keyEvents();
-        currentScene.render();
-        batch.end();
+        renderer.render(currentScene);
+
         guiSystem.renderGUI();
 
         Sound.renderMusic();

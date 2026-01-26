@@ -2,6 +2,7 @@ package org.argentumforge.engine;
 
 import org.argentumforge.engine.listeners.KeyHandler;
 import org.argentumforge.engine.listeners.MouseListener;
+import org.argentumforge.engine.utils.Platform;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWImage;
 import org.lwjgl.glfw.GLFWVidMode;
@@ -16,6 +17,8 @@ import org.lwjgl.system.MemoryStack;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
+import static org.argentumforge.engine.Engine.renderer;
+import static org.argentumforge.engine.scenes.Camera.updateConstants;
 import static org.argentumforge.engine.utils.GameData.options;
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
@@ -85,7 +88,7 @@ public enum Window {
         // Actualizar las constantes estáticas con los valores de las opciones
         SCREEN_WIDTH = this.width;
         SCREEN_HEIGHT = this.height;
-        org.argentumforge.engine.scenes.Camera.updateConstants();
+        updateConstants();
 
         // Setup an error callback
         GLFWErrorCallback.createPrint(System.err).set();
@@ -97,17 +100,16 @@ public enum Window {
         // Configure GLFW
         glfwDefaultWindowHints();
 
-        // Sacamos esto por ahora, sino no va a ser compatible con linux. Habria que
-        // testiar en MacOS
-        // glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-        // glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
-        // glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-        // glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-
-        glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-        glfwWindowHint(GLFW_MAXIMIZED, GLFW_FALSE);
-        glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
+        // GLFW config for MacOS.
+        if (Platform.isMac()) {
+            glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+            glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+        } else { // Windows or linux.
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+        }
 
         // Create the window
         window = glfwCreateWindow(this.width, this.height, this.title,
@@ -116,7 +118,10 @@ public enum Window {
         if (window == NULL)
             throw new IllegalStateException("Failed to create the GLFW window.");
 
-        loadIcon();
+        // Not available in MacOs, this is implemented differently.
+        if (!Platform.isMac()) {
+            loadIcon();
+        }
 
         glfwSetCursorPosCallback(window, MouseListener::mousePosCallback);
         glfwSetMouseButtonCallback(window, MouseListener::mouseButtonCallback);
@@ -220,9 +225,6 @@ public enum Window {
         // Inicializa OpenGL
         GL.createCapabilities();
 
-        glEnable(GL_TEXTURE_2D);
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-
         // Usar framebuffer size para viewport correcto en HiDPI
         try (MemoryStack stack = stackPush()) {
             IntBuffer fWidth = stack.mallocInt(1);
@@ -231,11 +233,7 @@ public enum Window {
             glViewport(0, 0, fWidth.get(0), fHeight.get(0));
         }
 
-        glOrtho(0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 1, -1);
-
-        glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
         glEnable(GL_ALPHA);
-
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_BLEND);
         glDisable(GL_DEPTH_TEST);
@@ -275,7 +273,7 @@ public enum Window {
         SCREEN_HEIGHT = height;
 
         // Actualizar constantes de camara
-        org.argentumforge.engine.scenes.Camera.updateConstants();
+        updateConstants();
 
         // Actualizar ventana GLFW
         glfwSetWindowSize(window, width, height);
@@ -314,14 +312,7 @@ public enum Window {
             glViewport(0, 0, fWidth.get(0), fHeight.get(0));
         }
 
-        // Configurar matriz de proyección
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-        glOrtho(0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 1, -1);
-
-        // Resetear matriz de modelo-vista
-        glMatrixMode(GL_MODELVIEW);
-        glLoadIdentity();
+        renderer.updateProjection(0, SCREEN_WIDTH, SCREEN_HEIGHT, 0);
     }
 
     public void toggleWindow() {

@@ -10,8 +10,10 @@ import org.lwjgl.system.MemoryStack;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
+import static org.argentumforge.engine.Engine.renderer;
 import static org.argentumforge.engine.game.models.Character.drawCharacter;
 import static org.argentumforge.engine.renderer.Drawn.drawTexture;
+import static org.argentumforge.engine.renderer.Renderer.batch;
 import static org.argentumforge.engine.utils.GameData.mapData;
 import static org.argentumforge.engine.utils.AssetRegistry.grhData;
 
@@ -78,9 +80,9 @@ public class MapExporter {
         glClearColor(0, 0, 0, 1);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        Engine.batch.begin();
+        renderer.beginOffscreen(pixelWidth, pixelHeight);
         renderMapContent(mapWidth, mapHeight);
-        Engine.batch.end();
+        renderer.endOffscreen();
 
         // Leer Píxeles
         ByteBuffer buffer = BufferUtils.createByteBuffer(pixelWidth * pixelHeight * 4);
