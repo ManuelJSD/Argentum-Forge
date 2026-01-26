@@ -14,10 +14,10 @@ import static org.argentumforge.engine.utils.GameData.mapData;
  */
 public class NpcChangeCommand implements Command {
     private final int x, y;
-    private final short oldNpcIndex;
-    private final short newNpcIndex;
+    private final int oldNpcIndex;
+    private final int newNpcIndex;
 
-    public NpcChangeCommand(int x, int y, short oldNpcIndex, short newNpcIndex) {
+    public NpcChangeCommand(int x, int y, int oldNpcIndex, int newNpcIndex) {
         this.x = x;
         this.y = y;
         this.oldNpcIndex = oldNpcIndex;
@@ -34,9 +34,9 @@ public class NpcChangeCommand implements Command {
         apply(oldNpcIndex);
     }
 
-    private void apply(short npcIndex) {
+    private void apply(int npcIndex) {
         // Borrar visual actual
-        short currentChar = mapData[x][y].getCharIndex();
+        short currentChar = GameData.mapData[x][y].getCharIndex();
         if (currentChar != 0) {
             Character.eraseChar(currentChar);
         }
@@ -44,9 +44,9 @@ public class NpcChangeCommand implements Command {
         // Actualizar dato mapa
         mapData[x][y].setNpcIndex(npcIndex);
 
-        // Crear nueva visual si corresponde
-        if (npcIndex > 0 && AssetRegistry.npcs.containsKey((int) npcIndex)) {
-            NpcData data = AssetRegistry.npcs.get((int) npcIndex);
+        // Create nueva visual si corresponde
+        if (npcIndex > 0 && AssetRegistry.npcs.containsKey(npcIndex)) {
+            NpcData data = AssetRegistry.npcs.get(npcIndex);
             for (short i = 1; i < GameData.charList.length; i++) {
                 if (!GameData.charList[i].isActive()) {
                     Character.makeChar(i, data.getBody(), data.getHead(), Direction.DOWN, x, y, 0, 0, 0);

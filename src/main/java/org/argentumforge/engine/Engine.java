@@ -69,56 +69,53 @@ public final class Engine {
                 System.getProperty("os.arch"));
         Logger.info("Java version: {}", System.getProperty("java.version"));
 
-        // IMPORTANTE: Verificar primera ejecución ANTES de GameData.init()
-        // porque GameData.init() llama a options.load() que crea el archivo
-        boolean firstRun = options.isFirstRun();
+        // Cargar perfiles
+        org.argentumforge.engine.utils.ProfileManager.INSTANCE.load();
+        boolean hasProfiles = org.argentumforge.engine.utils.ProfileManager.INSTANCE.hasProfiles();
 
-        GameData.init();
+        // Inicializar Window y GUI siempre
+        window.init();
+        guiSystem.init();
 
-        // Si es primera ejecución, mostrar wizard
-        if (firstRun) {
-            window.init();
-            guiSystem.init();
+        // Inicializar idioma por defecto (Español) para que la UI tenga texto
+        // Posteriormente, al cargar el perfil, se recargará el idioma configurado si es
+        // distinto
+        org.argentumforge.engine.i18n.I18n.INSTANCE.loadLanguage("es_ES");
 
+        if (!hasProfiles) {
+            // Primera ejecución global: Wizard de creación
             org.argentumforge.engine.gui.forms.FSetupWizard wizard = new org.argentumforge.engine.gui.forms.FSetupWizard(
                     this::completeInitialization, true);
             ImGUISystem.INSTANCE.show(wizard);
-
-            isWaitingForSetup = true;
-            return;
+        } else {
+            // Ya existen perfiles: Selector
+            org.argentumforge.engine.gui.forms.FProfileSelector selector = new org.argentumforge.engine.gui.forms.FProfileSelector(
+                    this::completeInitialization);
+            ImGUISystem.INSTANCE.show(selector);
         }
 
-        completeInitialization();
+        isWaitingForSetup = true;
     }
 
     /**
-     * Completa la inicialización después del wizard o si no es primera ejecución.
+     * Completa la inicialización después del wizard o selector de perfil.
      */
     private void completeInitialization() {
-        boolean justCompletedWizard = isWaitingForSetup;
-
-        if (!isWaitingForSetup) {
-            window.init();
-            guiSystem.init();
-        }
-
-        // Si acabamos de completar el wizard, recargar recursos con las nuevas rutas
-        if (justCompletedWizard) {
-            GameData.init(); // Recargar con las rutas configuradas
-        }
+        // En este punto, GameData ya ha sido inicializado por el formulario
+        // correspondiente
+        // y Window/GUI ya están inicializados por init()
+        GameData.init();
 
         Surface.INSTANCE.init();
         batch = new BatchRenderer();
 
-        // Solo verificar recursos si NO acabamos de completar el wizard
-        // (el wizard ya configuró las rutas correctamente)
-        if (!justCompletedWizard && !GameData.checkResources()) {
+        // Verificar recursos cargados
+        if (!GameData.checkResources()) {
             ImGUISystem.INSTANCE.show(new org.argentumforge.engine.gui.forms.FRoutes());
         }
 
         changeScene(INTRO_SCENE);
         isWaitingForSetup = false;
-        // playMusic("intro.ogg");
     }
 
     /**

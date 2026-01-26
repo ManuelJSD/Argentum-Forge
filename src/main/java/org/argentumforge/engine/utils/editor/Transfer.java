@@ -108,27 +108,27 @@ public class Transfer {
             }
 
             // Aplicar traslado mediante comando (con soporte para undo/redo)
-            short oldMap = mapData[x][y].getExitMap();
-            short oldX = mapData[x][y].getExitX();
-            short oldY = mapData[x][y].getExitY();
+            int oldMap = mapData[x][y].getExitMap();
+            int oldX = mapData[x][y].getExitX();
+            int oldY = mapData[x][y].getExitY();
 
-            if (oldMap != (short) finalMap || oldX != (short) finalX || oldY != (short) finalY) {
+            if (oldMap != finalMap || oldX != finalX || oldY != finalY) {
                 org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
                         new org.argentumforge.engine.utils.editor.commands.TransferChangeCommand(x, y,
                                 oldMap, oldX, oldY,
-                                (short) finalMap, (short) finalX, (short) finalY));
+                                finalMap, finalX, finalY));
             }
         } else {
             // Modo quitar
-            short oldMap = mapData[x][y].getExitMap();
-            short oldX = mapData[x][y].getExitX();
-            short oldY = mapData[x][y].getExitY();
+            int oldMap = mapData[x][y].getExitMap();
+            int oldX = mapData[x][y].getExitX();
+            int oldY = mapData[x][y].getExitY();
 
             if (oldMap != 0) {
                 org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
                         new org.argentumforge.engine.utils.editor.commands.TransferChangeCommand(x, y,
                                 oldMap, oldX, oldY,
-                                (short) 0, (short) 0, (short) 0));
+                                0, 0, 0));
             }
         }
     }
@@ -164,7 +164,7 @@ public class Transfer {
         if (north >= 0) {
             for (int x = 1; x <= 100; x++) {
                 for (int y = 1; y <= BORDER_TOP; y++) {
-                    applyAutoTransfer(x, y, north, (short) (north == 0 ? 0 : x), (short) (north == 0 ? 0 : 90));
+                    applyAutoTransfer(x, y, north, (north == 0 ? 0 : x), (north == 0 ? 0 : 90));
                     changed = true;
                 }
             }
@@ -174,7 +174,7 @@ public class Transfer {
         if (south >= 0) {
             for (int x = 1; x <= 100; x++) {
                 for (int y = BORDER_BOTTOM; y <= 100; y++) {
-                    applyAutoTransfer(x, y, south, (short) (south == 0 ? 0 : x), (short) (south == 0 ? 0 : 11));
+                    applyAutoTransfer(x, y, south, (south == 0 ? 0 : x), (south == 0 ? 0 : 11));
                     changed = true;
                 }
             }
@@ -184,7 +184,7 @@ public class Transfer {
         if (east >= 0) {
             for (int x = BORDER_RIGHT; x <= 100; x++) {
                 for (int y = 1; y <= 100; y++) {
-                    applyAutoTransfer(x, y, east, (short) (east == 0 ? 0 : 12), (short) (east == 0 ? 0 : y));
+                    applyAutoTransfer(x, y, east, (east == 0 ? 0 : 12), (east == 0 ? 0 : y));
                     changed = true;
                 }
             }
@@ -194,7 +194,7 @@ public class Transfer {
         if (west >= 0) {
             for (int x = 1; x <= BORDER_LEFT; x++) {
                 for (int y = 1; y <= 100; y++) {
-                    applyAutoTransfer(x, y, west, (short) (west == 0 ? 0 : 91), (short) (west == 0 ? 0 : y));
+                    applyAutoTransfer(x, y, west, (west == 0 ? 0 : 91), (west == 0 ? 0 : y));
                     changed = true;
                 }
             }
@@ -212,15 +212,15 @@ public class Transfer {
      * Aplica un traslado automáticamente si es diferente al actual.
      */
     private void applyAutoTransfer(int x, int y, int destMap, int destX, int destY) {
-        short oldMap = mapData[x][y].getExitMap();
-        short oldX = mapData[x][y].getExitX();
-        short oldY = mapData[x][y].getExitY();
+        int oldMap = mapData[x][y].getExitMap();
+        int oldX = mapData[x][y].getExitX();
+        int oldY = mapData[x][y].getExitY();
 
-        if (oldMap != (short) destMap || oldX != (short) destX || oldY != (short) destY) {
+        if (oldMap != destMap || oldX != destX || oldY != destY) {
             org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
                     new org.argentumforge.engine.utils.editor.commands.TransferChangeCommand(x, y,
                             oldMap, oldX, oldY,
-                            (short) destMap, (short) destX, (short) destY));
+                            destMap, destX, destY));
         }
     }
 

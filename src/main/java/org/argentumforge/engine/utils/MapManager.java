@@ -256,41 +256,88 @@ public final class MapManager {
         GameData.reader.init(data);
 
         GameData.mapData = new MapData[GameData.X_MAX_MAP_SIZE + 1][GameData.Y_MAX_MAP_SIZE + 1];
+        for (int y = 0; y <= GameData.Y_MAX_MAP_SIZE; y++) {
+            for (int x = 0; x <= GameData.X_MAX_MAP_SIZE; x++) {
+                GameData.mapData[x][y] = new MapData();
+            }
+        }
 
         // Leer versión y saltar cabecera heredada de VB6
+        if (!GameData.reader.hasRemaining(2))
+            return;
         final short mapversion = GameData.reader.readShort();
-        GameData.reader.skipBytes(263);
+
+        // Debug logging for AOLibre analysis
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < Math.min(data.length, 32); i++) { // Más bytes para ver firma
+            sb.append(String.format("%02X ", data[i]));
+        }
+        Logger.info("Mapa: tamaño={}, versión={}, bytes=[{}]", data.length, mapversion, sb.toString().trim());
+
+        if (GameData.reader.hasRemaining(263)) {
+            GameData.reader.skipBytes(263);
+        }
+
+        // Detectar si el mapa usa índices de 4 bytes (AOLibre/Versiones nuevas)
+        // Por defecto 2 bytes (short). Los mapas de AOLibre versión 136 suelen ser de 4
+        // bytes.
+        boolean useLongIndices = false;
+
+        // Si la versión es conocida para 4 bytes (ej: 7 en algunos mods específicos,
+        // 136 en AOLibre)
+        // o si el archivo es masivamente grande (AOLibre suele pesar >50KB para
+        // 100x100).
+        if (mapversion == 7 || mapversion == 10 || mapversion == 136) {
+            useLongIndices = true;
+            Logger.info("Detectado mapa AOLibre (V:{}), usando índices de 4 bytes.", mapversion);
+        } else if (data.length > 50000) {
+            useLongIndices = true;
+            Logger.info("Buffer de mapa indicativo de AOLibre por tamaño ({}), usando 4 bytes.", data.length);
+        }
 
         byte byflags;
         byte bloq;
+        int indexSize = useLongIndices ? 4 : 2;
 
         // Saltar campos no utilizados en el editor
-        GameData.reader.readShort();
-        GameData.reader.readShort();
-        GameData.reader.readShort();
-        GameData.reader.readShort();
+        if (GameData.reader.hasRemaining(8)) {
+            GameData.reader.readShort();
+            GameData.reader.readShort();
+            GameData.reader.readShort();
+            GameData.reader.readShort();
+        }
 
-        GameData.mapData[0][0] = new MapData();
-
-        for (int y = 1; y <= 100; y++) {
+        tileLoop: for (int y = 1; y <= 100; y++) {
             for (int x = 1; x <= 100; x++) {
-                GameData.mapData[x][y] = new MapData();
+                if (!GameData.reader.hasRemaining(1))
+                    break tileLoop;
 
+                int currentPos = GameData.reader.getPosition();
                 byflags = GameData.reader.readByte();
+
+                if (y == 1 && x <= 5) {
+                    Logger.info("DEBUG Tile ({},{}): Pos={}, Flags={}", x, y, currentPos, byflags);
+                }
 
                 // Bit 1: Bloqueo
                 bloq = (byte) (byflags & 1);
                 GameData.mapData[x][y].setBlocked(bloq == 1);
 
                 // Capa 1 (Siempre presente)
-                GameData.mapData[x][y].getLayer(1).setGrhIndex(GameData.reader.readShort());
+                if (!GameData.reader.hasRemaining(indexSize))
+                    break tileLoop;
+                int grh1 = useLongIndices ? GameData.reader.readInt() : GameData.reader.readUnsignedShort();
+                GameData.mapData[x][y].getLayer(1).setGrhIndex(grh1);
                 GameData.mapData[x][y].setLayer(1,
                         GameData.initGrh(GameData.mapData[x][y].getLayer(1),
                                 GameData.mapData[x][y].getLayer(1).getGrhIndex(), true));
 
                 // Capa 2
                 if ((byte) (byflags & 2) != 0) {
-                    GameData.mapData[x][y].getLayer(2).setGrhIndex(GameData.reader.readShort());
+                    if (!GameData.reader.hasRemaining(indexSize))
+                        break tileLoop;
+                    int grh2 = useLongIndices ? GameData.reader.readInt() : GameData.reader.readUnsignedShort();
+                    GameData.mapData[x][y].getLayer(2).setGrhIndex(grh2);
                     GameData.mapData[x][y].setLayer(2,
                             GameData.initGrh(GameData.mapData[x][y].getLayer(2),
                                     GameData.mapData[x][y].getLayer(2).getGrhIndex(), true));
@@ -300,7 +347,10 @@ public final class MapManager {
 
                 // Capa 3
                 if ((byte) (byflags & 4) != 0) {
-                    GameData.mapData[x][y].getLayer(3).setGrhIndex(GameData.reader.readShort());
+                    if (!GameData.reader.hasRemaining(indexSize))
+                        break tileLoop;
+                    int grh3 = useLongIndices ? GameData.reader.readInt() : GameData.reader.readUnsignedShort();
+                    GameData.mapData[x][y].getLayer(3).setGrhIndex(grh3);
                     GameData.mapData[x][y].setLayer(3,
                             GameData.initGrh(GameData.mapData[x][y].getLayer(3),
                                     GameData.mapData[x][y].getLayer(3).getGrhIndex(), true));
@@ -309,7 +359,10 @@ public final class MapManager {
 
                 // Capa 4
                 if ((byte) (byflags & 8) != 0) {
-                    GameData.mapData[x][y].getLayer(4).setGrhIndex(GameData.reader.readShort());
+                    if (!GameData.reader.hasRemaining(indexSize))
+                        break tileLoop;
+                    int grh4 = useLongIndices ? GameData.reader.readInt() : GameData.reader.readUnsignedShort();
+                    GameData.mapData[x][y].getLayer(4).setGrhIndex(grh4);
                     GameData.mapData[x][y].setLayer(4,
                             GameData.initGrh(GameData.mapData[x][y].getLayer(4),
                                     GameData.mapData[x][y].getLayer(4).getGrhIndex(), true));
@@ -317,10 +370,20 @@ public final class MapManager {
                     GameData.mapData[x][y].getLayer(4).setGrhIndex(0);
 
                 // Triggers
-                if ((byte) (byflags & 16) != 0)
-                    GameData.mapData[x][y].setTrigger(GameData.reader.readShort());
-                else
+                if ((byte) (byflags & 16) != 0) {
+                    if (!GameData.reader.hasRemaining(2))
+                        break tileLoop;
+                    GameData.mapData[x][y].setTrigger(GameData.reader.readUnsignedShort());
+                } else
                     GameData.mapData[x][y].setTrigger(0);
+
+                // Bit 32: Partículas (AOLibre/Versiones nuevas)
+                if ((byte) (byflags & 32) != 0) {
+                    // Según código VB6 (^[GS]^): Get FreeFileMap, , TempInt (As Integer = 2 bytes)
+                    if (!GameData.reader.hasRemaining(2))
+                        break tileLoop;
+                    GameData.reader.readShort();
+                }
 
                 GameData.mapData[x][y].getObjGrh().setGrhIndex(0);
             }
@@ -411,24 +474,24 @@ public final class MapManager {
                     if (!GameData.reader.hasRemaining())
                         break;
 
+                    if (GameData.mapData[x][y] == null)
+                        continue;
+
                     byte flags = GameData.reader.readByte();
 
                     // Bit 1: Traslados (Exits)
                     if ((flags & 1) != 0) {
-                        GameData.mapData[x][y].setExitMap(GameData.reader.readShort());
-                        GameData.mapData[x][y].setExitX(GameData.reader.readShort());
-                        GameData.mapData[x][y].setExitY(GameData.reader.readShort());
+                        GameData.mapData[x][y].setExitMap(GameData.reader.readUnsignedShort());
+                        GameData.mapData[x][y].setExitX(GameData.reader.readUnsignedShort());
+                        GameData.mapData[x][y].setExitY(GameData.reader.readUnsignedShort());
                     }
 
                     // Bit 2: NPCs
                     if ((flags & 2) != 0) {
-                        short npcIndex = GameData.reader.readShort();
-                        if (npcIndex < 0)
-                            npcIndex = 0;
-
+                        int npcIndex = GameData.reader.readUnsignedShort();
                         if (npcIndex > 0) {
-                            GameData.mapData[x][y].setNpcIndex(npcIndex);
-                            NpcData npc = AssetRegistry.npcs.get((int) npcIndex);
+                            GameData.mapData[x][y].setNpcIndex((short) npcIndex);
+                            NpcData npc = AssetRegistry.npcs.get(npcIndex);
                             if (npc != null) {
                                 Character.makeChar(GameData.nextOpenChar(), npc.getBody(), npc.getHead(),
                                         Direction.fromID(npc.getHeading()), x, y, 0, 0, 0);
@@ -438,8 +501,8 @@ public final class MapManager {
 
                     // Bit 4: Objetos
                     if ((flags & 4) != 0) {
-                        int objIndex = GameData.reader.readShort();
-                        int amount = GameData.reader.readShort();
+                        int objIndex = GameData.reader.readUnsignedShort();
+                        int amount = GameData.reader.readUnsignedShort();
 
                         GameData.mapData[x][y].setObjIndex(objIndex);
                         GameData.mapData[x][y].setObjAmount(amount);
@@ -511,7 +574,7 @@ public final class MapManager {
                     if ((flags & 8) != 0)
                         bodyBuf.putShort((short) GameData.mapData[x][y].getLayer(4).getGrhIndex());
                     if ((flags & 16) != 0)
-                        bodyBuf.putShort(GameData.mapData[x][y].getTrigger());
+                        bodyBuf.putShort((short) GameData.mapData[x][y].getTrigger());
                 }
             }
 
@@ -575,12 +638,12 @@ public final class MapManager {
                     bodyBuf.put(flags);
 
                     if ((flags & 1) != 0) {
-                        bodyBuf.putShort(GameData.mapData[x][y].getExitMap());
-                        bodyBuf.putShort(GameData.mapData[x][y].getExitX());
-                        bodyBuf.putShort(GameData.mapData[x][y].getExitY());
+                        bodyBuf.putShort((short) GameData.mapData[x][y].getExitMap());
+                        bodyBuf.putShort((short) GameData.mapData[x][y].getExitX());
+                        bodyBuf.putShort((short) GameData.mapData[x][y].getExitY());
                     }
                     if ((flags & 2) != 0) {
-                        bodyBuf.putShort(GameData.mapData[x][y].getNpcIndex());
+                        bodyBuf.putShort((short) GameData.mapData[x][y].getNpcIndex());
                     }
                     if ((flags & 4) != 0) {
                         bodyBuf.putShort((short) GameData.mapData[x][y].getObjIndex());

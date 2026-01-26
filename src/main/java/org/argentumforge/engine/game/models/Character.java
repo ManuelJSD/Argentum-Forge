@@ -173,7 +173,7 @@ public final class Character {
      */
     public static void eraseAllChars() {
         for (short i = 1; i < charList.length; i++) {
-            if (charList[i].isActive()) {
+            if (charList[i] != null && charList[i].isActive()) {
                 mapData[charList[i].getPos().getX()][charList[i].getPos().getY()].setCharIndex(0);
             }
             resetCharInfo(i);
@@ -195,7 +195,7 @@ public final class Character {
      */
     public static void refreshAllChars() {
         for (int loopC = 1; loopC <= lastChar; loopC++)
-            if (charList[loopC].isActive())
+            if (charList[loopC] != null && charList[loopC].isActive())
                 mapData[charList[loopC].getPos().getX()][charList[loopC].getPos().getY()].setCharIndex(loopC);
     }
 

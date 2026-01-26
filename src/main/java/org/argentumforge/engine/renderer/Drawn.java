@@ -58,6 +58,8 @@ public final class Drawn {
 
     public static void geometryBoxRender(int grh_index, int x, int y, int src_width, int src_height, float sX, float sY,
             boolean blend, float alpha, RGBColor color, float scaleX, float scaleY) {
+        if (grhData == null)
+            return;
         final Texture texture = Surface.INSTANCE.getTexture(grhData[grh_index].getFileNum());
         float globalScale = org.argentumforge.engine.scenes.Camera.getZoomScale();
 
@@ -123,13 +125,19 @@ public final class Drawn {
 
     public static void drawTexture(GrhInfo grh, int x, int y, boolean center, boolean animate, boolean blend,
             float alpha, RGBColor color, float scaleX, float scaleY) {
-        if (grh.getGrhIndex() == 0 || grhData[grh.getGrhIndex()].getNumFrames() == 0)
+        if (grhData == null)
+            return;
+        if (grh.getGrhIndex() <= 0 || grh.getGrhIndex() >= grhData.length || grhData[grh.getGrhIndex()] == null
+                || grhData[grh.getGrhIndex()].getNumFrames() == 0)
             return;
         if (animate && grh.isStarted()) {
+            int gIdx = grh.getGrhIndex();
+            if (gIdx >= grhData.length || grhData[gIdx] == null)
+                return;
             grh.setFrameCounter(
-                    grh.getFrameCounter() + (deltaTime * grhData[grh.getGrhIndex()].getNumFrames() / grh.getSpeed()));
-            if (grh.getFrameCounter() > grhData[grh.getGrhIndex()].getNumFrames()) {
-                grh.setFrameCounter((grh.getFrameCounter() % grhData[grh.getGrhIndex()].getNumFrames()) + 1);
+                    grh.getFrameCounter() + (deltaTime * grhData[gIdx].getNumFrames() / grh.getSpeed()));
+            if (grh.getFrameCounter() > grhData[gIdx].getNumFrames()) {
+                grh.setFrameCounter((grh.getFrameCounter() % grhData[gIdx].getNumFrames()) + 1);
                 if (grh.getLoops() != -1) {
                     if (grh.getLoops() > 0)
                         grh.setLoops(grh.getLoops() - 1);
@@ -139,7 +147,13 @@ public final class Drawn {
             }
         }
 
-        final int currentGrhIndex = grhData[grh.getGrhIndex()].getFrame((int) (grh.getFrameCounter()));
+        int gIdx2 = grh.getGrhIndex();
+        if (gIdx2 >= grhData.length || grhData[gIdx2] == null)
+            return;
+        final int currentGrhIndex = grhData[gIdx2].getFrame((int) (grh.getFrameCounter()));
+
+        if (currentGrhIndex <= 0 || currentGrhIndex >= grhData.length || grhData[currentGrhIndex] == null)
+            return;
 
         if (center) {
             if (grhData[currentGrhIndex].getTileWidth() != 1)
@@ -169,6 +183,8 @@ public final class Drawn {
      * Dibujamos sin animacion con opacidad ajustable
      */
     public static void drawGrhIndex(int grhIndex, int x, int y, float alpha, RGBColor color) {
+        if (grhData == null)
+            return;
         if (grhIndex <= 0 || grhIndex >= grhData.length || grhData[grhIndex] == null)
             return;
         if (color == null)
@@ -191,13 +207,19 @@ public final class Drawn {
      */
     public static void drawTextureNoBatch(GrhInfo grh, int x, int y, boolean center, boolean animate, boolean blend,
             float alpha, RGBColor color) {
-        if (grh.getGrhIndex() == 0 || grhData[grh.getGrhIndex()].getNumFrames() == 0)
+        if (grhData == null)
+            return;
+        if (grh.getGrhIndex() <= 0 || grh.getGrhIndex() >= grhData.length || grhData[grh.getGrhIndex()] == null
+                || grhData[grh.getGrhIndex()].getNumFrames() == 0)
             return;
         if (animate && grh.isStarted()) {
+            int gIdx = grh.getGrhIndex();
+            if (gIdx >= grhData.length || grhData[gIdx] == null)
+                return;
             grh.setFrameCounter(
-                    grh.getFrameCounter() + (deltaTime * grhData[grh.getGrhIndex()].getNumFrames() / grh.getSpeed()));
-            if (grh.getFrameCounter() > grhData[grh.getGrhIndex()].getNumFrames()) {
-                grh.setFrameCounter((grh.getFrameCounter() % grhData[grh.getGrhIndex()].getNumFrames()) + 1);
+                    grh.getFrameCounter() + (deltaTime * grhData[gIdx].getNumFrames() / grh.getSpeed()));
+            if (grh.getFrameCounter() > grhData[gIdx].getNumFrames()) {
+                grh.setFrameCounter((grh.getFrameCounter() % grhData[gIdx].getNumFrames()) + 1);
                 if (grh.getLoops() != -1) {
                     if (grh.getLoops() > 0)
                         grh.setLoops(grh.getLoops() - 1);
@@ -207,7 +229,13 @@ public final class Drawn {
             }
         }
 
-        final int currentGrhIndex = grhData[grh.getGrhIndex()].getFrame((int) (grh.getFrameCounter()));
+        int gIdx2 = grh.getGrhIndex();
+        if (gIdx2 >= grhData.length || grhData[gIdx2] == null)
+            return;
+        final int currentGrhIndex = grhData[gIdx2].getFrame((int) (grh.getFrameCounter()));
+
+        if (currentGrhIndex <= 0 || currentGrhIndex >= grhData.length || grhData[currentGrhIndex] == null)
+            return;
 
         if (center) {
             if (grhData[currentGrhIndex].getTileWidth() != 1)
@@ -241,6 +269,8 @@ public final class Drawn {
 
     public static void geometryBoxRenderNoBatch(int grh_index, int x, int y, int src_width, int src_height, float sX,
             float sY, boolean blend, float alpha, RGBColor color) {
+        if (grhData == null)
+            return;
         if (blend)
             glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 

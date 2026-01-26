@@ -8,10 +8,10 @@ import static org.argentumforge.engine.utils.GameData.initGrh;
  */
 public class SurfaceChangeCommand implements Command {
     private final int x, y;
-    private final short[] oldLayers;
-    private final short[] newLayers;
+    private final int[] oldLayers;
+    private final int[] newLayers;
 
-    public SurfaceChangeCommand(int x, int y, short[] oldLayers, short[] newLayers) {
+    public SurfaceChangeCommand(int x, int y, int[] oldLayers, int[] newLayers) {
         this.x = x;
         this.y = y;
         this.oldLayers = oldLayers;
@@ -28,7 +28,7 @@ public class SurfaceChangeCommand implements Command {
         applyLayers(oldLayers);
     }
 
-    private void applyLayers(short[] layers) {
+    private void applyLayers(int[] layers) {
         if (layers == null)
             return;
         for (int i = 1; i <= 4; i++) {

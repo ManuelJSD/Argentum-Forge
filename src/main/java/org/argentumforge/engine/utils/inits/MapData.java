@@ -14,14 +14,14 @@ public final class MapData {
     private final GrhInfo[] layer = new GrhInfo[5];
     private short charIndex;
     private GrhInfo objGrh;
-    private short npcIndex;
+    private int npcIndex;
     private boolean blocked;
-    private short trigger;
+    private int trigger;
 
     // Tile Exit
-    private short exitMap;
-    private short exitX;
-    private short exitY;
+    private int exitMap;
+    private int exitX;
+    private int exitY;
 
     // Object Info
     private int objIndex;
@@ -59,11 +59,11 @@ public final class MapData {
         this.objGrh = objGrh;
     }
 
-    public short getNpcIndex() {
+    public int getNpcIndex() {
         return npcIndex;
     }
 
-    public void setNpcIndex(short npcIndex) {
+    public void setNpcIndex(int npcIndex) {
         this.npcIndex = npcIndex;
     }
 
@@ -75,36 +75,36 @@ public final class MapData {
         this.blocked = blocked;
     }
 
-    public short getTrigger() {
+    public int getTrigger() {
         return trigger;
     }
 
     public void setTrigger(int trigger) {
-        this.trigger = (short) trigger;
+        this.trigger = trigger;
     }
 
-    public short getExitMap() {
+    public int getExitMap() {
         return exitMap;
     }
 
     public void setExitMap(int exitMap) {
-        this.exitMap = (short) exitMap;
+        this.exitMap = exitMap;
     }
 
-    public short getExitX() {
+    public int getExitX() {
         return exitX;
     }
 
     public void setExitX(int exitX) {
-        this.exitX = (short) exitX;
+        this.exitX = exitX;
     }
 
-    public short getExitY() {
+    public int getExitY() {
         return exitY;
     }
 
     public void setExitY(int exitY) {
-        this.exitY = (short) exitY;
+        this.exitY = exitY;
     }
 
     public int getObjIndex() {

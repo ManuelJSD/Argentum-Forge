@@ -19,16 +19,18 @@ import java.io.File;
 public final class FSetupWizard extends Form {
 
     private static final int STEP_WELCOME = 0;
-    private static final int STEP_ROUTES = 1;
-    private static final int STEP_PREFERENCES = 2;
-    private static final int STEP_MINIMAP = 3;
-    private static final int STEP_CONFIRMATION = 4;
+    private static final int STEP_PROFILE = 1; // Nuevo paso
+    private static final int STEP_ROUTES = 2;
+    private static final int STEP_PREFERENCES = 3;
+    private static final int STEP_MINIMAP = 4;
+    private static final int STEP_CONFIRMATION = 5;
 
     private int currentStep = STEP_WELCOME;
     private final Runnable onComplete;
     private final boolean isFirstRun;
 
     // Campos de configuración
+    private final ImString profileName = new ImString(64); // Nuevo campo
     private final ImString graphicsPath = new ImString(256);
     private final ImString datsPath = new ImString(256);
     private final ImString initsPath = new ImString(256);
@@ -65,37 +67,12 @@ public final class FSetupWizard extends Form {
         this.onComplete = onComplete;
         this.isFirstRun = isFirstRun;
 
-        // Detectar idiomas disponibles en la carpeta lang/
-        java.util.List<String> langList = new java.util.ArrayList<>();
+        // Obtener idiomas disponibles desde I18n (combina locales y defaults)
+        java.util.List<String> langList = I18n.INSTANCE.getAvailableLanguages();
         java.util.List<String> langNameList = new java.util.ArrayList<>();
 
-        java.io.File langDir = new java.io.File("lang");
-        if (langDir.exists() && langDir.isDirectory()) {
-            java.io.File[] files = langDir.listFiles((dir, name) -> name.endsWith(".properties"));
-            if (files != null) {
-                for (java.io.File file : files) {
-                    String fileName = file.getName();
-                    String langCode = fileName.replace(".properties", "");
-                    langList.add(langCode);
-
-                    // Mapear códigos a nombres legibles
-                    String displayName = switch (langCode) {
-                        case "es_ES" -> "Español";
-                        case "en_US" -> "English";
-                        case "pt_BR" -> "Português (Brasil)";
-                        default -> langCode; // Fallback al código si no está mapeado
-                    };
-                    langNameList.add(displayName);
-                }
-            }
-        }
-
-        // Si no se encontraron idiomas, usar fallback
-        if (langList.isEmpty()) {
-            langList.add("es_ES");
-            langList.add("en_US");
-            langNameList.add("Español");
-            langNameList.add("English");
+        for (String langCode : langList) {
+            langNameList.add(I18n.INSTANCE.getLanguageName(langCode));
         }
 
         this.languages = langList.toArray(new String[0]);
@@ -138,10 +115,11 @@ public final class FSetupWizard extends Form {
         // Tamaño adaptativo según el paso actual
         int windowHeight = switch (currentStep) {
             case STEP_WELCOME -> 250;
+            case STEP_PROFILE -> 200;
             case STEP_ROUTES -> 350;
             case STEP_PREFERENCES -> 420;
             case STEP_MINIMAP -> 320;
-            case STEP_CONFIRMATION -> 380;
+            case STEP_CONFIRMATION -> 400; // Un poco más alto por el nuevo campo
             default -> 400;
         };
 
@@ -152,11 +130,11 @@ public final class FSetupWizard extends Form {
                 ImGuiCond.Always);
 
         int flags = ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize;
-        // No se puede evitar que cierren con X en ImGui, pero se puede ignorar
 
         if (ImGui.begin(I18n.INSTANCE.get("wizard.title"), windowOpen, flags)) {
             switch (currentStep) {
                 case STEP_WELCOME -> renderWelcome();
+                case STEP_PROFILE -> renderProfile();
                 case STEP_ROUTES -> renderRoutes();
                 case STEP_PREFERENCES -> renderPreferences();
                 case STEP_MINIMAP -> renderMinimap();
@@ -178,14 +156,27 @@ public final class FSetupWizard extends Form {
         // Detectar si el usuario cerró la ventana con la X
         if (!windowOpen.get()) {
             if (isFirstRun) {
-                // Durante primera ejecución, mostrar confirmación
-                windowOpen.set(true); // Reabrir la ventana
+                windowOpen.set(true);
                 showExitConfirmation = true;
             } else {
-                // Durante ejecución manual, simplemente cerrar
                 this.close();
             }
         }
+    }
+
+    private void renderProfile() {
+        ImGui.text(I18n.INSTANCE.get("wizard.profile.title"));
+        ImGui.separator();
+        ImGui.spacing();
+
+        ImGui.textWrapped(
+                "Antes de continuar, asigna un nombre a este perfil de configuración (por ejemplo, el nombre del servidor o mod con el que trabajarás).");
+        ImGui.spacing();
+
+        ImGui.text(I18n.INSTANCE.get("wizard.profile.name"));
+        ImGui.pushItemWidth(400);
+        ImGui.inputText("##proname", profileName);
+        ImGui.popItemWidth();
     }
 
     private void renderWelcome() {
@@ -193,13 +184,21 @@ public final class FSetupWizard extends Form {
         ImGui.spacing();
         ImGui.spacing();
         ImGui.textWrapped(I18n.INSTANCE.get("wizard.welcome.description"));
+        ImGui.spacing();
+        ImGui.spacing();
+
+        ImGui.text(I18n.INSTANCE.get("wizard.prefs.language"));
+        if (ImGui.combo("##language", languageIndex, languageNames)) {
+            // Recargar idioma inmediatamente al cambiar la selección
+            String selectedLang = languages[languageIndex.get()];
+            I18n.INSTANCE.loadLanguage(selectedLang);
+        }
     }
 
     private void renderRoutes() {
         ImGui.text(I18n.INSTANCE.get("wizard.routes.title"));
         ImGui.separator();
         ImGui.spacing();
-
         renderPathField("wizard.routes.graphics", graphicsPath);
         renderPathField("wizard.routes.dats", datsPath);
         renderPathField("wizard.routes.inits", initsPath);
@@ -226,17 +225,10 @@ public final class FSetupWizard extends Form {
         ImGui.separator();
         ImGui.spacing();
 
-        // Idioma
-        ImGui.text(I18n.INSTANCE.get("wizard.prefs.language"));
-        ImGui.combo("##language", languageIndex, languageNames);
-        ImGui.spacing();
-
-        // Resolución
         ImGui.text(I18n.INSTANCE.get("wizard.prefs.resolution"));
         ImGui.combo("##resolution", resolutionIndex, resolutions);
         ImGui.spacing();
 
-        // Dimensiones del cliente
         ImGui.text(I18n.INSTANCE.get("wizard.prefs.clientSize"));
         ImGui.pushItemWidth(100);
         ImGui.inputInt("Width (tiles)", clientWidth);
@@ -244,15 +236,11 @@ public final class FSetupWizard extends Form {
         ImGui.popItemWidth();
         ImGui.spacing();
 
-        // Opciones de audio
         ImGui.checkbox(I18n.INSTANCE.get("wizard.prefs.music"), musicEnabled);
         ImGui.checkbox(I18n.INSTANCE.get("wizard.prefs.sound"), soundEnabled);
         ImGui.spacing();
 
-        // Pantalla completa
         ImGui.checkbox(I18n.INSTANCE.get("wizard.prefs.fullscreen"), fullscreen);
-
-        // Cursor gráfico
         ImGui.checkbox(I18n.INSTANCE.get("wizard.prefs.graphicCursor"), graphicCursor);
     }
 
@@ -280,6 +268,9 @@ public final class FSetupWizard extends Form {
         ImGui.separator();
         ImGui.spacing();
 
+        ImGui.bulletText(I18n.INSTANCE.get("wizard.profile.name") + ": " + profileName.get());
+        ImGui.spacing();
+
         ImGui.bulletText(I18n.INSTANCE.get("wizard.routes.graphics") + " " + graphicsPath.get());
         ImGui.bulletText(I18n.INSTANCE.get("wizard.routes.dats") + " " + datsPath.get());
         ImGui.bulletText(I18n.INSTANCE.get("wizard.routes.inits") + " " + initsPath.get());
@@ -296,7 +287,6 @@ public final class FSetupWizard extends Form {
     private void renderNavigation() {
         float buttonWidth = 120;
 
-        // Botón "Atrás"
         if (currentStep > STEP_WELCOME) {
             if (ImGui.button(I18n.INSTANCE.get("common.back"), buttonWidth, 0)) {
                 currentStep--;
@@ -308,14 +298,12 @@ public final class FSetupWizard extends Form {
 
         ImGui.sameLine();
 
-        // Espacio flexible
         float availWidth = ImGui.getContentRegionAvailX() - buttonWidth * 2 - ImGui.getStyle().getItemSpacingX();
         if (availWidth > 0) {
             ImGui.dummy(availWidth, 0);
             ImGui.sameLine();
         }
 
-        // Botón "Siguiente" o "Finalizar"
         if (currentStep == STEP_CONFIRMATION) {
             if (ImGui.button(I18n.INSTANCE.get("common.finish"), buttonWidth, 0)) {
                 finish();
@@ -331,14 +319,12 @@ public final class FSetupWizard extends Form {
 
         ImGui.sameLine();
 
-        // Botón "Cancelar" (solo si no es primera ejecución)
         if (!isFirstRun) {
             if (ImGui.button(I18n.INSTANCE.get("common.cancel"), buttonWidth, 0)) {
                 this.close();
             }
         }
 
-        // Modal de confirmación de salida
         renderExitConfirmation();
     }
 
@@ -369,8 +355,14 @@ public final class FSetupWizard extends Form {
     }
 
     private boolean validateCurrentStep() {
+        if (currentStep == STEP_PROFILE) {
+            if (profileName.get().trim().isEmpty()) {
+                errorMessage = "El nombre del perfil no puede estar vacío.";
+                return false;
+            }
+        }
+
         if (currentStep == STEP_ROUTES) {
-            // Validar que las rutas no estén vacías y existan
             if (graphicsPath.get().isEmpty()) {
                 errorMessage = I18n.INSTANCE.get("wizard.error.emptyPath") + ": "
                         + I18n.INSTANCE.get("wizard.routes.graphics");
@@ -392,7 +384,6 @@ public final class FSetupWizard extends Form {
                 return false;
             }
 
-            // Validar que las rutas existan
             if (!new File(graphicsPath.get()).exists()) {
                 errorMessage = I18n.INSTANCE.get("wizard.error.invalidPath") + ": "
                         + I18n.INSTANCE.get("wizard.routes.graphics");
@@ -419,8 +410,21 @@ public final class FSetupWizard extends Form {
     }
 
     private void finish() {
-        // Guardar configuración en Options
+        // Crear perfil nuevo mediante ProfileManager
+        String pName = profileName.get().trim();
+        if (pName.isEmpty())
+            pName = "Default";
+
+        org.argentumforge.engine.utils.Profile newProfile = org.argentumforge.engine.utils.ProfileManager.INSTANCE
+                .createProfile(pName);
+
+        org.argentumforge.engine.utils.ProfileManager.INSTANCE.setCurrentProfile(newProfile);
+
+        // Configurar Options con la ruta del nuevo perfil
         Options opts = Options.INSTANCE;
+        opts.setConfigPath(newProfile.getConfigPath());
+
+        // Setear valores
         opts.setGraphicsPath(graphicsPath.get());
         opts.setDatsPath(datsPath.get());
         opts.setInitPath(initsPath.get());
@@ -433,26 +437,22 @@ public final class FSetupWizard extends Form {
         opts.setClientHeight(clientHeight.get());
         opts.setLanguage(languages[languageIndex.get()]);
 
-        // Parsear resolución
         String[] res = resolutions[resolutionIndex.get()].split("x");
         opts.setScreenWidth(Integer.parseInt(res[0]));
         opts.setScreenHeight(Integer.parseInt(res[1]));
 
-        // Guardar en archivo
+        // Guardar en el archivo del perfil
         opts.save();
 
-        // Recargar recursos con las nuevas rutas para que estén disponibles
+        // Inicializar
         org.argentumforge.engine.utils.GameData.init();
 
-        // Generar colores del minimapa si está marcado
         if (generateMinimap.get()) {
             org.argentumforge.engine.utils.editor.MinimapColorGenerator.generateBinary();
         }
 
-        // Cerrar wizard
         this.close();
 
-        // Ejecutar callback
         if (onComplete != null) {
             onComplete.run();
         }

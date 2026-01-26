@@ -1,6 +1,5 @@
 package org.argentumforge.engine.utils.editor;
 
-import static org.argentumforge.engine.utils.GameData.initGrh;
 import static org.argentumforge.engine.utils.GameData.mapData;
 import org.argentumforge.engine.listeners.KeyHandler;
 
@@ -181,7 +180,7 @@ public class Surface {
             selection.getSelectedEntities().clear();
         }
 
-        short targetGrh = mapData[x][y].getLayer(layer).getGrhIndex();
+        int targetGrh = mapData[x][y].getLayer(layer).getGrhIndex();
 
         java.util.Queue<int[]> queue = new java.util.LinkedList<>();
         queue.add(new int[] { x, y });
@@ -245,8 +244,8 @@ public class Surface {
         if (mode == 0)
             return;
 
-        java.util.Map<org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos, Short> oldTiles = new java.util.HashMap<>();
-        java.util.Map<org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos, Short> newTiles = new java.util.HashMap<>();
+        java.util.Map<org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos, Integer> oldTiles = new java.util.HashMap<>();
+        java.util.Map<org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos, Integer> newTiles = new java.util.HashMap<>();
         java.util.Map<org.argentumforge.engine.utils.editor.commands.BlockChangeCommand.TilePos, Boolean> oldBlocks = new java.util.HashMap<>();
         java.util.Map<org.argentumforge.engine.utils.editor.commands.BlockChangeCommand.TilePos, Boolean> newBlocks = new java.util.HashMap<>();
 
@@ -259,8 +258,8 @@ public class Surface {
                     int mapX = x + dx;
                     int mapY = y + dy;
                     if (mapX >= 0 && mapX < mapData.length && mapY >= 0 && mapY < mapData[0].length) {
-                        short targetGrhWithMosaic = (short) (surfaceIndex + (dy * mosaicWidth) + dx);
-                        short currentGrh = mapData[mapX][mapY].getLayer(layer).getGrhIndex();
+                        int targetGrhWithMosaic = (surfaceIndex + (dy * mosaicWidth) + dx);
+                        int currentGrh = mapData[mapX][mapY].getLayer(layer).getGrhIndex();
                         if (currentGrh != targetGrhWithMosaic) {
                             oldTiles.put(
                                     new org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos(
@@ -308,14 +307,14 @@ public class Surface {
                                 continue;
                         }
 
-                        short targetGrhWithMosaic = (short) (mode == 1 ? surfaceIndex : (layer == 1 ? 1 : 0));
+                        int targetGrhWithMosaic = (mode == 1 ? surfaceIndex : (layer == 1 ? 1 : 0));
                         if (mode == 1 && (mosaicWidth > 1 || mosaicHeight > 1)) {
                             int relX = (i % mosaicWidth);
                             int relY = (j % mosaicHeight);
-                            targetGrhWithMosaic = (short) (surfaceIndex + (relY * mosaicWidth) + relX);
+                            targetGrhWithMosaic = (surfaceIndex + (relY * mosaicWidth) + relX);
                         }
 
-                        short currentGrh = mapData[i][j].getLayer(layer).getGrhIndex();
+                        int currentGrh = mapData[i][j].getLayer(layer).getGrhIndex();
                         if (currentGrh != targetGrhWithMosaic) {
                             org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos pos = new org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos(
                                     i, j);
@@ -359,14 +358,14 @@ public class Surface {
         if (mode == 0)
             return;
 
-        short targetGrh = (short) (mode == 1 ? surfaceIndex : (layer == 1 ? 1 : 0));
-        short startGrh = mapData[x][y].getLayer(layer).getGrhIndex();
+        int targetGrh = (mode == 1 ? surfaceIndex : (layer == 1 ? 1 : 0));
+        int startGrh = mapData[x][y].getLayer(layer).getGrhIndex();
 
         if (startGrh == targetGrh && !autoBlock && (mosaicWidth <= 1 && mosaicHeight <= 1))
             return;
 
-        java.util.Map<org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos, Short> oldTiles = new java.util.HashMap<>();
-        java.util.Map<org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos, Short> newTiles = new java.util.HashMap<>();
+        java.util.Map<org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos, Integer> oldTiles = new java.util.HashMap<>();
+        java.util.Map<org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos, Integer> newTiles = new java.util.HashMap<>();
         java.util.Map<org.argentumforge.engine.utils.editor.commands.BlockChangeCommand.TilePos, Boolean> oldBlocks = new java.util.HashMap<>();
         java.util.Map<org.argentumforge.engine.utils.editor.commands.BlockChangeCommand.TilePos, Boolean> newBlocks = new java.util.HashMap<>();
 
@@ -381,11 +380,11 @@ public class Surface {
             int currX = pos[0];
             int currY = pos[1];
 
-            short targetGrhWithMosaic = targetGrh;
+            int targetGrhWithMosaic = targetGrh;
             if (mode == 1 && (mosaicWidth > 1 || mosaicHeight > 1)) {
                 int offsetX = currX % mosaicWidth;
                 int offsetY = currY % mosaicHeight;
-                targetGrhWithMosaic = (short) (surfaceIndex + (offsetY * mosaicWidth) + offsetX);
+                targetGrhWithMosaic = (surfaceIndex + (offsetY * mosaicWidth) + offsetX);
             }
 
             oldTiles.put(new org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos(currX, currY),

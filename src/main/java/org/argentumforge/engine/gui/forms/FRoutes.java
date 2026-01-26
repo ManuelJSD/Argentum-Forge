@@ -18,6 +18,16 @@ public class FRoutes extends Form {
     private final ImString initPath = new ImString(options.getInitPath(), 256);
     private final ImString musicPath = new ImString(options.getMusicPath(), 256);
 
+    private Runnable onComplete;
+
+    public FRoutes() {
+        this(null);
+    }
+
+    public FRoutes(Runnable onComplete) {
+        this.onComplete = onComplete;
+    }
+
     @Override
     public void render() {
         ImGui.setNextWindowFocus();
@@ -40,6 +50,11 @@ public class FRoutes extends Form {
                 options.setMusicPath(musicPath.get());
                 options.save();
                 org.argentumforge.engine.utils.GameData.init();
+
+                if (onComplete != null) {
+                    onComplete.run();
+                }
+
                 this.close();
             }
             ImGui.sameLine();

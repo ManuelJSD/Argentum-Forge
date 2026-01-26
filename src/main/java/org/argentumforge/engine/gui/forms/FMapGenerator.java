@@ -196,8 +196,8 @@ public class FMapGenerator extends Form {
     }
 
     private void applyBiomes(double[][] heightMap, double[][] moistureMap, int width, int height) {
-        Map<TilePos, Short> oldTiles = new HashMap<>();
-        Map<TilePos, Short> newTiles = new HashMap<>();
+        Map<TilePos, Integer> oldTiles = new HashMap<>();
+        Map<TilePos, Integer> newTiles = new HashMap<>();
 
         // Get biome records
         GrhIndexRecord waterRec = categories.get(selectedWaterCategory).getRecords().get(0);
@@ -231,11 +231,11 @@ public class FMapGenerator extends Form {
                 // Apply mosaic pattern
                 int relX = x % biome.getWidth();
                 int relY = y % biome.getHeight();
-                short newGrh = (short) (biome.getGrhIndex() + (relY * biome.getWidth()) + relX);
+                int newGrh = (biome.getGrhIndex() + (relY * biome.getWidth()) + relX);
 
                 int currentGrh = GameData.mapData[x][y].getLayer(1).getGrhIndex();
                 if (currentGrh != newGrh) {
-                    oldTiles.put(new TilePos(x, y), (short) currentGrh);
+                    oldTiles.put(new TilePos(x, y), currentGrh);
                     newTiles.put(new TilePos(x, y), newGrh);
                 }
             }

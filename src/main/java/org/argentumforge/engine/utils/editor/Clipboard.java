@@ -12,13 +12,13 @@ public class Clipboard {
         public Selection.EntityType type;
         public int id;
         public int offsetX, offsetY; // Desplazamiento relativo al punto de referencia
-        public short[] layers; // Para capturar las 4 capas de un tile
+        public int[] layers; // Para capturar las 4 capas de un tile
 
         public ClipboardItem(Selection.EntityType type, int id, int offsetX, int offsetY) {
             this(type, id, offsetX, offsetY, null);
         }
 
-        public ClipboardItem(Selection.EntityType type, int id, int offsetX, int offsetY, short[] layers) {
+        public ClipboardItem(Selection.EntityType type, int id, int offsetX, int offsetY, int[] layers) {
             this.type = type;
             this.id = id;
             this.offsetX = offsetX;
@@ -49,9 +49,9 @@ public class Clipboard {
     public void copy(List<Selection.SelectedEntity> selectedEntities, int refX, int refY) {
         items.clear();
         for (Selection.SelectedEntity se : selectedEntities) {
-            short[] layers = null;
+            int[] layers = null;
             if (se.type == Selection.EntityType.TILE) {
-                layers = new short[5]; // Usamos 1-4 para coincidir con MapData
+                layers = new int[5]; // Usamos 1-4 para coincidir con MapData
                 for (int i = 1; i <= 4; i++) {
                     layers[i] = org.argentumforge.engine.utils.GameData.mapData[se.x][se.y].getLayer(i).getGrhIndex();
                 }

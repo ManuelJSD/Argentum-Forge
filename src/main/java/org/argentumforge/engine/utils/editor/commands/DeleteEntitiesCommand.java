@@ -13,12 +13,12 @@ public class DeleteEntitiesCommand implements Command {
     public DeleteEntitiesCommand(List<Selection.SelectedEntity> entities) {
         for (Selection.SelectedEntity se : entities) {
             if (se.type == Selection.EntityType.NPC) {
-                commands.add(new NpcChangeCommand(se.x, se.y, (short) se.id, (short) 0));
+                commands.add(new NpcChangeCommand(se.x, se.y, se.id, 0));
             } else if (se.type == Selection.EntityType.OBJECT) {
                 commands.add(new ObjChangeCommand(se.x, se.y, se.id, 0));
             } else if (se.type == Selection.EntityType.TILE) {
-                short[] oldLayers = new short[5];
-                short[] newLayers = new short[5]; // Todo a 0
+                int[] oldLayers = new int[5];
+                int[] newLayers = new int[5]; // Todo a 0
                 for (int i = 1; i <= 4; i++) {
                     oldLayers[i] = org.argentumforge.engine.utils.GameData.mapData[se.x][se.y].getLayer(i)
                             .getGrhIndex();

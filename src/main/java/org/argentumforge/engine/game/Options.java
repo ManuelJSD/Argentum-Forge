@@ -14,7 +14,7 @@ public enum Options {
 
     INSTANCE; // Implementacion del patron Singleton de Joshua Bloch (considerada la mejor)
 
-    private static final String OPTIONS_FILE_PATH = "resources/options.ini";
+    private String configPath = "resources/options.ini";
 
     private boolean music = true;
     private boolean sound = true;
@@ -41,6 +41,14 @@ public enum Options {
 
     private final RenderSettings renderSettings = new RenderSettings();
 
+    public void setConfigPath(String path) {
+        this.configPath = path;
+    }
+
+    public String getConfigPath() {
+        return configPath;
+    }
+
     /**
      * Carga las opciones.
      * <p>
@@ -51,7 +59,13 @@ public enum Options {
      * configuracion con valores predeterminados.
      */
     public void load() {
-        try (BufferedReader reader = new BufferedReader(new FileReader(OPTIONS_FILE_PATH))) {
+        File file = new File(configPath);
+        // Asegurar que exista la carpeta padre si es una ruta compleja
+        if (file.getParentFile() != null) {
+            file.getParentFile().mkdirs();
+        }
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split("=");
@@ -64,26 +78,29 @@ public enum Options {
         } catch (IOException e) {
             Logger.error(
                     "El archivo {} no fue encontrado o no pudo leerse, se creó uno nuevo con la configuración por defecto.",
-                    OPTIONS_FILE_PATH);
-            save();
+                    configPath);
+            save(); // Guarda defaults en el nuevo path
         }
     }
 
     /**
-     * Verifica si es la primera ejecución del editor.
+     * Verifica si es la primera ejecución del editor (para este perfil).
      * 
-     * @return true si options.ini no existe, false en caso contrario
+     * @return true si el archivo de config no existe, false en caso contrario
      */
     public boolean isFirstRun() {
-        File optionsFile = new File(OPTIONS_FILE_PATH);
+        File optionsFile = new File(configPath);
         return !optionsFile.exists();
     }
 
     /**
      * Guarda las opciones.
      */
+    /**
+     * Guarda las opciones.
+     */
     public void save() {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(OPTIONS_FILE_PATH))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(configPath))) {
             write(writer, "Music", music);
             write(writer, "Sound", sound);
             write(writer, "GraphicsPath", graphicsPath);
@@ -127,7 +144,7 @@ public enum Options {
                     .collect(java.util.stream.Collectors.joining(","));
             write(writer, "IgnoredObjTypes", ignoredStr);
         } catch (IOException e) {
-            Logger.error("¡No se pudo escribir en el archivo options.ini!");
+            Logger.error("¡No se pudo escribir en el archivo de opciones: {}!", configPath);
         }
     }
 

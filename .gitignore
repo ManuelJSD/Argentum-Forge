@@ -54,3 +54,7 @@ minimap.bin
 *.log
 
 *~
+
+### Profiles
+profiles.json
+/profiles/
