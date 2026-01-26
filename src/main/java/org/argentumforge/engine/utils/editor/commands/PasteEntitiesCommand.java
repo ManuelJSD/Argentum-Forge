@@ -24,13 +24,13 @@ public class PasteEntitiesCommand implements Command {
                 continue;
 
             if (item.type == Selection.EntityType.NPC) {
-                short oldNpc = mapData[tx][ty].getNpcIndex();
-                commands.add(new NpcChangeCommand(tx, ty, oldNpc, (short) item.id));
+                int oldNpc = mapData[tx][ty].getNpcIndex();
+                commands.add(new NpcChangeCommand(tx, ty, oldNpc, item.id));
             } else if (item.type == Selection.EntityType.OBJECT) {
                 int oldObj = mapData[tx][ty].getObjGrh().getGrhIndex();
                 commands.add(new ObjChangeCommand(tx, ty, oldObj, item.id));
             } else if (item.type == Selection.EntityType.TILE && item.layers != null) {
-                short[] oldLayers = new short[5];
+                int[] oldLayers = new int[5];
                 for (int i = 1; i <= 4; i++) {
                     oldLayers[i] = mapData[tx][ty].getLayer(i).getGrhIndex();
                 }

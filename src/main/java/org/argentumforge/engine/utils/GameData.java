@@ -113,7 +113,7 @@ public final class GameData {
     public static final int Y_MAX_MAP_SIZE = 100;
 
     /** Lector de datos binarios persistente para la carga de recursos. */
-    static BinaryDataReader reader;
+    static BinaryDataReader reader = new BinaryDataReader();
 
     /**
      * Inicializamos todos los datos almacenados en archivos.
@@ -122,25 +122,22 @@ public final class GameData {
         for (int i = 0; i < charList.length; i++)
             charList[i] = new Character();
 
-        reader = new BinaryDataReader();
         options.load();
         org.argentumforge.engine.i18n.I18n.INSTANCE.loadLanguage(options.getLanguage());
 
-        if (checkResources()) {
-            loadNpcs();
-            loadObjs();
-            loadMiniMapColors();
-            loadGrhData();
-            loadHeads();
-            loadHelmets();
-            loadBodys();
-            loadWeapons();
-            loadShields();
-            loadFxs();
+        loadNpcs();
+        loadObjs();
+        loadMiniMapColors();
+        loadGrhData();
+        loadHeads();
+        loadHelmets();
+        loadBodys();
+        loadWeapons();
+        loadShields();
+        loadFxs();
 
-            // loadMessages(options.getLanguage()); -> Eliminado ya que el sistema de
-            // mensajes fue borrado
-        }
+        // loadMessages(options.getLanguage()); -> Eliminado ya que el sistema de
+        // mensajes fue borrado
     }
 
     /**
@@ -204,7 +201,12 @@ public final class GameData {
      */
     private static void loadMiniMapColors() {
         // 1. Intentar cargar binario (más rápido y completo)
-        Path binPath = Path.of("minimap.bin");
+        String fileName = ProfileManager.PROFILES_DIR + "/minimap.bin";
+        if (ProfileManager.INSTANCE.getCurrentProfile() != null) {
+            fileName = ProfileManager.PROFILES_DIR + "/minimap_" + ProfileManager.INSTANCE.getCurrentProfile().getName()
+                    + ".bin";
+        }
+        Path binPath = Path.of(fileName);
         if (Files.exists(binPath)) {
             try {
                 byte[] bytes = Files.readAllBytes(binPath);
@@ -310,209 +312,149 @@ public final class GameData {
 
     /**
      * Carga y parsea el archivo de índices de gráficos (graphics.ind).
-     * Intenta detectar automáticamente el formato (Standard, Legacy Integer, Con
-     * Cabecera).
+     * Reconstruye la jerarquía de animaciones y frames de GRH.
      */
     private static void loadGrhData() {
         byte[] data = loadLocalInitFile("Graficos.ind", "Gráficos", true);
         if (data == null)
             return;
 
-        // Intentar cargar con diferentes estrategias
-        if (attemptLoadGrh(data, false, false)) { // Standard (Long Index, No Header)
-            Logger.info("Formato Grh detectado: Standard (Long Index)");
-            return;
-        }
-
-        if (attemptLoadGrh(data, true, false)) { // Header + Standard
-            Logger.info("Formato Grh detectado: Custom Header + Standard (Long Index)");
-            return;
-        }
-
-        if (attemptLoadGrh(data, false, true)) { // Legacy (Integer Index, No Header)
-            Logger.info("Formato Grh detectado: Legacy (Integer Index)");
-            return;
-        }
-
-        if (attemptLoadGrh(data, true, true)) { // Header + Legacy
-            Logger.info("Formato Grh detectado: Custom Header + Legacy (Integer Index)");
-            return;
-        }
-
-        Logger.error("No se pudo detectar el formato de Graficos.ind (o el archivo esta corrupto).");
-        javax.swing.JOptionPane.showMessageDialog(null,
-                "No se pudo cargar 'Graficos.ind'.\n\n" +
-                        "El editor intentó detectar automáticamente el formato (0.13.0, 0.11.5, Con cabecera), pero falló.\n"
-                        +
-                        "Posibles causas:\n" +
-                        "1. El archivo está corrupto o vacío.\n" +
-                        "2. Es un formato muy antiguo o muy modificado no soportado.\n" +
-                        "3. No es un archivo de índices de Argentum Online válido.",
-                "Error de Formato en Graficos.ind",
-                javax.swing.JOptionPane.ERROR_MESSAGE);
-    }
-
-    /**
-     * Intenta cargar los datos de Grh con una configuración específica.
-     * 
-     * @param data            Raw byte data
-     * @param useHeaderOffset Si true, salta 263 bytes de cabecera custom
-     * @param useIntegerIndex Si true, lee los indices como Short (2 bytes) en lugar
-     *                        de Int
-     * @return true si la carga fue exitosa, false si falló
-     */
-    private static boolean attemptLoadGrh(byte[] data, boolean useHeaderOffset, boolean useIntegerIndex) {
-        BinaryDataReader reader = new BinaryDataReader();
-        reader.init(data);
-
         try {
-            if (useHeaderOffset) {
-                // Cabecera: Desc(255) + CRC(4) + MagicWord(4) = 263 bytes
-                if (data.length < 263)
-                    return false;
+            // Validar existencia de cabecera custom (263 bytes)
+            // Usamos un tamaño de entrada promedio de 16 bytes para la heurística
+            boolean hasHeader = detectHeader(data, 16);
+
+            reader.init(data);
+            if (hasHeader) {
                 reader.skipBytes(263);
             }
 
             final int fileVersion = reader.readInt();
             final int grhCount = reader.readInt();
+            Logger.info("Cargando Graficos.ind: Versión={}, Registros={}", fileVersion, grhCount);
 
-            // Sanity check básico
-            if (grhCount <= 0 || grhCount > 200000)
-                return false;
-
-            GrhData[] tempGrhData = new GrhData[grhCount + 1];
-            tempGrhData[0] = new GrhData();
-
-            int processed = 0;
-            while (reader.hasRemaining() && processed < grhCount) {
-                int grh;
-                if (useIntegerIndex) {
-                    grh = reader.readShort() & 0xFFFF; // Unsigned Short
-                } else {
-                    grh = reader.readInt();
-                }
-
-                // Sanity check de índice
-                if (grh <= 0 || grh >= tempGrhData.length) {
-                    // Si el índice está fuera de rango pero la versión del archivo es vieja,
-                    // a veces grhCount no coincide exactamente con el ID máximo.
-                    // Pero para seguridad, si el ID es absurdo, asumimos formato incorrecto.
-                    if (grh > 200000)
-                        return false;
-
-                    // Expandir array si es necesario (casos dinámicos raros) o fallar
-                    if (grh >= tempGrhData.length)
-                        return false;
-                }
-
-                tempGrhData[grh] = new GrhData();
-                tempGrhData[grh].setNumFrames(reader.readShort());
-
-                if (tempGrhData[grh].getNumFrames() <= 0)
-                    return false;
-
-                tempGrhData[grh].setFrames(new int[tempGrhData[grh].getNumFrames() + 1]);
-
-                if (tempGrhData[grh].getNumFrames() > 1) {
-                    for (int i = 1; i <= tempGrhData[grh].getNumFrames(); i++) {
-                        tempGrhData[grh].setFrame(i, reader.readInt());
-                        if (tempGrhData[grh].getFrame(i) <= 0)
-                            return false;
-                    }
-
-                    tempGrhData[grh].setSpeed(reader.readFloat());
-                    if (tempGrhData[grh].getSpeed() <= 0)
-                        return false;
-
-                    // Referenciamos temporalmente al frame 1, PERO debemos tener cuidado:
-                    // Si el frame 1 apunta a un Grh que AUN NO LEIMOS, esto fallará
-                    // (NullPointerException).
-                    // En los formatos AO, los frames suelen apuntar a gráficos base (que ya
-                    // deberían estar cargados o ser simples).
-                    // Pero la lógica original accedía a `AssetRegistry.grhData[...]`.
-                    // Aquí estamos llenando `tempGrhData`.
-                    // Si el gráfico base no está en `tempGrhData` aún, crasheará.
-                    // PERO: La lógica original asumía orden secuencial o que las referencias ya
-                    // existen?
-                    // EL ORIGINAL usaba `AssetRegistry.grhData`. Si `AssetRegistry.grhData[frame1]`
-                    // es null, crash.
-                    // Así que el orden de carga en el archivo IMPORTA.
-                    // Para validar el formato, PODEMOS simplemente leer los bytes sin validar
-                    // semántica profunda,
-                    // O debemos simular la lectura.
-
-                    // Si solo queremos validar formato, leeremos pixels width/height directamente
-                    // del archivo si NO es animación?
-                    // NO, el formato dice: si frames > 1, copiamos pixelWidth del frame(1).
-                    // Esto es un problema para la validación pura porque requiere dependencias
-                    // cruzadas.
-
-                    // SOLUCIÓN: Para validar formato, capturamos NullPointerException también como
-                    // fallo de formato?
-                    // O mejor: Usamos un "Dummy" lookup o posponemos la validación semántica.
-                    // Dado que estamos reemplazando `loadGrhData` real, necesitamos que funcione de
-                    // verdad.
-
-                    // Si el formato original fallaba por dependencias circulares, fallaba siempre.
-                    // Asumiremos que el archivo está bien formado semánticamente si logramos leerlo
-                    // sintácticamente.
-                    // Para evitar NPE durante el "dry run" o carga real:
-                    // Usaremos `tempGrhData` para los lookups.
-
-                    int firstFrame = tempGrhData[grh].getFrame(1);
-                    if (firstFrame > 0 && firstFrame < tempGrhData.length && tempGrhData[firstFrame] != null) {
-                        tempGrhData[grh].setPixelHeight(tempGrhData[firstFrame].getPixelHeight());
-                        tempGrhData[grh].setPixelWidth(tempGrhData[firstFrame].getPixelWidth());
-                        tempGrhData[grh].setTileWidth(tempGrhData[firstFrame].getTileWidth());
-                        tempGrhData[grh].setTileHeight(tempGrhData[firstFrame].getTileHeight());
-                    } else {
-                        // Si falla la referencia, técnicamente el archivo podría ser valido pero estar
-                        // desordenado.
-                        // Sin embargo, en AO standard los frames base siempre están definidos antes o
-                        // son idx bajos.
-                        // Si no podemos resolverlo ahora, ponemos valores por defecto o fallamos.
-                        // Pero cuidado: Si ponemos 0, luego la app puede fallar.
-                        // Vamos a capturar NPE.
-                    }
-
-                } else {
-                    tempGrhData[grh].setFileNum(reader.readInt());
-                    if (tempGrhData[grh].getFileNum() <= 0)
-                        return false;
-
-                    tempGrhData[grh].setsX(reader.readShort());
-                    if (tempGrhData[grh].getsX() < 0)
-                        return false;
-
-                    tempGrhData[grh].setsY(reader.readShort());
-                    if (tempGrhData[grh].getsY() < 0)
-                        return false;
-
-                    tempGrhData[grh].setPixelWidth(reader.readShort());
-                    if (tempGrhData[grh].getPixelWidth() <= 0)
-                        return false;
-
-                    tempGrhData[grh].setPixelHeight(reader.readShort());
-                    if (tempGrhData[grh].getPixelHeight() <= 0)
-                        return false;
-
-                    tempGrhData[grh].setTileWidth((float) tempGrhData[grh].getPixelWidth() / 32);
-                    tempGrhData[grh].setTileHeight((float) tempGrhData[grh].getPixelHeight() / 32);
-                    tempGrhData[grh].setFrame(1, grh);
-                }
-
-                processed++;
+            // Sanity check: grhCount shouldn't be negative or impossibly huge relative to
+            // file size
+            if (grhCount < 0) {
+                throw new IOException("El conteo de GRHs es negativo: " + grhCount);
+            }
+            // Loose check: Minimum 1 byte per GRH (impossible but safe bound)
+            if (grhCount > data.length) {
+                throw new IOException("El conteo de GRHs (" + grhCount + ") es mayor que el tamaño del archivo.");
             }
 
-            // Si llegamos aquí, la carga sintáctica fue exitosa.
-            // Asignamos el resultado al registro global.
-            AssetRegistry.grhData = tempGrhData;
-            return true;
+            // Inicializamos con grhCount+1, pero permitiremos expandir si los IDs son
+            // mayores
+            AssetRegistry.grhData = new GrhData[grhCount + 1001]; // Margen inicial
 
+            int grh = 0;
+            AssetRegistry.grhData[0] = new GrhData();
+
+            int loadedCount = 0;
+
+            while (loadedCount < grhCount && reader.hasRemaining()) {
+                // Try-catch interno por registro para intentar recuperar en caso de error
+                // parcial?
+                // No, si el stream se desincroniza, todo lo demás será basura.
+                // Mejor verificar bounds.
+
+                if (!reader.hasRemaining())
+                    break;
+
+                grh = reader.readInt();
+
+                if (grh <= 0 || grh > grhCount) {
+                    // Si el índice es inválido (posible desincronización o versión legacy usando
+                    // short),
+                    // intentamos leer como short si parece que estamos en formato antiguo?
+                    // Por ahora, asumimos formato standard (int index).
+                    // Si grh es basura, abortamos.
+                    if (grh > 200000 || grh < 0) { // Límite razonable AO
+                        throw new IOException("Índice GRH corrupto o fuera de rango: " + grh);
+                    }
+                    // Si es válido pero desordenado, continuamos (expandiendo si fuera necesario
+                    // fuera del array)
+                }
+
+                if (grh >= AssetRegistry.grhData.length) {
+                    // Si el índice supera el count del header, redimensionamos dinámicamente
+                    int newSize = Math.max(grh + 1000, AssetRegistry.grhData.length * 2);
+                    if (newSize > 1000000)
+                        newSize = 1000000; // Hard limit 1M GRHs
+
+                    AssetRegistry.grhData = java.util.Arrays.copyOf(AssetRegistry.grhData, newSize);
+                }
+
+                AssetRegistry.grhData[grh] = new GrhData();
+                AssetRegistry.grhData[grh].setNumFrames(reader.readShort());
+
+                if (AssetRegistry.grhData[grh].getNumFrames() <= 0)
+                    throw new IOException("NumFrames <= 0 en GRH " + grh);
+
+                AssetRegistry.grhData[grh].setFrames(new int[AssetRegistry.grhData[grh].getNumFrames() + 1]);
+
+                if (AssetRegistry.grhData[grh].getNumFrames() > 1) {
+                    for (int i = 1; i <= AssetRegistry.grhData[grh].getNumFrames(); i++) {
+                        AssetRegistry.grhData[grh].setFrame(i, reader.readInt());
+                        if (AssetRegistry.grhData[grh].getFrame(i) <= 0) {
+                            // frame invalido
+                        }
+                    }
+
+                    AssetRegistry.grhData[grh].setSpeed(reader.readFloat());
+
+                    // Copiar dimensiones del primer frame
+                    int firstFrame = AssetRegistry.grhData[grh].getFrame(1);
+                    if (firstFrame > 0 && firstFrame < AssetRegistry.grhData.length
+                            && AssetRegistry.grhData[firstFrame] != null) {
+                        AssetRegistry.grhData[grh].setPixelHeight(AssetRegistry.grhData[firstFrame].getPixelHeight());
+                        AssetRegistry.grhData[grh].setPixelWidth(AssetRegistry.grhData[firstFrame].getPixelWidth());
+                        AssetRegistry.grhData[grh].setTileWidth(AssetRegistry.grhData[firstFrame].getTileWidth());
+                        AssetRegistry.grhData[grh].setTileHeight(AssetRegistry.grhData[firstFrame].getTileHeight());
+                    } else {
+                        // Si el frame 1 no existe aún (referencia forward), ponemos 0 y esperamos que
+                        // no explote
+                        // Ojo: Esto pasa si el GRH de animación está definido ANTES que sus frames.
+                    }
+
+                } else {
+                    AssetRegistry.grhData[grh].setFileNum(reader.readInt());
+                    AssetRegistry.grhData[grh].setsX(reader.readShort());
+                    AssetRegistry.grhData[grh].setsY(reader.readShort());
+                    AssetRegistry.grhData[grh].setPixelWidth(reader.readShort());
+                    AssetRegistry.grhData[grh].setPixelHeight(reader.readShort());
+
+                    AssetRegistry.grhData[grh].setTileWidth((float) AssetRegistry.grhData[grh].getPixelWidth() / 32);
+                    AssetRegistry.grhData[grh].setTileHeight((float) AssetRegistry.grhData[grh].getPixelHeight() / 32);
+                    AssetRegistry.grhData[grh].setFrame(1, grh);
+                }
+
+                loadedCount++;
+            }
+
+        } catch (java.nio.BufferUnderflowException e) {
+            Logger.error(e, "Error: Fin de archivo inesperado en Graficos.ind");
+            javax.swing.JOptionPane.showMessageDialog(null,
+                    "Error crítico al leer 'Graficos.ind'.\n" +
+                            "El archivo terminó inesperadamente (BufferUnderflow).\n" +
+                            "Probablemente esté corrupto o cortado.\n\n" +
+                            "Por favor, verifique el archivo en la carpeta INIT.",
+                    "Archivo Corrupto",
+                    javax.swing.JOptionPane.ERROR_MESSAGE);
+            // Safety init
+            if (AssetRegistry.grhData == null)
+                AssetRegistry.grhData = new GrhData[1];
         } catch (Exception e) {
-            // BufferUnderflow, IOException, NPE -> Asumimos formato incorrecto
-            return false;
+            Logger.error(e, "Error general al cargar Graficos.ind");
+            javax.swing.JOptionPane.showMessageDialog(null,
+                    "Error al cargar 'Graficos.ind'.\n" +
+                            "Detalle: " + e.getMessage(),
+                    "Error",
+                    javax.swing.JOptionPane.ERROR_MESSAGE);
+            if (AssetRegistry.grhData == null)
+                AssetRegistry.grhData = new GrhData[1];
         }
+
     }
 
     /**
@@ -1160,7 +1102,7 @@ public final class GameData {
      *
      * @param baseLayer1GrhIndex Índice del GRH a usar como suelo base.
      */
-    public static void createEmptyMap(short baseLayer1GrhIndex) {
+    public static void createEmptyMap(int baseLayer1GrhIndex) {
         mapData = new MapData[X_MAX_MAP_SIZE + 1][Y_MAX_MAP_SIZE + 1];
 
         for (int y = Y_MIN_MAP_SIZE; y <= Y_MAX_MAP_SIZE; y++) {
@@ -1185,7 +1127,7 @@ public final class GameData {
         eraseAllChars();
     }
 
-    private static void initGrhOrReset(GrhInfo grh, short grhIndex, boolean started) {
+    private static void initGrhOrReset(GrhInfo grh, int grhIndex, boolean started) {
         if (AssetRegistry.grhData != null && grhIndex >= 0 && grhIndex < AssetRegistry.grhData.length
                 && AssetRegistry.grhData[grhIndex] != null) {
             initGrh(grh, grhIndex, started);
@@ -1367,7 +1309,7 @@ public final class GameData {
      * @return La estructura GrhInfo inicializada.
      */
 
-    public static GrhInfo initGrh(GrhInfo grh, short grhIndex, boolean started) {
+    public static GrhInfo initGrh(GrhInfo grh, int grhIndex, boolean started) {
         if (grh == null)
             throw new NullPointerException("Se esta intentando incializar un GrhInfo nulo...");
 
@@ -1375,7 +1317,8 @@ public final class GameData {
         grh.setStarted(false);
         grh.setLoops(0);
 
-        if (started)
+        if (started && AssetRegistry.grhData != null && grh.getGrhIndex() > 0
+                && grh.getGrhIndex() < AssetRegistry.grhData.length && AssetRegistry.grhData[grh.getGrhIndex()] != null)
             grh.setStarted(AssetRegistry.grhData[grh.getGrhIndex()].getNumFrames() > 1);
 
         if (grh.isStarted())
@@ -1400,6 +1343,8 @@ public final class GameData {
         final Path filePath = Path.of(options.getInitPath(), fileName);
 
         if (!Files.exists(filePath)) {
+            Logger.error("DEBUG: Failed to find file at: " + filePath.toAbsolutePath());
+            Logger.error("DEBUG: Configured InitPath is: " + options.getInitPath());
             if (showError) {
                 Logger.error("{} no encontrado en la ruta: {}", fileName, filePath.toAbsolutePath());
                 javax.swing.JOptionPane.showMessageDialog(null,
@@ -1409,6 +1354,8 @@ public final class GameData {
                         javax.swing.JOptionPane.ERROR_MESSAGE);
             }
             return null;
+        } else {
+            Logger.info("DEBUG: Found file at: " + filePath.toAbsolutePath());
         }
 
         try {

@@ -252,8 +252,12 @@ public class FSurfaceEditor extends Form {
     }
 
     private void drawSearchAndPagination() {
-        if (AssetRegistry.grhData == null)
+        if (AssetRegistry.grhData == null) {
+            ImGui.textColored(1f, 0f, 0f, 1f, "ERROR: grhData no cargado (NULL)");
+            ImGui.text("Init Path: " + org.argentumforge.engine.game.Options.INSTANCE.getInitPath());
+            ImGui.text("Dats Path: " + org.argentumforge.engine.game.Options.INSTANCE.getDatsPath());
             return;
+        }
 
         // Buscador
         ImGui.text(I18n.INSTANCE.get("editor.surface.search") + ":");

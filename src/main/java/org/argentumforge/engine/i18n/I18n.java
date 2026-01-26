@@ -33,27 +33,47 @@ public class I18n {
      * @param locale Código de idioma (ej: "es_ES", "en_US")
      */
     public void loadLanguage(String locale) {
+        // 1. Intentar cargar desde archivo local (carpeta lang/)
         Path langFile = Paths.get(LANG_DIR, locale + ".properties");
+        boolean loaded = false;
 
-        if (!Files.exists(langFile)) {
-            Logger.warn("Language file not found: {}. Using default: {}", locale, DEFAULT_LOCALE);
-            locale = DEFAULT_LOCALE;
-            langFile = Paths.get(LANG_DIR, locale + ".properties");
+        if (Files.exists(langFile)) {
+            try (InputStream is = new FileInputStream(langFile.toFile());
+                    InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
+                translations.clear();
+                translations.load(reader);
+                currentLocale = locale;
+                Logger.info("Loaded language from file: {}", langFile);
+                loaded = true;
+            } catch (IOException e) {
+                Logger.error(e, "Failed to load language file: {}", langFile);
+            }
         }
 
-        if (!Files.exists(langFile)) {
-            Logger.error("Default language file not found either: {}", langFile);
-            return;
+        // 2. Si falló, intentar desde Classpath/Resources (src/main/resources/lang/)
+        if (!loaded) {
+            String resourcePath = "/" + LANG_DIR + "/" + locale + ".properties";
+            try (InputStream is = I18n.class.getResourceAsStream(resourcePath)) {
+                if (is != null) {
+                    try (InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
+                        translations.clear();
+                        translations.load(reader);
+                        currentLocale = locale;
+                        Logger.info("Loaded language from classpath: {}", resourcePath);
+                        loaded = true;
+                    }
+                }
+            } catch (IOException e) {
+                Logger.error(e, "Failed to load language resource: {}", resourcePath);
+            }
         }
 
-        try (InputStream is = new FileInputStream(langFile.toFile());
-                InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
-            translations.clear();
-            translations.load(reader);
-            currentLocale = locale;
-            Logger.info("Loaded language: {}", locale);
-        } catch (IOException e) {
-            Logger.error(e, "Failed to load language file: {}", langFile);
+        // 3. Si sigue fallando y no era el default, probar con default
+        if (!loaded && !locale.equals(DEFAULT_LOCALE)) {
+            Logger.warn("Language {} not found. Falling back to default: {}", locale, DEFAULT_LOCALE);
+            loadLanguage(DEFAULT_LOCALE);
+        } else if (!loaded) {
+            Logger.error("CRITICAL: Default language {} could not be found!", DEFAULT_LOCALE);
         }
     }
 
@@ -97,27 +117,34 @@ public class I18n {
      * @return Lista de códigos de idioma disponibles
      */
     public List<String> getAvailableLanguages() {
+        Set<String> languages = new HashSet<>();
+
+        // 1. Agregar idiomas por defecto (que sabemos que están en el JAR)
+        languages.add("es_ES");
+        languages.add("en_US");
+        languages.add("pt_BR");
+
+        // 2. Escanear carpeta local para encontrar nuevos o custom
         Path langDir = Paths.get(LANG_DIR);
 
-        if (!Files.exists(langDir)) {
+        if (Files.exists(langDir)) {
+            try {
+                Files.list(langDir)
+                        .filter(p -> p.toString().endsWith(".properties"))
+                        .map(p -> p.getFileName().toString().replace(".properties", ""))
+                        .forEach(languages::add);
+            } catch (IOException e) {
+                Logger.error(e, "Failed to scan language directory");
+            }
+        } else {
             try {
                 Files.createDirectories(langDir);
             } catch (IOException e) {
                 Logger.error(e, "Failed to create lang directory");
-                return Collections.singletonList(DEFAULT_LOCALE);
             }
         }
 
-        try {
-            return Files.list(langDir)
-                    .filter(p -> p.toString().endsWith(".properties"))
-                    .map(p -> p.getFileName().toString().replace(".properties", ""))
-                    .sorted()
-                    .collect(Collectors.toList());
-        } catch (IOException e) {
-            Logger.error(e, "Failed to scan language directory");
-            return Collections.singletonList(DEFAULT_LOCALE);
-        }
+        return languages.stream().sorted().collect(Collectors.toList());
     }
 
     /**

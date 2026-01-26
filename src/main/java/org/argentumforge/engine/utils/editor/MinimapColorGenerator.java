@@ -2,6 +2,7 @@ package org.argentumforge.engine.utils.editor;
 
 import org.argentumforge.engine.game.Options;
 import org.argentumforge.engine.utils.AssetRegistry;
+import org.argentumforge.engine.utils.ProfileManager;
 import org.argentumforge.engine.utils.inits.GrhData;
 import org.tinylog.Logger;
 
@@ -33,7 +34,12 @@ public class MinimapColorGenerator {
         progress = 0.0f;
 
         new Thread(() -> {
-            Path outputPath = Path.of("minimap.bin");
+            String fileName = ProfileManager.PROFILES_DIR + "/minimap.bin";
+            if (org.argentumforge.engine.utils.ProfileManager.INSTANCE.getCurrentProfile() != null) {
+                fileName = ProfileManager.PROFILES_DIR + "/minimap_"
+                        + org.argentumforge.engine.utils.ProfileManager.INSTANCE.getCurrentProfile().getName() + ".bin";
+            }
+            Path outputPath = Path.of(fileName);
             Logger.info("Iniciando generacion de colores de minimapa en: {}", outputPath.toAbsolutePath());
 
             GrhData[] grhData = AssetRegistry.grhData;

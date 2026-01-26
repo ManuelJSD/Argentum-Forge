@@ -10,8 +10,8 @@ import static org.argentumforge.engine.utils.GameData.initGrh;
  */
 public class BulkTileChangeCommand implements Command {
     private final int layer;
-    private final Map<TilePos, Short> oldTiles;
-    private final Map<TilePos, Short> newTiles;
+    private final Map<TilePos, Integer> oldTiles;
+    private final Map<TilePos, Integer> newTiles;
 
     public static class TilePos {
         public final int x, y;
@@ -37,7 +37,7 @@ public class BulkTileChangeCommand implements Command {
         }
     }
 
-    public BulkTileChangeCommand(int layer, Map<TilePos, Short> oldTiles, Map<TilePos, Short> newTiles) {
+    public BulkTileChangeCommand(int layer, Map<TilePos, Integer> oldTiles, Map<TilePos, Integer> newTiles) {
         this.layer = layer;
         this.oldTiles = oldTiles;
         this.newTiles = newTiles;
@@ -45,9 +45,9 @@ public class BulkTileChangeCommand implements Command {
 
     @Override
     public void execute() {
-        for (Map.Entry<TilePos, Short> entry : newTiles.entrySet()) {
+        for (Map.Entry<TilePos, Integer> entry : newTiles.entrySet()) {
             TilePos pos = entry.getKey();
-            short newGrh = entry.getValue();
+            int newGrh = entry.getValue();
             GameData.mapData[pos.x][pos.y].getLayer(layer).setGrhIndex(newGrh);
             initGrh(GameData.mapData[pos.x][pos.y].getLayer(layer), newGrh, true);
         }
@@ -55,9 +55,9 @@ public class BulkTileChangeCommand implements Command {
 
     @Override
     public void undo() {
-        for (Map.Entry<TilePos, Short> entry : oldTiles.entrySet()) {
+        for (Map.Entry<TilePos, Integer> entry : oldTiles.entrySet()) {
             TilePos pos = entry.getKey();
-            short oldGrh = entry.getValue();
+            int oldGrh = entry.getValue();
             GameData.mapData[pos.x][pos.y].getLayer(layer).setGrhIndex(oldGrh);
             initGrh(GameData.mapData[pos.x][pos.y].getLayer(layer), oldGrh, true);
         }

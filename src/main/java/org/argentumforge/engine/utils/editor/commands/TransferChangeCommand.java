@@ -7,12 +7,12 @@ import static org.argentumforge.engine.utils.GameData.mapData;
  */
 public class TransferChangeCommand implements Command {
     private final int x, y;
-    private final short oldExitMap, oldExitX, oldExitY;
-    private final short newExitMap, newExitX, newExitY;
+    private final int oldExitMap, oldExitX, oldExitY;
+    private final int newExitMap, newExitX, newExitY;
 
     public TransferChangeCommand(int x, int y,
-            short oldExitMap, short oldExitX, short oldExitY,
-            short newExitMap, short newExitX, short newExitY) {
+            int oldExitMap, int oldExitX, int oldExitY,
+            int newExitMap, int newExitX, int newExitY) {
         this.x = x;
         this.y = y;
         this.oldExitMap = oldExitMap;
@@ -33,7 +33,7 @@ public class TransferChangeCommand implements Command {
         apply(oldExitMap, oldExitX, oldExitY);
     }
 
-    private void apply(short exitMap, short exitX, short exitY) {
+    private void apply(int exitMap, int exitX, int exitY) {
         mapData[x][y].setExitMap(exitMap);
         mapData[x][y].setExitX(exitX);
         mapData[x][y].setExitY(exitY);

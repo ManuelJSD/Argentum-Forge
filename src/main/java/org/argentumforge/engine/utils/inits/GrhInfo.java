@@ -12,7 +12,7 @@ package org.argentumforge.engine.utils.inits;
  */
 public final class GrhInfo {
 
-    private short grhIndex;
+    private int grhIndex;
     private float frameCounter;
     private float speed;
     private boolean started;
@@ -37,12 +37,12 @@ public final class GrhInfo {
         this.angle = other.angle;
     }
 
-    public short getGrhIndex() {
+    public int getGrhIndex() {
         return grhIndex;
     }
 
     public void setGrhIndex(int grhIndex) {
-        this.grhIndex = (short) grhIndex;
+        this.grhIndex = grhIndex;
     }
 
     public float getFrameCounter() {

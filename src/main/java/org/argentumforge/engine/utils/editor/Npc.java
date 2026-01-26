@@ -90,24 +90,24 @@ public class Npc {
      */
     private void place(int x, int y) {
         if (mapData != null && x >= 0 && x < mapData.length && y >= 0 && y < mapData[0].length) {
-            short oldNpc = mapData[x][y].getNpcIndex();
-            if (oldNpc == (short) npcNumber)
+            int oldNpc = mapData[x][y].getNpcIndex();
+            if (oldNpc == npcNumber)
                 return;
 
             org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
                     new org.argentumforge.engine.utils.editor.commands.NpcChangeCommand(x, y, oldNpc,
-                            (short) npcNumber));
+                            npcNumber));
         }
     }
 
     private void remove(int x, int y) {
         if (mapData != null && x >= 0 && x < mapData.length && y >= 0 && y < mapData[0].length) {
-            short oldNpc = mapData[x][y].getNpcIndex();
+            int oldNpc = mapData[x][y].getNpcIndex();
             if (oldNpc == 0)
                 return;
 
             org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
-                    new org.argentumforge.engine.utils.editor.commands.NpcChangeCommand(x, y, oldNpc, (short) 0));
+                    new org.argentumforge.engine.utils.editor.commands.NpcChangeCommand(x, y, oldNpc, 0));
         }
     }
 
@@ -116,7 +116,7 @@ public class Npc {
      */
     private void pick(int x, int y) {
         if (mapData != null && x >= 0 && x < mapData.length && y >= 0 && y < mapData[0].length) {
-            short npcIdx = mapData[x][y].getNpcIndex();
+            int npcIdx = mapData[x][y].getNpcIndex();
             if (npcIdx > 0) {
                 this.npcNumber = npcIdx;
                 // Una vez capturado, volvemos a modo colocar con ese NPC
