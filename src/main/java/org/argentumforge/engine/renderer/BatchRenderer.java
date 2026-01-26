@@ -1,10 +1,10 @@
 package org.argentumforge.engine.renderer;
 
+import org.lwjgl.system.MemoryUtil;
+
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
-import org.lwjgl.BufferUtils;
-import org.lwjgl.system.MemoryUtil;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.*;
@@ -19,17 +19,12 @@ import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 import static org.lwjgl.opengl.GL30.*;
 
 /**
- * Clase Batch Renderer <br>
- * <br>
+ * Clase Batch Renderer <br> <br>
  *
- * Que es mas rapido? Hacer dibujos 1x1 o tener toda la info necesaria para
- * dibujar de una y una sola vez? <br>
- * <br>
+ * Que es mas rapido? Hacer dibujos 1x1 o tener toda la info necesaria para dibujar de una y una sola vez? <br> <br>
  *
- * Esto es lo que hace el batch rendering, antes de dibujar empieza a colocar
- * cada textura en su posicion
- * con su recorte, blend, color, etc. Para luego al momento de dibujar solo
- * tenga que hacerlo sabiendo donde se encuentra
+ * Esto es lo que hace el batch rendering, antes de dibujar empieza a colocar cada textura en su posicion
+ * con su recorte, blend, color, etc. Para luego al momento de dibujar solo tenga que hacerlo sabiendo donde se encuentra
  * cada textura y como tiene que estar.
  */
 public class BatchRenderer {
@@ -39,7 +34,7 @@ public class BatchRenderer {
 
     private static final int MAX_QUADS = 10000;
     private static final int VERTICES_PER_QUAD = 6;
-    private static final int FLOATS_PER_VERTEX = 8;
+    private static final int FLOATS_PER_VERTEX = 8; // la concha de tu madre.
 
     private int vao, vbo;
     private FloatBuffer buffer;
@@ -149,7 +144,15 @@ public class BatchRenderer {
         if (vertexCount == 0) return;
 
         buffer.flip();
+
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+        glBufferData(
+                GL_ARRAY_BUFFER,
+                buffer.capacity() * Float.BYTES,
+                GL_DYNAMIC_DRAW
+        );
+
         glBufferSubData(GL_ARRAY_BUFFER, 0, buffer);
 
         glBindVertexArray(vao);
@@ -199,5 +202,4 @@ public class BatchRenderer {
         glDeleteBuffers(vbo);
         glDeleteVertexArrays(vao);
     }
-
 }

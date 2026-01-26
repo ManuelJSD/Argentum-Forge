@@ -70,7 +70,7 @@ public final class Drawn {
         // hay que precargar todas las texturas xd....
         TextureManager.requestTexture(grh_index); // test
 
-        Texture tex = TextureManager.getTexture(grhData[grh_index].getFileNum());
+        final Texture tex = TextureManager.getTexture(grhData[grh_index].getFileNum());
         if (tex == null) return; // todavía no está lista
 
         float globalScale = org.argentumforge.engine.scenes.Camera.getZoomScale();

@@ -13,7 +13,6 @@ import java.nio.IntBuffer;
 import static org.argentumforge.engine.Engine.renderer;
 import static org.argentumforge.engine.game.models.Character.drawCharacter;
 import static org.argentumforge.engine.renderer.Drawn.drawTexture;
-import static org.argentumforge.engine.renderer.Renderer.batch;
 import static org.argentumforge.engine.utils.GameData.mapData;
 import static org.argentumforge.engine.utils.AssetRegistry.grhData;
 

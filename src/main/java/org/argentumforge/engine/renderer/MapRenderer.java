@@ -7,6 +7,8 @@ import org.argentumforge.engine.scenes.Camera;
 import org.argentumforge.engine.utils.editor.Selection;
 import org.argentumforge.engine.utils.editor.Selection.SelectedEntity;
 import org.argentumforge.engine.game.User;
+import org.argentumforge.engine.utils.inits.GrhInfo;
+import org.argentumforge.engine.utils.inits.MapData;
 
 import static org.argentumforge.engine.game.models.Character.drawCharacter;
 import static org.argentumforge.engine.renderer.Drawn.drawTexture;

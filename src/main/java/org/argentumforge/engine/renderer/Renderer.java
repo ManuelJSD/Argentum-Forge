@@ -16,7 +16,9 @@ public class Renderer {
     private final Shader shader;
     private Matrix4f projection;
 
-    public static final BatchRenderer batch = new BatchRenderer();
+    private static final BatchRenderer batch = new BatchRenderer();
+    private final FloatBuffer projBuf = MemoryUtil.memAllocFloat(16);
+    private final FloatBuffer viewBuf = MemoryUtil.memAllocFloat(16);
 
     public Renderer() {
         camera = new Camera2D(0, 0);
@@ -72,24 +74,23 @@ public class Renderer {
         int texLoc = glGetUniformLocation(shader.getId(), "uTexture");
         glUniform1i(texLoc, 0);
 
-        int projLoc = glGetUniformLocation(shader.getId(), "uProjection");
-        FloatBuffer projBuf = MemoryUtil.memAllocFloat(16);
-        projection.get(projBuf);
-        glUniformMatrix4fv(projLoc, false, projBuf);
-
-        int viewLoc = glGetUniformLocation(shader.getId(), "uView");
-        FloatBuffer viewBuf = MemoryUtil.memAllocFloat(16);
-        camera.getViewMatrix().get(viewBuf);
-        glUniformMatrix4fv(viewLoc, false, viewBuf);
+        setMatrices();
 
         batch.begin();
         scene.render();
         batch.end();
 
-        MemoryUtil.memFree(projBuf);
-        MemoryUtil.memFree(viewBuf);
-
         shader.unbind();
+    }
+
+    private void setMatrices() {
+        int projLoc = glGetUniformLocation(shader.getId(), "uProjection");
+        projection.get(projBuf);
+        glUniformMatrix4fv(projLoc, false, projBuf);
+
+        int viewLoc = glGetUniformLocation(shader.getId(), "uView");
+        camera.getViewMatrix().get(viewBuf);
+        glUniformMatrix4fv(viewLoc, false, viewBuf);
     }
 
     public void beginOffscreen(int width, int height) {
