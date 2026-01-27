@@ -6,6 +6,7 @@ import org.argentumforge.engine.game.console.Console;
 import org.argentumforge.engine.game.models.Direction;
 import org.argentumforge.engine.game.models.Key;
 import org.argentumforge.engine.gui.ImGUISystem;
+import org.argentumforge.engine.gui.components.ContextMenu;
 import org.argentumforge.engine.renderer.RGBColor;
 import org.argentumforge.engine.scenes.Camera;
 import org.argentumforge.engine.utils.editor.*;
@@ -94,31 +95,15 @@ public class EditorInputManager {
 
     private void handleRightClick(int x, int y) {
         boolean valid = isValidTile(x, y);
-        boolean active = transfer.isActive();
-        int exitMap = (valid) ? mapData[x][y].getExitMap() : -1;
 
-        // Permitir capturar si es válido Y (está activo O el editor está abierto)
-        org.argentumforge.engine.gui.forms.FTransferEditor editor = (org.argentumforge.engine.gui.forms.FTransferEditor) ImGUISystem.INSTANCE
-                .getForm(org.argentumforge.engine.gui.forms.FTransferEditor.class);
-        boolean isEditorOpen = (editor != null);
-
-        if (valid && exitMap > 0) {
-            int destMap = mapData[x][y].getExitMap();
-            int destX = mapData[x][y].getExitX();
-            int destY = mapData[x][y].getExitY();
-
-            Console.INSTANCE.addMsgToConsole(
-                    "Traslado: Mapa " + destMap + " (" + destX + ", " + destY + ")",
-                    REGULAR,
-                    new RGBColor(0f, 1f, 0f));
-
-            if (active || isEditorOpen) {
-                transfer.captureCoordinates(destMap, destX, destY);
-                if (editor != null) {
-                    editor.updateInputFields(destMap, destX, destY);
-                }
-            }
+        if (valid) {
+            ContextMenu.open(x, y);
         }
+
+        // Old Logic (Optional: Keep it if user wants immediate feedback when NO menu is
+        // desired?)
+        // Giving priority to menu as per request "Menu Contextual [...] al hacer clic
+        // derecho"
     }
 
     private void handleDoubleClick(int x, int y) {
