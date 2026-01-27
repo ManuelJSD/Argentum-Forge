@@ -35,6 +35,7 @@ import static org.lwjgl.glfw.GLFW.*;
 public final class FMain extends Form {
 
     private static final int TRANSPARENT_COLOR = Theme.TRANSPARENT;
+    private static final float STATUS_BAR_HEIGHT = 30.0f;
 
     private FSurfaceEditor surfaceEditor;
     private FBlockEditor blockEditor;
@@ -74,7 +75,7 @@ public final class FMain extends Form {
         // Setup DockSpace
         ImGuiViewport viewport = ImGui.getMainViewport();
         ImGui.setNextWindowPos(viewport.getPosX(), viewport.getPosY());
-        ImGui.setNextWindowSize(viewport.getSizeX(), viewport.getSizeY());
+        ImGui.setNextWindowSize(viewport.getSizeX(), viewport.getSizeY() - STATUS_BAR_HEIGHT);
         ImGui.setNextWindowViewport(viewport.getID());
 
         int windowFlags = ImGuiWindowFlags.MenuBar | ImGuiWindowFlags.NoDocking;
@@ -84,11 +85,12 @@ public final class FMain extends Form {
                 | ImGuiWindowFlags.NoBackground;
 
         ImGui.pushStyleVar(ImGuiStyleVar.WindowRounding, 0.0f);
-        ImGui.pushStyleVar(ImGuiStyleVar.WindowBorderSize, 0.0f);
+        // ImGui.pushStyleVar(ImGuiStyleVar.WindowBorderSize, 0.0f); // User requested
+        // border
         ImGui.pushStyleVar(ImGuiStyleVar.WindowPadding, 0.0f, 0.0f);
 
         ImGui.begin("DockSpace Demo", windowFlags);
-        ImGui.popStyleVar(3);
+        ImGui.popStyleVar(2);
 
         int dockspaceId = ImGui.getID("MyDockSpace");
         ImGui.dockSpace(dockspaceId, 0.0f, 0.0f, ImGuiDockNodeFlags.PassthruCentralNode);
@@ -195,7 +197,7 @@ public final class FMain extends Form {
     // Barra de estado inferior
     private void drawStatusBar() {
         // Altura de la barra
-        float statusHeight = 30;
+        float statusHeight = STATUS_BAR_HEIGHT;
         // Posición en la parte inferior de la ventana
         ImGui.setNextWindowPos(0, Window.INSTANCE.getHeight() - statusHeight);
         // Ancho completo
