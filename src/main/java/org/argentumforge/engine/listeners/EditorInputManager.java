@@ -62,7 +62,7 @@ public class EditorInputManager {
                 particle.particle_edit(x, y);
             }
 
-            if (MouseListener.mouseButtonDown(GLFW_MOUSE_BUTTON_RIGHT)) {
+            if (MouseListener.mouseButtonReleased(GLFW_MOUSE_BUTTON_RIGHT)) {
                 handleRightClick(x, y);
             }
 
@@ -93,17 +93,30 @@ public class EditorInputManager {
     }
 
     private void handleRightClick(int x, int y) {
-        if (isValidTile(x, y) && transfer.isActive() && mapData[x][y].getExitMap() > 0) {
+        boolean valid = isValidTile(x, y);
+        boolean active = transfer.isActive();
+        int exitMap = (valid) ? mapData[x][y].getExitMap() : -1;
+
+        // Permitir capturar si es válido Y (está activo O el editor está abierto)
+        org.argentumforge.engine.gui.forms.FTransferEditor editor = (org.argentumforge.engine.gui.forms.FTransferEditor) ImGUISystem.INSTANCE
+                .getForm(org.argentumforge.engine.gui.forms.FTransferEditor.class);
+        boolean isEditorOpen = (editor != null);
+
+        if (valid && exitMap > 0) {
             int destMap = mapData[x][y].getExitMap();
             int destX = mapData[x][y].getExitX();
             int destY = mapData[x][y].getExitY();
 
-            transfer.captureCoordinates(destMap, destX, destY);
+            Console.INSTANCE.addMsgToConsole(
+                    "Traslado: Mapa " + destMap + " (" + destX + ", " + destY + ")",
+                    REGULAR,
+                    new RGBColor(0f, 1f, 0f));
 
-            org.argentumforge.engine.gui.forms.FTransferEditor editor = (org.argentumforge.engine.gui.forms.FTransferEditor) ImGUISystem.INSTANCE
-                    .getForm(org.argentumforge.engine.gui.forms.FTransferEditor.class);
-            if (editor != null) {
-                editor.updateInputFields(destMap, destX, destY);
+            if (active || isEditorOpen) {
+                transfer.captureCoordinates(destMap, destX, destY);
+                if (editor != null) {
+                    editor.updateInputFields(destMap, destX, destY);
+                }
             }
         }
     }
