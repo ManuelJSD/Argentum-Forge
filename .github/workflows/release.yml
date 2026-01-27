@@ -30,6 +30,16 @@ jobs:
           # Remove 'v' prefix from tag (v1.0.0 -> 1.0.0)
           VERSION=${GITHUB_REF#refs/tags/v}
           echo "version=$VERSION" >> $GITHUB_OUTPUT
+          
+          # Check for prerelease keywords (beta, alpha, rc, etc.)
+          if [[ $VERSION =~ (beta|alpha|rc|preview) ]]; then
+            echo "is_prerelease=true" >> $GITHUB_OUTPUT
+            echo "Type: Pre-release"
+          else
+            echo "is_prerelease=false" >> $GITHUB_OUTPUT
+            echo "Type: Stable"
+          fi
+          
           echo "Version: $VERSION"
       
       - name: Update version in build.gradle
@@ -141,6 +151,6 @@ jobs:
             
             **Instalación completa**: Ver [README.md](https://github.com/${{ github.repository }}/blob/main/README.md)
           draft: false
-          prerelease: false
+          prerelease: ${{ steps.version.outputs.is_prerelease == 'true' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
