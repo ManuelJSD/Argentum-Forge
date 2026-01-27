@@ -16,7 +16,7 @@ java {
 // }
 
 group = 'org.argentumforge'
-version = '1.0.0-beta'
+version = '1.0.0-beta2'
 
 import org.gradle.internal.os.OperatingSystem
 
