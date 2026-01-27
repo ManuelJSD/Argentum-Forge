@@ -428,4 +428,9 @@ public final class GameScene extends Scene {
             }
         }
     }
+
+    @Override
+    public boolean isResizable() {
+        return true;
+    }
 }

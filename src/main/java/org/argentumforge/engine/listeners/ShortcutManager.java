@@ -129,6 +129,9 @@ public class ShortcutManager {
                 case GOTO_POS:
                     ImGUISystem.INSTANCE.show(new org.argentumforge.engine.gui.forms.FGoTo());
                     break;
+                case MAP_PROPERTIES:
+                    ImGUISystem.INSTANCE.show(new org.argentumforge.engine.gui.forms.FInfoMap());
+                    break;
                 default:
                     break;
             }

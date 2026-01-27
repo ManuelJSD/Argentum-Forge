@@ -52,7 +52,7 @@ public final class MapManager {
             MapSaveOptions opt = new MapSaveOptions();
             opt.version = 1;
             opt.useLongIndices = true;
-            opt.includeHeader = false;
+            opt.includeHeader = true;
             return opt;
         }
 
@@ -173,16 +173,7 @@ public final class MapManager {
                 javax.swing.JOptionPane.WARNING_MESSAGE);
 
         if (result == javax.swing.JOptionPane.YES_OPTION) {
-            // Intentar guardar en la última ruta conocida
-            String lastPath = org.argentumforge.engine.game.Options.INSTANCE.getLastMapPath();
-            if (lastPath != null && !lastPath.isEmpty() && new java.io.File(lastPath).exists()) {
-                saveMap(lastPath);
-                return true;
-            } else {
-                javax.swing.JOptionPane.showMessageDialog(null,
-                        "No se pudo autoguardar. Por favor, guarde el mapa manualmente.");
-                return false;
-            }
+            return MapFileUtils.quickSaveMap();
         } else if (result == javax.swing.JOptionPane.NO_OPTION) {
             return true; // Descartar cambios
         } else {
@@ -353,7 +344,10 @@ public final class MapManager {
         GameData.mapData = new MapData[width + 1][height + 1];
         for (int x = 0; x <= width; x++) {
             for (int y = 0; y <= height; y++) {
-                GameData.mapData[x][y] = new MapData();
+                MapData cell = new MapData();
+                // Inicializar Capa 1 con Grh 1 (Césped) por defecto
+                GameData.initGrh(cell.getLayer(1), 1, true);
+                GameData.mapData[x][y] = cell;
             }
         }
 
@@ -364,6 +358,10 @@ public final class MapManager {
         context.setLastChar(org.argentumforge.engine.game.models.Character.lastChar);
         context.setSaveOptions(MapSaveOptions.extended());
         GameData.setActiveContext(context);
+
+        // Limpiar recursos de renderizado anteriores
+        Surface.INSTANCE.deleteAllTextures();
+        org.argentumforge.engine.game.models.Character.eraseAllChars();
 
         // Reiniciar estado de modificaciones
         markAsSaved();

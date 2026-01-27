@@ -148,7 +148,7 @@ public final class FLauncher extends Form {
         user.setUserCharIndex(charIndex);
 
         if (newMap) {
-            GameData.createEmptyMap();
+            org.argentumforge.engine.utils.MapManager.createEmptyMap(100, 100);
         }
 
         charList[charIndex].getPos().setX(startX);

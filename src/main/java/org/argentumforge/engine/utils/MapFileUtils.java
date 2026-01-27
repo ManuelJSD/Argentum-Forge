@@ -69,7 +69,7 @@ public class MapFileUtils {
      * Abre un diálogo de selección de archivo para guardar el mapa actual (Guardar
      * Como).
      */
-    public static void saveMapAs() {
+    public static boolean saveMapAs() {
         final String[] selectedPath = { null };
         final MapManager.MapSaveOptions[] selectedOptions = { null };
 
@@ -121,30 +121,34 @@ public class MapFileUtils {
             });
         } catch (Exception e) {
             org.tinylog.Logger.error(e, "Error al guardar mapa");
+            return false;
         }
 
         if (selectedPath[0] != null && selectedOptions[0] != null) {
             // Guardar el mapa en el hilo principal con las opciones elegidas
             GameData.saveMap(selectedPath[0], selectedOptions[0]);
+            return true;
         }
+        return false;
     }
 
     /**
      * Guarda el mapa actual sin mostrar diálogo, si ya tiene ruta asociada.
      * Si no tiene ruta, llama a saveMapAs().
      */
-    public static void quickSaveMap() {
+    public static boolean quickSaveMap() {
         MapContext context = GameData.getActiveContext();
         if (context == null) {
             javax.swing.JOptionPane.showMessageDialog(null, I18n.INSTANCE.get("msg.noActiveMap"));
-            return;
+            return false;
         }
 
         if (context.getFilePath() == null || context.getFilePath().isEmpty()) {
-            saveMapAs();
+            return saveMapAs();
         } else {
             // Guardar directamente con las opciones actuales del contexto
             GameData.saveMap(context.getFilePath(), context.getSaveOptions());
+            return true;
         }
     }
 
@@ -225,7 +229,7 @@ public class MapFileUtils {
                     shortIdxRadio.setSelected(true);
                 } else if (idx == 1) { // Extended
                     versionSpinner.setValue(1);
-                    headerCheck.setSelected(false);
+                    headerCheck.setSelected(true);
                     longIdxRadio.setSelected(true);
                 } else if (idx == 2) { // AOLibre
                     versionSpinner.setValue(136);
@@ -251,7 +255,7 @@ public class MapFileUtils {
             // Initialize with correct preset
             if (initial.getVersion() == 1 && !initial.isUseLongIndices() && initial.isIncludeHeader()) {
                 presetCombo.setSelectedIndex(0);
-            } else if (initial.getVersion() == 1 && initial.isUseLongIndices() && !initial.isIncludeHeader()) {
+            } else if (initial.getVersion() == 1 && initial.isUseLongIndices() && initial.isIncludeHeader()) {
                 presetCombo.setSelectedIndex(1);
             } else if (initial.getVersion() == 136 && initial.isUseLongIndices() && initial.isIncludeHeader()) {
                 presetCombo.setSelectedIndex(2);

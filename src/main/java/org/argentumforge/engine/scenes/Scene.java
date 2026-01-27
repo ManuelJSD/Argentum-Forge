@@ -92,4 +92,12 @@ public abstract class Scene {
         return org.argentumforge.engine.game.Options.INSTANCE.getScreenHeight();
     }
 
+    /**
+     * Indica si la ventana puede ser redimensionada mientras esta escena está
+     * activa.
+     */
+    public boolean isResizable() {
+        return false;
+    }
+
 }

@@ -43,6 +43,10 @@ public final class Engine {
     /** Flag que indica si el motor está esperando la configuración inicial. */
     private static boolean isWaitingForSetup = false;
 
+    public static boolean isPrgRun() {
+        return prgRun;
+    }
+
     public static Scene getCurrentScene() {
         return currentScene;
     }
@@ -75,6 +79,7 @@ public final class Engine {
 
         // Inicializar Window y GUI siempre
         window.init();
+        window.setResizable(false); // Bloquear resize durante Wizard/Selector
         guiSystem.init();
 
         // Inicializar idioma por defecto (Español) para que la UI tenga texto
@@ -212,6 +217,9 @@ public final class Engine {
         if (preferredWidth != Window.INSTANCE.getWidth() || preferredHeight != Window.INSTANCE.getHeight()) {
             Window.INSTANCE.updateResolution(preferredWidth, preferredHeight);
         }
+
+        // Aplicar política de redimensionamiento de la escena
+        Window.INSTANCE.setResizable(currentScene.isResizable());
     }
 
     /**
