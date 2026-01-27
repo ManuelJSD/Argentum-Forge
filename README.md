@@ -128,7 +128,7 @@ See [.github/RELEASE_GUIDE.md](.github/RELEASE_GUIDE.md) for detailed instructio
 
 ## 📸 Screenshots
 
-<img width="1918" height="1078" alt="Argentum Forge Editor Interface" src="https://github.com/user-attachments/assets/f188b837-b803-4686-81f7-ed8f9d9b0b6e" />
+<img width="1918" height="1078" alt="image" src="https://github.com/user-attachments/assets/56c18ce3-7d06-4e36-81e4-163a41b642d1" />
 
 ## 🤝 How to Contribute
 
