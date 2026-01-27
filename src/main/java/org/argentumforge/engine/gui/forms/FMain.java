@@ -23,6 +23,7 @@ import org.argentumforge.engine.listeners.MouseListener;
 import org.argentumforge.engine.scenes.GameScene;
 import org.argentumforge.engine.listeners.EditorInputManager;
 import org.argentumforge.engine.scenes.Camera;
+import org.argentumforge.engine.gui.components.ContextMenu;
 import static org.lwjgl.glfw.GLFW.*;
 
 /**
@@ -117,6 +118,9 @@ public final class FMain extends Form {
         if (org.argentumforge.engine.utils.editor.MinimapColorGenerator.generating) {
             ImGui.openPopup(I18n.INSTANCE.get("msg.processingColors"));
         }
+
+        // Render Context Menu (always available to pop up)
+        ContextMenu.render();
 
         if (ImGui.beginPopupModal(I18n.INSTANCE.get("msg.processingColors"),
                 ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoTitleBar)) {
