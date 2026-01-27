@@ -17,6 +17,7 @@ public final class MapData {
     private int npcIndex;
     private boolean blocked;
     private int trigger;
+    private int particleIndex;
 
     // Tile Exit
     private int exitMap;
@@ -121,6 +122,14 @@ public final class MapData {
 
     public void setObjAmount(int objAmount) {
         this.objAmount = objAmount;
+    }
+
+    public int getParticleIndex() {
+        return particleIndex;
+    }
+
+    public void setParticleIndex(int particleIndex) {
+        this.particleIndex = particleIndex;
     }
 
 }

@@ -115,6 +115,7 @@ public final class MapManager {
 
         short version = (short) ((data[0] & 0xFF) | ((data[1] & 0xFF) << 8));
         options.setVersion(version);
+
         options.setIncludeHeader(true); // Asumimos cabecera por defecto en carga estándar
 
         if (version == 136 || data.length > 50000) {
@@ -418,6 +419,8 @@ public final class MapManager {
             GameData.reader.readShort();
         }
 
+        int particlesLoaded = 0;
+
         tileLoop: for (int y = 1; y <= 100; y++) {
             for (int x = 1; x <= 100; x++) {
                 if (!GameData.reader.hasRemaining(1))
@@ -488,12 +491,16 @@ public final class MapManager {
                 } else
                     GameData.mapData[x][y].setTrigger(0);
 
-                // Bit 32: Partículas (AOLibre/Versiones nuevas)
-                if ((byte) (byflags & 32) != 0) {
-                    // Según código VB6 (^[GS]^): Get FreeFileMap, , TempInt (As Integer = 2 bytes)
+                // Bit 5 (Valor 32): Partículas (AOLibre/Versiones nuevas)
+                if ((byflags & 32) != 0) {
                     if (!GameData.reader.hasRemaining(2))
                         break tileLoop;
-                    GameData.reader.readShort();
+                    int pId = GameData.reader.readShort();
+                    GameData.mapData[x][y].setParticleIndex(pId);
+                    if (pId > 0)
+                        particlesLoaded++;
+                } else {
+                    GameData.mapData[x][y].setParticleIndex(0);
                 }
 
                 GameData.mapData[x][y].getObjGrh().setGrhIndex(0);
@@ -501,6 +508,9 @@ public final class MapManager {
         }
 
         // Limpiar recursos de renderizado y entidades anteriores
+        if (particlesLoaded > 0) {
+            GameData.options.getRenderSettings().setShowParticles(true);
+        }
         Surface.INSTANCE.deleteAllTextures();
         eraseAllChars();
     }
@@ -661,7 +671,8 @@ public final class MapManager {
 
             // 2. Datos de tiles
             boolean useLongIndices = options.isUseLongIndices();
-            int estimatedSize = useLongIndices ? 200000 : 110000;
+            // Aumentamos buffer para evitar overflow (150KB para short, 250KB para long)
+            int estimatedSize = useLongIndices ? 250000 : 150000;
             java.nio.ByteBuffer bodyBuf = java.nio.ByteBuffer.allocate(estimatedSize);
             bodyBuf.order(java.nio.ByteOrder.LITTLE_ENDIAN);
 
@@ -678,6 +689,8 @@ public final class MapManager {
                         flags |= 8;
                     if (GameData.mapData[x][y].getTrigger() > 0)
                         flags |= 16;
+                    if (GameData.mapData[x][y].getParticleIndex() > 0)
+                        flags |= 32;
 
                     bodyBuf.put(flags);
 
@@ -712,6 +725,9 @@ public final class MapManager {
                     }
                     if ((flags & 16) != 0)
                         bodyBuf.putShort((short) GameData.mapData[x][y].getTrigger());
+
+                    if ((flags & 32) != 0)
+                        bodyBuf.putShort((short) GameData.mapData[x][y].getParticleIndex());
                 }
             }
 

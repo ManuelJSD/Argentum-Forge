@@ -29,6 +29,7 @@ public class EditorInputManager {
     private final Selection selection = Selection.getInstance();
     private final Trigger trigger = Trigger.getInstance();
     private final Transfer transfer = Transfer.getInstance();
+    private final Particle particle = Particle.getInstance();
     private final Camera camera;
 
     public EditorInputManager(Camera camera) {
@@ -58,6 +59,7 @@ public class EditorInputManager {
                 obj.obj_edit(x, y);
                 trigger.trigger_edit(x, y);
                 transfer.transfer_edit(x, y);
+                particle.particle_edit(x, y);
             }
 
             if (MouseListener.mouseButtonDown(GLFW_MOUSE_BUTTON_RIGHT)) {

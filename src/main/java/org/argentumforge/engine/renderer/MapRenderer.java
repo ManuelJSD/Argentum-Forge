@@ -278,7 +278,9 @@ public class MapRenderer {
     public void renderImGuiOverlays(int pixelOffsetX, int pixelOffsetY) {
         RenderSettings renderSettings = Options.INSTANCE.getRenderSettings();
         if (org.argentumforge.engine.utils.editor.Trigger.getInstance().isActive()
-                || renderSettings.getShowTriggers()) {
+                || renderSettings.getShowTriggers()
+                || org.argentumforge.engine.utils.editor.Particle.getInstance().isActive()
+                || renderSettings.getShowParticles()) {
 
             camera.setScreenY(camera.getMinYOffset() - TILE_BUFFER_SIZE);
             imgui.ImDrawList drawList = imgui.ImGui.getBackgroundDrawList();
@@ -290,19 +292,34 @@ public class MapRenderer {
                 camera.setScreenX(camera.getMinXOffset() - TILE_BUFFER_SIZE);
                 for (int x = camera.getMinX(); x <= camera.getMaxX(); x++) {
 
-                    if (mapData[x][y].getTrigger() > 0) {
+                    if (mapData[x][y].getTrigger() > 0 && renderSettings.getShowTriggers()) {
                         int screenX = POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX;
                         int screenY = POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY;
 
                         String idText = String.valueOf(mapData[x][y].getTrigger());
                         float textWidth = imgui.ImGui.calcTextSize(idText).x;
                         float textX = screenX + (TILE_PIXEL_SIZE - textWidth) / 2;
-                        float textY = screenY + (TILE_PIXEL_SIZE - 14) / 2;
+                        float textY = screenY + (TILE_PIXEL_SIZE - 28) / 2; // Arriba si hay partículas? No, centrado.
 
                         // Sombra Negra (offset +1)
                         drawList.addText(textX + 1, textY + 1, 0xFF000000, idText);
                         // Texto Blanco (con opacidad completa)
                         drawList.addText(textX, textY, 0xFFFFFFFF, idText);
+                    }
+
+                    if (mapData[x][y].getParticleIndex() > 0 && renderSettings.getShowParticles()) {
+                        int screenX = POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX;
+                        int screenY = POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY;
+
+                        String idText = "P" + mapData[x][y].getParticleIndex();
+                        float textWidth = imgui.ImGui.calcTextSize(idText).x;
+                        float textX = screenX + (TILE_PIXEL_SIZE - textWidth) / 2;
+                        float textY = screenY + (TILE_PIXEL_SIZE + 4) / 2; // Un poco más abajo que el centro
+
+                        // Sombra Negra (offset +1)
+                        drawList.addText(textX + 1, textY + 1, 0xFF000000, idText);
+                        // Texto Cian para partículas (Visible)
+                        drawList.addText(textX, textY, 0xFFFFFF00, idText);
                     }
                     camera.incrementScreenX();
                 }
