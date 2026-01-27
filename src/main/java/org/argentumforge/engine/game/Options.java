@@ -20,6 +20,7 @@ public enum Options {
     private boolean sound = true;
     private boolean fullscreen = false;
     private boolean vsync = true;
+    private boolean dockingEnabled = true;
     private boolean cursorGraphic = true;
     private String language = "es_ES";
     private String graphicsPath = "";
@@ -109,6 +110,7 @@ public enum Options {
             write(writer, "MusicPath", musicPath);
             write(writer, "Fullscreen", fullscreen);
             write(writer, "VSYNC", vsync);
+            write(writer, "DockingEnabled", dockingEnabled);
             write(writer, "CursorGraphic", cursorGraphic);
             write(writer, "Language", language);
             write(writer, "ScreenWidth", screenWidth);
@@ -182,6 +184,14 @@ public enum Options {
 
     public void setVsync(boolean vsync) {
         this.vsync = vsync;
+    }
+
+    public boolean isDockingEnabled() {
+        return dockingEnabled;
+    }
+
+    public void setDockingEnabled(boolean dockingEnabled) {
+        this.dockingEnabled = dockingEnabled;
     }
 
     public boolean isCursorGraphic() {
@@ -320,6 +330,7 @@ public enum Options {
             case "MusicPath" -> musicPath = value;
             case "Fullscreen" -> fullscreen = Boolean.parseBoolean(value);
             case "VSYNC" -> vsync = Boolean.parseBoolean(value);
+            case "DockingEnabled" -> dockingEnabled = Boolean.parseBoolean(value);
             case "CursorGraphic" -> cursorGraphic = Boolean.parseBoolean(value);
             case "Language" -> {
                 if ("es".equalsIgnoreCase(value)) {
