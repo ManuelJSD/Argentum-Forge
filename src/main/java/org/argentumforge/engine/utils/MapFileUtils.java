@@ -66,9 +66,10 @@ public class MapFileUtils {
     }
 
     /**
-     * Abre un diálogo de selección de archivo para guardar el mapa actual.
+     * Abre un diálogo de selección de archivo para guardar el mapa actual (Guardar
+     * Como).
      */
-    public static void saveMap() {
+    public static void saveMapAs() {
         final String[] selectedPath = { null };
         final MapManager.MapSaveOptions[] selectedOptions = { null };
 
@@ -81,7 +82,7 @@ public class MapFileUtils {
                 }
 
                 JFileChooser fileChooser = new JFileChooser();
-                fileChooser.setDialogTitle(I18n.INSTANCE.get("menu.file.save"));
+                fileChooser.setDialogTitle(I18n.INSTANCE.get("menu.file.saveAs"));
                 fileChooser.setFileFilter(new FileNameExtensionFilter("Archivos de Mapa (*.map)", "map"));
 
                 String lastPath = org.argentumforge.engine.game.Options.INSTANCE.getLastMapPath();
@@ -125,6 +126,25 @@ public class MapFileUtils {
         if (selectedPath[0] != null && selectedOptions[0] != null) {
             // Guardar el mapa en el hilo principal con las opciones elegidas
             GameData.saveMap(selectedPath[0], selectedOptions[0]);
+        }
+    }
+
+    /**
+     * Guarda el mapa actual sin mostrar diálogo, si ya tiene ruta asociada.
+     * Si no tiene ruta, llama a saveMapAs().
+     */
+    public static void quickSaveMap() {
+        MapContext context = GameData.getActiveContext();
+        if (context == null) {
+            javax.swing.JOptionPane.showMessageDialog(null, I18n.INSTANCE.get("msg.noActiveMap"));
+            return;
+        }
+
+        if (context.getFilePath() == null || context.getFilePath().isEmpty()) {
+            saveMapAs();
+        } else {
+            // Guardar directamente con las opciones actuales del contexto
+            GameData.saveMap(context.getFilePath(), context.getSaveOptions());
         }
     }
 

@@ -58,9 +58,13 @@ public class ShortcutManager {
         else if (KeyHandler.isKeyJustPressed(GLFW_KEY_0)) {
             Camera.setTileSize(32);
         }
-        // Guardar: Ctrl + S (Opcional, pero recomendado)
+        // Guardar: Ctrl + S / Ctrl + Shift + S
         else if (KeyHandler.isKeyJustPressed(GLFW_KEY_S)) {
-            MapFileUtils.saveMap();
+            if (KeyHandler.isKeyPressed(GLFW_KEY_LEFT_SHIFT) || KeyHandler.isKeyPressed(GLFW_KEY_RIGHT_SHIFT)) {
+                MapFileUtils.saveMapAs();
+            } else {
+                MapFileUtils.quickSaveMap();
+            }
         }
     }
 
