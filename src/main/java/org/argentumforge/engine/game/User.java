@@ -60,7 +60,7 @@ public enum User {
         final int tX = userPos.getX() + x;
         final int tY = userPos.getY() + y;
 
-        if (!(tX < minXBorder || tX > maxXBorder || tY < minYBorder || tY > maxYBorder)) {
+        if (!(tX < XMinMapSize || tX > XMaxMapSize || tY < YMinMapSize || tY > YMaxMapSize)) {
             addToUserPos.setX(x);
             userPos.setX(tX);
             addToUserPos.setY(y);
@@ -252,7 +252,7 @@ public enum User {
     }
 
     public void teleport(int x, int y) {
-        if (x < minXBorder || x > maxXBorder || y < minYBorder || y > maxYBorder)
+        if (x < XMinMapSize || x > XMaxMapSize || y < YMinMapSize || y > YMaxMapSize)
             return;
 
         userPos.setX(x);
@@ -284,7 +284,7 @@ public enum User {
      */
     private boolean moveToLegalPos(int x, int y) {
         // Limite del mapa
-        if (x < minXBorder || x > maxXBorder || y < minYBorder || y > maxYBorder)
+        if (x < XMinMapSize || x > XMaxMapSize || y < YMinMapSize || y > YMaxMapSize)
             return false;
 
         // ¿Modo caminata activo?
