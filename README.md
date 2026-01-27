@@ -128,7 +128,7 @@ See [.github/RELEASE_GUIDE.md](.github/RELEASE_GUIDE.md) for detailed instructio
 
 ## 📸 Screenshots
 
-<img width="1918" height="1078" alt="image" src="https://github.com/user-attachments/assets/56c18ce3-7d06-4e36-81e4-163a41b642d1" />
+<img width="1920" height="1081" alt="image" src="https://github.com/user-attachments/assets/234a6cf7-983a-4f12-a780-ac4429c9d746" />
 
 ## 🤝 How to Contribute
 
