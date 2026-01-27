@@ -2,7 +2,7 @@ package org.argentumforge.engine.utils;
 
 import org.argentumforge.engine.game.Options;
 import org.argentumforge.engine.game.models.Character;
-import org.argentumforge.engine.renderer.Surface;
+
 import org.argentumforge.engine.utils.inits.*;
 import org.tinylog.Logger;
 
@@ -13,8 +13,6 @@ import java.nio.file.Path;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.*;
-
-import static org.argentumforge.engine.game.models.Character.eraseAllChars;
 
 /**
  * Repositorio central de recursos y datos del editor.
@@ -1168,54 +1166,6 @@ public final class GameData {
      * Crea un mapa vacío de 100x100 tiles con un tile de base predeterminado (GRH
      * 1).
      */
-    public static void createEmptyMap() {
-        createEmptyMap((short) 1);
-    }
-
-    /**
-     * Crea un mapa vacío de 100x100 tiles utilizando el GRH especificado para la
-     * primera capa.
-     *
-     * @param baseLayer1GrhIndex Índice del GRH a usar como suelo base.
-     */
-    public static void createEmptyMap(int baseLayer1GrhIndex) {
-        mapData = new MapData[X_MAX_MAP_SIZE + 1][Y_MAX_MAP_SIZE + 1];
-
-        for (int y = Y_MIN_MAP_SIZE; y <= Y_MAX_MAP_SIZE; y++) {
-            for (int x = X_MIN_MAP_SIZE; x <= X_MAX_MAP_SIZE; x++) {
-                MapData cell = new MapData();
-                cell.setBlocked(false);
-                cell.setTrigger(0);
-                cell.setCharIndex(0);
-                cell.setNpcIndex((short) 0);
-
-                initGrhOrReset(cell.getLayer(1), baseLayer1GrhIndex, true);
-                initGrhOrReset(cell.getLayer(2), (short) 0, true);
-                initGrhOrReset(cell.getLayer(3), (short) 0, true);
-                initGrhOrReset(cell.getLayer(4), (short) 0, true);
-                initGrhOrReset(cell.getObjGrh(), (short) 0, false);
-
-                mapData[x][y] = cell;
-            }
-        }
-
-        Surface.INSTANCE.deleteAllTextures();
-        eraseAllChars();
-    }
-
-    private static void initGrhOrReset(GrhInfo grh, int grhIndex, boolean started) {
-        if (AssetRegistry.grhData != null && grhIndex >= 0 && grhIndex < AssetRegistry.grhData.length
-                && AssetRegistry.grhData[grhIndex] != null) {
-            initGrh(grh, grhIndex, started);
-            return;
-        }
-
-        grh.setGrhIndex(grhIndex);
-        grh.setStarted(false);
-        grh.setLoops(0);
-        grh.setFrameCounter(1);
-        grh.setSpeed(0.4f);
-    }
 
     /**
      * Carga los efectos visuales (FXs) desde el archivo "fxs.ind".

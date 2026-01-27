@@ -4,7 +4,6 @@ import imgui.type.ImBoolean;
 import imgui.ImGui;
 import imgui.ImGuiViewport;
 import imgui.flag.*;
-import org.argentumforge.engine.Window;
 import org.argentumforge.engine.game.console.Console;
 import org.argentumforge.engine.gui.ImGUISystem;
 import org.argentumforge.engine.renderer.RenderSettings;
@@ -74,7 +73,7 @@ public final class FMain extends Form {
     public void render() {
         // Setup DockSpace
         ImGuiViewport viewport = ImGui.getMainViewport();
-        ImGui.setNextWindowPos(viewport.getPosX(), viewport.getPosY());
+        ImGui.setNextWindowPos(0, 0);
         ImGui.setNextWindowSize(viewport.getSizeX(), viewport.getSizeY() - STATUS_BAR_HEIGHT);
         ImGui.setNextWindowViewport(viewport.getID());
 
@@ -148,8 +147,9 @@ public final class FMain extends Form {
         if (openMaps.isEmpty())
             return;
 
+        ImGuiViewport viewport = ImGui.getMainViewport();
         ImGui.setNextWindowPos(0, 19); // Debajo de la barra de menú Principal
-        ImGui.setNextWindowSize(Window.INSTANCE.getWidth(), 30);
+        ImGui.setNextWindowSize(viewport.getSizeX(), 30);
         if (ImGui.begin("WorkspaceTabsWindow", ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoBackground
                 | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoSavedSettings)) {
             if (ImGui.beginTabBar("##WorkspaceTabs", ImGuiTabBarFlags.AutoSelectNewTabs)) {
@@ -198,10 +198,11 @@ public final class FMain extends Form {
     private void drawStatusBar() {
         // Altura de la barra
         float statusHeight = STATUS_BAR_HEIGHT;
+        ImGuiViewport viewport = ImGui.getMainViewport();
         // Posición en la parte inferior de la ventana
-        ImGui.setNextWindowPos(0, Window.INSTANCE.getHeight() - statusHeight);
+        ImGui.setNextWindowPos(0, viewport.getSizeY() - statusHeight);
         // Ancho completo
-        ImGui.setNextWindowSize(Window.INSTANCE.getWidth(), statusHeight);
+        ImGui.setNextWindowSize(viewport.getSizeX(), statusHeight);
 
         // Estilo: Fondo oscuro, sin bordes ni decoraciones
         ImGui.pushStyleColor(ImGuiCol.WindowBg, 0.1f, 0.1f, 0.1f, 0.9f);
@@ -261,8 +262,9 @@ public final class FMain extends Form {
 
     // Botones principales
     private void drawButtons() {
+        ImGuiViewport viewport = ImGui.getMainViewport();
         ImGui.setNextWindowPos(0, 49);
-        ImGui.setNextWindowSize(1000, 60); // Aumentado para evitar que los botones se corten
+        ImGui.setNextWindowSize(viewport.getSizeX(), 60); // Ajustado al ancho del viewport
         if (ImGui.begin("ToolBar", ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoBackground
                 | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoSavedSettings)) {
             drawEditorButtons();
@@ -587,7 +589,7 @@ public final class FMain extends Form {
              */
 
             if (ImGui.beginMenu(I18n.INSTANCE.get("menu.map"))) {
-                if (ImGui.menuItem(I18n.INSTANCE.get("menu.map.properties"))) {
+                if (ImGui.menuItem(I18n.INSTANCE.get("menu.map.properties"), "F6")) {
                     ImGUISystem.INSTANCE.show(new FInfoMap());
                 }
 

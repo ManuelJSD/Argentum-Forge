@@ -122,6 +122,19 @@ public enum Window {
         glfwSetMouseButtonCallback(window, MouseListener::mouseButtonCallback);
         glfwSetScrollCallback(window, MouseListener::mouseScrollCallback);
         glfwSetKeyCallback(window, KeyHandler::keyCallback);
+        glfwSetWindowCloseCallback(window, (win) -> {
+            Engine.closeClient();
+            if (Engine.isPrgRun()) {
+                glfwSetWindowShouldClose(win, false);
+            }
+        });
+        glfwSetWindowSizeCallback(window, (win, w, h) -> {
+            this.updateResolution(w, h, true);
+        });
+        glfwSetFramebufferSizeCallback(window, (win, w, h) -> {
+            glViewport(0, 0, w, h);
+            setupGameProjection();
+        });
 
         // Get the thread stack and push a new frame
         try (MemoryStack stack = stackPush()) {
@@ -269,6 +282,10 @@ public enum Window {
     }
 
     public void updateResolution(int width, int height) {
+        updateResolution(width, height, false);
+    }
+
+    public void updateResolution(int width, int height, boolean fromCallback) {
         this.width = width;
         this.height = height;
         SCREEN_WIDTH = width;
@@ -277,20 +294,22 @@ public enum Window {
         // Actualizar constantes de camara
         org.argentumforge.engine.scenes.Camera.updateConstants();
 
-        // Actualizar ventana GLFW
-        glfwSetWindowSize(window, width, height);
+        // Solo actualizar la ventana GLFW si no viene de un evento de la misma
+        if (!fromCallback) {
+            glfwSetWindowSize(window, width, height);
 
-        // Centrar ventana si no es fullscreen
-        if (!options.isFullscreen()) {
-            try (MemoryStack stack = stackPush()) {
-                IntBuffer pWidth = stack.mallocInt(1);
-                IntBuffer pHeight = stack.mallocInt(1);
-                glfwGetWindowSize(window, pWidth, pHeight);
-                GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-                glfwSetWindowPos(
-                        window,
-                        (vidmode.width() - pWidth.get(0)) / 2,
-                        (vidmode.height() - pHeight.get(0)) / 2);
+            // Centrar ventana si no es fullscreen ni está maximizada
+            if (!options.isFullscreen() && glfwGetWindowAttrib(window, GLFW_MAXIMIZED) == GLFW_FALSE) {
+                try (MemoryStack stack = stackPush()) {
+                    IntBuffer pWidth = stack.mallocInt(1);
+                    IntBuffer pHeight = stack.mallocInt(1);
+                    glfwGetWindowSize(window, pWidth, pHeight);
+                    GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+                    glfwSetWindowPos(
+                            window,
+                            (vidmode.width() - pWidth.get(0)) / 2,
+                            (vidmode.height() - pHeight.get(0)) / 2);
+                }
             }
         }
 
@@ -382,6 +401,13 @@ public enum Window {
 
     public int getHeight() {
         return height;
+    }
+
+    /**
+     * Cambia dinámicamente si la ventana permite el redimensionamiento.
+     */
+    public void setResizable(boolean resizable) {
+        glfwSetWindowAttrib(window, GLFW_RESIZABLE, resizable ? GLFW_TRUE : GLFW_FALSE);
     }
 
     public boolean isCursorCrosshair() {

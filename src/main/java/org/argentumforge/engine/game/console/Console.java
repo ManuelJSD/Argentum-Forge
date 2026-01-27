@@ -5,6 +5,7 @@ import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiCond;
 import imgui.flag.ImGuiWindowFlags;
+import imgui.ImGuiViewport;
 import org.argentumforge.engine.renderer.RGBColor;
 
 import java.util.ArrayList;
@@ -150,7 +151,8 @@ public enum Console {
         if (data.size() > MAX_SIZE_DATA)
             clearConsole();
 
-        ImGui.setNextWindowPos(10, org.argentumforge.engine.Window.INSTANCE.getHeight() - CONSOLE_HEIGHT - 10);
+        ImGuiViewport viewport = ImGui.getMainViewport();
+        ImGui.setNextWindowPos(10, viewport.getSizeY() - CONSOLE_HEIGHT - 10);
         ImGui.setNextWindowSize(CONSOLE_WIDTH, CONSOLE_HEIGHT, ImGuiCond.Once);
         ImGui.begin("console", ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoResize
                 | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoInputs);

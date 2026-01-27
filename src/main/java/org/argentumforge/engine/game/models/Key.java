@@ -39,6 +39,7 @@ public enum Key {
     GOTO_POS(GLFW_KEY_F4),
     MULTI_SELECT(GLFW_KEY_LEFT_SHIFT),
     EXIT_GAME(GLFW_KEY_ESCAPE),
+    MAP_PROPERTIES(GLFW_KEY_F6),
 
     // Herramientas de Editor
     TOOL_BRUSH(GLFW_KEY_B),
