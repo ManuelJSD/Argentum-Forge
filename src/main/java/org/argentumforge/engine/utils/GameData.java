@@ -1056,6 +1056,16 @@ public final class GameData {
         MapManager.saveMap(filePath);
     }
 
+    /**
+     * Guarda el mapa actual en la ruta y formato especificados.
+     *
+     * @param filePath Ruta absoluta al fichero .map de destino.
+     * @param options  Opciones de guardado.
+     */
+    public static void saveMap(String filePath, MapManager.MapSaveOptions options) {
+        MapManager.saveMap(filePath, options);
+    }
+
     static short nextOpenChar() {
         for (short i = 1; i < charList.length; i++) {
             if (!charList[i].isActive()) {
@@ -1085,7 +1095,8 @@ public final class GameData {
             System.err.println("Could not load mapa" + numMap + " data from: " + mapPath);
             return;
         }
-        MapManager.initMap(data);
+        MapManager.MapSaveOptions options = MapManager.detectSaveOptions(data);
+        MapManager.initMap(data, options);
     }
 
     /**

@@ -11,6 +11,9 @@ import org.argentumforge.engine.game.Options;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.File;
+import java.awt.*;
+import java.awt.event.ActionListener;
+import org.argentumforge.engine.i18n.I18n;
 
 public class MapFileUtils {
 
@@ -66,7 +69,9 @@ public class MapFileUtils {
      * Abre un diálogo de selección de archivo para guardar el mapa actual.
      */
     public static void saveMap() {
-        final File[] selectedFileBox = { null };
+        final String[] selectedPath = { null };
+        final MapManager.MapSaveOptions[] selectedOptions = { null };
+
         try {
             SwingUtilities.invokeAndWait(() -> {
                 try {
@@ -76,13 +81,23 @@ public class MapFileUtils {
                 }
 
                 JFileChooser fileChooser = new JFileChooser();
-                fileChooser.setDialogTitle("Guardar Mapa");
+                fileChooser.setDialogTitle(I18n.INSTANCE.get("menu.file.save"));
                 fileChooser.setFileFilter(new FileNameExtensionFilter("Archivos de Mapa (*.map)", "map"));
 
-                String lastPath = Options.INSTANCE.getLastMapPath();
+                String lastPath = org.argentumforge.engine.game.Options.INSTANCE.getLastMapPath();
                 if (lastPath != null && !lastPath.isEmpty()) {
                     fileChooser.setCurrentDirectory(new File(lastPath));
                 }
+
+                // Obtener opciones actuales del contexto para preestablecer la UI
+                MapManager.MapSaveOptions currentOpts = MapManager.MapSaveOptions.standard();
+                MapContext context = GameData.getActiveContext();
+                if (context != null && context.getSaveOptions() != null) {
+                    currentOpts = context.getSaveOptions();
+                }
+
+                SaveOptionsPanel accessory = new SaveOptionsPanel(currentOpts);
+                fileChooser.setAccessory(accessory);
 
                 int returnVal = fileChooser.showSaveDialog(null);
 
@@ -95,21 +110,142 @@ public class MapFileUtils {
                         path += ".map";
                     }
 
-                    // Guardar el último directorio utilizado
-                    Options.INSTANCE.setLastMapPath(f.getParent());
-                    Options.INSTANCE.save();
+                    selectedPath[0] = path;
+                    selectedOptions[0] = accessory.getOptions();
 
-                    // Usamos el archivo con la extensión corregida
-                    selectedFileBox[0] = new File(path);
+                    // Guardar el último directorio utilizado
+                    org.argentumforge.engine.game.Options.INSTANCE.setLastMapPath(new File(path).getParent());
+                    org.argentumforge.engine.game.Options.INSTANCE.save();
                 }
             });
         } catch (Exception e) {
             org.tinylog.Logger.error(e, "Error al guardar mapa");
         }
 
-        if (selectedFileBox[0] != null) {
-            // Guardar el mapa en el hilo principal
-            GameData.saveMap(selectedFileBox[0].getAbsolutePath());
+        if (selectedPath[0] != null && selectedOptions[0] != null) {
+            // Guardar el mapa en el hilo principal con las opciones elegidas
+            GameData.saveMap(selectedPath[0], selectedOptions[0]);
+        }
+    }
+
+    /**
+     * Panel de accesorios para JFileChooser que permite configurar el formato de
+     * guardado.
+     */
+    private static class SaveOptionsPanel extends JPanel {
+        private final JComboBox<String> presetCombo;
+        private final JCheckBox headerCheck;
+        private final JRadioButton shortIdxRadio;
+        private final JRadioButton longIdxRadio;
+        private final JSpinner versionSpinner;
+        private boolean isUpdating = false;
+
+        public SaveOptionsPanel(MapManager.MapSaveOptions initial) {
+            setLayout(new GridBagLayout());
+            setBorder(BorderFactory.createTitledBorder(I18n.INSTANCE.get("map.save.format.title")));
+            GridBagConstraints gbc = new GridBagConstraints();
+            gbc.insets = new Insets(5, 5, 5, 5);
+            gbc.fill = GridBagConstraints.HORIZONTAL;
+            gbc.gridx = 0;
+            gbc.gridy = 0;
+
+            // Presets
+            add(new JLabel(I18n.INSTANCE.get("map.save.option.preset") + ":"), gbc);
+            gbc.gridy++;
+            presetCombo = new JComboBox<>(new String[] {
+                    I18n.INSTANCE.get("map.save.format.standard"),
+                    I18n.INSTANCE.get("map.save.format.extended"),
+                    I18n.INSTANCE.get("map.save.format.aolibre"),
+                    I18n.INSTANCE.get("map.save.option.custom")
+            });
+            add(presetCombo, gbc);
+
+            gbc.gridy++;
+            add(new JSeparator(), gbc);
+
+            // Version
+            gbc.gridy++;
+            add(new JLabel(I18n.INSTANCE.get("map.save.option.version") + ":"), gbc);
+            gbc.gridy++;
+            versionSpinner = new JSpinner(new SpinnerNumberModel(initial.getVersion(), 0, 32767, 1));
+            add(versionSpinner, gbc);
+
+            // Header checkbox
+            gbc.gridy++;
+            headerCheck = new JCheckBox(I18n.INSTANCE.get("map.save.option.header"), initial.isIncludeHeader());
+            add(headerCheck, gbc);
+
+            // Index Size
+            gbc.gridy++;
+            add(new JLabel(I18n.INSTANCE.get("map.save.option.indices") + ":"), gbc);
+            gbc.gridy++;
+            shortIdxRadio = new JRadioButton(I18n.INSTANCE.get("map.save.option.indices.short"),
+                    !initial.isUseLongIndices());
+            shortIdxRadio.setToolTipText("Integer - VB6 Compatible (2 bytes)");
+            longIdxRadio = new JRadioButton(I18n.INSTANCE.get("map.save.option.indices.long"),
+                    initial.isUseLongIndices());
+            longIdxRadio.setToolTipText("Long - Modern / 32-bit (4 bytes)");
+            ButtonGroup bg = new ButtonGroup();
+            bg.add(shortIdxRadio);
+            bg.add(longIdxRadio);
+            JPanel radioPanel = new JPanel(new GridLayout(1, 2));
+            radioPanel.add(shortIdxRadio);
+            radioPanel.add(longIdxRadio);
+            add(radioPanel, gbc);
+
+            // Logic to update UI based on Preset
+            presetCombo.addActionListener(e -> {
+                if (isUpdating)
+                    return;
+                isUpdating = true;
+                int idx = presetCombo.getSelectedIndex();
+                if (idx == 0) { // Standard
+                    versionSpinner.setValue(1);
+                    headerCheck.setSelected(true);
+                    shortIdxRadio.setSelected(true);
+                } else if (idx == 1) { // Extended
+                    versionSpinner.setValue(1);
+                    headerCheck.setSelected(false);
+                    longIdxRadio.setSelected(true);
+                } else if (idx == 2) { // AOLibre
+                    versionSpinner.setValue(136);
+                    headerCheck.setSelected(true);
+                    longIdxRadio.setSelected(true);
+                }
+                isUpdating = false;
+            });
+
+            // If any individual component changes, switch preset to Custom
+            ActionListener customListener = e -> {
+                if (!isUpdating)
+                    presetCombo.setSelectedIndex(3);
+            };
+            headerCheck.addActionListener(customListener);
+            shortIdxRadio.addActionListener(customListener);
+            longIdxRadio.addActionListener(customListener);
+            versionSpinner.addChangeListener(e -> {
+                if (!isUpdating)
+                    presetCombo.setSelectedIndex(3);
+            });
+
+            // Initialize with correct preset
+            if (initial.getVersion() == 1 && !initial.isUseLongIndices() && initial.isIncludeHeader()) {
+                presetCombo.setSelectedIndex(0);
+            } else if (initial.getVersion() == 1 && initial.isUseLongIndices() && !initial.isIncludeHeader()) {
+                presetCombo.setSelectedIndex(1);
+            } else if (initial.getVersion() == 136 && initial.isUseLongIndices() && initial.isIncludeHeader()) {
+                presetCombo.setSelectedIndex(2);
+            } else {
+                presetCombo.setSelectedIndex(3);
+            }
+        }
+
+        public MapManager.MapSaveOptions getOptions() {
+            MapManager.MapSaveOptions opt = new MapManager.MapSaveOptions();
+            opt.setVersion(((Number) versionSpinner.getValue()).shortValue());
+            opt.setIncludeHeader(headerCheck.isSelected());
+            opt.setUseLongIndices(longIdxRadio.isSelected());
+            return opt;
         }
     }
 }

@@ -17,6 +17,7 @@ public class MapContext {
     private Character[] charList;
     private boolean modified = false;
     private short lastChar = 0;
+    private MapManager.MapSaveOptions saveOptions = MapManager.MapSaveOptions.standard();
     private final Stack<Command> undoStack = new Stack<>();
     private final Stack<Command> redoStack = new Stack<>();
 
@@ -25,6 +26,14 @@ public class MapContext {
         this.mapData = mapData;
         this.mapProperties = mapProperties;
         this.charList = charList;
+    }
+
+    public MapManager.MapSaveOptions getSaveOptions() {
+        return saveOptions;
+    }
+
+    public void setSaveOptions(MapManager.MapSaveOptions saveOptions) {
+        this.saveOptions = saveOptions;
     }
 
     public String getFilePath() {

@@ -25,6 +25,107 @@ public final class MapManager {
     }
 
     /**
+     * Opciones detalladas para el guardado del mapa.
+     */
+    public static class MapSaveOptions {
+        private short version = 1;
+        private boolean useLongIndices = false;
+        private boolean includeHeader = true;
+
+        public static MapSaveOptions standard() {
+            MapSaveOptions opt = new MapSaveOptions();
+            opt.version = 1;
+            opt.useLongIndices = false;
+            opt.includeHeader = true;
+            return opt;
+        }
+
+        public static MapSaveOptions aoLibre() {
+            MapSaveOptions opt = new MapSaveOptions();
+            opt.version = 136;
+            opt.useLongIndices = true;
+            opt.includeHeader = true;
+            return opt;
+        }
+
+        public static MapSaveOptions extended() {
+            MapSaveOptions opt = new MapSaveOptions();
+            opt.version = 1;
+            opt.useLongIndices = true;
+            opt.includeHeader = false;
+            return opt;
+        }
+
+        public short getVersion() {
+            return version;
+        }
+
+        public void setVersion(short version) {
+            this.version = version;
+        }
+
+        public boolean isUseLongIndices() {
+            return useLongIndices;
+        }
+
+        public void setUseLongIndices(boolean useLongIndices) {
+            this.useLongIndices = useLongIndices;
+        }
+
+        public boolean isIncludeHeader() {
+            return includeHeader;
+        }
+
+        public void setIncludeHeader(boolean includeHeader) {
+            this.includeHeader = includeHeader;
+        }
+    }
+
+    /**
+     * Carga un mapa por su número desde los recursos empaquetados.
+     *
+     * @param numMap Número del mapa a cargar.
+     */
+    public static void loadMap(int numMap) {
+        Path mapPath = Path.of("resources", "maps", "mapa" + numMap + ".map");
+        byte[] data = null;
+        try {
+            if (Files.exists(mapPath)) {
+                data = Files.readAllBytes(mapPath);
+            }
+        } catch (IOException e) {
+            System.err.println("Error reading map file: " + e.getMessage());
+        }
+
+        if (data == null) {
+            System.err.println("Could not load mapa" + numMap + " data from: " + mapPath);
+            return;
+        }
+        MapSaveOptions detectedOptions = detectSaveOptions(data);
+        initMap(data, detectedOptions);
+    }
+
+    /**
+     * Estima las opciones de guardado originales basándose en los datos cargados.
+     */
+    public static MapSaveOptions detectSaveOptions(byte[] data) {
+        MapSaveOptions options = new MapSaveOptions();
+        if (data.length < 2)
+            return options;
+
+        short version = (short) ((data[0] & 0xFF) | ((data[1] & 0xFF) << 8));
+        options.setVersion(version);
+        options.setIncludeHeader(true); // Asumimos cabecera por defecto en carga estándar
+
+        if (version == 136 || data.length > 50000) {
+            options.setUseLongIndices(true);
+        } else {
+            options.setUseLongIndices(false);
+        }
+        return options;
+    }
+
+    /**
      * Marca el mapa como modificado para el prompt de guardado.
      */
     public static void markAsModified() {
@@ -124,7 +225,8 @@ public final class MapManager {
 
             // Cargar archivo principal de capas (.map)
             byte[] data = Files.readAllBytes(Path.of(filePath));
-            initMap(data);
+            MapSaveOptions detectedOptions = detectSaveOptions(data);
+            initMap(data, detectedOptions);
 
             // Preparar para buscar archivos complementarios (.inf y .dat)
             String basePath = filePath.substring(0, filePath.lastIndexOf('.'));
@@ -149,6 +251,7 @@ public final class MapManager {
             // Crear el contexto y registrarlo
             MapContext context = new MapContext(filePath, GameData.mapData, GameData.mapProperties, GameData.charList);
             context.setLastChar(org.argentumforge.engine.game.models.Character.lastChar);
+            context.setSaveOptions(detectedOptions);
             GameData.setActiveContext(context);
 
             // Reiniciar estado de modificaciones
@@ -168,11 +271,34 @@ public final class MapManager {
      * @param filePath Ruta absoluta al archivo .map de destino.
      */
     public static void saveMap(String filePath) {
-        Logger.info("Guardando mapa en: {}", filePath);
+        // Usar formato del contexto si existe, de lo contrario STANDARD
+        MapSaveOptions options = MapSaveOptions.standard();
+        MapContext context = GameData.getActiveContext();
+        if (context != null && context.getSaveOptions() != null) {
+            options = context.getSaveOptions();
+        }
+        saveMap(filePath, options);
+    }
+
+    /**
+     * Guarda el estado actual del mapa en disco en el formato especificado.
+     * 
+     * @param filePath Ruta absoluta al archivo .map de destino.
+     * @param options  Opciones de guardado.
+     */
+    public static void saveMap(String filePath, MapSaveOptions options) {
+        Logger.info("Guardando mapa en: {} (V:{}, LongIndices: {}, Header: {})",
+                filePath, options.getVersion(), options.isUseLongIndices(), options.isIncludeHeader());
+
+        MapContext context = GameData.getActiveContext();
+        if (context != null) {
+            context.setSaveOptions(options);
+            context.setFilePath(filePath);
+        }
 
         try {
             // Guardar datos de capas (.map)
-            saveMapData(filePath);
+            saveMapData(filePath, options);
 
             String basePath = filePath.substring(0, filePath.lastIndexOf('.'));
             String datPath = basePath + ".dat";
@@ -233,10 +359,9 @@ public final class MapManager {
         // Resetear propiedades del mapa
         GameData.mapProperties = new MapProperties();
 
-        // Crear contexto sin ruta (Sin Título)
-        // Crear contexto sin ruta (Sin Título)
         MapContext context = new MapContext("", GameData.mapData, GameData.mapProperties, GameData.charList);
         context.setLastChar(org.argentumforge.engine.game.models.Character.lastChar);
+        context.setSaveOptions(MapSaveOptions.extended());
         GameData.setActiveContext(context);
 
         // Reiniciar estado de modificaciones
@@ -250,9 +375,10 @@ public final class MapManager {
      * Procesa los datos binarios del archivo .map para inicializar la rejilla.
      * Lee cabeceras, flags de tile, capas de gráficos, bloqueos y triggers base.
      *
-     * @param data Contenido binario del archivo .map.
+     * @param data    Contenido binario del archivo .map.
+     * @param options Opciones de guardado inferidas.
      */
-    static void initMap(byte[] data) {
+    static void initMap(byte[] data, MapSaveOptions options) {
         GameData.reader.init(data);
 
         GameData.mapData = new MapData[GameData.X_MAX_MAP_SIZE + 1][GameData.Y_MAX_MAP_SIZE + 1];
@@ -274,30 +400,15 @@ public final class MapManager {
         }
         Logger.info("Mapa: tamaño={}, versión={}, bytes=[{}]", data.length, mapversion, sb.toString().trim());
 
-        if (GameData.reader.hasRemaining(263)) {
+        if (options.isIncludeHeader() && GameData.reader.hasRemaining(263)) {
             GameData.reader.skipBytes(263);
         }
 
-        // Detectar si el mapa usa índices de 4 bytes (AOLibre/Versiones nuevas)
-        // Por defecto 2 bytes (short). Los mapas de AOLibre versión 136 suelen ser de 4
-        // bytes.
-        boolean useLongIndices = false;
-
-        // Si la versión es conocida para 4 bytes (ej: 7 en algunos mods específicos,
-        // 136 en AOLibre)
-        // o si el archivo es masivamente grande (AOLibre suele pesar >50KB para
-        // 100x100).
-        if (mapversion == 7 || mapversion == 10 || mapversion == 136) {
-            useLongIndices = true;
-            Logger.info("Detectado mapa AOLibre (V:{}), usando índices de 4 bytes.", mapversion);
-        } else if (data.length > 50000) {
-            useLongIndices = true;
-            Logger.info("Buffer de mapa indicativo de AOLibre por tamaño ({}), usando 4 bytes.", data.length);
-        }
+        boolean useLongIndices = options.isUseLongIndices();
+        int indexSize = useLongIndices ? 4 : 2;
 
         byte byflags;
         byte bloq;
-        int indexSize = useLongIndices ? 4 : 2;
 
         // Saltar campos no utilizados en el editor
         if (GameData.reader.hasRemaining(8)) {
@@ -528,26 +639,30 @@ public final class MapManager {
     /**
      * Serializa las capas y bloqueos del mapa en formato binario (.map).
      */
-    private static void saveMapData(String filePath) throws IOException {
+    private static void saveMapData(String filePath, MapSaveOptions options) throws IOException {
         try (FileOutputStream fos = new FileOutputStream(filePath)) {
             java.nio.channels.FileChannel channel = fos.getChannel();
 
-            // 1. Cabecera (273 bytes)
-            java.nio.ByteBuffer headerBuf = java.nio.ByteBuffer.allocate(273);
-            headerBuf.order(java.nio.ByteOrder.LITTLE_ENDIAN);
+            // 1. Cabecera (273 bytes) si está habilitada
+            if (options.isIncludeHeader()) {
+                java.nio.ByteBuffer headerBuf = java.nio.ByteBuffer.allocate(273);
+                headerBuf.order(java.nio.ByteOrder.LITTLE_ENDIAN);
 
-            headerBuf.putShort((short) 1); // Versión del mapa
-            headerBuf.put(new byte[263]); // Relleno cabecera
-            headerBuf.putShort((short) 0);
-            headerBuf.putShort((short) 0);
-            headerBuf.putShort((short) 0);
-            headerBuf.putShort((short) 0);
+                headerBuf.putShort(options.getVersion()); // Versión del mapa
+                headerBuf.put(new byte[263]); // Relleno cabecera
+                headerBuf.putShort((short) 0);
+                headerBuf.putShort((short) 0);
+                headerBuf.putShort((short) 0);
+                headerBuf.putShort((short) 0);
 
-            headerBuf.flip();
-            channel.write(headerBuf);
+                headerBuf.flip();
+                channel.write(headerBuf);
+            }
 
             // 2. Datos de tiles
-            java.nio.ByteBuffer bodyBuf = java.nio.ByteBuffer.allocate(110000);
+            boolean useLongIndices = options.isUseLongIndices();
+            int estimatedSize = useLongIndices ? 200000 : 110000;
+            java.nio.ByteBuffer bodyBuf = java.nio.ByteBuffer.allocate(estimatedSize);
             bodyBuf.order(java.nio.ByteOrder.LITTLE_ENDIAN);
 
             for (int y = GameData.Y_MIN_MAP_SIZE; y <= GameData.Y_MAX_MAP_SIZE; y++) {
@@ -565,14 +680,36 @@ public final class MapManager {
                         flags |= 16;
 
                     bodyBuf.put(flags);
-                    bodyBuf.putShort((short) GameData.mapData[x][y].getLayer(1).getGrhIndex());
 
-                    if ((flags & 2) != 0)
-                        bodyBuf.putShort((short) GameData.mapData[x][y].getLayer(2).getGrhIndex());
-                    if ((flags & 4) != 0)
-                        bodyBuf.putShort((short) GameData.mapData[x][y].getLayer(3).getGrhIndex());
-                    if ((flags & 8) != 0)
-                        bodyBuf.putShort((short) GameData.mapData[x][y].getLayer(4).getGrhIndex());
+                    // Capa 1
+                    int grh1 = GameData.mapData[x][y].getLayer(1).getGrhIndex();
+                    if (!useLongIndices) {
+                        bodyBuf.putShort((short) grh1);
+                    } else {
+                        bodyBuf.putInt(grh1);
+                    }
+
+                    if ((flags & 2) != 0) {
+                        int grh = GameData.mapData[x][y].getLayer(2).getGrhIndex();
+                        if (!useLongIndices)
+                            bodyBuf.putShort((short) grh);
+                        else
+                            bodyBuf.putInt(grh);
+                    }
+                    if ((flags & 4) != 0) {
+                        int grh = GameData.mapData[x][y].getLayer(3).getGrhIndex();
+                        if (!useLongIndices)
+                            bodyBuf.putShort((short) grh);
+                        else
+                            bodyBuf.putInt(grh);
+                    }
+                    if ((flags & 8) != 0) {
+                        int grh = GameData.mapData[x][y].getLayer(4).getGrhIndex();
+                        if (!useLongIndices)
+                            bodyBuf.putShort((short) grh);
+                        else
+                            bodyBuf.putInt(grh);
+                    }
                     if ((flags & 16) != 0)
                         bodyBuf.putShort((short) GameData.mapData[x][y].getTrigger());
                 }
