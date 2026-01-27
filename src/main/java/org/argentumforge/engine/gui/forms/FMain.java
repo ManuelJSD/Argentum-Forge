@@ -2,6 +2,7 @@ package org.argentumforge.engine.gui.forms;
 
 import imgui.type.ImBoolean;
 import imgui.ImGui;
+import imgui.ImGuiViewport;
 import imgui.flag.*;
 import org.argentumforge.engine.Window;
 import org.argentumforge.engine.game.console.Console;
@@ -69,7 +70,39 @@ public final class FMain extends Form {
 
     @Override
     public void render() {
+        // Setup DockSpace
+        ImGuiViewport viewport = ImGui.getMainViewport();
+        ImGui.setNextWindowPos(viewport.getPosX(), viewport.getPosY());
+        ImGui.setNextWindowSize(viewport.getSizeX(), viewport.getSizeY());
+        ImGui.setNextWindowViewport(viewport.getID());
+
+        int windowFlags = ImGuiWindowFlags.MenuBar | ImGuiWindowFlags.NoDocking;
+        windowFlags |= ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize
+                | ImGuiWindowFlags.NoMove;
+        windowFlags |= ImGuiWindowFlags.NoBringToFrontOnFocus | ImGuiWindowFlags.NoNavFocus
+                | ImGuiWindowFlags.NoBackground;
+
+        ImGui.pushStyleVar(ImGuiStyleVar.WindowRounding, 0.0f);
+        ImGui.pushStyleVar(ImGuiStyleVar.WindowBorderSize, 0.0f);
+        ImGui.pushStyleVar(ImGuiStyleVar.WindowPadding, 0.0f, 0.0f);
+
+        ImGui.begin("DockSpace Demo", windowFlags);
+        ImGui.popStyleVar(3);
+
+        int dockspaceId = ImGui.getID("MyDockSpace");
+        ImGui.dockSpace(dockspaceId, 0.0f, 0.0f, ImGuiDockNodeFlags.PassthruCentralNode);
+
         drawMenuBar();
+        ImGui.end(); // End DockSpace window
+
+        // drawTabs(); // Tabs are redundant with docking potentially, but let's keep
+        // them logic-wise if needed or refactor later.
+        // For now, let's look if we can integrate them or just keep them floating for a
+        // moment.
+        // Actually, map contexts should probably be separate windows if we want full
+        // docking power.
+        // For this step, we keep the old tabs but might need to adjust Z-order.
+
         drawTabs();
         this.drawStatusBar();
         this.drawButtons();
@@ -399,7 +432,7 @@ public final class FMain extends Form {
 
     private void drawMenuBar() {
 
-        if (ImGui.beginMainMenuBar()) {
+        if (ImGui.beginMenuBar()) {
 
             RenderSettings renderSettings = options.getRenderSettings();
 
@@ -445,6 +478,16 @@ public final class FMain extends Form {
 
                 if (ImGui.menuItem(I18n.INSTANCE.get("options.title"))) {
                     ImGUISystem.INSTANCE.show(new FOptions());
+                }
+
+                ImGui.separator();
+
+                if (ImGui.menuItem(I18n.INSTANCE.get("menu.file.enableDocking"), "Restart Required",
+                        options.isDockingEnabled())) {
+                    options.setDockingEnabled(!options.isDockingEnabled());
+                    options.save();
+                    javax.swing.JOptionPane.showMessageDialog(null,
+                            "Debe reiniciar la aplicación para aplicar los cambios de Docking.");
                 }
 
                 ImGui.separator();
@@ -746,7 +789,7 @@ public final class FMain extends Form {
                 ImGui.endMenu();
             }
 
-            ImGui.endMainMenuBar();
+            ImGui.endMenuBar();
         }
 
     }
