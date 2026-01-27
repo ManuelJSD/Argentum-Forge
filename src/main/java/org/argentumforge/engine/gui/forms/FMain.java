@@ -44,6 +44,7 @@ public final class FMain extends Form {
     private FTransferEditor transferEditor;
     private FParticleEditor particleEditor;
     private float[] ambientColorArr;
+    private org.argentumforge.engine.renderer.Texture toolbarIcons;
 
     public FMain() {
         ambientColorArr = new float[] {
@@ -60,6 +61,10 @@ public final class FMain extends Form {
         triggerEditor = new FTriggerEditor();
         transferEditor = new FTransferEditor();
         particleEditor = new FParticleEditor();
+
+        // Cargar iconos de la barra de herramientas
+        toolbarIcons = new org.argentumforge.engine.renderer.Texture();
+        toolbarIcons.loadTexture(toolbarIcons, "gui", "toolbar_icons.png", true);
     }
 
     @Override
@@ -175,7 +180,7 @@ public final class FMain extends Form {
     // Botones principales
     private void drawButtons() {
         ImGui.setNextWindowPos(0, 49);
-        ImGui.setNextWindowSize(1000, 40); // Aumentado para evitar que los botones se corten
+        ImGui.setNextWindowSize(1000, 60); // Aumentado para evitar que los botones se corten
         if (ImGui.begin("ToolBar", ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoBackground
                 | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoSavedSettings)) {
             drawEditorButtons();
@@ -187,125 +192,166 @@ public final class FMain extends Form {
      * Dibuja los botones para mostrar/ocultar los editores de superficies y
      * bloqueos.
      */
+    /**
+     * Dibuja la barra de herramientas compacta.
+     */
     private void drawEditorButtons() {
         ImGui.setCursorPos(10, 5); // Alineado arriba dentro de la mini-ventana
 
-        // Botón Superficies
-        if (ImGui.button(I18n.INSTANCE.get("toolbar.surface"), 110, 25)) {
-            if (ImGUISystem.INSTANCE.isFormVisible("FSurfaceEditor")) {
-                ImGUISystem.INSTANCE.deleteFrmArray(surfaceEditor);
-            } else {
-                ImGUISystem.INSTANCE.show(surfaceEditor);
-            }
-        }
+        // Configuración de estilo par botones
+        float btnSize = 48;
+        float uvStep = 1.0f / 3.0f; // 3x3 grid
+        float zoom = 0.03f; // Ajuste fino (3%) para eliminar márgenes transparentes sin recortar el icono
+
+        ImGui.pushStyleVar(ImGuiStyleVar.FrameBorderSize, 0); // Eliminar borde de ImGui
+
+        // Superficies (Fila 0, Col 0) -> UV: (0, 0) a (0.33, 0.33)
+        drawIconButton("Su", I18n.INSTANCE.get("toolbar.surface"), "FSurfaceEditor", surfaceEditor,
+                btnSize, 0 * uvStep + zoom, 0 * uvStep + zoom, 1 * uvStep - zoom, 1 * uvStep - zoom);
 
         ImGui.sameLine();
 
-        // Botón Bloqueos
-        if (ImGui.button(I18n.INSTANCE.get("menu.view.blocks"), 100, 25)) {
-            if (ImGUISystem.INSTANCE.isFormVisible("FBlockEditor")) {
-                ImGUISystem.INSTANCE.deleteFrmArray(blockEditor);
-            } else {
-                ImGUISystem.INSTANCE.show(blockEditor);
-            }
-        }
+        // Bloqueos (Fila 0, Col 1) -> UV: (0.33, 0) a (0.66, 0.33)
+        drawIconButton("Bl", I18n.INSTANCE.get("menu.view.blocks"), "FBlockEditor", blockEditor,
+                btnSize, 1 * uvStep + zoom, 0 * uvStep + zoom, 2 * uvStep - zoom, 1 * uvStep - zoom);
 
         ImGui.sameLine();
 
-        // Botón Triggers
-        if (ImGui.button(I18n.INSTANCE.get("menu.view.triggers"), 100, 25)) {
-            if (ImGUISystem.INSTANCE.isFormVisible("FTriggerEditor")) {
-                ImGUISystem.INSTANCE.deleteFrmArray(triggerEditor);
-            } else {
-                ImGUISystem.INSTANCE.show(triggerEditor);
-            }
-        }
+        // Triggers (Fila 0, Col 2) -> UV: (0.66, 0) a (1, 0.33)
+        drawIconButton("Tg", I18n.INSTANCE.get("menu.view.triggers"), "FTriggerEditor", triggerEditor,
+                btnSize, 2 * uvStep + zoom, 0 * uvStep + zoom, 3 * uvStep - zoom, 1 * uvStep - zoom);
 
         ImGui.sameLine();
 
-        // Botón NPCs
-        if (ImGui.button(I18n.INSTANCE.get("menu.view.npcs"), 100, 25)) {
-            if (ImGUISystem.INSTANCE.isFormVisible("FNpcEditor")) {
-                ImGUISystem.INSTANCE.deleteFrmArray(npcEditor);
-            } else {
-                ImGUISystem.INSTANCE.show(npcEditor);
-            }
-        }
+        // NPCs (Fila 1, Col 0) -> UV: (0, 0.33) a (0.33, 0.66)
+        drawIconButton("NP", I18n.INSTANCE.get("menu.view.npcs"), "FNpcEditor", npcEditor,
+                btnSize, 0 * uvStep + zoom, 1 * uvStep + zoom, 1 * uvStep - zoom, 2 * uvStep - zoom);
 
         ImGui.sameLine();
 
-        // Botón Objetos
-        if (ImGui.button(I18n.INSTANCE.get("menu.view.objects"), 100, 25)) {
-            if (ImGUISystem.INSTANCE.isFormVisible("FObjEditor")) {
-                ImGUISystem.INSTANCE.deleteFrmArray(objEditor);
-            } else {
-                ImGUISystem.INSTANCE.show(objEditor);
-            }
-        }
+        // Objetos (Fila 1, Col 1) -> UV: (0.33, 0.33) a (0.66, 0.66)
+        drawIconButton("Ob", I18n.INSTANCE.get("menu.view.objects"), "FObjEditor", objEditor,
+                btnSize, 1 * uvStep + zoom, 1 * uvStep + zoom, 2 * uvStep - zoom, 2 * uvStep - zoom);
 
         ImGui.sameLine();
 
-        // Botón Traslados
-        if (ImGui.button(I18n.INSTANCE.get("menu.view.transfers"), 100, 25)) {
-            if (ImGUISystem.INSTANCE.isFormVisible("FTransferEditor")) {
-                ImGUISystem.INSTANCE.deleteFrmArray(transferEditor);
-            } else {
-                ImGUISystem.INSTANCE.show(transferEditor);
-            }
-        }
+        // Traslados (Fila 1, Col 2) -> UV: (0.66, 0.33) a (1, 0.66)
+        drawIconButton("Tl", I18n.INSTANCE.get("menu.view.transfers"), "FTransferEditor", transferEditor,
+                btnSize, 2 * uvStep + zoom, 1 * uvStep + zoom, 3 * uvStep - zoom, 2 * uvStep - zoom);
 
         ImGui.sameLine();
 
-        // Botón Partículas
-        if (ImGui.button(I18n.INSTANCE.get("menu.view.particles"), 100, 25)) {
-            if (ImGUISystem.INSTANCE.isFormVisible("FParticleEditor")) {
-                ImGUISystem.INSTANCE.deleteFrmArray(particleEditor);
-            } else {
-                ImGUISystem.INSTANCE.show(particleEditor);
-            }
-        }
+        // Partículas (Fila 2, Col 0) -> UV: (0, 0.66) a (0.33, 1)
+        drawIconButton("Pa", I18n.INSTANCE.get("menu.view.particles"), "FParticleEditor", particleEditor,
+                btnSize, 0 * uvStep + zoom, 2 * uvStep + zoom, 1 * uvStep - zoom, 3 * uvStep - zoom);
 
         ImGui.sameLine();
 
-        // Botón Minimapa
-        if (ImGui.button(I18n.INSTANCE.get("menu.view.minimap"), 100, 25)) {
-            if (ImGUISystem.INSTANCE.isFormVisible("FMinimap")) {
-                ImGUISystem.INSTANCE.deleteFrmArray(minimap);
-            } else {
-                ImGUISystem.INSTANCE.show(minimap);
-            }
-        }
+        // Minimapa (Fila 2, Col 1) -> UV: (0.33, 0.66) a (0.66, 1)
+        drawIconButton("MM", I18n.INSTANCE.get("menu.view.minimap"), "FMinimap", minimap,
+                btnSize, 1 * uvStep + zoom, 2 * uvStep + zoom, 2 * uvStep - zoom, 3 * uvStep - zoom);
 
         ImGui.sameLine();
 
-        // Botón Selección
+        // Botón Selección (Fila 2, Col 2) -> UV: (0.66, 0.66) a (1, 1)
         boolean selectionActive = Selection.getInstance().isActive();
         if (selectionActive) {
             ImGui.pushStyleColor(ImGuiCol.Button, Theme.COLOR_ACCENT);
         }
-        if (ImGui.button(I18n.INSTANCE.get("common.selection"), 100, 25)) {
-            Selection sel = Selection.getInstance();
-            sel.setActive(!sel.isActive());
 
-            if (sel.isActive()) {
-                Console.INSTANCE.addMsgToConsole(I18n.INSTANCE.get("msg.selectionModeOn"), REGULAR,
-                        new RGBColor(0f, 1f, 0f));
-                // Desactivar otros modos
-                Surface.getInstance().setMode(0);
-                Npc.getInstance().setMode(0);
-                Obj.getInstance().setMode(0);
-                Block.getInstance().setMode(0);
-                Trigger.getInstance().setMode(0);
-                Transfer.getInstance().setMode(0);
-            } else {
-                Console.INSTANCE.addMsgToConsole(I18n.INSTANCE.get("msg.selectionModeOff"), REGULAR,
-                        new RGBColor(1f, 1f, 0f));
+        // Use ImageButton for Selection if texture is loaded, else fallback to text
+        ImGui.pushID("btnSelect");
+        if (toolbarIcons.getId() > 0) {
+            ImGui.pushStyleVar(ImGuiStyleVar.FramePadding, 0, 0);
+            if (ImGui.imageButton(toolbarIcons.getId(), btnSize, btnSize, 2 * uvStep + zoom, 2 * uvStep + zoom,
+                    3 * uvStep - zoom,
+                    3 * uvStep - zoom)) {
+                toggleSelection();
             }
+            ImGui.popStyleVar();
+        } else {
+            if (ImGui.button("Sel", btnSize, btnSize)) {
+                toggleSelection();
+            }
+        }
+        ImGui.popID();
+
+        if (ImGui.isItemHovered()) {
+            ImGui.setTooltip(I18n.INSTANCE.get("common.selection"));
         }
         if (selectionActive) {
             ImGui.popStyleColor();
         }
+        ImGui.popStyleVar(); // Pop BorderSize
+    }
 
+    private void toggleSelection() {
+        Selection sel = Selection.getInstance();
+        sel.setActive(!sel.isActive());
+
+        if (sel.isActive()) {
+            Console.INSTANCE.addMsgToConsole(I18n.INSTANCE.get("msg.selectionModeOn"), REGULAR,
+                    new RGBColor(0f, 1f, 0f));
+            // Desactivar otros modos
+            Surface.getInstance().setMode(0);
+            org.argentumforge.engine.utils.editor.Npc.getInstance().setMode(0);
+            org.argentumforge.engine.utils.editor.Obj.getInstance().setMode(0);
+            org.argentumforge.engine.utils.editor.Block.getInstance().setMode(0);
+            org.argentumforge.engine.utils.editor.Trigger.getInstance().setMode(0);
+            org.argentumforge.engine.utils.editor.Transfer.getInstance().setMode(0);
+        } else {
+            Console.INSTANCE.addMsgToConsole(I18n.INSTANCE.get("msg.selectionModeOff"), REGULAR,
+                    new RGBColor(1f, 1f, 0f));
+        }
+    }
+
+    private void drawIconButton(String fallbackLabel, String tooltip, String formName, Form formInstance,
+            float size, float u0, float v0, float u1, float v1) {
+        ImGui.pushID(formName);
+        // Resaltar si está activo (visible)
+        boolean isVisible = ImGUISystem.INSTANCE.isFormVisible(formName);
+        if (isVisible) {
+            ImGui.pushStyleColor(ImGuiCol.Button, Theme.COLOR_PRIMARY);
+        }
+
+        // Si la textura cargó correctamente, usar ImageButton, sino fallback a Texto
+        if (toolbarIcons.getId() > 0) {
+            // Eliminar padding para que el icono ocupe todo el botón
+            ImGui.pushStyleVar(ImGuiStyleVar.FramePadding, 0, 0);
+            if (ImGui.imageButton(toolbarIcons.getId(), size, size, u0, v0, u1, v1)) {
+                toggleForm(isVisible, formInstance);
+            }
+            ImGui.popStyleVar();
+        } else {
+            if (ImGui.button(fallbackLabel, size, size)) {
+                toggleForm(isVisible, formInstance);
+            }
+        }
+
+        if (isVisible) {
+            ImGui.popStyleColor();
+        }
+
+        if (ImGui.isItemHovered()) {
+            ImGui.setTooltip(tooltip);
+        }
+        ImGui.popID();
+    }
+
+    private void toggleForm(boolean isVisible, Form formInstance) {
+        if (isVisible) {
+            ImGUISystem.INSTANCE.deleteFrmArray(formInstance);
+        } else {
+            ImGUISystem.INSTANCE.show(formInstance);
+        }
+    }
+
+    /**
+     * Dibuja los botones para mostrar/ocultar los editores de superficies y
+     * bloqueos. (Legacy, kept just in case but overridden by drawEditorButtons)
+     */
+    private void drawCompactButton(String label, String tooltip, String formName, Form formInstance, float w, float h) {
+        // ... Unused now
     }
 
     private void drawMenuBar() {

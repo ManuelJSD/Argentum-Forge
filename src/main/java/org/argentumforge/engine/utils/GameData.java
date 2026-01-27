@@ -545,16 +545,41 @@ public final class GameData {
 
             final IndexHeads[] myHeads;
             final short numHeads = reader.readShort();
+            Logger.info("DEBUG: Cargando Cabezas.ind. Tamaño Archivo: {}, Header Detectado: {}, NumCabezas leídas: {}",
+                    data.length, hasHeader, numHeads);
+
+            // Check record size drift
+            int expectedHeadSize = 8;
+            long estimatedDataSize = (long) numHeads * expectedHeadSize;
+            long headerOffset = hasHeader ? 263 + 2 : 2;
+            long actualDataAvailable = data.length - headerOffset;
+
+            Logger.info("DEBUG: Validacion Cabezas: Esperado={} bytes, Disponible={} bytes. Diferencia={}",
+                    estimatedDataSize, actualDataAvailable, actualDataAvailable - estimatedDataSize);
+
+            // Heuristic detection: 8 bytes (Standard) vs 16 bytes (AOLibre/Long)
+            // Header is 263 bytes + 2 bytes (short count) = 265 bytes (or just 2 bytes for
+            // no header)
+            long dataSize = data.length - (hasHeader ? 263 : 0) - 2;
+            boolean useLongs = false;
+            if (numHeads > 0) {
+                long avgRecordSize = dataSize / numHeads;
+                if (avgRecordSize >= 16) {
+                    useLongs = true;
+                    Logger.info("Detectado formato AOLibre (Longs) para Cabezas.ind");
+                }
+            }
+
             AssetRegistry.headData = new HeadData[numHeads + 1];
             myHeads = new IndexHeads[numHeads + 1];
 
             AssetRegistry.headData[0] = new HeadData();
             for (int i = 1; i <= numHeads; i++) {
                 myHeads[i] = new IndexHeads();
-                myHeads[i].setHead(1, reader.readShort());
-                myHeads[i].setHead(2, reader.readShort());
-                myHeads[i].setHead(3, reader.readShort());
-                myHeads[i].setHead(4, reader.readShort());
+                myHeads[i].setHead(1, (short) readDynamic(reader, useLongs));
+                myHeads[i].setHead(2, (short) readDynamic(reader, useLongs));
+                myHeads[i].setHead(3, (short) readDynamic(reader, useLongs));
+                myHeads[i].setHead(4, (short) readDynamic(reader, useLongs));
 
                 AssetRegistry.headData[i] = new HeadData();
                 if (myHeads[i].getHead(1) != 0) {
@@ -571,15 +596,17 @@ public final class GameData {
         } catch (Exception e) {
             Logger.error(e, "Error al cargar Cabezas.ind");
             javax.swing.JOptionPane.showMessageDialog(null,
-                    "Error al cargar 'Cabezas.ind'.\n" +
-                            "El archivo podría estar corrupto o ser de una versión no soportada.\n\n" +
-                            "Detalle: " + e.getMessage(),
-                    "Error de Formato en Cabezas",
+                    "Error al cargar 'Cabezas.ind'.\nDetalle: " + e.getMessage(), "Error",
                     javax.swing.JOptionPane.ERROR_MESSAGE);
-            AssetRegistry.headData = new HeadData[1]; // Evitar NPE posteriores
+            AssetRegistry.headData = new HeadData[1];
             AssetRegistry.headData[0] = new HeadData();
         }
+    }
 
+    private static int readDynamic(BinaryDataReader reader, boolean useLongs) throws IOException {
+        if (useLongs)
+            return reader.readInt();
+        return reader.readShort();
     }
 
     /**
@@ -599,16 +626,28 @@ public final class GameData {
 
             final IndexHeads[] myHeads;
             final short numHeads = reader.readShort();
+
+            // Heuristic detection: 8 bytes vs 16 bytes
+            long dataSize = data.length - (hasHeader ? 263 : 0) - 2;
+            boolean useLongs = false;
+            if (numHeads > 0) {
+                long avgRecordSize = dataSize / numHeads;
+                if (avgRecordSize >= 16) {
+                    useLongs = true;
+                    Logger.info("Detectado formato AOLibre (Longs) para Cascos.ind");
+                }
+            }
+
             AssetRegistry.helmetsData = new HeadData[numHeads + 1];
             myHeads = new IndexHeads[numHeads + 1];
 
             AssetRegistry.helmetsData[0] = new HeadData();
             for (int i = 1; i <= numHeads; i++) {
                 myHeads[i] = new IndexHeads();
-                myHeads[i].setHead(1, reader.readShort());
-                myHeads[i].setHead(2, reader.readShort());
-                myHeads[i].setHead(3, reader.readShort());
-                myHeads[i].setHead(4, reader.readShort());
+                myHeads[i].setHead(1, (short) readDynamic(reader, useLongs));
+                myHeads[i].setHead(2, (short) readDynamic(reader, useLongs));
+                myHeads[i].setHead(3, (short) readDynamic(reader, useLongs));
+                myHeads[i].setHead(4, (short) readDynamic(reader, useLongs));
 
                 AssetRegistry.helmetsData[i] = new HeadData();
                 if (myHeads[i].getHead(1) != 0) {
@@ -658,16 +697,42 @@ public final class GameData {
 
             final IndexBodys[] myBodys;
             final short numBodys = reader.readShort();
+            Logger.info("DEBUG: Cargando Cuerpos.ind. Tamaño Archivo: {}, Header Detectado: {}, NumCuerpos leídos: {}",
+                    data.length, hasHeader, numBodys);
+
+            // Check record size drift
+            int expectedBodySize = 12;
+            long estimatedDataSize = (long) numBodys * expectedBodySize;
+            long headerOffset = hasHeader ? 263 + 2 : 2;
+            long actualDataAvailable = data.length - headerOffset;
+
+            Logger.info("DEBUG: Validacion Cuerpos: Esperado={} bytes, Disponible={} bytes. Diferencia={}",
+                    estimatedDataSize, actualDataAvailable, actualDataAvailable - estimatedDataSize);
+
+            // Heuristic detection: 12 bytes vs 20+ bytes
+            long dataSize = data.length - (hasHeader ? 263 : 0) - 2;
+            boolean useLongs = false;
+            if (numBodys > 0) {
+                long avgRecordSize = dataSize / numBodys;
+                // Standard: 4*2 + 2*2 = 12 bytes
+                // AOLibre: 4*4 + 2*2 = 20 bytes (Assuming offsets are shorts)
+                // AOLibre: 4*4 + 2*4 = 24 bytes (Assuming offsets are ints)
+                if (avgRecordSize >= 20) {
+                    useLongs = true;
+                    Logger.info("Detectado formato AOLibre (Longs) para Cuerpos.ind");
+                }
+            }
+
             AssetRegistry.bodyData = new BodyData[numBodys + 1];
             myBodys = new IndexBodys[numBodys + 1];
 
             AssetRegistry.bodyData[0] = new BodyData();
             for (int i = 1; i <= numBodys; i++) {
                 myBodys[i] = new IndexBodys();
-                myBodys[i].setBody(1, reader.readShort());
-                myBodys[i].setBody(2, reader.readShort());
-                myBodys[i].setBody(3, reader.readShort());
-                myBodys[i].setBody(4, reader.readShort());
+                myBodys[i].setBody(1, (short) readDynamic(reader, useLongs));
+                myBodys[i].setBody(2, (short) readDynamic(reader, useLongs));
+                myBodys[i].setBody(3, (short) readDynamic(reader, useLongs));
+                myBodys[i].setBody(4, (short) readDynamic(reader, useLongs));
 
                 myBodys[i].setHeadOffsetX(reader.readShort());
                 myBodys[i].setHeadOffsetY(reader.readShort());
@@ -1170,11 +1235,25 @@ public final class GameData {
                 reader.skipBytes(263);
 
             final short numFXs = reader.readShort();
+
+            // Heuristic detection: 6 bytes (Standard) vs 10 bytes (AOLibre/Long)?
+            // Fxs: Anim(2) + OffX(2) + OffY(2) = 6
+            // AOLibre: Anim(4) + OffX(2) + OffY(2) = 8?
+            long dataSize = data.length - (hasHeader ? 263 : 0) - 2;
+            boolean useLongs = false;
+            if (numFXs > 0) {
+                long avgRecordSize = dataSize / numFXs;
+                if (avgRecordSize >= 8) {
+                    useLongs = true;
+                    Logger.info("Detectado formato AOLibre (Longs) para Fxs.ind");
+                }
+            }
+
             AssetRegistry.fxData = new FxData[numFXs + 1];
 
             for (int i = 1; i <= numFXs; i++) {
                 AssetRegistry.fxData[i] = new FxData();
-                AssetRegistry.fxData[i].setAnimacion(reader.readShort());
+                AssetRegistry.fxData[i].setAnimacion((short) readDynamic(reader, useLongs));
                 AssetRegistry.fxData[i].setOffsetX(reader.readShort());
                 AssetRegistry.fxData[i].setOffsetY(reader.readShort());
             }
