@@ -127,7 +127,7 @@ Consulta [.github/RELEASE_GUIDE.md](.github/RELEASE_GUIDE.md) para instrucciones
 
 ## 📸 Capturas de Pantalla
 
-<img width="1918" height="1078" alt="Interfaz del Editor Argentum Forge" src="https://github.com/user-attachments/assets/131cdca3-03a6-4c0d-a855-1e0b5a07da51" />
+<img width="1918" height="1078" alt="image" src="https://github.com/user-attachments/assets/1e2b5bcc-1475-4347-bc2d-2e0d42ffa163" />
 
 ## 🤝 Cómo Contribuir
 
