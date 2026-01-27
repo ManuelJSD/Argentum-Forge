@@ -285,61 +285,68 @@ public final class FMain extends Form {
 
         ImGui.pushStyleVar(ImGuiStyleVar.FrameBorderSize, 0); // Eliminar borde de ImGui
 
-        // Superficies (Fila 0, Col 0) -> UV: (0, 0) a (0.33, 0.33)
+        // --- GRUPO 1: EDICIÓN (Visual) ---
+
+        // Superficies (Fila 0, Col 0)
         drawIconButton("Su", I18n.INSTANCE.get("toolbar.surface"), "FSurfaceEditor", surfaceEditor,
                 btnSize, 0 * uvStep + zoom, 0 * uvStep + zoom, 1 * uvStep - zoom, 1 * uvStep - zoom);
 
         ImGui.sameLine();
 
-        // Bloqueos (Fila 0, Col 1) -> UV: (0.33, 0) a (0.66, 0.33)
-        drawIconButton("Bl", I18n.INSTANCE.get("menu.view.blocks"), "FBlockEditor", blockEditor,
-                btnSize, 1 * uvStep + zoom, 0 * uvStep + zoom, 2 * uvStep - zoom, 1 * uvStep - zoom);
-
-        ImGui.sameLine();
-
-        // Triggers (Fila 0, Col 2) -> UV: (0.66, 0) a (1, 0.33)
-        drawIconButton("Tg", I18n.INSTANCE.get("menu.view.triggers"), "FTriggerEditor", triggerEditor,
-                btnSize, 2 * uvStep + zoom, 0 * uvStep + zoom, 3 * uvStep - zoom, 1 * uvStep - zoom);
-
-        ImGui.sameLine();
-
-        // NPCs (Fila 1, Col 0) -> UV: (0, 0.33) a (0.33, 0.66)
-        drawIconButton("NP", I18n.INSTANCE.get("menu.view.npcs"), "FNpcEditor", npcEditor,
-                btnSize, 0 * uvStep + zoom, 1 * uvStep + zoom, 1 * uvStep - zoom, 2 * uvStep - zoom);
-
-        ImGui.sameLine();
-
-        // Objetos (Fila 1, Col 1) -> UV: (0.33, 0.33) a (0.66, 0.66)
+        // Objetos (Fila 1, Col 1)
         drawIconButton("Ob", I18n.INSTANCE.get("menu.view.objects"), "FObjEditor", objEditor,
                 btnSize, 1 * uvStep + zoom, 1 * uvStep + zoom, 2 * uvStep - zoom, 2 * uvStep - zoom);
 
         ImGui.sameLine();
 
-        // Traslados (Fila 1, Col 2) -> UV: (0.66, 0.33) a (1, 0.66)
-        drawIconButton("Tl", I18n.INSTANCE.get("menu.view.transfers"), "FTransferEditor", transferEditor,
-                btnSize, 2 * uvStep + zoom, 1 * uvStep + zoom, 3 * uvStep - zoom, 2 * uvStep - zoom);
+        // NPCs (Fila 1, Col 0)
+        drawIconButton("NP", I18n.INSTANCE.get("menu.view.npcs"), "FNpcEditor", npcEditor,
+                btnSize, 0 * uvStep + zoom, 1 * uvStep + zoom, 1 * uvStep - zoom, 2 * uvStep - zoom);
 
         ImGui.sameLine();
 
-        // Partículas (Fila 2, Col 0) -> UV: (0, 0.66) a (0.33, 1)
+        // Partículas (Fila 2, Col 0)
         drawIconButton("Pa", I18n.INSTANCE.get("menu.view.particles"), "FParticleEditor", particleEditor,
                 btnSize, 0 * uvStep + zoom, 2 * uvStep + zoom, 1 * uvStep - zoom, 3 * uvStep - zoom);
 
+        // --- SEPARADOR ---
+        drawToolbarSeparator();
+
+        // --- GRUPO 2: LÓGICA ---
+
+        // Bloqueos (Fila 0, Col 1)
+        drawIconButton("Bl", I18n.INSTANCE.get("menu.view.blocks"), "FBlockEditor", blockEditor,
+                btnSize, 1 * uvStep + zoom, 0 * uvStep + zoom, 2 * uvStep - zoom, 1 * uvStep - zoom);
+
         ImGui.sameLine();
 
-        // Minimapa (Fila 2, Col 1) -> UV: (0.33, 0.66) a (0.66, 1)
+        // Triggers (Fila 0, Col 2)
+        drawIconButton("Tg", I18n.INSTANCE.get("menu.view.triggers"), "FTriggerEditor", triggerEditor,
+                btnSize, 2 * uvStep + zoom, 0 * uvStep + zoom, 3 * uvStep - zoom, 1 * uvStep - zoom);
+
+        ImGui.sameLine();
+
+        // Traslados (Fila 1, Col 2)
+        drawIconButton("Tl", I18n.INSTANCE.get("menu.view.transfers"), "FTransferEditor", transferEditor,
+                btnSize, 2 * uvStep + zoom, 1 * uvStep + zoom, 3 * uvStep - zoom, 2 * uvStep - zoom);
+
+        // --- SEPARADOR ---
+        drawToolbarSeparator();
+
+        // --- GRUPO 3: UTILIDAD ---
+
+        // Minimapa (Fila 2, Col 1)
         drawIconButton("MM", I18n.INSTANCE.get("menu.view.minimap"), "FMinimap", minimap,
                 btnSize, 1 * uvStep + zoom, 2 * uvStep + zoom, 2 * uvStep - zoom, 3 * uvStep - zoom);
 
         ImGui.sameLine();
 
-        // Botón Selección (Fila 2, Col 2) -> UV: (0.66, 0.66) a (1, 1)
+        // Botón Selección (Fila 2, Col 2)
         boolean selectionActive = Selection.getInstance().isActive();
         if (selectionActive) {
             ImGui.pushStyleColor(ImGuiCol.Button, Theme.COLOR_ACCENT);
         }
 
-        // Use ImageButton for Selection if texture is loaded, else fallback to text
         ImGui.pushID("btnSelect");
         if (toolbarIcons.getId() > 0) {
             ImGui.pushStyleVar(ImGuiStyleVar.FramePadding, 0, 0);
@@ -363,6 +370,23 @@ public final class FMain extends Form {
             ImGui.popStyleColor();
         }
         ImGui.popStyleVar(); // Pop BorderSize
+    }
+
+    private void drawToolbarSeparator() {
+        ImGui.sameLine(0, 10);
+
+        float x = ImGui.getCursorScreenPosX();
+        float y = ImGui.getCursorScreenPosY();
+        float h = 48; // Button height
+
+        // Draw vertical line centered
+        ImGui.getWindowDrawList().addLine(
+                x, y + 8,
+                x, y + h - 8,
+                ImGui.getColorU32(ImGuiCol.Separator));
+
+        ImGui.dummy(1, h); // Advance cursor
+        ImGui.sameLine(0, 10);
     }
 
     private void toggleSelection() {
