@@ -71,7 +71,7 @@ public final class FMain extends Form {
     public void render() {
         drawMenuBar();
         drawTabs();
-        this.renderFPS();
+        this.drawStatusBar();
         this.drawButtons();
         Console.INSTANCE.drawConsole();
         handleShortcuts();
@@ -155,26 +155,69 @@ public final class FMain extends Form {
         ImGui.end();
     }
 
-    // FPS
-    private void renderFPS() {
-        final String txtStats = FPS + " FPS | Zoom: "
-                + (int) (org.argentumforge.engine.scenes.Camera.getZoomScale() * 100) + "%";
-        float widgetWidth = 165;
+    // Barra de estado inferior
+    private void drawStatusBar() {
+        // Altura de la barra
+        float statusHeight = 30;
+        // Posición en la parte inferior de la ventana
+        ImGui.setNextWindowPos(0, Window.INSTANCE.getHeight() - statusHeight);
+        // Ancho completo
+        ImGui.setNextWindowSize(Window.INSTANCE.getWidth(), statusHeight);
 
-        ImGui.setNextWindowPos(Window.INSTANCE.getWidth() - widgetWidth - 10, 52);
-        ImGui.setNextWindowSize(widgetWidth, 30);
-        ImGui.pushStyleColor(ImGuiCol.WindowBg, 0.0f, 0.0f, 0.0f, 0.4f);
-        if (ImGui.begin("Stats",
+        // Estilo: Fondo oscuro, sin bordes ni decoraciones
+        ImGui.pushStyleColor(ImGuiCol.WindowBg, 0.1f, 0.1f, 0.1f, 0.9f);
+
+        if (ImGui.begin("StatusBar",
                 ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoInputs
-                        | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoSavedSettings)) {
-            ImGui.pushStyleVar(ImGuiStyleVar.SelectableTextAlign, 0.5f, 0.5f);
-            ImGui.pushStyleColor(ImGuiCol.HeaderHovered, TRANSPARENT_COLOR);
-            ImGui.pushStyleColor(ImGuiCol.HeaderActive, TRANSPARENT_COLOR);
-            ImGui.selectable(txtStats, false, ImGuiSelectableFlags.None, widgetWidth - 10, 20);
-            ImGui.popStyleColor(3);
-            ImGui.popStyleVar();
+                        | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoSavedSettings
+                        | ImGuiWindowFlags.NoBringToFrontOnFocus | ImGuiWindowFlags.NoFocusOnAppearing)) {
+
+            // Datos a mostrar
+            String fpsText = FPS + " FPS";
+            String zoomText = "Zoom: " + (int) (org.argentumforge.engine.scenes.Camera.getZoomScale() * 100) + "%";
+
+            // Coordenadas del Usuario
+            int userX = org.argentumforge.engine.game.User.INSTANCE.getUserPos().getX();
+            int userY = org.argentumforge.engine.game.User.INSTANCE.getUserPos().getY();
+            String userPosText = "User: " + userX + ", " + userY;
+
+            // Coordenadas del Mouse
+            int mx = (int) MouseListener.getX() - Camera.POS_SCREEN_X;
+            int my = (int) MouseListener.getY() - Camera.POS_SCREEN_Y;
+            int tileMouseX = EditorInputManager.getTileMouseX(mx);
+            int tileMouseY = EditorInputManager.getTileMouseY(my);
+            String mousePosText = "Mouse: " + tileMouseX + ", " + tileMouseY;
+
+            // Renderizado con espaciado
+            ImGui.text(fpsText);
+            ImGui.sameLine(0, 20); // Spacing
+            ImGui.text("|");
+            ImGui.sameLine(0, 20);
+            ImGui.text(zoomText);
+            ImGui.sameLine(0, 20);
+            ImGui.text("|");
+
+            // Highlight User Pos
+            ImGui.sameLine(0, 20);
+            ImGui.textColored(0.2f, 0.8f, 1.0f, 1.0f, userPosText);
+
+            // Highlight Mouse Pos if valid
+            ImGui.sameLine(0, 20);
+            ImGui.text("|");
+            ImGui.sameLine(0, 20);
+
+            boolean validDetails = tileMouseX >= Camera.XMinMapSize && tileMouseX <= Camera.XMaxMapSize &&
+                    tileMouseY >= Camera.YMinMapSize && tileMouseY <= Camera.YMaxMapSize;
+
+            if (validDetails) {
+                ImGui.textColored(1.0f, 0.8f, 0.2f, 1.0f, mousePosText);
+            } else {
+                ImGui.textDisabled(mousePosText);
+            }
+
         }
         ImGui.end();
+        ImGui.popStyleColor();
     }
 
     // Botones principales
@@ -388,26 +431,14 @@ public final class FMain extends Form {
                     ImGui.endMenu();
                 }
 
+                ImGui.separator();
+
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.file.save"), "Ctrl+S")) {
                     org.argentumforge.engine.utils.MapFileUtils.quickSaveMap();
                 }
 
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.file.saveAs"), "Ctrl+Shift+S")) {
                     org.argentumforge.engine.utils.MapFileUtils.saveMapAs();
-                }
-
-                if (ImGui.menuItem(I18n.INSTANCE.get("menu.file.export"))) {
-                    javax.swing.JFileChooser fileChooser = new javax.swing.JFileChooser();
-                    fileChooser.setDialogTitle("Exportar Mapa como Imagen");
-                    fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Imagen PNG", "png"));
-                    if (fileChooser.showSaveDialog(null) == javax.swing.JFileChooser.APPROVE_OPTION) {
-                        String path = fileChooser.getSelectedFile().getAbsolutePath();
-                        if (!path.toLowerCase().endsWith(".png")) {
-                            path += ".png";
-                        }
-                        org.argentumforge.engine.utils.MapExporter.exportMap(path);
-                        javax.swing.JOptionPane.showMessageDialog(null, "Mapa exportado correctamente a:\n" + path);
-                    }
                 }
 
                 ImGui.separator();
@@ -625,12 +656,28 @@ public final class FMain extends Form {
             }
 
             if (ImGui.beginMenu(I18n.INSTANCE.get("menu.tools"))) {
-                if (ImGui.menuItem(I18n.INSTANCE.get("menu.tools.setupWizard"))) {
-                    FSetupWizard wizard = new FSetupWizard(() -> {
-                        // Al finalizar, recargar recursos si cambiaron las rutas
-                        org.argentumforge.engine.utils.GameData.init();
-                    }, false);
-                    ImGUISystem.INSTANCE.show(wizard);
+                /*
+                 * if (ImGui.menuItem(I18n.INSTANCE.get("menu.tools.setupWizard"))) {
+                 * FSetupWizard wizard = new FSetupWizard(() -> {
+                 * // Al finalizar, recargar recursos si cambiaron las rutas
+                 * org.argentumforge.engine.utils.GameData.init();
+                 * }, false);
+                 * ImGUISystem.INSTANCE.show(wizard);
+                 * }
+                 */
+
+                if (ImGui.menuItem(I18n.INSTANCE.get("menu.file.export"))) {
+                    javax.swing.JFileChooser fileChooser = new javax.swing.JFileChooser();
+                    fileChooser.setDialogTitle("Exportar Mapa como Imagen");
+                    fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Imagen PNG", "png"));
+                    if (fileChooser.showSaveDialog(null) == javax.swing.JFileChooser.APPROVE_OPTION) {
+                        String path = fileChooser.getSelectedFile().getAbsolutePath();
+                        if (!path.toLowerCase().endsWith(".png")) {
+                            path += ".png";
+                        }
+                        org.argentumforge.engine.utils.MapExporter.exportMap(path);
+                        javax.swing.JOptionPane.showMessageDialog(null, "Mapa exportado correctamente a:\n" + path);
+                    }
                 }
 
                 ImGui.separator();
