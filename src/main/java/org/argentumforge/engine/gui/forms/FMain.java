@@ -342,8 +342,12 @@ public final class FMain extends Form {
                     ImGui.endMenu();
                 }
 
-                if (ImGui.menuItem(I18n.INSTANCE.get("menu.file.save"))) {
-                    org.argentumforge.engine.utils.MapFileUtils.saveMap();
+                if (ImGui.menuItem(I18n.INSTANCE.get("menu.file.save"), "Ctrl+S")) {
+                    org.argentumforge.engine.utils.MapFileUtils.quickSaveMap();
+                }
+
+                if (ImGui.menuItem(I18n.INSTANCE.get("menu.file.saveAs"), "Ctrl+Shift+S")) {
+                    org.argentumforge.engine.utils.MapFileUtils.saveMapAs();
                 }
 
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.file.export"))) {
