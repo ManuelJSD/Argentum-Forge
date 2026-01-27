@@ -611,7 +611,7 @@ public final class MapManager {
                     if ((flags & 2) != 0) {
                         int npcIndex = GameData.reader.readUnsignedShort();
                         if (npcIndex > 0) {
-                            GameData.mapData[x][y].setNpcIndex((short) npcIndex);
+                            GameData.mapData[x][y].setNpcIndex(npcIndex);
                             NpcData npc = AssetRegistry.npcs.get(npcIndex);
                             if (npc != null) {
                                 Character.makeChar(GameData.nextOpenChar(), npc.getBody(), npc.getHead(),
@@ -631,7 +631,7 @@ public final class MapManager {
                         if (objIndex > 0) {
                             ObjData obj = AssetRegistry.objs.get(objIndex);
                             if (obj != null) {
-                                GameData.initGrh(GameData.mapData[x][y].getObjGrh(), (short) obj.getGrhIndex(), false);
+                                GameData.initGrh(GameData.mapData[x][y].getObjGrh(), obj.getGrhIndex(), false);
                             } else {
                                 Logger.warn("Definición de objeto no encontrada para el índice: {}", objIndex);
                             }
