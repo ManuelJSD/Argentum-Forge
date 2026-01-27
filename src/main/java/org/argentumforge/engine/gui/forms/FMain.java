@@ -42,6 +42,7 @@ public final class FMain extends Form {
     private FGrhLibrary grhLibrary;
     private FTriggerEditor triggerEditor;
     private FTransferEditor transferEditor;
+    private FParticleEditor particleEditor;
     private float[] ambientColorArr;
 
     public FMain() {
@@ -58,6 +59,7 @@ public final class FMain extends Form {
         grhLibrary = new FGrhLibrary();
         triggerEditor = new FTriggerEditor();
         transferEditor = new FTransferEditor();
+        particleEditor = new FParticleEditor();
     }
 
     @Override
@@ -249,6 +251,17 @@ public final class FMain extends Form {
                 ImGUISystem.INSTANCE.deleteFrmArray(transferEditor);
             } else {
                 ImGUISystem.INSTANCE.show(transferEditor);
+            }
+        }
+
+        ImGui.sameLine();
+
+        // Botón Partículas
+        if (ImGui.button(I18n.INSTANCE.get("menu.view.particles"), 100, 25)) {
+            if (ImGUISystem.INSTANCE.isFormVisible("FParticleEditor")) {
+                ImGUISystem.INSTANCE.deleteFrmArray(particleEditor);
+            } else {
+                ImGUISystem.INSTANCE.show(particleEditor);
             }
         }
 
@@ -483,6 +496,11 @@ public final class FMain extends Form {
 
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.view.triggers"), "", renderSettings.getShowTriggers())) {
                     renderSettings.setShowTriggers(!renderSettings.getShowTriggers());
+                    options.save();
+                }
+
+                if (ImGui.menuItem(I18n.INSTANCE.get("menu.view.particles"), "", renderSettings.getShowParticles())) {
+                    renderSettings.setShowParticles(!renderSettings.getShowParticles());
                     options.save();
                 }
 

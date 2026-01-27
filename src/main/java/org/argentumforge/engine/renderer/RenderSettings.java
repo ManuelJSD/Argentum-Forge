@@ -12,6 +12,8 @@ public class RenderSettings {
     private boolean showTriggers = false;
     // Traslados (Teleporks)
     private boolean showMapTransfer = true;
+    // Partículas
+    private boolean showParticles = false;
     // Bloqueos
     private boolean showBlock = true;
     private float blockOpacity = 0.5f;
@@ -65,6 +67,14 @@ public class RenderSettings {
 
     public void setShowMapTransfer(boolean showMapTransfer) {
         this.showMapTransfer = showMapTransfer;
+    }
+
+    public boolean getShowParticles() {
+        return showParticles;
+    }
+
+    public void setShowParticles(boolean showParticles) {
+        this.showParticles = showParticles;
     }
 
     public boolean getShowBlock() {
