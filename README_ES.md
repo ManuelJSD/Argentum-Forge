@@ -127,7 +127,7 @@ Consulta [.github/RELEASE_GUIDE.md](.github/RELEASE_GUIDE.md) para instrucciones
 
 ## 📸 Capturas de Pantalla
 
-<img width="1918" height="1078" alt="image" src="https://github.com/user-attachments/assets/1e2b5bcc-1475-4347-bc2d-2e0d42ffa163" />
+<img width="1920" height="1081" alt="image" src="https://github.com/user-attachments/assets/07297e8f-6fe7-420b-a469-e90cd5ddb23f" />
 
 ## 🤝 Cómo Contribuir
 
