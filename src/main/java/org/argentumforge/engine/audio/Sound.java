@@ -498,6 +498,21 @@ public final class Sound {
     }
 
     /**
+     * Verifica si se esta reproduciendo alguna musica.
+     *
+     * @return true si hay musica reproduciendose, false de lo contrario.
+     */
+    public static boolean isMusicPlaying() {
+        if (!Window.INSTANCE.isAudioAvailable())
+            return false;
+        for (Sound s : musics.values()) {
+            if (s.isPlaying())
+                return true;
+        }
+        return false;
+    }
+
+    /**
      * Elimina los recursos de audio asociados a este objeto de sonido.
      * <p>
      * Este metodo verifica si el sonido es valido y si el sistema de audio esta

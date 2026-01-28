@@ -249,6 +249,7 @@ public enum ImGUISystem {
             ImGui.end();
         }
         renderFrms();
+        DialogManager.getInstance().render();
 
         ImGui.render();
 

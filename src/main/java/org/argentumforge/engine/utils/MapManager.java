@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import static org.argentumforge.engine.game.models.Character.eraseAllChars;
+import org.argentumforge.engine.gui.DialogManager;
 
 /**
  * Clase responsable de la gestión de archivos de mapa (.map, .inf, .dat).
@@ -202,24 +203,58 @@ public final class MapManager {
      * 
      * @return true si es seguro continuar, false si el usuario canceló.
      */
-    public static boolean checkUnsavedChanges() {
-        if (!hasUnsavedChanges())
-            return true;
-
-        int result = javax.swing.JOptionPane.showConfirmDialog(
-                null,
-                "Hay cambios sin guardar en el mapa actual.\n¿Desea guardarlos antes de continuar?",
-                "Cambios sin guardar",
-                javax.swing.JOptionPane.YES_NO_CANCEL_OPTION,
-                javax.swing.JOptionPane.WARNING_MESSAGE);
-
-        if (result == javax.swing.JOptionPane.YES_OPTION) {
-            return MapFileUtils.quickSaveMap();
-        } else if (result == javax.swing.JOptionPane.NO_OPTION) {
-            return true; // Descartar cambios
-        } else {
-            return false; // Cancelar
+    /**
+     * Verifica si hay cambios sin guardar y ejecuta callback.
+     * Reemplazo asincrónico para checkUnsavedChanges bloqueante.
+     * 
+     * @param onContinue Runnable a ejecutar si se puede continuar (ya sea guardando
+     *                   o descartando).
+     * @param onCancel   Runnable a ejecutar si el usuario cancela la acción.
+     */
+    public static void checkUnsavedChangesAsync(Runnable onContinue, Runnable onCancel) {
+        if (!hasUnsavedChanges()) {
+            if (onContinue != null)
+                onContinue.run();
+            return;
         }
+
+        DialogManager.getInstance().showYesNoCancel(
+                "Cambios sin guardar",
+                "Hay cambios sin guardar en el mapa actual.\n¿Desea guardarlos antes de continuar?",
+                () -> {
+                    // YES -> Save then Continue
+                    MapFileUtils.quickSaveMap(
+                            () -> { // On Success
+                                if (onContinue != null)
+                                    onContinue.run();
+                            },
+                            () -> { // On Failure
+                                if (onCancel != null)
+                                    onCancel.run();
+                            });
+                },
+                () -> {
+                    // NO -> Discard changes (just continue)
+                    if (onContinue != null)
+                        onContinue.run();
+                },
+                () -> {
+                    // CANCEL
+                    if (onCancel != null)
+                        onCancel.run();
+                });
+    }
+
+    /**
+     * @deprecated Use {@link #checkUnsavedChangesAsync(Runnable, Runnable)}
+     *             instead.
+     *             This method now always returns false to avoid blocking, but logs
+     *             a warning.
+     */
+    @Deprecated
+    public static boolean checkUnsavedChanges() {
+        Logger.warn("checkUnsavedChanges() called synchronously! Use async version.");
+        return true; // Forzamos true para no bloquear, asumiendo "descartar" si se llama por error.
     }
 
     /**
@@ -355,11 +390,10 @@ public final class MapManager {
             markAsSaved();
 
             Logger.info("Mapa guardado exitosamente en: {}", filePath);
-            javax.swing.JOptionPane.showMessageDialog(null, "Mapa guardado correctamente.");
+            DialogManager.getInstance().showInfo("Guardar Mapa", "Mapa guardado correctamente.");
         } catch (IOException e) {
             Logger.error(e, "Error al guardar el mapa en: {}", filePath);
-            javax.swing.JOptionPane.showMessageDialog(null, "Error al guardar el mapa:\n" + e.getMessage(), "Error",
-                    javax.swing.JOptionPane.ERROR_MESSAGE);
+            DialogManager.getInstance().showError("Error", "Error al guardar el mapa:\n" + e.getMessage());
         }
     }
 

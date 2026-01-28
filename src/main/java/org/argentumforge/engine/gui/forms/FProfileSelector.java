@@ -130,21 +130,19 @@ public class FProfileSelector extends Form {
             ImGui.pushStyleColor(imgui.flag.ImGuiCol.Button, org.argentumforge.engine.gui.Theme.COLOR_DANGER);
             if (ImGui.button(I18n.INSTANCE.get("profile.delete"), buttonWidth, 30)) {
                 if (selectedProfile != null) {
-                    int response = javax.swing.JOptionPane.showConfirmDialog(null,
+                    org.argentumforge.engine.gui.DialogManager.getInstance().showConfirm(
+                            "Confirmar Eliminación",
                             "¿Está seguro que desea eliminar el perfil '" + selectedProfile.getName()
                                     + "'?\nEsta acción no se puede deshacer.",
-                            "Confirmar Eliminación",
-                            javax.swing.JOptionPane.YES_NO_OPTION,
-                            javax.swing.JOptionPane.WARNING_MESSAGE);
-
-                    if (response == javax.swing.JOptionPane.YES_OPTION) {
-                        ProfileManager.INSTANCE.deleteProfile(selectedProfile);
-                        if (profiles.isEmpty()) {
-                            selectedProfile = null;
-                        } else {
-                            selectedProfile = profiles.get(0);
-                        }
-                    }
+                            () -> {
+                                ProfileManager.INSTANCE.deleteProfile(selectedProfile);
+                                if (profiles.isEmpty()) {
+                                    selectedProfile = null;
+                                } else {
+                                    selectedProfile = profiles.get(0);
+                                }
+                            },
+                            null);
                 }
             }
             ImGui.popStyleColor();

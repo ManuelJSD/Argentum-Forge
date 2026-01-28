@@ -31,13 +31,18 @@ public class Main {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
         t.printStackTrace(pw);
-        String stackTrace = sw.toString();
 
-        javax.swing.JOptionPane.showMessageDialog(null,
-                "Se ha producido un error crítico en el editor:\n\n" + t.getMessage() +
-                        "\n\nStack Trace:\n" + stackTrace.substring(0, Math.min(stackTrace.length(), 1000)),
-                "Error Crítico - Argentum Forge",
-                javax.swing.JOptionPane.ERROR_MESSAGE);
+        System.err.println("CRITICAL ERROR: " + t.getMessage());
+        System.err.println(sw.toString());
+
+        try {
+            java.nio.file.Files.writeString(
+                    java.nio.file.Path.of("crash.log"),
+                    "CRITICAL ERROR: " + t.getMessage() + "\n" + sw.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         System.exit(1);
     }
 

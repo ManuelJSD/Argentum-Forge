@@ -7,7 +7,6 @@ import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImString;
 import org.argentumforge.engine.game.Options;
 
-import javax.swing.*;
 import java.io.File;
 
 public class FRoutes extends Form {
@@ -83,24 +82,13 @@ public class FRoutes extends Form {
     }
 
     private String selectFolder(String currentPath) {
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-
-        // Solo establecer directorio actual si la ruta no está vacía y existe
-        if (currentPath != null && !currentPath.isEmpty()) {
-            File dir = new File(currentPath);
-            if (dir.exists() && dir.isDirectory()) {
-                fileChooser.setCurrentDirectory(dir);
-            }
+        if (currentPath == null || currentPath.isEmpty()) {
+            currentPath = new File(".").getAbsolutePath();
         }
 
-        fileChooser.setDialogTitle(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.paths.selectFolder"));
-
-        int result = fileChooser.showOpenDialog(null);
-        if (result == JFileChooser.APPROVE_OPTION) {
-            return fileChooser.getSelectedFile().getAbsolutePath();
-        }
-        return null;
+        return org.argentumforge.engine.gui.FileDialog.selectFolder(
+                org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.paths.selectFolder"),
+                currentPath);
     }
 
 }
