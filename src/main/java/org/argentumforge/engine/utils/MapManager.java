@@ -228,14 +228,6 @@ public final class MapManager {
      * @param filePath Ruta absoluta al archivo .map
      */
     public static void loadMap(String filePath) {
-        // Si el mapa ya está abierto, simplemente lo activamos
-        for (MapContext context : GameData.getOpenMaps()) {
-            if (filePath.equals(context.getFilePath())) {
-                GameData.setActiveContext(context);
-                return;
-            }
-        }
-
         Logger.info("Cargando mapa desde: {}", filePath);
 
         // Guardar la ruta del último mapa para futuras sesiones y añadir al historial

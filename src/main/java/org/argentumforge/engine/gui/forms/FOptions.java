@@ -3,6 +3,7 @@ package org.argentumforge.engine.gui.forms;
 import imgui.ImGui;
 import imgui.flag.ImGuiCond;
 import imgui.flag.ImGuiWindowFlags;
+import imgui.type.ImInt;
 import org.argentumforge.engine.Window;
 import org.argentumforge.engine.audio.Sound;
 import static org.argentumforge.engine.utils.GameData.options;
@@ -89,6 +90,51 @@ public final class FOptions extends Form {
                 if (ImGui.isItemHovered()) {
                     ImGui.setTooltip(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.docking.tooltip"));
                 }
+
+                ImGui.endTabItem();
+            }
+
+            // --- TAB: APARIENCIA ---
+            if (ImGui.beginTabItem("Apariencia")) {
+                ImGui.dummy(0, 10);
+
+                // User Appearance
+                ImGui.text("Apariencia en Tierra:");
+                ImGui.separator();
+
+                ImInt body = new ImInt(org.argentumforge.engine.game.User.INSTANCE.getUserBody());
+                if (ImGui.inputInt("Cuerpo", body)) {
+                    if (body.get() < 1)
+                        body.set(1);
+                    org.argentumforge.engine.game.User.INSTANCE.setUserBody(body.get());
+                    org.argentumforge.engine.game.User.INSTANCE.refreshUserCharacter();
+                }
+
+                ImInt head = new ImInt(org.argentumforge.engine.game.User.INSTANCE.getUserHead());
+                if (ImGui.inputInt("Cabeza", head)) {
+                    if (head.get() < 1)
+                        head.set(1);
+                    org.argentumforge.engine.game.User.INSTANCE.setUserHead(head.get());
+                    org.argentumforge.engine.game.User.INSTANCE.refreshUserCharacter();
+                }
+
+                ImGui.dummy(0, 10);
+                ImGui.text("Apariencia en Agua:");
+                ImGui.separator();
+
+                ImInt waterBody = new ImInt(org.argentumforge.engine.game.User.INSTANCE.getUserWaterBody());
+                if (ImGui.inputInt("Cuerpo (Agua)", waterBody)) {
+                    if (waterBody.get() < 1)
+                        waterBody.set(1);
+                    org.argentumforge.engine.game.User.INSTANCE.setUserWaterBody(waterBody.get());
+                    // Update appearance immediately if on water
+                    if (org.argentumforge.engine.game.User.INSTANCE.isWalkingmode()) {
+                        org.argentumforge.engine.game.User.INSTANCE.checkAppearance();
+                    }
+                }
+
+                ImGui.dummy(0, 10);
+                ImGui.textDisabled("(Los cambios se ven en tiempo real)");
 
                 ImGui.endTabItem();
             }
