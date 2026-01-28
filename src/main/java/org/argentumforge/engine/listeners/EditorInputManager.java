@@ -278,6 +278,8 @@ public class EditorInputManager {
                                         transferIgnored = true;
                                         ignoredX = x;
                                         ignoredY = y;
+                                        org.argentumforge.engine.listeners.KeyHandler.resetInputs(); // Stop any sticky
+                                                                                                     // movement
                                         org.tinylog.Logger.info(
                                                 "Transfer Cancelled. Ignoring tile (" + x + "," + y + ") until move.");
                                     }

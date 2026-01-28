@@ -40,6 +40,11 @@ public enum Options {
     private java.util.Set<Integer> ignoredObjTypes = new java.util.HashSet<>(
             java.util.Arrays.asList(4, 6, 8, 10, 15, 20, 22, 27, 28));
 
+    // Appearance
+    private int userBody = 1;
+    private int userHead = 4;
+    private int userWaterBody = 84;
+
     private final RenderSettings renderSettings = new RenderSettings();
 
     public void setConfigPath(String path) {
@@ -138,6 +143,10 @@ public enum Options {
 
             write(writer, "MoveSpeedNormal", moveSpeedNormal);
             write(writer, "MoveSpeedWalk", moveSpeedWalk);
+
+            write(writer, "UserBody", userBody);
+            write(writer, "UserHead", userHead);
+            write(writer, "UserWaterBody", userWaterBody);
 
             for (int i = 0; i < recentMaps.size(); i++) {
                 write(writer, "Recent" + (i + 1), recentMaps.get(i));
@@ -401,6 +410,9 @@ public enum Options {
             }
             case "MoveSpeedNormal" -> moveSpeedNormal = Integer.parseInt(value);
             case "MoveSpeedWalk" -> moveSpeedWalk = Integer.parseInt(value);
+            case "UserBody" -> userBody = Integer.parseInt(value);
+            case "UserHead" -> userHead = Integer.parseInt(value);
+            case "UserWaterBody" -> userWaterBody = Integer.parseInt(value);
             default -> {
                 if (option.startsWith("Recent")) {
                     if (!recentMaps.contains(value) && new java.io.File(value).exists()) {
@@ -439,5 +451,29 @@ public enum Options {
 
     public java.util.Set<Integer> getIgnoredObjTypes() {
         return ignoredObjTypes;
+    }
+
+    public int getUserBody() {
+        return userBody;
+    }
+
+    public void setUserBody(int userBody) {
+        this.userBody = userBody;
+    }
+
+    public int getUserHead() {
+        return userHead;
+    }
+
+    public void setUserHead(int userHead) {
+        this.userHead = userHead;
+    }
+
+    public int getUserWaterBody() {
+        return userWaterBody;
+    }
+
+    public void setUserWaterBody(int userWaterBody) {
+        this.userWaterBody = userWaterBody;
     }
 }
