@@ -9,7 +9,6 @@ import org.argentumforge.engine.utils.MapManager;
 import org.argentumforge.engine.utils.MapManager.MapSaveOptions;
 import org.argentumforge.engine.i18n.I18n;
 import org.argentumforge.engine.gui.FileDialog;
-import org.argentumforge.engine.gui.DialogManager;
 import org.argentumforge.engine.game.Options;
 import java.io.File;
 
@@ -23,10 +22,13 @@ public class FMapSaveOptions extends Form {
 
     // Callback to execute after successful save
     private Runnable onSuccess;
+    // Callback to execute if cancelled
+    private Runnable onCancel;
 
-    public FMapSaveOptions(MapSaveOptions initialOptions, Runnable onSuccess) {
+    public FMapSaveOptions(MapSaveOptions initialOptions, Runnable onSuccess, Runnable onCancel) {
         this.options = initialOptions != null ? initialOptions : MapSaveOptions.standard();
         this.onSuccess = onSuccess;
+        this.onCancel = onCancel;
 
         // Load initial state
         this.version.set(this.options.getVersion());
@@ -34,6 +36,10 @@ public class FMapSaveOptions extends Form {
         this.longIndices.set(this.options.isUseLongIndices());
 
         detectPreset();
+    }
+
+    public FMapSaveOptions(MapSaveOptions initialOptions, Runnable onSuccess) {
+        this(initialOptions, onSuccess, null);
     }
 
     private void detectPreset() {
@@ -140,6 +146,8 @@ public class FMapSaveOptions extends Form {
             ImGui.pushStyleColor(imgui.flag.ImGuiCol.ButtonHovered, 0.9f, 0.3f, 0.3f, 1.0f);
             ImGui.pushStyleColor(imgui.flag.ImGuiCol.ButtonActive, 0.7f, 0.1f, 0.1f, 1.0f);
             if (ImGui.button("Cancelar", btnWidth, btnHeight)) {
+                if (onCancel != null)
+                    onCancel.run();
                 this.close();
             }
             ImGui.popStyleColor(3);
@@ -158,9 +166,6 @@ public class FMapSaveOptions extends Form {
         this.close();
 
         // Execute File Dialog logic immediately
-        // Note: Since FileDialog is blocking (TinyFD), this might freeze UI briefly,
-        // which is expected behavior for modal file dialogs.
-
         String lastPath = Options.INSTANCE.getLastMapPath();
         if (lastPath == null || lastPath.isEmpty()) {
             lastPath = new File(".").getAbsolutePath() + File.separator;
@@ -191,6 +196,10 @@ public class FMapSaveOptions extends Form {
             if (onSuccess != null) {
                 onSuccess.run();
             }
+        } else {
+            // User cancelled the file dialog
+            if (onCancel != null)
+                onCancel.run();
         }
     }
 }

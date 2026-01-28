@@ -53,8 +53,9 @@ public class MapFileUtils {
      * Abre un diálogo de configuración de guardado y luego el selector de archivos.
      * 
      * @param onSuccess Callback opcional a ejecutar tras un guardado exitoso
+     * @param onFailure Callback opcional si falla o se cancela
      */
-    public static void saveMapAs(Runnable onSuccess) {
+    public static void saveMapAs(Runnable onSuccess, Runnable onFailure) {
         MapManager.MapSaveOptions currentOpts = MapManager.MapSaveOptions.standard();
         MapContext context = GameData.getActiveContext();
         if (context != null && context.getSaveOptions() != null) {
@@ -65,13 +66,17 @@ public class MapFileUtils {
         // FMapSaveOptions se encargará de llamar al FileDialog y luego a
         // GameData.saveMap
         org.argentumforge.engine.gui.ImGUISystem.INSTANCE.show(
-                new org.argentumforge.engine.gui.forms.FMapSaveOptions(currentOpts, onSuccess));
+                new org.argentumforge.engine.gui.forms.FMapSaveOptions(currentOpts, onSuccess, onFailure));
+    }
+
+    public static void saveMapAs(Runnable onSuccess) {
+        saveMapAs(onSuccess, null);
     }
 
     // Sobrecarga para compatibilidad si alguien llama sin argumentos (aunque
     // idealmente refactorizar)
     public static void saveMapAs() {
-        saveMapAs(null);
+        saveMapAs(null, null);
     }
 
     /**
@@ -93,23 +98,8 @@ public class MapFileUtils {
         }
 
         if (context.getFilePath() == null || context.getFilePath().isEmpty()) {
-            // Necesita "Guardar Como", delegamos al formulario
-            // PERO: SaveAs es asíncrono (abre form).
-            // Pasamos onSuccess. Si el usuario cancela el form, no hay callback de fallo
-            // explícito aún en FMapSaveOptions para cancelar todo.
-            // TODO: Agregar onCancel a FMapSaveOptions si es crítico manejar el "No
-            // guardé".
-            // Por ahora asumimos que si llama a saveMapAs, el flujo continúa allí.
-            // Para soportar onFailure correctamente, FMapSaveOptions necesitaría un
-            // onCancel.
-            // Vamos a modificar FMapSaveOptions para soportar onCancel o simplemente
-            // notar que si el usuario cancela, el flujo "Save then Continue" se rompe (que
-            // es lo deseado).
-
-            // Si requiere SaveAs, abrimos el form. El onFailure no se llamará
-            // inmediatamente,
-            // lo cual está bien si el usuario simplemente cierra la ventana sin guardar.
-            saveMapAs(onSuccess);
+            // Necesita "Guardar Como", delegamos al formulario con callbacks
+            saveMapAs(onSuccess, onFailure);
 
         } else {
             // Guardar directamente async? No, saveMap es síncrono en disco pero rápido.
