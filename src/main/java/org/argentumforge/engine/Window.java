@@ -62,9 +62,6 @@ public enum Window {
     private long audioDevice;
     private boolean cursorCrosshair;
 
-    private long cursorMainID;
-    private long cursorCrosshairID;
-
     Window() {
         this.title = "Argentum Forge";
         this.width = options.getScreenWidth();
@@ -221,15 +218,6 @@ public enum Window {
         // Make the window visible
         glfwShowWindow(window);
 
-        // cargamos los cursores graficos!
-        cursorMainID = loadCursor("MAIN");
-        cursorCrosshairID = loadCursor("CAST");
-
-        // set current cursor
-        if (options.isCursorGraphic()) {
-            glfwSetCursor(window, cursorMainID);
-        }
-
         // Inicializa OpenGL
         GL.createCapabilities();
 
@@ -252,14 +240,6 @@ public enum Window {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_BLEND);
         glDisable(GL_DEPTH_TEST);
-    }
-
-    public void setCursorGraphic(boolean cast) {
-        if (!cast) {
-            glfwSetCursor(window, cursorMainID);
-        } else {
-            glfwSetCursor(window, cursorCrosshairID);
-        }
     }
 
     /**
@@ -445,33 +425,6 @@ public enum Window {
             image.set(w.get(), h.get(), imgBuff);
             imageBf.put(0, image);
             glfwSetWindowIcon(window, imageBf);
-        }
-    }
-
-    /**
-     * Carga un cursor grafico, por ahora no lo vamos a usar.
-     */
-    private long loadCursor(final String fileName) {
-        try (MemoryStack stack = MemoryStack.stackPush()) {
-            final IntBuffer ch = stack.mallocInt(1), w = stack.mallocInt(1), h = stack.mallocInt(1);
-            final ByteBuffer imgBuff = STBImage.stbi_load("./resources/" + fileName + ".png", w, h, ch, 4);
-
-            if (imgBuff == null)
-                return 0;
-
-            GLFWImage image = GLFWImage.malloc();
-            GLFWImage.Buffer imageBf = GLFWImage.malloc(1);
-
-            image.set(w.get(), h.get(), imgBuff);
-            imageBf.put(0, image);
-
-            // the hotspot indicates the displacement of the sprite to the
-            // position where mouse clicks are registered (see image below)
-            final int hotspotX = 3;
-            final int hotspotY = 6;
-
-            // create custom cursor and store its ID
-            return glfwCreateCursor(image, hotspotX, hotspotY);
         }
     }
 

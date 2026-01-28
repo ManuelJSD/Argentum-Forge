@@ -51,7 +51,7 @@ public final class FSetupWizard extends Form {
     private final ImInt clientHeight = new ImInt(11);
 
     private final ImBoolean generateMinimap = new ImBoolean(true);
-    private final ImBoolean graphicCursor = new ImBoolean(false);
+
     private final ImBoolean windowOpen = new ImBoolean(true);
     private boolean showExitConfirmation = false;
 
@@ -87,7 +87,7 @@ public final class FSetupWizard extends Form {
         musicEnabled.set(opts.isMusic());
         soundEnabled.set(opts.isSound());
         fullscreen.set(opts.isFullscreen());
-        graphicCursor.set(opts.isCursorGraphic());
+
         clientWidth.set(opts.getClientWidth());
         clientHeight.set(opts.getClientHeight());
 
@@ -265,7 +265,7 @@ public final class FSetupWizard extends Form {
         ImGui.spacing();
 
         ImGui.checkbox(I18n.INSTANCE.get("wizard.prefs.fullscreen"), fullscreen);
-        ImGui.checkbox(I18n.INSTANCE.get("wizard.prefs.graphicCursor"), graphicCursor);
+
     }
 
     private void renderMinimap() {
@@ -456,7 +456,7 @@ public final class FSetupWizard extends Form {
         opts.setMusic(musicEnabled.get());
         opts.setSound(soundEnabled.get());
         opts.setFullscreen(fullscreen.get());
-        opts.setCursorGraphic(graphicCursor.get());
+
         opts.setClientWidth(clientWidth.get());
         opts.setClientHeight(clientHeight.get());
         opts.setLanguage(languages[languageIndex.get()]);

@@ -13,7 +13,6 @@ import org.argentumforge.engine.listeners.MouseListener;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.argentumforge.engine.utils.GameData.options;
 import static org.argentumforge.engine.utils.Time.deltaTime;
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -228,18 +227,10 @@ public enum ImGUISystem {
 
         // ACA HAY QUE LABURAR CON LOS CURSORES.
         if (window.isCursorCrosshair())
-            if (options.isCursorGraphic()) {
-                Window.INSTANCE.setCursorGraphic(true);
-            } else {
-                glfwSetCursor(window.getWindow(), glfwCreateStandardCursor(GLFW_CROSSHAIR_CURSOR));
-            }
+            glfwSetCursor(window.getWindow(), glfwCreateStandardCursor(GLFW_CROSSHAIR_CURSOR));
         else {
-            if (options.isCursorGraphic()) {
-                Window.INSTANCE.setCursorGraphic(false);
-            } else {
-                glfwSetCursor(window.getWindow(), mouseCursors[ImGui.getMouseCursor()]);
-                glfwSetInputMode(window.getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-            }
+            glfwSetCursor(window.getWindow(), mouseCursors[ImGui.getMouseCursor()]);
+            glfwSetInputMode(window.getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         }
 
         // IMPORTANT!!

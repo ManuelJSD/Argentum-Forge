@@ -21,7 +21,7 @@ public enum Options {
     private boolean fullscreen = false;
     private boolean vsync = true;
     private boolean dockingEnabled = true;
-    private boolean cursorGraphic = true;
+
     private String language = "es_ES";
     private String graphicsPath = "";
     private String datsPath = "";
@@ -111,7 +111,7 @@ public enum Options {
             write(writer, "Fullscreen", fullscreen);
             write(writer, "VSYNC", vsync);
             write(writer, "DockingEnabled", dockingEnabled);
-            write(writer, "CursorGraphic", cursorGraphic);
+
             write(writer, "Language", language);
             write(writer, "ScreenWidth", screenWidth);
             write(writer, "ScreenHeight", screenHeight);
@@ -192,14 +192,6 @@ public enum Options {
 
     public void setDockingEnabled(boolean dockingEnabled) {
         this.dockingEnabled = dockingEnabled;
-    }
-
-    public boolean isCursorGraphic() {
-        return cursorGraphic;
-    }
-
-    public void setCursorGraphic(boolean cursorGraphic) {
-        this.cursorGraphic = cursorGraphic;
     }
 
     public String getLanguage() {
@@ -331,7 +323,7 @@ public enum Options {
             case "Fullscreen" -> fullscreen = Boolean.parseBoolean(value);
             case "VSYNC" -> vsync = Boolean.parseBoolean(value);
             case "DockingEnabled" -> dockingEnabled = Boolean.parseBoolean(value);
-            case "CursorGraphic" -> cursorGraphic = Boolean.parseBoolean(value);
+
             case "Language" -> {
                 if ("es".equalsIgnoreCase(value)) {
                     language = "es_ES";

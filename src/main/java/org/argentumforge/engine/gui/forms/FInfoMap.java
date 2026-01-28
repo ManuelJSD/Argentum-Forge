@@ -74,7 +74,8 @@ public final class FInfoMap extends Form {
         }
 
         ImGui.setNextWindowSize(350, 300, ImGuiCond.Always);
-        if (ImGui.begin(I18n.INSTANCE.get("map.info.title"), ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize)) {
+        if (ImGui.begin(I18n.INSTANCE.get("map.info.title"),
+                ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoDocking)) {
 
             if (ImGui.inputText(I18n.INSTANCE.get("map.info.name"), mapName)) {
                 GameData.mapProperties.setName(mapName.get());

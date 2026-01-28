@@ -4,7 +4,7 @@ import imgui.ImGui;
 import imgui.flag.ImGuiCond;
 import imgui.flag.ImGuiWindowFlags;
 import org.argentumforge.engine.Window;
-import static org.argentumforge.engine.audio.Sound.*;
+import org.argentumforge.engine.audio.Sound;
 import static org.argentumforge.engine.utils.GameData.options;
 
 /**
@@ -35,118 +35,136 @@ public final class FOptions extends Form {
 
     @Override
     public void render() {
-        ImGui.setNextWindowSize(400, 360, ImGuiCond.Always);
+        ImGui.setNextWindowSize(500, 0, ImGuiCond.Once);
         ImGui.begin(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.title"),
-                ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize);
+                ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.AlwaysAutoResize
+                        | ImGuiWindowFlags.NoDocking);
 
-        if (ImGui.checkbox(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.graphics") + " (Fullscreen)",
-                options.isFullscreen())) {
-            options.setFullscreen(!options.isFullscreen());
-            org.argentumforge.engine.Window.INSTANCE.toggleWindow();
-        }
+        if (ImGui.beginTabBar("OptionsTabs")) {
 
-        // Selector de Resolucion
-        String[] resolutions = { "1024x768", "1024x1024", "1280x720", "1366x768", "1920x1080", "2560x1440",
-                "3840x2160" };
-        int currentResIndex = 0;
-        String currentResString = options.getScreenWidth() + "x" + options.getScreenHeight();
+            // --- TAB: GENERAL ---
+            if (ImGui.beginTabItem(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.tab.general", "General"))) {
+                ImGui.dummy(0, 10);
 
-        for (int i = 0; i < resolutions.length; i++) {
-            if (resolutions[i].equals(currentResString)) {
-                currentResIndex = i;
-                break;
-            }
-        }
+                // Language
+                java.util.List<String> availableLanguages = org.argentumforge.engine.i18n.I18n.INSTANCE
+                        .getAvailableLanguages();
+                String currentLanguage = options.getLanguage();
+                int currentLangIndex = availableLanguages.indexOf(currentLanguage);
+                if (currentLangIndex == -1)
+                    currentLangIndex = 0;
 
-        ImGui.setNextItemWidth(200);
-        if (ImGui.beginCombo(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.resolution"),
-                resolutions[currentResIndex])) {
-            for (int i = 0; i < resolutions.length; i++) {
-                boolean isSelected = (currentResIndex == i);
-                if (ImGui.selectable(resolutions[i], isSelected)) {
-                    String[] parts = resolutions[i].split("x");
-                    int newWidth = Integer.parseInt(parts[0]);
-                    int newHeight = Integer.parseInt(parts[1]);
+                ImGui.text(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.language") + ":");
+                ImGui.sameLine();
+                ImGui.setNextItemWidth(200);
+                if (ImGui.beginCombo("##language",
+                        org.argentumforge.engine.i18n.I18n.INSTANCE.getLanguageName(currentLanguage))) {
+                    for (int i = 0; i < availableLanguages.size(); i++) {
+                        String lang = availableLanguages.get(i);
+                        boolean isSelected = (i == currentLangIndex);
+                        if (ImGui.selectable(org.argentumforge.engine.i18n.I18n.INSTANCE.getLanguageName(lang),
+                                isSelected)) {
+                            options.setLanguage(lang);
+                            org.argentumforge.engine.i18n.I18n.INSTANCE.loadLanguage(lang);
+                            options.save();
+                        }
+                        if (isSelected)
+                            ImGui.setItemDefaultFocus();
+                    }
+                    ImGui.endCombo();
+                }
+                ImGui.textColored(ImGui.getColorU32(1.0f, 1.0f, 0.0f, 1.0f),
+                        "* " + org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.restart"));
 
-                    options.setScreenWidth(newWidth);
-                    options.setScreenHeight(newHeight);
-                    org.argentumforge.engine.Window.INSTANCE.updateResolution(newWidth, newHeight);
+                ImGui.separator();
+
+                // Docking Option
+                if (ImGui.checkbox(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.docking"),
+                        options.isDockingEnabled())) {
+                    options.setDockingEnabled(!options.isDockingEnabled());
                     options.save();
+                    javax.swing.JOptionPane.showMessageDialog(null,
+                            org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.docking.message"));
                 }
-                if (isSelected) {
-                    ImGui.setItemDefaultFocus();
+                if (ImGui.isItemHovered()) {
+                    ImGui.setTooltip(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.docking.tooltip"));
                 }
+
+                ImGui.endTabItem();
             }
-            ImGui.endCombo();
-        }
 
-        if (ImGui.checkbox("VSYNC", options.isVsync())) {
-            options.setVsync(!options.isVsync());
-            org.argentumforge.engine.Window.INSTANCE.toggleWindow();
-        }
+            // --- TAB: GRAFICOS ---
+            if (ImGui.beginTabItem(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.tab.graphics"))) {
+                ImGui.dummy(0, 10);
 
-        ImGui.separator();
-
-        if (ImGui.checkbox(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.music"), options.isMusic())) {
-            options.setMusic(!options.isMusic());
-            stopMusic();
-        }
-
-        if (ImGui.checkbox(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.sound"), options.isSound())) {
-            options.setSound(!options.isSound());
-        }
-
-        ImGui.separator();
-
-        if (ImGui.checkbox(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.cursorGraphic"),
-                options.isCursorGraphic())) {
-            options.setCursorGraphic(!options.isCursorGraphic());
-        }
-
-        ImGui.separator();
-
-        // Language Selector
-        java.util.List<String> availableLanguages = org.argentumforge.engine.i18n.I18n.INSTANCE.getAvailableLanguages();
-        String currentLanguage = options.getLanguage();
-        int currentLangIndex = availableLanguages.indexOf(currentLanguage);
-        if (currentLangIndex == -1)
-            currentLangIndex = 0;
-
-        ImGui.text(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.language") + ":");
-        ImGui.setNextItemWidth(200);
-        if (ImGui.beginCombo("##language",
-                org.argentumforge.engine.i18n.I18n.INSTANCE.getLanguageName(currentLanguage))) {
-            for (int i = 0; i < availableLanguages.size(); i++) {
-                String lang = availableLanguages.get(i);
-                boolean isSelected = (i == currentLangIndex);
-                if (ImGui.selectable(org.argentumforge.engine.i18n.I18n.INSTANCE.getLanguageName(lang), isSelected)) {
-                    options.setLanguage(lang);
-                    org.argentumforge.engine.i18n.I18n.INSTANCE.loadLanguage(lang);
-                    options.save();
+                // Fullscreen
+                if (ImGui.checkbox(
+                        org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.graphics") + " (Fullscreen)",
+                        options.isFullscreen())) {
+                    options.setFullscreen(!options.isFullscreen());
+                    org.argentumforge.engine.Window.INSTANCE.toggleWindow();
                 }
-                if (isSelected) {
-                    ImGui.setItemDefaultFocus();
+
+                ImGui.sameLine(250);
+
+                // VSync
+                if (ImGui.checkbox("VSync", options.isVsync())) {
+                    options.setVsync(!options.isVsync());
+                    org.argentumforge.engine.Window.INSTANCE.toggleWindow();
                 }
+
+                ImGui.spacing();
+
+                // Resolution
+                String[] resolutions = { "1024x768", "1024x1024", "1280x720", "1366x768", "1920x1080", "2560x1440",
+                        "3840x2160" };
+                String currentResString = options.getScreenWidth() + "x" + options.getScreenHeight();
+
+                ImGui.text(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.resolution") + ":");
+                ImGui.sameLine();
+                ImGui.setNextItemWidth(200);
+                if (ImGui.beginCombo("##resolution", currentResString)) {
+                    for (String res : resolutions) {
+                        boolean isSelected = res.equals(currentResString);
+                        if (ImGui.selectable(res, isSelected)) {
+                            String[] parts = res.split("x");
+                            options.setScreenWidth(Integer.parseInt(parts[0]));
+                            options.setScreenHeight(Integer.parseInt(parts[1]));
+                            org.argentumforge.engine.Window.INSTANCE.updateResolution(options.getScreenWidth(),
+                                    options.getScreenHeight());
+                            options.save();
+                        }
+                        if (isSelected)
+                            ImGui.setItemDefaultFocus();
+                    }
+                    ImGui.endCombo();
+                }
+
+                ImGui.separator();
+
+                // Ghost Opacity
+                ImGui.text(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.ghostOpacity") + ":");
+                float[] ghostAlpha = { options.getRenderSettings().getGhostOpacity() };
+                if (ImGui.sliderFloat("##ghostAlpha", ghostAlpha, 0.0f, 1.0f)) {
+                    options.getRenderSettings().setGhostOpacity(ghostAlpha[0]);
+                }
+
+                // NPC Breathing
+                if (ImGui.checkbox(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.visual.breathing"),
+                        options.getRenderSettings().isShowNpcBreathing())) {
+                    options.getRenderSettings().setShowNpcBreathing(!options.getRenderSettings().isShowNpcBreathing());
+                }
+
+                ImGui.endTabItem();
             }
-            ImGui.endCombo();
-        }
-        ImGui.textColored(ImGui.getColorU32(1.0f, 1.0f, 0.0f, 1.0f),
-                "* " + org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.restart"));
 
-        ImGui.separator();
-        ImGui.text(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.ghostOpacity") + ":");
-        float[] ghostAlpha = { options.getRenderSettings().getGhostOpacity() };
-        if (ImGui.sliderFloat("##ghostAlpha", ghostAlpha, 0.0f, 1.0f)) {
-            options.getRenderSettings().setGhostOpacity(ghostAlpha[0]);
+            ImGui.endTabBar();
         }
 
-        if (ImGui.checkbox(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.visual.breathing"),
-                options.getRenderSettings().isShowNpcBreathing())) {
-            options.getRenderSettings().setShowNpcBreathing(!options.getRenderSettings().isShowNpcBreathing());
-        }
-
-        // Add some spacing before buttons
+        // Bottom Actions
         ImGui.dummy(0, 20);
+        ImGui.separator();
+        ImGui.dummy(0, 10);
 
         this.drawButtons();
 
@@ -154,24 +172,31 @@ public final class FOptions extends Form {
     }
 
     private void drawButtons() {
-        float buttonWidth = 200;
-        float centerX = (ImGui.getWindowWidth() - buttonWidth) / 2;
+        // Calcular ancho total para centrar
+        float buttonWidth = 120;
+        float spacing = 10;
+        float totalWidth = (buttonWidth * 3) + (spacing * 2);
 
-        ImGui.setCursorPosX(centerX);
+        float startX = (ImGui.getWindowWidth() - totalWidth) / 2;
+
+        // Botón Teclas
+        ImGui.setCursorPosX(startX);
         if (ImGui.button(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.keys"), buttonWidth, 25)) {
-            playSound(SND_CLICK);
+            Sound.playSound(Sound.SND_CLICK);
             org.argentumforge.engine.gui.ImGUISystem.INSTANCE.show(new FBindKeys());
         }
 
-        ImGui.setCursorPosX(centerX);
+        ImGui.sameLine();
+
+        // Botón Rutas
         if (ImGui.button(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.paths"), buttonWidth, 25)) {
-            playSound(SND_CLICK);
+            Sound.playSound(Sound.SND_CLICK);
             org.argentumforge.engine.gui.ImGUISystem.INSTANCE.show(new FRoutes());
         }
 
-        ImGui.separator();
+        ImGui.sameLine();
 
-        ImGui.setCursorPosX(centerX);
+        // Botón Cerrar
         if (ImGui.button(org.argentumforge.engine.i18n.I18n.INSTANCE.get("common.close"), buttonWidth, 25)) {
             options.save();
             this.close();

@@ -373,6 +373,7 @@ public final class FMain extends Form {
         if (selectionActive) {
             ImGui.popStyleColor();
         }
+
         ImGui.popStyleVar(); // Pop BorderSize
     }
 
@@ -514,12 +515,8 @@ public final class FMain extends Form {
 
                 ImGui.separator();
 
-                if (ImGui.menuItem(I18n.INSTANCE.get("menu.file.enableDocking"), "Restart Required",
-                        options.isDockingEnabled())) {
-                    options.setDockingEnabled(!options.isDockingEnabled());
-                    options.save();
-                    javax.swing.JOptionPane.showMessageDialog(null,
-                            "Debe reiniciar la aplicación para aplicar los cambios de Docking.");
+                if (ImGui.menuItem("Cambiar Perfil")) {
+                    org.argentumforge.engine.Engine.INSTANCE.requestProfileChange();
                 }
 
                 ImGui.separator();
@@ -527,6 +524,7 @@ public final class FMain extends Form {
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.file.exit"))) {
                     org.argentumforge.engine.Engine.closeClient();
                 }
+
                 ImGui.endMenu();
             }
 
@@ -599,6 +597,12 @@ public final class FMain extends Form {
                     } else {
                         javax.swing.JOptionPane.showMessageDialog(null, I18n.INSTANCE.get("msg.noActiveMap"));
                     }
+                }
+
+                ImGui.separator();
+
+                if (ImGui.menuItem(I18n.INSTANCE.get("menu.edit.goto"), "F4")) {
+                    ImGUISystem.INSTANCE.show(new FGoTo());
                 }
                 ImGui.endMenu();
             }
@@ -708,23 +712,6 @@ public final class FMain extends Form {
                     }
 
                     ImGui.endMenu();
-                }
-
-                ImGui.endMenu();
-            }
-
-            if (ImGui.beginMenu(I18n.INSTANCE.get("menu.map"))) {
-                if (ImGui.menuItem(I18n.INSTANCE.get("menu.edit.goto"), "F4")) {
-                    ImGUISystem.INSTANCE.show(new FGoTo());
-                }
-
-                ImGui.separator();
-
-                // Otras opciones de mapa futuras (Validar, Propiedades)
-                if (ImGui.menuItem(I18n.INSTANCE.get("menu.map.validate"))) {
-                    // Lógica de validación TODO
-                    // org.argentumforge.engine.utils.MapValidator.validate();
-                    javax.swing.JOptionPane.showMessageDialog(null, "Próximamente...");
                 }
 
                 ImGui.endMenu();
