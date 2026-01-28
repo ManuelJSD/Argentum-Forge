@@ -2,6 +2,7 @@ package org.argentumforge.engine.utils;
 
 import org.argentumforge.engine.game.Options;
 import org.argentumforge.engine.game.models.Character;
+import org.argentumforge.engine.gui.DialogManager;
 
 import org.argentumforge.engine.utils.inits.*;
 import org.tinylog.Logger;
@@ -186,11 +187,9 @@ public final class GameData {
 
         if (AssetRegistry.npcs.isEmpty()) {
             final Path npcsPath = Path.of(options.getDatsPath(), "NPCs.dat");
-            javax.swing.JOptionPane.showMessageDialog(null,
+            DialogManager.getInstance().showError("Error al cargar NPCs",
                     "No se encontró o no se pudo leer NPCs.dat en:\n" + npcsPath.toAbsolutePath() +
-                            "\n\nPor favor, configure la ruta de Dats correctamente.",
-                    "Error al cargar NPCs",
-                    javax.swing.JOptionPane.ERROR_MESSAGE);
+                            "\n\nPor favor, configure la ruta de Dats correctamente.");
         }
     }
 
@@ -204,11 +203,9 @@ public final class GameData {
 
         if (AssetRegistry.objs.isEmpty()) {
             final Path objsPath = Path.of(options.getDatsPath(), "OBJ.dat");
-            javax.swing.JOptionPane.showMessageDialog(null,
+            DialogManager.getInstance().showError("Error al cargar Objetos",
                     "No se encontró o no se pudo leer OBJ.dat en:\n" + objsPath.toAbsolutePath() +
-                            "\n\nPor favor, configure la ruta de Dats correctamente.",
-                    "Error al cargar Objetos",
-                    javax.swing.JOptionPane.ERROR_MESSAGE);
+                            "\n\nPor favor, configure la ruta de Dats correctamente.");
         }
     }
 
@@ -451,23 +448,19 @@ public final class GameData {
 
         } catch (java.nio.BufferUnderflowException e) {
             Logger.error(e, "Error: Fin de archivo inesperado en Graficos.ind");
-            javax.swing.JOptionPane.showMessageDialog(null,
+            DialogManager.getInstance().showError("Archivo Corrupto",
                     "Error crítico al leer 'Graficos.ind'.\n" +
                             "El archivo terminó inesperadamente (BufferUnderflow).\n" +
                             "Probablemente esté corrupto o cortado.\n\n" +
-                            "Por favor, verifique el archivo en la carpeta INIT.",
-                    "Archivo Corrupto",
-                    javax.swing.JOptionPane.ERROR_MESSAGE);
+                            "Por favor, verifique el archivo en la carpeta INIT.");
             // Safety init
             if (AssetRegistry.grhData == null)
                 AssetRegistry.grhData = new GrhData[1];
         } catch (Exception e) {
             Logger.error(e, "Error general al cargar Graficos.ind");
-            javax.swing.JOptionPane.showMessageDialog(null,
+            DialogManager.getInstance().showError("Error",
                     "Error al cargar 'Graficos.ind'.\n" +
-                            "Detalle: " + e.getMessage(),
-                    "Error",
-                    javax.swing.JOptionPane.ERROR_MESSAGE);
+                            "Detalle: " + e.getMessage());
             if (AssetRegistry.grhData == null)
                 AssetRegistry.grhData = new GrhData[1];
         }
@@ -612,9 +605,8 @@ public final class GameData {
             }
         } catch (Exception e) {
             Logger.error(e, "Error al cargar Cabezas.ind");
-            javax.swing.JOptionPane.showMessageDialog(null,
-                    "Error al cargar 'Cabezas.ind'.\nDetalle: " + e.getMessage(), "Error",
-                    javax.swing.JOptionPane.ERROR_MESSAGE);
+            DialogManager.getInstance().showError("Error",
+                    "Error al cargar 'Cabezas.ind'.\nDetalle: " + e.getMessage());
             AssetRegistry.headData = new HeadData[1];
             AssetRegistry.headData[0] = new HeadData();
         }
@@ -680,12 +672,10 @@ public final class GameData {
             }
         } catch (Exception e) {
             Logger.error(e, "Error al cargar Cascos.ind");
-            javax.swing.JOptionPane.showMessageDialog(null,
+            DialogManager.getInstance().showError("Error de Formato en Cascos",
                     "Error al cargar 'Cascos.ind'.\n" +
                             "El archivo podría estar corrupto o ser de una versión no soportada.\n\n" +
-                            "Detalle: " + e.getMessage(),
-                    "Error de Formato en Cascos",
-                    javax.swing.JOptionPane.ERROR_MESSAGE);
+                            "Detalle: " + e.getMessage());
             AssetRegistry.helmetsData = new HeadData[1];
             AssetRegistry.helmetsData[0] = new HeadData();
         }
@@ -771,12 +761,10 @@ public final class GameData {
             }
         } catch (Exception e) {
             Logger.error(e, "Error al cargar Cuerpos.ind/Personajes.ind");
-            javax.swing.JOptionPane.showMessageDialog(null,
+            DialogManager.getInstance().showError("Error de Formato en Cuerpos",
                     "Error al cargar 'Cuerpos.ind' o 'Personajes.ind'.\n" +
                             "El archivo podría estar corrupto o ser de una versión no soportada.\n\n" +
-                            "Detalle: " + e.getMessage(),
-                    "Error de Formato en Cuerpos",
-                    javax.swing.JOptionPane.ERROR_MESSAGE);
+                            "Detalle: " + e.getMessage());
             AssetRegistry.bodyData = new BodyData[1];
             AssetRegistry.bodyData[0] = new BodyData();
         }
@@ -817,12 +805,10 @@ public final class GameData {
             }
         } catch (Exception e) {
             Logger.error(e, "Error al cargar Armas.ind");
-            javax.swing.JOptionPane.showMessageDialog(null,
+            DialogManager.getInstance().showError("Error de Formato en Armas",
                     "Error al cargar 'Armas.ind'.\n" +
                             "El archivo podría estar corrupto o ser de una versión no soportada.\n\n" +
-                            "Detalle: " + e.getMessage(),
-                    "Error de Formato en Armas",
-                    javax.swing.JOptionPane.ERROR_MESSAGE);
+                            "Detalle: " + e.getMessage());
             AssetRegistry.weaponData = new WeaponData[1];
             AssetRegistry.weaponData[0] = new WeaponData();
         }
@@ -840,11 +826,9 @@ public final class GameData {
             weaponsPath = Path.of(options.getInitPath(), "Armas.dat");
             if (!Files.exists(weaponsPath)) {
                 Logger.error("Armas.ind y Armas.dat no encontrados.");
-                javax.swing.JOptionPane.showMessageDialog(null,
+                DialogManager.getInstance().showError("Error al cargar Armas",
                         "No se encontró el archivo de armas (Armas.ind o Armas.dat).\n" +
-                                "Por favor, configure las rutas correctamente.",
-                        "Error al cargar Armas",
-                        javax.swing.JOptionPane.ERROR_MESSAGE);
+                                "Por favor, configure las rutas correctamente.");
                 AssetRegistry.weaponData = new WeaponData[1];
                 AssetRegistry.weaponData[0] = new WeaponData();
                 return;
@@ -992,12 +976,10 @@ public final class GameData {
             }
         } catch (Exception e) {
             Logger.error(e, "Error al cargar Escudos.ind");
-            javax.swing.JOptionPane.showMessageDialog(null,
+            DialogManager.getInstance().showError("Error de Formato en Escudos",
                     "Error al cargar 'Escudos.ind'.\n" +
                             "El archivo podría estar corrupto o ser de una versión no soportada.\n\n" +
-                            "Detalle: " + e.getMessage(),
-                    "Error de Formato en Escudos",
-                    javax.swing.JOptionPane.ERROR_MESSAGE);
+                            "Detalle: " + e.getMessage());
             AssetRegistry.shieldData = new ShieldData[1];
             AssetRegistry.shieldData[0] = new ShieldData();
         }
@@ -1228,12 +1210,10 @@ public final class GameData {
             }
         } catch (Exception e) {
             Logger.error(e, "Error al cargar Fxs.ind");
-            javax.swing.JOptionPane.showMessageDialog(null,
+            DialogManager.getInstance().showError("Error de Formato en Fxs",
                     "Error al cargar 'Fxs.ind'.\n" +
                             "El archivo podría estar corrupto o ser de una versión no soportada.\n\n" +
-                            "Detalle: " + e.getMessage(),
-                    "Error de Formato en Fxs",
-                    javax.swing.JOptionPane.ERROR_MESSAGE);
+                            "Detalle: " + e.getMessage());
             AssetRegistry.fxData = new FxData[1];
             AssetRegistry.fxData[0] = new FxData(); // Evitar NPE
         }
@@ -1243,11 +1223,9 @@ public final class GameData {
         Path fxsPath = Path.of(options.getInitPath(), "Fxs.ini");
         if (!Files.exists(fxsPath)) {
             Logger.error("Fxs.ind y Fxs.ini no encontrados.");
-            javax.swing.JOptionPane.showMessageDialog(null,
+            DialogManager.getInstance().showError("Error al cargar Fxs",
                     "No se encontró el archivo de Fxs (Fxs.ind o Fxs.ini).\n" +
-                            "Por favor, configure las rutas correctamente.",
-                    "Error al cargar Fxs",
-                    javax.swing.JOptionPane.ERROR_MESSAGE);
+                            "Por favor, configure las rutas correctamente.");
             AssetRegistry.fxData = new FxData[1];
             AssetRegistry.fxData[0] = new FxData();
             return;
@@ -1328,9 +1306,8 @@ public final class GameData {
 
         } catch (IOException e) {
             Logger.error(e, "Error al leer Fxs.ini");
-            javax.swing.JOptionPane.showMessageDialog(null,
-                    "Error al leer 'Fxs.ini'.\nDetalle: " + e.getMessage(),
-                    "Error de Lectura", javax.swing.JOptionPane.ERROR_MESSAGE);
+            DialogManager.getInstance().showError("Error de Lectura",
+                    "Error al leer 'Fxs.ini'.\nDetalle: " + e.getMessage());
         }
 
         int finalSize = Math.max(numFxsFromInit, maxFxId);
@@ -1406,11 +1383,9 @@ public final class GameData {
             Logger.error("DEBUG: Configured InitPath is: " + options.getInitPath());
             if (showError) {
                 Logger.error("{} no encontrado en la ruta: {}", fileName, filePath.toAbsolutePath());
-                javax.swing.JOptionPane.showMessageDialog(null,
+                DialogManager.getInstance().showError("Error al cargar " + friendlyName,
                         "No se encontró el archivo " + fileName + " en:\n" + filePath.toAbsolutePath() +
-                                "\n\nPor favor, configure la ruta de Inits correctamente.",
-                        "Error al cargar " + friendlyName,
-                        javax.swing.JOptionPane.ERROR_MESSAGE);
+                                "\n\nPor favor, configure la ruta de Inits correctamente.");
             }
             return null;
         } else {

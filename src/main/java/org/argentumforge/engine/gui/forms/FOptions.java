@@ -84,7 +84,7 @@ public final class FOptions extends Form {
                         options.isDockingEnabled())) {
                     options.setDockingEnabled(!options.isDockingEnabled());
                     options.save();
-                    javax.swing.JOptionPane.showMessageDialog(null,
+                    org.argentumforge.engine.gui.DialogManager.getInstance().showInfo("Docking",
                             org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.docking.message"));
                 }
                 if (ImGui.isItemHovered()) {

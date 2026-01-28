@@ -8,7 +8,6 @@ import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import org.argentumforge.engine.game.Options;
 import org.argentumforge.engine.i18n.I18n;
-import org.argentumforge.engine.utils.FileChooserUtil;
 
 import java.io.File;
 
@@ -236,7 +235,11 @@ public final class FSetupWizard extends Form {
         ImGui.popItemWidth();
         ImGui.sameLine();
         if (ImGui.button(I18n.INSTANCE.get("wizard.routes.browse") + "##" + labelKey, 60, 0)) {
-            String selected = FileChooserUtil.selectFolder(I18n.INSTANCE.get(labelKey));
+            String defaultPath = pathField.get();
+            if (defaultPath.isEmpty())
+                defaultPath = "";
+            String selected = org.argentumforge.engine.gui.FileDialog.selectFolder(I18n.INSTANCE.get(labelKey),
+                    defaultPath);
             if (selected != null) {
                 pathField.set(selected);
             }

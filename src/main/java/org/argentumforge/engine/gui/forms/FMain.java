@@ -6,6 +6,7 @@ import imgui.ImGuiViewport;
 import imgui.flag.*;
 import org.argentumforge.engine.game.console.Console;
 import org.argentumforge.engine.gui.ImGUISystem;
+import org.argentumforge.engine.gui.DialogManager;
 import org.argentumforge.engine.renderer.RenderSettings;
 import org.argentumforge.engine.gui.Theme;
 import org.argentumforge.engine.utils.editor.*;
@@ -141,6 +142,7 @@ public final class FMain extends Form {
             }
             ImGui.endPopup();
         }
+
     }
 
     private void drawTabs() {
@@ -175,11 +177,10 @@ public final class FMain extends Form {
                         if (context.isModified()) {
                             // Cambiar temporalmente al contexto para guardar si es necesario
                             org.argentumforge.engine.utils.GameData.setActiveContext(context);
-                            if (org.argentumforge.engine.utils.MapManager.checkUnsavedChanges()) {
-                                contextToClose = context;
-                            } else {
-                                open.set(true); // Cancelar cierre
-                            }
+                            open.set(true); // Cancelar cierre inmediato mientras preguntamos
+                            org.argentumforge.engine.utils.MapManager.checkUnsavedChangesAsync(
+                                    () -> org.argentumforge.engine.utils.GameData.closeMap(context),
+                                    null);
                         } else {
                             contextToClose = context;
                         }
@@ -256,6 +257,12 @@ public final class FMain extends Form {
             } else {
                 ImGui.textDisabled(mousePosText);
             }
+
+            // Version info at the right
+            String versionText = "v" + org.argentumforge.engine.Engine.VERSION;
+            float versionWidth = ImGui.calcTextSize(versionText).x;
+            ImGui.sameLine(viewport.getSizeX() - versionWidth - 20);
+            ImGui.textDisabled(versionText);
 
         }
         ImGui.end();
@@ -375,12 +382,6 @@ public final class FMain extends Form {
         if (selectionActive) {
             ImGui.popStyleColor();
         }
-
-        // --- SEPARADOR ---
-        drawToolbarSeparator();
-
-        // --- GRUPO 4: VELOCIDAD ---
-        // Speed control moved to keys and menu
 
         ImGui.popStyleVar(); // Pop BorderSize
     }
@@ -603,7 +604,8 @@ public final class FMain extends Form {
                     if (org.argentumforge.engine.utils.GameData.getActiveContext() != null) {
                         ImGUISystem.INSTANCE.show(new org.argentumforge.engine.gui.forms.FMapValidator());
                     } else {
-                        javax.swing.JOptionPane.showMessageDialog(null, I18n.INSTANCE.get("msg.noActiveMap"));
+                        org.argentumforge.engine.gui.DialogManager.getInstance().showInfo("Mapa",
+                                I18n.INSTANCE.get("msg.noActiveMap"));
                     }
                 }
 
@@ -737,29 +739,31 @@ public final class FMain extends Form {
                  */
 
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.file.export"))) {
-                    javax.swing.JFileChooser fileChooser = new javax.swing.JFileChooser();
-                    fileChooser.setDialogTitle("Exportar Mapa como Imagen");
-                    fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Imagen PNG", "png"));
-                    if (fileChooser.showSaveDialog(null) == javax.swing.JFileChooser.APPROVE_OPTION) {
-                        String path = fileChooser.getSelectedFile().getAbsolutePath();
+                    String selectedFile = org.argentumforge.engine.gui.FileDialog.showSaveDialog(
+                            "Exportar Mapa como Imagen",
+                            new java.io.File(".").getAbsolutePath() + java.io.File.separator + "mapa.png",
+                            "Imagen PNG",
+                            "*.png");
+
+                    if (selectedFile != null) {
+                        String path = selectedFile;
                         if (!path.toLowerCase().endsWith(".png")) {
                             path += ".png";
                         }
                         org.argentumforge.engine.utils.MapExporter.exportMap(path);
-                        javax.swing.JOptionPane.showMessageDialog(null, "Mapa exportado correctamente a:\n" + path);
+                        DialogManager.getInstance().showInfo("Exportar Mapa",
+                                "Mapa exportado correctamente a:\n" + path);
                     }
                 }
 
                 ImGui.separator();
 
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.tools.generateColors"))) {
-                    int response = javax.swing.JOptionPane.showConfirmDialog(null,
+                    DialogManager.getInstance().showConfirm(
+                            I18n.INSTANCE.get("menu.tools.generateColors"),
                             I18n.INSTANCE.get("msg.generateColorsConfirm"),
-                            I18n.INSTANCE.get("menu.tools.generateColors"), javax.swing.JOptionPane.YES_NO_OPTION);
-
-                    if (response == javax.swing.JOptionPane.YES_OPTION) {
-                        MinimapColorGenerator.generateBinary();
-                    }
+                            MinimapColorGenerator::generateBinary,
+                            null);
                 }
                 ImGui.endMenu();
             }

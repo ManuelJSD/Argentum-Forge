@@ -152,7 +152,7 @@ public enum Console {
             clearConsole();
 
         ImGuiViewport viewport = ImGui.getMainViewport();
-        ImGui.setNextWindowPos(10, viewport.getSizeY() - CONSOLE_HEIGHT - 10);
+        ImGui.setNextWindowPos(10, viewport.getSizeY() - CONSOLE_HEIGHT - 45);
         ImGui.setNextWindowSize(CONSOLE_WIDTH, CONSOLE_HEIGHT, ImGuiCond.Once);
         ImGui.begin("console", ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoResize
                 | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoInputs);

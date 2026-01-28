@@ -110,10 +110,10 @@ public class MinimapColorGenerator {
                 }
 
                 Logger.info("Generacion completada. {} colores guardados.", processed);
-                javax.swing.JOptionPane.showMessageDialog(null,
+                org.argentumforge.engine.gui.DialogManager.getInstance().showInfo(
+                        "Generador de Minimapa",
                         "Se generaron los colores del minimapa exitosamente.\nArchivo guardado en: "
-                                + outputPath.toAbsolutePath(),
-                        "Generador de Minimapa", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+                                + outputPath.toAbsolutePath());
 
             } catch (IOException e) {
                 Logger.error(e, "Error al generar minimap.bin");

@@ -56,11 +56,10 @@ public final class Engine {
      * salir.
      */
     public static void closeClient() {
-        if (!org.argentumforge.engine.utils.MapManager.checkUnsavedChanges()) {
-            return;
-        }
-        options.save();
-        prgRun = false;
+        org.argentumforge.engine.utils.MapManager.checkUnsavedChangesAsync(() -> {
+            options.save();
+            prgRun = false;
+        }, null);
     }
 
     /**
@@ -146,9 +145,10 @@ public final class Engine {
     public static Engine INSTANCE;
 
     public void requestProfileChange() {
-        if (!org.argentumforge.engine.utils.MapManager.checkUnsavedChanges()) {
-            return;
-        }
+        org.argentumforge.engine.utils.MapManager.checkUnsavedChangesAsync(this::performProfileChange, null);
+    }
+
+    private void performProfileChange() {
         currentScene = null;
         isWaitingForSetup = true;
         guiSystem.closeAllFrms();

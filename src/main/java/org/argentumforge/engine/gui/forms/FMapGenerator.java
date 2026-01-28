@@ -157,7 +157,7 @@ public class FMapGenerator extends Form {
 
     private void generateWorld() {
         if (selectedWaterCategory < 0 || selectedGrassCategory < 0) {
-            javax.swing.JOptionPane.showMessageDialog(null,
+            org.argentumforge.engine.gui.DialogManager.getInstance().showInfo("Generador de Mapa",
                     "Por favor selecciona al menos Agua y Pasto.");
             return;
         }
