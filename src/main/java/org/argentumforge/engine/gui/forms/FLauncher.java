@@ -6,13 +6,10 @@ import imgui.flag.ImGuiWindowFlags;
 import org.argentumforge.engine.Engine;
 import org.argentumforge.engine.Window;
 import org.argentumforge.engine.game.User;
-import org.argentumforge.engine.game.models.Direction;
 import org.argentumforge.engine.gui.widgets.ImageButton3State;
-import org.argentumforge.engine.utils.GameData;
 
 import java.io.IOException;
 
-import static org.argentumforge.engine.utils.GameData.charList;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ENTER;
 
 /**
@@ -151,16 +148,12 @@ public final class FLauncher extends Form {
             org.argentumforge.engine.utils.MapManager.createEmptyMap(100, 100);
         }
 
-        charList[charIndex].getPos().setX(startX);
-        charList[charIndex].getPos().setY(startY);
-        charList[charIndex].setHeading(Direction.DOWN);
-        charList[charIndex].setiBody(1);
-        charList[charIndex].setiHead(1);
-        charList[charIndex].setActive(true);
+        // Configurar apariencia en el singleton User para persistencia
+        user.setUserBody((short) 1);
+        user.setUserHead((short) 4);
 
-        if (startX >= 1 && startX <= 100 && startY >= 1 && startY <= 100) {
-            GameData.mapData[startX][startY].setCharIndex(charIndex);
-        }
+        // Aplicar al personaje actual
+        user.refreshUserCharacter();
 
         this.connectPressed = true;
     }

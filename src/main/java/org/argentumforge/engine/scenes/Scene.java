@@ -37,6 +37,10 @@ public abstract class Scene {
     protected boolean visible = false;
     protected SceneType canChangeTo; // posible cambio de escena.
 
+    public Camera getCamera() {
+        return camera;
+    }
+
     /**
      * Inicializa la escena. No se crea un constructor ya que cada escena distinta
      * puede estar compuesta por distintos

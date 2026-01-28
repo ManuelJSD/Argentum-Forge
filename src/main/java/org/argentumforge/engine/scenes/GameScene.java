@@ -150,6 +150,9 @@ public final class GameScene extends Scene {
                     user.setUserMoving(false);
                 }
             }
+        } else {
+            offSetCounterX = 0;
+            offSetCounterY = 0;
         }
 
         renderScreen(user.getUserPos().getX() - user.getAddToUserPos().getX(),

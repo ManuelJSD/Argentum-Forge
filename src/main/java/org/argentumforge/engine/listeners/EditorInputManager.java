@@ -33,6 +33,11 @@ public class EditorInputManager {
     private final Particle particle = Particle.getInstance();
     private final Camera camera;
 
+    // Transfer Ignore Logic
+    private boolean transferIgnored = false;
+    private int ignoredX = -1;
+    private int ignoredY = -1;
+
     public EditorInputManager(Camera camera) {
         this.camera = camera;
     }
@@ -180,6 +185,107 @@ public class EditorInputManager {
                     user.moveTo(Direction.LEFT);
                 else if (keyCode == Key.RIGHT.getKeyCode())
                     user.moveTo(Direction.RIGHT);
+
+                // Check for Map Transfer (Trigger 1) after move
+                if (user.isWalkingmode()) {
+                    org.argentumforge.engine.game.models.Character userChar = org.argentumforge.engine.utils.GameData.charList[user
+                            .getUserCharIndex()];
+                    // Ensure userChar is valid before accessing
+                    if (userChar != null) {
+                        int x = userChar.getPos().getX();
+                        int y = userChar.getPos().getY();
+                        // Access mapData from GameData, ensure bounds
+                        // FIX: inMapBounds checks BORDERS, we need valid map coordinates (1-100)
+                        if (org.argentumforge.engine.utils.GameData.mapData != null && x >= 1 && x <= 100 && y >= 1
+                                && y <= 100) {
+                            int trig = org.argentumforge.engine.utils.GameData.mapData[x][y].getTrigger();
+                            // org.tinylog.Logger.info("WalkMode Check: Pos=" + x + "," + y + " Trig=" +
+                            // trig);
+                            // Debug Console Output (Non-blocking)
+                            // Only log if Trigger is found to avoid spam, or log every step if needed.
+                            // User asked for console debug.
+                            if (trig != 0) {
+                                org.tinylog.Logger.info("Debug: Pos=(" + x + "," + y + ") Trigger=" + trig);
+                            }
+                            // Also log if we are stepping on what looks like a transfer (visual check?) -
+                            // No, rely on data.
+
+                            // if (trig != 0) {
+                            // Also log if we are stepping on what looks like a transfer (visual check?) -
+                            // No, rely on data.
+
+                            // CHECK TRANSFER (Independent of Trigger value)
+                            // 1. Reset Ignore if we moved off the ignored tile
+                            if (transferIgnored && (x != ignoredX || y != ignoredY)) {
+                                transferIgnored = false;
+                                ignoredX = -1;
+                                ignoredY = -1;
+                            }
+
+                            int destMap = org.argentumforge.engine.utils.GameData.mapData[x][y].getExitMap();
+                            if (destMap > 0) {
+                                org.tinylog.Logger.info("Transfer Found! DestMap=" + destMap);
+
+                                // 2. Show Dialog ONLY if not ignored
+                                if (!transferIgnored) {
+                                    int response = javax.swing.JOptionPane.showConfirmDialog(null,
+                                            "¿Desea viajar al Mapa " + destMap + "?",
+                                            "Traslado de Mapa",
+                                            javax.swing.JOptionPane.YES_NO_OPTION);
+
+                                    if (response == javax.swing.JOptionPane.YES_OPTION) {
+                                        // Capture Exit Coordinates BEFORE loading new map
+                                        int destX = org.argentumforge.engine.utils.GameData.mapData[x][y].getExitX();
+                                        int destY = org.argentumforge.engine.utils.GameData.mapData[x][y].getExitY();
+
+                                        // Update User Map ID
+                                        user.setUserMap((short) destMap);
+
+                                        // Resolve Path & Load
+                                        String mapPath = org.argentumforge.engine.utils.MapManager
+                                                .resolveMapPath(destMap);
+
+                                        if (mapPath != null) {
+                                            // IMPORTANT: Remove character from current map first to avoid clones
+                                            // especially if reloading the same map or if mapData isn't fully wiped
+                                            // (though loadMap should).
+                                            user.removeInstanceFromMap();
+
+                                            org.argentumforge.engine.utils.MapManager.loadMap(mapPath);
+                                        } else {
+                                            org.argentumforge.engine.game.console.Console.INSTANCE.addMsgToConsole(
+                                                    "Error: No se encontró el mapa " + destMap + " (o sus variantes)",
+                                                    org.argentumforge.engine.game.console.FontStyle.REGULAR,
+                                                    new org.argentumforge.engine.renderer.RGBColor(1f, 0f, 0f));
+                                            return;
+                                        }
+
+                                        // Update User Pos
+                                        user.getUserPos().setX(destX);
+                                        user.getUserPos().setY(destY);
+
+                                        // Update Camera
+                                        camera.update(destX, destY);
+
+                                        // Refresh Character (places at new pos)
+                                        user.refreshUserCharacter();
+
+                                        // Ensure movement state is clean
+                                        user.resetMovement();
+                                        org.argentumforge.engine.listeners.KeyHandler.resetInputs(); // STOP AUTO-WALK
+                                    } else {
+                                        // User said NO - IGNORE this tile until we move away
+                                        transferIgnored = true;
+                                        ignoredX = x;
+                                        ignoredY = y;
+                                        org.tinylog.Logger.info(
+                                                "Transfer Cancelled. Ignoring tile (" + x + "," + y + ") until move.");
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }

@@ -248,4 +248,12 @@ public final class Camera {
         return minYOffset;
     }
 
+    public int getCenterX() {
+        return screenminX + HALF_WINDOW_TILE_WIDTH;
+    }
+
+    public int getCenterY() {
+        return screenminY + HALF_WINDOW_TILE_HEIGHT;
+    }
+
 }

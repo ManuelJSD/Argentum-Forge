@@ -6,6 +6,15 @@ import static org.argentumforge.engine.game.models.Character.*;
 import static org.argentumforge.engine.game.models.Direction.*;
 import static org.argentumforge.engine.scenes.Camera.*;
 import static org.argentumforge.engine.utils.GameData.*;
+import org.argentumforge.engine.utils.GameData; // Import class to avoid resolution errors
+import org.argentumforge.engine.utils.AssetRegistry;
+import org.argentumforge.engine.utils.inits.BodyData;
+import org.argentumforge.engine.utils.inits.HeadData;
+import org.argentumforge.engine.utils.inits.WeaponData;
+import org.argentumforge.engine.utils.inits.ShieldData;
+import org.argentumforge.engine.Engine;
+import org.argentumforge.engine.scenes.GameScene;
+import org.argentumforge.engine.scenes.Camera;
 
 /**
  * Entidad del usuario principal.
@@ -25,10 +34,88 @@ public enum User {
     private short userMap;
     private short userCharIndex;
 
+    // Apariencia persistente
+    private short userBody = 1;
+    private short userHead = 4; // Default cambiado a 4 segun preferencia del usuario
+
     User() {
         this.userPos = new Position();
         this.addToUserPos = new Position();
         this.walkingmode = false;
+    }
+
+    /**
+     * Restaura o inicializa el personaje del usuario en la lista global.
+     * Debe llamarse tras cargar un mapa nuevo.
+     */
+    public void refreshUserCharacter() {
+        if (userCharIndex <= 0) {
+            org.tinylog.Logger
+                    .warn("refreshUserCharacter: Invalid userCharIndex=" + userCharIndex + " -> Auto-fixing to 1");
+            userCharIndex = 1;
+        }
+
+        org.tinylog.Logger.info("refreshUserCharacter START: Index=" + userCharIndex);
+
+        // Asegurar que el slot esta activo y configurado
+        GameData.charList[userCharIndex].setActive(true);
+        GameData.charList[userCharIndex].getPos().setX(userPos.getX());
+        GameData.charList[userCharIndex].getPos().setY(userPos.getY());
+        GameData.charList[userCharIndex].setHeading(Direction.DOWN);
+
+        // Aplicar apariencia persistente
+        GameData.charList[userCharIndex].setiBody(userBody);
+        GameData.charList[userCharIndex].setiHead(userHead);
+
+        // Actualizar objetos de datos (Importante para renderizado!)
+        if (AssetRegistry.bodyData != null && userBody < AssetRegistry.bodyData.length
+                && AssetRegistry.bodyData[userBody] != null) {
+            GameData.charList[userCharIndex].setBody(new BodyData(AssetRegistry.bodyData[userBody]));
+        } else {
+            GameData.charList[userCharIndex].setBody(new BodyData());
+        }
+
+        if (AssetRegistry.headData != null && userHead < AssetRegistry.headData.length
+                && AssetRegistry.headData[userHead] != null) {
+            GameData.charList[userCharIndex].setHead(new HeadData(AssetRegistry.headData[userHead]));
+        } else {
+            GameData.charList[userCharIndex].setHead(new HeadData());
+        }
+
+        GameData.charList[userCharIndex].setHelmet(new HeadData()); // Dummy
+        GameData.charList[userCharIndex].setWeapon(new WeaponData());
+        GameData.charList[userCharIndex].setShield(new ShieldData());
+
+        // Update lastChar just in case
+        if (userCharIndex > org.argentumforge.engine.game.models.Character.lastChar) {
+            org.argentumforge.engine.game.models.Character.lastChar = userCharIndex;
+        }
+
+        // Actualizar mapa
+        if (GameData.mapData != null) {
+            int x = userPos.getX();
+            int y = userPos.getY();
+            // Check bounds directly using mapData length
+            if (x >= 1 && x < GameData.mapData.length && y >= 1 && y < GameData.mapData[0].length) {
+                GameData.mapData[x][y].setCharIndex(userCharIndex);
+            }
+        }
+    }
+
+    public void setUserBody(short body) {
+        this.userBody = body;
+    }
+
+    public short getUserBody() {
+        return userBody;
+    }
+
+    public void setUserHead(short head) {
+        this.userHead = head;
+    }
+
+    public short getUserHead() {
+        return userHead;
     }
 
     /**
@@ -203,6 +290,37 @@ public enum User {
             // Solo mover al personaje si el modo caminata está activo
             if (walkingmode) {
                 moveCharbyHead(userCharIndex, direction);
+
+                // Check for Map Transfer (Trigger 1)
+                if (userCharIndex > 0 && userCharIndex < charList.length) {
+                    int x = charList[userCharIndex].getPos().getX();
+                    int y = charList[userCharIndex].getPos().getY();
+
+                    // Trigger 1 = Map Transfer
+                    if (inMapBounds(x, y) && mapData[x][y].getTrigger() == 1) {
+                        int destMap = mapData[x][y].getExitMap();
+                        if (destMap > 0) {
+                            int response = javax.swing.JOptionPane.showConfirmDialog(null,
+                                    "¿Desea viajar al Mapa " + destMap + "?",
+                                    "Traslado de Mapa",
+                                    javax.swing.JOptionPane.YES_NO_OPTION);
+
+                            if (response == javax.swing.JOptionPane.YES_OPTION) {
+                                if (org.argentumforge.engine.utils.MapManager.checkUnsavedChanges()) {
+                                    org.argentumforge.engine.utils.MapManager.loadMap(destMap);
+                                    // Update position to exit coordinates
+                                    int destX = mapData[x][y].getExitX();
+                                    int destY = mapData[x][y].getExitY();
+                                    if (inMapBounds(destX, destY)) {
+                                        userPos.setX(destX);
+                                        userPos.setY(destY);
+                                        refreshUserCharacter(); // Ensure correct position on new map
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         } else if (walkingmode && charList[userCharIndex].getHeading() != direction) {
             // Solo cambiar el rumbo en modo caminata
@@ -274,6 +392,46 @@ public enum User {
 
     public void setWalkingmode(boolean walkingmode) {
         this.walkingmode = walkingmode;
+        if (walkingmode) {
+            // AUTO-SYNC: Update position to match Camera center when enabling Walk Mode
+            if (Engine.getCurrentScene() instanceof GameScene) {
+                Camera cam = ((GameScene) Engine.getCurrentScene()).getCamera();
+                if (cam != null) {
+                    // Prevent Clones: Brute-force clear user from ENTIRE map
+                    // This ensures no ghost at 50,50 or anywhere else
+                    if (userCharIndex > 0 && GameData.mapData != null) {
+                        for (int x = XMinMapSize; x <= XMaxMapSize; x++) {
+                            for (int y = YMinMapSize; y <= YMaxMapSize; y++) {
+                                if (GameData.mapData[x][y].getCharIndex() == userCharIndex) {
+                                    GameData.mapData[x][y].setCharIndex(0);
+                                }
+                            }
+                        }
+                    }
+
+                    // Teleport to Camera Center
+                    teleport(cam.getCenterX(), cam.getCenterY());
+                }
+            }
+
+            if (userCharIndex <= 0) {
+                org.tinylog.Logger.warn("WalkingMode enabled with invalid UserCharIdx. Forcing refresh.");
+                refreshUserCharacter();
+            } else if (GameData.charList != null && userCharIndex < GameData.charList.length) {
+                // Check if char slot is active/valid
+                if (!GameData.charList[userCharIndex].isActive()
+                        || GameData.charList[userCharIndex].getBody() == null) {
+                    org.tinylog.Logger.warn("WalkingMode enabled but CharInx " + userCharIndex
+                            + " is inactive/empty. Forcing refresh.");
+                    refreshUserCharacter();
+                } else {
+                    // Always refresh to sync visual position with new UserPos
+                    refreshUserCharacter();
+                }
+            } else {
+                refreshUserCharacter();
+            }
+        }
     }
 
     /**
@@ -306,5 +464,31 @@ public enum User {
         }
 
         return true;
+    }
+
+    public void resetMovement() {
+        this.userMoving = false;
+        this.addToUserPos.setX(0);
+        this.addToUserPos.setY(0);
+
+        if (userCharIndex > 0 && userCharIndex < charList.length) {
+            charList[userCharIndex].setMoveOffsetX(0);
+            charList[userCharIndex].setMoveOffsetY(0);
+            charList[userCharIndex].setMoving(false);
+            charList[userCharIndex].setScrollDirectionX(0);
+            charList[userCharIndex].setScrollDirectionY(0);
+        }
+    }
+
+    public void removeInstanceFromMap() {
+        if (userCharIndex > 0 && GameData.mapData != null) {
+            for (int x = XMinMapSize; x <= XMaxMapSize; x++) {
+                for (int y = YMinMapSize; y <= YMaxMapSize; y++) {
+                    if (GameData.mapData[x][y].getCharIndex() == userCharIndex) {
+                        GameData.mapData[x][y].setCharIndex(0);
+                    }
+                }
+            }
+        }
     }
 }
