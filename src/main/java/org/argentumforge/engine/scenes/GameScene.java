@@ -90,7 +90,7 @@ public final class GameScene extends Scene {
     public void init() {
         super.init();
 
-        canChangeTo = SceneType.MAIN_SCENE;
+        canChangeTo = SceneType.INTRO_SCENE;
         weather = Weather.INSTANCE;
         frmMain = new FMain();
         surface = Surface.getInstance();

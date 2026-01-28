@@ -11,6 +11,8 @@ import org.argentumforge.engine.utils.Profile;
 import org.argentumforge.engine.utils.ProfileManager;
 
 import java.util.List;
+import org.argentumforge.engine.renderer.Texture;
+import org.argentumforge.engine.renderer.Surface;
 
 public class FProfileSelector extends Form {
     private final Runnable onProfileSelected;
@@ -18,9 +20,22 @@ public class FProfileSelector extends Form {
     private boolean showCreateDialog = false;
     private Profile selectedProfile = null;
     private String errorMessage = "";
+    private Texture backgroundTexture;
 
     public FProfileSelector(Runnable onProfileSelected) {
         this.onProfileSelected = onProfileSelected;
+        // Cargar textura de fondo
+        try {
+            this.backgroundTexture = Surface.INSTANCE.createTexture("VentanaInicio.jpg", false);
+            if (this.backgroundTexture != null) {
+                org.argentumforge.engine.Window.INSTANCE.updateResolution(
+                        this.backgroundTexture.getTex_width(),
+                        this.backgroundTexture.getTex_height());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         // Preseleccionar el último usado o el primero si existe
         if (ProfileManager.INSTANCE.hasProfiles()) {
             selectedProfile = ProfileManager.INSTANCE.getProfiles().get(0);
@@ -29,13 +44,21 @@ public class FProfileSelector extends Form {
 
     @Override
     public void render() {
+        if (backgroundTexture != null) {
+            ImGui.getBackgroundDrawList().addImage(
+                    backgroundTexture.getId(),
+                    0, 0,
+                    org.argentumforge.engine.Window.INSTANCE.getWidth(),
+                    org.argentumforge.engine.Window.INSTANCE.getHeight());
+        }
+
         int windowWidth = 350;
         int windowHeight = 270;
 
         ImGui.setNextWindowSize(windowWidth, windowHeight, ImGuiCond.Always);
         ImGui.setNextWindowPos(
                 (org.argentumforge.engine.Window.INSTANCE.getWidth() - windowWidth) / 2f,
-                (org.argentumforge.engine.Window.INSTANCE.getHeight() - windowHeight) / 2f,
+                (org.argentumforge.engine.Window.INSTANCE.getHeight() - windowHeight) * 0.70f,
                 ImGuiCond.Always);
 
         int flags = ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove
