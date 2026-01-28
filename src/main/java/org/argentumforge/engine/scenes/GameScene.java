@@ -121,6 +121,15 @@ public final class GameScene extends Scene {
         weather.update();
         intervalToUpdatePos.update();
 
+        // Update user walking speed based on options
+        int charIndex = user.getUserCharIndex();
+        if (charIndex >= 0 && charIndex < charList.length) {
+            int targetSpeed = user.isWalkingmode()
+                    ? options.getMoveSpeedWalk()
+                    : options.getMoveSpeedNormal();
+            charList[charIndex].setWalkingSpeed(targetSpeed);
+        }
+
         if (user.isUserMoving()) {
             if (user.getAddToUserPos().getX() != 0) {
                 offSetCounterX -= charList[user.getUserCharIndex()].getWalkingSpeed() * user.getAddToUserPos().getX()
