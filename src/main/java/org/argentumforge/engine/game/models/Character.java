@@ -399,6 +399,10 @@ public final class Character {
         return walkingSpeed;
     }
 
+    public void setWalkingSpeed(int walkingSpeed) {
+        this.walkingSpeed = walkingSpeed;
+    }
+
     public boolean isActive() {
         return active;
     }

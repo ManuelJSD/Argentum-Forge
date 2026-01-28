@@ -45,6 +45,7 @@ public final class FMain extends Form {
     private FTriggerEditor triggerEditor;
     private FTransferEditor transferEditor;
     private FParticleEditor particleEditor;
+    private FSpeedControl speedControl;
     private float[] ambientColorArr;
     private org.argentumforge.engine.renderer.Texture toolbarIcons;
 
@@ -63,6 +64,7 @@ public final class FMain extends Form {
         triggerEditor = new FTriggerEditor();
         transferEditor = new FTransferEditor();
         particleEditor = new FParticleEditor();
+        speedControl = new FSpeedControl();
 
         // Cargar iconos de la barra de herramientas
         toolbarIcons = new org.argentumforge.engine.renderer.Texture();
@@ -373,6 +375,12 @@ public final class FMain extends Form {
         if (selectionActive) {
             ImGui.popStyleColor();
         }
+
+        // --- SEPARADOR ---
+        drawToolbarSeparator();
+
+        // --- GRUPO 4: VELOCIDAD ---
+        // Speed control moved to keys and menu
 
         ImGui.popStyleVar(); // Pop BorderSize
     }
@@ -761,6 +769,14 @@ public final class FMain extends Form {
                         org.argentumforge.engine.game.User.INSTANCE.isWalkingmode())) {
                     org.argentumforge.engine.game.User.INSTANCE
                             .setWalkingmode(!org.argentumforge.engine.game.User.INSTANCE.isWalkingmode());
+                }
+
+                if (ImGui.menuItem(I18n.INSTANCE.get("options.moveSpeed"))) {
+                    if (ImGUISystem.INSTANCE.isFormVisible("FSpeedControl")) {
+                        ImGUISystem.INSTANCE.deleteFrmArray(speedControl);
+                    } else {
+                        ImGUISystem.INSTANCE.show(speedControl);
+                    }
                 }
 
                 if (ImGui.beginMenu(I18n.INSTANCE.get("menu.misc.ambient"))) {

@@ -35,6 +35,8 @@ public enum Options {
     private float ambientR = 1.0f;
     private float ambientG = 1.0f;
     private float ambientB = 1.0f;
+    private int moveSpeedNormal = 8;
+    private int moveSpeedWalk = 8;
     private java.util.List<String> recentMaps = new java.util.ArrayList<>();
     private static final int MAX_RECENT_MAPS = 10;
     private java.util.Set<Integer> ignoredObjTypes = new java.util.HashSet<>(
@@ -136,6 +138,9 @@ public enum Options {
             write(writer, "RenderShowGrid", renderSettings.isShowGrid());
             write(writer, "RenderShowNpcBreathing", renderSettings.isShowNpcBreathing());
             write(writer, "RenderDisableAnimations", renderSettings.isDisableAnimations());
+
+            write(writer, "MoveSpeedNormal", moveSpeedNormal);
+            write(writer, "MoveSpeedWalk", moveSpeedWalk);
 
             for (int i = 0; i < recentMaps.size(); i++) {
                 write(writer, "Recent" + (i + 1), recentMaps.get(i));
@@ -284,6 +289,38 @@ public enum Options {
         return recentMaps;
     }
 
+    public int getMoveSpeedNormal() {
+        return moveSpeedNormal;
+    }
+
+    public void setMoveSpeedNormal(int moveSpeedNormal) {
+        this.moveSpeedNormal = moveSpeedNormal;
+    }
+
+    public int getMoveSpeedWalk() {
+        return moveSpeedWalk;
+    }
+
+    public void setMoveSpeedWalk(int moveSpeedWalk) {
+        this.moveSpeedWalk = moveSpeedWalk;
+    }
+
+    public void increaseSpeed() {
+        if (org.argentumforge.engine.game.User.INSTANCE.isWalkingmode()) {
+            moveSpeedWalk = Math.min(moveSpeedWalk + 1, 32);
+        } else {
+            moveSpeedNormal = Math.min(moveSpeedNormal + 1, 32);
+        }
+    }
+
+    public void decreaseSpeed() {
+        if (org.argentumforge.engine.game.User.INSTANCE.isWalkingmode()) {
+            moveSpeedWalk = Math.max(moveSpeedWalk - 1, 1);
+        } else {
+            moveSpeedNormal = Math.max(moveSpeedNormal - 1, 1);
+        }
+    }
+
     private void addRecentMap(String path) {
         if (path == null || path.isEmpty())
             return;
@@ -366,6 +403,8 @@ public enum Options {
                             .forEach(ignoredObjTypes::add);
                 }
             }
+            case "MoveSpeedNormal" -> moveSpeedNormal = Integer.parseInt(value);
+            case "MoveSpeedWalk" -> moveSpeedWalk = Integer.parseInt(value);
             default -> {
                 if (option.startsWith("Recent")) {
                     if (!recentMaps.contains(value) && new java.io.File(value).exists()) {

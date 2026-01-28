@@ -152,6 +152,19 @@ public class EditorInputManager {
 
     public void updateKeys() {
         ShortcutManager.getInstance().update();
+
+        // Speed shortcuts
+        if (!imgui.ImGui.getIO().getWantCaptureKeyboard()) {
+            // Keypad + or Numpad Add to increase speed
+            if (KeyHandler.isKeyPressed(GLFW_KEY_KP_ADD)) {
+                org.argentumforge.engine.game.Options.INSTANCE.increaseSpeed();
+            }
+            // Keypad - or Numpad Subtract to decrease speed
+            if (KeyHandler.isKeyPressed(GLFW_KEY_KP_SUBTRACT)) {
+                org.argentumforge.engine.game.Options.INSTANCE.decreaseSpeed();
+            }
+        }
+
         checkWalkKeys();
     }
 
