@@ -11,11 +11,12 @@ public class FAbout extends Form {
         // Center window
         ImGui.setNextWindowPos(
                 (org.argentumforge.engine.Window.INSTANCE.getWidth() - 400) / 2f,
-                (org.argentumforge.engine.Window.INSTANCE.getHeight() - 350) / 2f,
+                (org.argentumforge.engine.Window.INSTANCE.getHeight() - 290) / 2f,
                 imgui.flag.ImGuiCond.Once);
-        ImGui.setNextWindowSize(400, 350);
+        ImGui.setNextWindowSize(400, 290, imgui.flag.ImGuiCond.Always);
 
-        int flags = ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoDocking;
+        int flags = imgui.flag.ImGuiWindowFlags.NoCollapse | imgui.flag.ImGuiWindowFlags.NoResize
+                | imgui.flag.ImGuiWindowFlags.NoDocking | imgui.flag.ImGuiWindowFlags.AlwaysAutoResize;
 
         if (ImGui.begin("Acerca de Argentum Forge", flags)) {
             ImGui.spacing();
@@ -28,7 +29,7 @@ public class FAbout extends Form {
             ImGui.textColored(Theme.COLOR_PRIMARY, title);
 
             // Version
-            String version = "Versión Beta 1.0.0";
+            String version = "Versión 1.0.0-beta3";
             float verWidth = ImGui.calcTextSize(version).x;
             ImGui.setCursorPosX((windowWidth - verWidth) / 2f);
             ImGui.textColored(0.7f, 0.7f, 0.7f, 1.0f, version);
@@ -52,12 +53,12 @@ public class FAbout extends Form {
 
             // Links / Info
             ImGui.text("Repositorio:");
-            ImGui.textColored(0.4f, 0.8f, 1.0f, 1.0f, "https://github.com/Lorwik/Argentum-Forge");
+            ImGui.textColored(0.4f, 0.8f, 1.0f, 1.0f, "https://github.com/ManuelJSD/Argentum-Forge");
             if (ImGui.isItemHovered()) {
                 ImGui.setTooltip("Click para copiar URL"); // ImGui doesn't support clickable links easily without extra
                                                            // logic
                 if (ImGui.isMouseClicked(0)) {
-                    ImGui.setClipboardText("https://github.com/Lorwik/Argentum-Forge");
+                    ImGui.setClipboardText("https://github.com/ManuelJSD/Argentum-Forge");
                 }
             }
 
