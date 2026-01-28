@@ -148,12 +148,65 @@ public enum User {
         final int tY = userPos.getY() + y;
 
         if (!(tX < XMinMapSize || tX > XMaxMapSize || tY < YMinMapSize || tY > YMaxMapSize)) {
-            addToUserPos.setX(x);
+
+            // 1. Clean Old Position
+            if (GameData.mapData != null) {
+                GameData.mapData[userPos.getX()][userPos.getY()].setCharIndex(0);
+            }
+
+            // 2. Update User Position
+            addToUserPos.setX(x); // Keep this for camera/legacy User logic
             userPos.setX(tX);
             addToUserPos.setY(y);
             userPos.setY(tY);
             userMoving = true;
             underCeiling = checkUnderCeiling();
+
+            // 3. Update CharList Entry (Critical for Rendering & Map Logic)
+            if (userCharIndex > 0 && userCharIndex < GameData.charList.length) {
+                org.argentumforge.engine.game.models.Character chr = GameData.charList[userCharIndex];
+
+                // Sync Position
+                chr.getPos().setX(tX);
+                chr.getPos().setY(tY);
+
+                // Update Map
+                if (GameData.mapData != null) {
+                    GameData.mapData[tX][tY].setCharIndex(userCharIndex);
+                }
+
+                // Smooth Movement Setup (Offsets in Pixels)
+                // Assuming TILE_PIXEL_SIZE is 32. Using constants if available.
+                chr.setMoveOffsetX(-1 * (32 * x));
+                chr.setMoveOffsetY(-1 * (32 * y));
+                chr.setMoving(true);
+                chr.setHeading(nDirection);
+                chr.setScrollDirectionX(x);
+                chr.setScrollDirectionY(y);
+
+                // 4. Handle Walking Mode Appearance (Swimming)
+                if (walkingmode) {
+                    boolean onWater = hayAgua(tX, tY);
+                    if (onWater) {
+                        // Set Boat Body if not already set (Check DOWN animation index)
+                        if (chr.getBody().getWalk(3).getGrhIndex() != AssetRegistry.bodyData[84].getWalk(3)
+                                .getGrhIndex()) {
+                            chr.setBody(new BodyData(AssetRegistry.bodyData[84]));
+                            chr.setHead(new HeadData()); // Remove head
+                        }
+                    } else {
+                        // Restore User Body if needed
+                        if (chr.getBody().getWalk(3).getGrhIndex() != AssetRegistry.bodyData[userBody].getWalk(3)
+                                .getGrhIndex()) {
+                            if (AssetRegistry.bodyData[userBody] != null)
+                                chr.setBody(new BodyData(AssetRegistry.bodyData[userBody]));
+
+                            if (AssetRegistry.headData[userHead] != null)
+                                chr.setHead(new HeadData(AssetRegistry.headData[userHead]));
+                        }
+                    }
+                }
+            }
         }
 
     }
@@ -289,7 +342,8 @@ public enum User {
 
             // Solo mover al personaje si el modo caminata está activo
             if (walkingmode) {
-                moveCharbyHead(userCharIndex, direction);
+                // moveCharbyHead(userCharIndex, direction); // REMOVED: Redundant and causes
+                // double movement/desync
 
                 // Check for Map Transfer (Trigger 1)
                 if (userCharIndex > 0 && userCharIndex < charList.length) {
@@ -383,6 +437,7 @@ public enum User {
         if (userCharIndex > 0) {
             charList[userCharIndex].getPos().setX(x);
             charList[userCharIndex].getPos().setY(y);
+
         }
     }
 
@@ -453,8 +508,12 @@ public enum User {
 
         // Modo caminata - aplicar restricciones
         // ¿Tile bloqueado?
-        if (mapData[x][y].getBlocked())
-            return false;
+        if (mapData[x][y].getBlocked()) {
+            // Exception: Allow water if walking mode is active (Swimming)
+            if (!hayAgua(x, y)) {
+                return false;
+            }
+        }
 
         final int charIndex = mapData[x][y].getCharIndex();
 
@@ -464,6 +523,27 @@ public enum User {
         }
 
         return true;
+    }
+
+    /**
+     * Checks if the user needs to update appearance based on terrain (e.g.
+     * swimming)
+     * and refreshes the character.
+     */
+    public void checkAppearance() {
+        if (userCharIndex > 0 && GameData.mapData != null) {
+            boolean onWater = hayAgua(userPos.getX(), userPos.getY());
+
+            // Logic for appearance change
+            if (onWater) {
+                // Swimming Appearance: Body 84, Head 0
+                GameData.charList[userCharIndex].setBody(new BodyData(AssetRegistry.bodyData[84]));
+                GameData.charList[userCharIndex].setHead(new HeadData()); // Empty head (invisible)
+            } else {
+                // Restore Normal Appearance
+                refreshUserCharacter();
+            }
+        }
     }
 
     public void resetMovement() {

@@ -15,6 +15,10 @@ java {
 //     lockAllConfigurations()
 // }
 
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
 group = 'org.argentumforge'
 version = '1.0.0-beta3'
 
