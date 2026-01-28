@@ -21,6 +21,7 @@ public class RenderSettings {
     private boolean showGrid = false;
     private float[] gridColor = { 1.0f, 1.0f, 1.0f, 0.2f }; // Blanco semi-transparente por defecto
     private boolean showNpcBreathing = true;
+    private boolean disableAnimations = false;
 
     // Minimap filters
     private boolean[] minimapLayers = { true, false, false, false };
@@ -163,6 +164,14 @@ public class RenderSettings {
 
     public void setShowMinimapBlocks(boolean showMinimapBlocks) {
         this.showMinimapBlocks = showMinimapBlocks;
+    }
+
+    public boolean isDisableAnimations() {
+        return disableAnimations;
+    }
+
+    public void setDisableAnimations(boolean disableAnimations) {
+        this.disableAnimations = disableAnimations;
     }
 
 }
