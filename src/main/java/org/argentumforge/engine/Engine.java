@@ -12,7 +12,6 @@ import org.argentumforge.engine.utils.Time;
 import org.lwjgl.Version;
 import org.tinylog.Logger;
 
-import static org.argentumforge.engine.scenes.SceneType.INTRO_SCENE;
 import static org.argentumforge.engine.utils.GameData.options;
 import static org.argentumforge.engine.utils.Time.deltaTime;
 import static org.lwjgl.glfw.GLFW.glfwPollEvents;
@@ -119,7 +118,9 @@ public final class Engine {
             ImGUISystem.INSTANCE.show(new org.argentumforge.engine.gui.forms.FRoutes());
         }
 
-        changeScene(INTRO_SCENE);
+        if (currentScene != null)
+            return;
+        changeScene(org.argentumforge.engine.scenes.SceneType.GAME_SCENE);
         isWaitingForSetup = false;
     }
 
@@ -203,7 +204,7 @@ public final class Engine {
      */
     private void changeScene(SceneType scene) {
         switch (scene) {
-            case INTRO_SCENE -> currentScene = new IntroScene();
+
             case GAME_SCENE -> currentScene = new GameScene();
 
         }
