@@ -155,6 +155,15 @@ public final class FOptions extends Form {
                     options.getRenderSettings().setShowNpcBreathing(!options.getRenderSettings().isShowNpcBreathing());
                 }
 
+                // Disable Animations
+                if (ImGui.checkbox(
+                        org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.graphics.disableAnimations"),
+                        options.getRenderSettings().isDisableAnimations())) {
+                    options.getRenderSettings()
+                            .setDisableAnimations(!options.getRenderSettings().isDisableAnimations());
+                    options.save();
+                }
+
                 ImGui.endTabItem();
             }
 

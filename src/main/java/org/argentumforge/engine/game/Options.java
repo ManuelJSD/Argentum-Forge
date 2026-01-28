@@ -135,6 +135,7 @@ public enum Options {
             write(writer, "RenderGhostOpacity", renderSettings.getGhostOpacity());
             write(writer, "RenderShowGrid", renderSettings.isShowGrid());
             write(writer, "RenderShowNpcBreathing", renderSettings.isShowNpcBreathing());
+            write(writer, "RenderDisableAnimations", renderSettings.isDisableAnimations());
 
             for (int i = 0; i < recentMaps.size(); i++) {
                 write(writer, "Recent" + (i + 1), recentMaps.get(i));
@@ -354,6 +355,7 @@ public enum Options {
             case "RenderGhostOpacity" -> renderSettings.setGhostOpacity(Float.parseFloat(value));
             case "RenderShowGrid" -> renderSettings.setShowGrid(Boolean.parseBoolean(value));
             case "RenderShowNpcBreathing" -> renderSettings.setShowNpcBreathing(Boolean.parseBoolean(value));
+            case "RenderDisableAnimations" -> renderSettings.setDisableAnimations(Boolean.parseBoolean(value));
             case "IgnoredObjTypes" -> {
                 ignoredObjTypes.clear();
                 if (!value.isEmpty()) {

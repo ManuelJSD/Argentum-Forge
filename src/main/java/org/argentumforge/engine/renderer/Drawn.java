@@ -131,18 +131,26 @@ public final class Drawn {
                 || grhData[grh.getGrhIndex()].getNumFrames() == 0)
             return;
         if (animate && grh.isStarted()) {
-            int gIdx = grh.getGrhIndex();
-            if (gIdx >= grhData.length || grhData[gIdx] == null)
-                return;
-            grh.setFrameCounter(
-                    grh.getFrameCounter() + (deltaTime * grhData[gIdx].getNumFrames() / grh.getSpeed()));
-            if (grh.getFrameCounter() > grhData[gIdx].getNumFrames()) {
-                grh.setFrameCounter((grh.getFrameCounter() % grhData[gIdx].getNumFrames()) + 1);
-                if (grh.getLoops() != -1) {
-                    if (grh.getLoops() > 0)
-                        grh.setLoops(grh.getLoops() - 1);
-                    else
-                        grh.setStarted(false);
+            // Check if animations are disabled in options
+            if (org.argentumforge.engine.game.Options.INSTANCE.getRenderSettings().isDisableAnimations()) {
+                // If disabled, just ensure we are using the first frame logic or just not
+                // updating frame counter
+                // But we still want to draw the current frame.
+                // If we don't update frame counter, it stays static.
+            } else {
+                int gIdx = grh.getGrhIndex();
+                if (gIdx >= grhData.length || grhData[gIdx] == null)
+                    return;
+                grh.setFrameCounter(
+                        grh.getFrameCounter() + (deltaTime * grhData[gIdx].getNumFrames() / grh.getSpeed()));
+                if (grh.getFrameCounter() > grhData[gIdx].getNumFrames()) {
+                    grh.setFrameCounter((grh.getFrameCounter() % grhData[gIdx].getNumFrames()) + 1);
+                    if (grh.getLoops() != -1) {
+                        if (grh.getLoops() > 0)
+                            grh.setLoops(grh.getLoops() - 1);
+                        else
+                            grh.setStarted(false);
+                    }
                 }
             }
         }
@@ -213,18 +221,23 @@ public final class Drawn {
                 || grhData[grh.getGrhIndex()].getNumFrames() == 0)
             return;
         if (animate && grh.isStarted()) {
-            int gIdx = grh.getGrhIndex();
-            if (gIdx >= grhData.length || grhData[gIdx] == null)
-                return;
-            grh.setFrameCounter(
-                    grh.getFrameCounter() + (deltaTime * grhData[gIdx].getNumFrames() / grh.getSpeed()));
-            if (grh.getFrameCounter() > grhData[gIdx].getNumFrames()) {
-                grh.setFrameCounter((grh.getFrameCounter() % grhData[gIdx].getNumFrames()) + 1);
-                if (grh.getLoops() != -1) {
-                    if (grh.getLoops() > 0)
-                        grh.setLoops(grh.getLoops() - 1);
-                    else
-                        grh.setStarted(false);
+            // Check if animations are disabled
+            if (org.argentumforge.engine.game.Options.INSTANCE.getRenderSettings().isDisableAnimations()) {
+                // Do nothing, effectively freezing the animation
+            } else {
+                int gIdx = grh.getGrhIndex();
+                if (gIdx >= grhData.length || grhData[gIdx] == null)
+                    return;
+                grh.setFrameCounter(
+                        grh.getFrameCounter() + (deltaTime * grhData[gIdx].getNumFrames() / grh.getSpeed()));
+                if (grh.getFrameCounter() > grhData[gIdx].getNumFrames()) {
+                    grh.setFrameCounter((grh.getFrameCounter() % grhData[gIdx].getNumFrames()) + 1);
+                    if (grh.getLoops() != -1) {
+                        if (grh.getLoops() > 0)
+                            grh.setLoops(grh.getLoops() - 1);
+                        else
+                            grh.setStarted(false);
+                    }
                 }
             }
         }
