@@ -824,6 +824,10 @@ public final class FMain extends Form {
                 ImGui.endMenu();
             }
 
+            if (ImGui.menuItem("Acerca de")) {
+                ImGUISystem.INSTANCE.show(new FAbout());
+            }
+
             ImGui.endMenuBar();
         }
 
