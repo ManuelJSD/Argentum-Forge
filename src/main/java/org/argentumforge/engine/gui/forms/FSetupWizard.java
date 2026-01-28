@@ -110,8 +110,32 @@ public final class FSetupWizard extends Form {
         }
     }
 
+    private org.argentumforge.engine.renderer.Texture backgroundTexture;
+
     @Override
     public void render() {
+        if (backgroundTexture == null) {
+            try {
+                this.backgroundTexture = org.argentumforge.engine.renderer.Surface.INSTANCE
+                        .createTexture("VentanaInicio.jpg", false);
+                if (this.backgroundTexture != null) {
+                    org.argentumforge.engine.Window.INSTANCE.updateResolution(
+                            this.backgroundTexture.getTex_width(),
+                            this.backgroundTexture.getTex_height());
+                }
+            } catch (Exception e) {
+                // Ignore
+            }
+        }
+
+        if (backgroundTexture != null) {
+            ImGui.getBackgroundDrawList().addImage(
+                    backgroundTexture.getId(),
+                    0, 0,
+                    org.argentumforge.engine.Window.INSTANCE.getWidth(),
+                    org.argentumforge.engine.Window.INSTANCE.getHeight());
+        }
+
         // Tamaño adaptativo según el paso actual
         int windowHeight = switch (currentStep) {
             case STEP_WELCOME -> 250;
@@ -126,7 +150,7 @@ public final class FSetupWizard extends Form {
         ImGui.setNextWindowSize(650, windowHeight, ImGuiCond.Always);
         ImGui.setNextWindowPos(
                 (org.argentumforge.engine.Window.INSTANCE.getWidth() - 650) / 2f,
-                (org.argentumforge.engine.Window.INSTANCE.getHeight() - windowHeight) / 2f,
+                (org.argentumforge.engine.Window.INSTANCE.getHeight() - windowHeight) * 0.70f,
                 ImGuiCond.Always);
 
         int flags = ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize;

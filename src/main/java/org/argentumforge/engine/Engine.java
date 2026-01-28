@@ -205,7 +205,7 @@ public final class Engine {
         switch (scene) {
             case INTRO_SCENE -> currentScene = new IntroScene();
             case GAME_SCENE -> currentScene = new GameScene();
-            case MAIN_SCENE -> currentScene = new MainScene();
+
         }
         currentScene.init();
 

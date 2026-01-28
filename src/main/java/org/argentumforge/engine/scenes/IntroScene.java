@@ -44,7 +44,7 @@ public final class IntroScene extends Scene {
     public void init() {
         super.init();
         this.alphaInterface = 0.0f;
-        this.canChangeTo = SceneType.MAIN_SCENE;
+        this.canChangeTo = SceneType.GAME_SCENE;
         this.ArgentumForgeLogo = Surface.INSTANCE.createTexture("argentumforge", true);
     }
 
