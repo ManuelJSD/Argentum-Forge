@@ -8,17 +8,23 @@ import static org.lwjgl.glfw.GLFW.*;
 /**
  * Clase que gestiona todos los eventos y estados del mouse en el contexto GLFW.
  * <p>
- * Proporciona funciones callback para GLFW que permiten detectar movimientos del cursor, pulsaciones de botones y desplazamiento
+ * Proporciona funciones callback para GLFW que permiten detectar movimientos
+ * del cursor, pulsaciones de botones y desplazamiento
  * de la rueda del mouse.
  * <p>
- * Esta clase mantiene un registro constante de la posicion actual del mouse, su posicion anterior, el estado de los botones y
- * detecta acciones como: arrastrar elementos, clic simple, doble clic y desplazamiento. Proporciona funcionalidad para determinar
- * si el mouse esta sobre areas especificas y gestiona temporizadores para deteccion de doble clic.
+ * Esta clase mantiene un registro constante de la posicion actual del mouse, su
+ * posicion anterior, el estado de los botones y
+ * detecta acciones como: arrastrar elementos, clic simple, doble clic y
+ * desplazamiento. Proporciona funcionalidad para determinar
+ * si el mouse esta sobre areas especificas y gestiona temporizadores para
+ * deteccion de doble clic.
  * <p>
- * Todos los demas componentes del juego que necesitan informacion sobre el estado del mouse o responder a eventos del mismo
+ * Todos los demas componentes del juego que necesitan informacion sobre el
+ * estado del mouse o responder a eventos del mismo
  * utilizan esta clase a traves de sus metodos estaticos.
  * <p>
- * Tambien se encarga de sincronizar adecuadamente con {@code ImGui} para mantener consistencia en los eventos del mouse entre el
+ * Tambien se encarga de sincronizar adecuadamente con {@code ImGui} para
+ * mantener consistencia en los eventos del mouse entre el
  * motor grafico y la interfaz.
  */
 
@@ -29,6 +35,7 @@ public enum MouseListener {
     private static final double DOUBLE_CLICK_TIME = 0.2;
     private static final boolean[] MOUSE_BUTTON_PRESSED = new boolean[3];
     private static final boolean[] MOUSE_BUTTON_DOBLE_CLICK_PRESSED = new boolean[3];
+    private static final boolean[] MOUSE_BUTTON_JUST_PRESSED = new boolean[3];
     private static final boolean[] MOUSE_BUTTON_RELEASED = new boolean[3];
 
     private static double scrollX, scrollY;
@@ -38,7 +45,7 @@ public enum MouseListener {
     private static double lastTimeClick;
 
     /**
-     *  Funcion callBack para detectar y actualizar la posicion del mouse.
+     * Funcion callBack para detectar y actualizar la posicion del mouse.
      */
     public static void mousePosCallback(long window, double xpos, double ypos) {
         lastX = xPos;
@@ -49,7 +56,7 @@ public enum MouseListener {
     }
 
     /**
-     *  Funcion callBack para detectar los botones pulsados.
+     * Funcion callBack para detectar los botones pulsados.
      */
     public static void mouseButtonCallback(long window, int button, int action, int mods) {
         final boolean[] mouseDown = new boolean[5];
@@ -63,7 +70,8 @@ public enum MouseListener {
         final ImGuiIO io = ImGui.getIO();
         io.setMouseDown(mouseDown);
 
-        if (!io.getWantCaptureMouse() && mouseDown[1]) ImGui.setWindowFocus(null);
+        if (!io.getWantCaptureMouse() && mouseDown[1])
+            ImGui.setWindowFocus(null);
 
         if (action == GLFW_PRESS) {
             if (button < MOUSE_BUTTON_PRESSED.length) {
@@ -74,6 +82,8 @@ public enum MouseListener {
                 double currentTime = glfwGetTime();
 
                 MOUSE_BUTTON_DOBLE_CLICK_PRESSED[button] = currentTime - lastTimeClick <= DOUBLE_CLICK_TIME;
+
+                MOUSE_BUTTON_JUST_PRESSED[button] = true;
 
                 lastTimeClick = currentTime;
             }
@@ -87,7 +97,8 @@ public enum MouseListener {
     }
 
     /**
-     *  Funcion callBack para detectar el desplazamiento del mouse de una posicion a otra.
+     * Funcion callBack para detectar el desplazamiento del mouse de una posicion a
+     * otra.
      */
     public static void mouseScrollCallback(long window, double xOffset, double yOffset) {
         final ImGuiIO io = ImGui.getIO();
@@ -102,6 +113,9 @@ public enum MouseListener {
         scrollY = 0;
         lastX = xPos;
         lastY = yPos;
+        for (int i = 0; i < MOUSE_BUTTON_JUST_PRESSED.length; i++) {
+            MOUSE_BUTTON_JUST_PRESSED[i] = false;
+        }
     }
 
     public static float getX() {
@@ -141,7 +155,8 @@ public enum MouseListener {
      * @return True si estamos apretamos un dicho boton, caso contrario false.
      */
     public static boolean mouseButtonDown(int button) {
-        if (button < MOUSE_BUTTON_PRESSED.length) return MOUSE_BUTTON_PRESSED[button];
+        if (button < MOUSE_BUTTON_PRESSED.length)
+            return MOUSE_BUTTON_PRESSED[button];
         return false;
     }
 
@@ -151,7 +166,8 @@ public enum MouseListener {
     public static boolean mouseButtonClick(int button) {
         if (button < MOUSE_BUTTON_PRESSED.length) {
             boolean retVal = MOUSE_BUTTON_PRESSED[button];
-            if (retVal) MOUSE_BUTTON_PRESSED[button] = false;
+            if (retVal)
+                MOUSE_BUTTON_PRESSED[button] = false;
             return retVal;
         }
         return false;
@@ -168,6 +184,13 @@ public enum MouseListener {
                 MOUSE_BUTTON_DOBLE_CLICK_PRESSED[button] = false;
             }
             return retVal;
+        }
+        return false;
+    }
+
+    public static boolean mouseButtonJustPressed(int button) {
+        if (button < MOUSE_BUTTON_JUST_PRESSED.length) {
+            return MOUSE_BUTTON_JUST_PRESSED[button];
         }
         return false;
     }
@@ -190,4 +213,3 @@ public enum MouseListener {
         }
     }
 }
-

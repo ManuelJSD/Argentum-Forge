@@ -10,7 +10,8 @@ import org.argentumforge.engine.utils.MapContext;
 public class CommandManager {
 
     private static CommandManager instance;
-    private static final int MAX_STACK_SIZE = 100;
+    private static final int MAX_STACK_SIZE = 50;
+    private Command hoveredCommand = null;
 
     private CommandManager() {
     }
@@ -101,5 +102,13 @@ public class CommandManager {
             context.getUndoStack().clear();
             context.getRedoStack().clear();
         }
+    }
+
+    public Command getHoveredCommand() {
+        return hoveredCommand;
+    }
+
+    public void setHoveredCommand(Command hoveredCommand) {
+        this.hoveredCommand = hoveredCommand;
     }
 }

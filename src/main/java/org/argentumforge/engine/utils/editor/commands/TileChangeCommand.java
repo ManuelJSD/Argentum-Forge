@@ -41,4 +41,9 @@ public class TileChangeCommand implements Command {
         layerGrh.setGrhIndex(grhIndex);
         initGrh(layerGrh, grhIndex, true);
     }
+
+    @Override
+    public int[] getAffectedBounds() {
+        return new int[] { x, y, x, y };
+    }
 }

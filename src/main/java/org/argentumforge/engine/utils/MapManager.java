@@ -389,6 +389,10 @@ public final class MapManager {
             // Reiniciar estado de modificaciones
             markAsSaved();
 
+            if (context != null) {
+                context.setSavedUndoStackSize(context.getUndoStack().size());
+            }
+
             Logger.info("Mapa guardado exitosamente en: {}", filePath);
             DialogManager.getInstance().showInfo("Guardar Mapa", "Mapa guardado correctamente.");
         } catch (IOException e) {

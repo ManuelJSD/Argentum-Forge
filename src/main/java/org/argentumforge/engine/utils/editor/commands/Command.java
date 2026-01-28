@@ -21,4 +21,13 @@ public interface Command {
      * @return Nombre localizado del comando.
      */
     String getName();
+
+    /**
+     * Obtiene los límites del área afectada por este comando.
+     * 
+     * @return Un array int[] {minX, minY, maxX, maxY} o null si no aplica.
+     */
+    default int[] getAffectedBounds() {
+        return null;
+    }
 }

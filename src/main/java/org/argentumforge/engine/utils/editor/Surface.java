@@ -148,6 +148,27 @@ public class Surface {
         this.mosaicHeight = Math.max(1, mosaicHeight);
     }
 
+    private boolean isBatching = false;
+    private org.argentumforge.engine.utils.editor.commands.MacroCommand batchCommand;
+
+    public void startBatch() {
+        if (!isBatching) {
+            isBatching = true;
+            batchCommand = new org.argentumforge.engine.utils.editor.commands.MacroCommand();
+        }
+    }
+
+    public void endBatch() {
+        if (isBatching) {
+            isBatching = false;
+            if (batchCommand != null && !batchCommand.getCommands().isEmpty()) {
+                org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance()
+                        .executeCommand(batchCommand);
+            }
+            batchCommand = null;
+        }
+    }
+
     public void surface_edit(int x, int y) {
         if (mapData == null || x < 0 || x >= mapData.length || y < 0 || y >= mapData[0].length) {
             return;
@@ -350,7 +371,20 @@ public class Surface {
                 macro.addCommand(
                         new org.argentumforge.engine.utils.editor.commands.BlockChangeCommand(oldBlocks, newBlocks));
             }
-            org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(macro);
+
+            if (isBatching && batchCommand != null) {
+                // Durante batch, añadimos al macro acumulador
+                // Optimización opcional: Si el macro acumulador ya tiene un comando del mismo
+                // tipo, podríamos fusionarlos
+                // Pero por ahora, simplemente añadimos sub-comandos al macro principal.
+                batchCommand.addCommand(macro);
+
+                // Ejecutamos visualmente (sin historial todavía) para que el usuario vea
+                // cambios
+                macro.execute();
+            } else {
+                org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(macro);
+            }
         }
     }
 
@@ -429,7 +463,15 @@ public class Surface {
                 macro.addCommand(
                         new org.argentumforge.engine.utils.editor.commands.BlockChangeCommand(oldBlocks, newBlocks));
             }
-            org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(macro);
+
+            // Bucket usually is a single action, but technically can be part of a batch if
+            // user clicks rapidly
+            if (isBatching && batchCommand != null) {
+                batchCommand.addCommand(macro);
+                macro.execute();
+            } else {
+                org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(macro);
+            }
         }
     }
 

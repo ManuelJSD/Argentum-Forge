@@ -20,6 +20,7 @@ public class MapContext {
     private MapManager.MapSaveOptions saveOptions = MapManager.MapSaveOptions.standard();
     private final Stack<Command> undoStack = new Stack<>();
     private final Stack<Command> redoStack = new Stack<>();
+    private int savedUndoStackSize = 0;
 
     public MapContext(String filePath, MapData[][] mapData, MapProperties mapProperties, Character[] charList) {
         this.filePath = filePath;
@@ -85,5 +86,13 @@ public class MapContext {
 
     public Stack<Command> getRedoStack() {
         return redoStack;
+    }
+
+    public int getSavedUndoStackSize() {
+        return savedUndoStackSize;
+    }
+
+    public void setSavedUndoStackSize(int savedUndoStackSize) {
+        this.savedUndoStackSize = savedUndoStackSize;
     }
 }

@@ -68,4 +68,26 @@ public class BulkTileChangeCommand implements Command {
             initGrh(GameData.mapData[pos.x][pos.y].getLayer(layer), oldGrh, true);
         }
     }
+
+    @Override
+    public int[] getAffectedBounds() {
+        if (newTiles.isEmpty())
+            return null;
+        int minX = Integer.MAX_VALUE;
+        int maxX = Integer.MIN_VALUE;
+        int minY = Integer.MAX_VALUE;
+        int maxY = Integer.MIN_VALUE;
+
+        for (TilePos pos : newTiles.keySet()) {
+            if (pos.x < minX)
+                minX = pos.x;
+            if (pos.x > maxX)
+                maxX = pos.x;
+            if (pos.y < minY)
+                minY = pos.y;
+            if (pos.y > maxY)
+                maxY = pos.y;
+        }
+        return new int[] { minX, minY, maxX, maxY };
+    }
 }
