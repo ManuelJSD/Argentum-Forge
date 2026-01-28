@@ -61,4 +61,9 @@ public class NpcChangeCommand implements Command {
             }
         }
     }
+
+    @Override
+    public int[] getAffectedBounds() {
+        return new int[] { x, y, x, y };
+    }
 }

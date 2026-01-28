@@ -77,4 +77,22 @@ public class BulkEntityMoveCommand implements Command {
             }
         }
     }
+
+    @Override
+    public int[] getAffectedBounds() {
+        if (moves.isEmpty())
+            return null;
+        int minX = Integer.MAX_VALUE;
+        int maxX = Integer.MIN_VALUE;
+        int minY = Integer.MAX_VALUE;
+        int maxY = Integer.MIN_VALUE;
+
+        for (MoveData m : moves) {
+            minX = Math.min(minX, Math.min(m.srcX, m.destX));
+            maxX = Math.max(maxX, Math.max(m.srcX, m.destX));
+            minY = Math.min(minY, Math.min(m.srcY, m.destY));
+            maxY = Math.max(maxY, Math.max(m.srcY, m.destY));
+        }
+        return new int[] { minX, minY, maxX, maxY };
+    }
 }

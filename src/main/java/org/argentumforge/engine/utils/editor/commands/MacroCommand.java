@@ -34,7 +34,37 @@ public class MacroCommand implements Command {
         }
     }
 
-    public boolean isEmpty() {
-        return commands.isEmpty();
+    public List<Command> getCommands() {
+        return commands;
+    }
+
+    @Override
+    public int[] getAffectedBounds() {
+        if (commands.isEmpty())
+            return null;
+        int minX = Integer.MAX_VALUE;
+        int maxX = Integer.MIN_VALUE;
+        int minY = Integer.MAX_VALUE;
+        int maxY = Integer.MIN_VALUE;
+        boolean hasBounds = false;
+
+        for (Command cmd : commands) {
+            int[] bounds = cmd.getAffectedBounds();
+            if (bounds != null) {
+                hasBounds = true;
+                if (bounds[0] < minX)
+                    minX = bounds[0];
+                if (bounds[1] < minY)
+                    minY = bounds[1];
+                if (bounds[2] > maxX)
+                    maxX = bounds[2];
+                if (bounds[3] > maxY)
+                    maxY = bounds[3];
+            }
+        }
+
+        if (!hasBounds)
+            return null;
+        return new int[] { minX, minY, maxX, maxY };
     }
 }

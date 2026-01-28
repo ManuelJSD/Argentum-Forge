@@ -211,6 +211,7 @@ public final class GameScene extends Scene {
 
         renderGrid(renderSettings, pixelOffsetX, pixelOffsetY);
         renderEditorPreviews(pixelOffsetX, pixelOffsetY);
+        renderCommandHighlight(pixelOffsetX, pixelOffsetY);
     }
 
     /**
@@ -373,6 +374,39 @@ public final class GameScene extends Scene {
             Engine.batch.draw(whiteTexture, screenX, screenY, 0, 0, 1, 1, width, height, true, 0.3f,
                     new RGBColor(0.2f, 0.5f, 1.0f));
         }
+    }
+
+    /**
+     * Resalta el área afectada por el comando que el usuario está sobrevolando en
+     * el
+     * historial.
+     */
+    private void renderCommandHighlight(int pixelOffsetX, int pixelOffsetY) {
+        org.argentumforge.engine.utils.editor.commands.Command hovered = org.argentumforge.engine.utils.editor.commands.CommandManager
+                .getInstance().getHoveredCommand();
+        if (hovered == null)
+            return;
+
+        int[] bounds = hovered.getAffectedBounds();
+        if (bounds == null)
+            return;
+
+        int minX = bounds[0];
+        int minY = bounds[1];
+        int maxX = bounds[2];
+        int maxY = bounds[3];
+
+        int screenX = POS_SCREEN_X
+                + (minX - camera.getMinX() + camera.getMinXOffset() - TILE_BUFFER_SIZE) * TILE_PIXEL_SIZE
+                + pixelOffsetX;
+        int screenY = POS_SCREEN_Y
+                + (minY - camera.getMinY() + camera.getMinYOffset() - TILE_BUFFER_SIZE) * TILE_PIXEL_SIZE
+                + pixelOffsetY;
+        int width = (maxX - minX + 1) * TILE_PIXEL_SIZE;
+        int height = (maxY - minY + 1) * TILE_PIXEL_SIZE;
+
+        Engine.batch.draw(whiteTexture, screenX, screenY, 0, 0, 1, 1, width, height, true, 0.4f,
+                new RGBColor(1.0f, 1.0f, 0.0f));
     }
 
     private void drawPreviewGrh(short grhIndex, int tileX, int tileY, int pixelOffsetX, int pixelOffsetY, float alpha) {

@@ -66,6 +66,10 @@ public class EditorInputManager {
                 return;
             }
 
+            if (MouseListener.mouseButtonJustPressed(GLFW_MOUSE_BUTTON_LEFT)) {
+                surface.startBatch();
+            }
+
             if (MouseListener.mouseButtonDown(GLFW_MOUSE_BUTTON_LEFT)) {
                 surface.surface_edit(x, y);
                 block.block_edit(x, y);
@@ -74,6 +78,10 @@ public class EditorInputManager {
                 trigger.trigger_edit(x, y);
                 transfer.transfer_edit(x, y);
                 particle.particle_edit(x, y);
+            }
+
+            if (MouseListener.mouseButtonReleased(GLFW_MOUSE_BUTTON_LEFT)) {
+                surface.endBatch();
             }
 
             if (MouseListener.mouseButtonReleased(GLFW_MOUSE_BUTTON_RIGHT)) {
