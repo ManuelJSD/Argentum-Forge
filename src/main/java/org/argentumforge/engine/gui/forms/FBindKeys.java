@@ -84,8 +84,7 @@ public class FBindKeys extends Form {
             ImGui.dummy(0, 10);
 
             renderGroupHeader(I18n.INSTANCE.get("options.keys.personal"));
-            renderKeyBindRow(I18n.INSTANCE.get("options.keys.music"), Key.TOGGLE_MUSIC);
-            renderKeyBindRow(I18n.INSTANCE.get("options.keys.sound"), Key.TOGGLE_SOUND);
+            // Audio keys removed as per request
             ImGui.dummy(0, 10);
 
             renderGroupHeader(I18n.INSTANCE.get("options.keys.other"));

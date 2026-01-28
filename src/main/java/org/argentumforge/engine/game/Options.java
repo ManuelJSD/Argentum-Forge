@@ -16,8 +16,6 @@ public enum Options {
 
     private String configPath = "resources/options.ini";
 
-    private boolean music = true;
-    private boolean sound = true;
     private boolean fullscreen = false;
     private boolean vsync = true;
     private boolean dockingEnabled = true;
@@ -104,8 +102,7 @@ public enum Options {
      */
     public void save() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(configPath))) {
-            write(writer, "Music", music);
-            write(writer, "Sound", sound);
+
             write(writer, "GraphicsPath", graphicsPath);
             write(writer, "DatsPath", datsPath);
             write(writer, "InitPath", initPath);
@@ -161,19 +158,19 @@ public enum Options {
     }
 
     public boolean isMusic() {
-        return music;
+        return true;
     }
 
     public void setMusic(boolean music) {
-        this.music = music;
+        // Ignored
     }
 
     public boolean isSound() {
-        return sound;
+        return true;
     }
 
     public void setSound(boolean sound) {
-        this.sound = sound;
+        // Ignored
     }
 
     public boolean isFullscreen() {
@@ -352,8 +349,7 @@ public enum Options {
      */
     private void load(String option, String value) {
         switch (option) {
-            case "Music" -> music = Boolean.parseBoolean(value);
-            case "Sound" -> sound = Boolean.parseBoolean(value);
+
             case "GraphicsPath" -> graphicsPath = value;
             case "DatsPath", "MapsPath" -> datsPath = value;
             case "InitPath" -> initPath = value;

@@ -27,9 +27,7 @@ public enum Key {
     DOWN(GLFW_KEY_S),
     LEFT(GLFW_KEY_A),
     RIGHT(GLFW_KEY_D),
-    // Audio
-    TOGGLE_MUSIC(GLFW_KEY_M),
-    TOGGLE_SOUND(GLFW_KEY_F1),
+    // Audio (Removed)
 
     // Sistemas
     TAKE_SCREENSHOT(GLFW_KEY_F2),

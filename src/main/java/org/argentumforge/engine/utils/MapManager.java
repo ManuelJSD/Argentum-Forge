@@ -87,22 +87,63 @@ public final class MapManager {
      * @param numMap Número del mapa a cargar.
      */
     public static void loadMap(int numMap) {
-        Path mapPath = Path.of("resources", "maps", "mapa" + numMap + ".map");
-        byte[] data = null;
-        try {
-            if (Files.exists(mapPath)) {
-                data = Files.readAllBytes(mapPath);
+        String mapPath = resolveMapPath(numMap);
+        if (mapPath != null) {
+            loadMap(mapPath);
+        } else {
+            System.err.println("Map file not found for map " + numMap);
+        }
+    }
+
+    /**
+     * Resuelve la ruta absoluta del archivo de mapa dado su numero.
+     * Busca en la carpeta del ultimo mapa abierto, config, o recursos por defecto.
+     */
+    public static String resolveMapPath(int numMap) {
+        // 1. Check folder of last loaded map
+        String lastPath = Options.INSTANCE.getLastMapPath();
+        if (lastPath != null && !lastPath.isEmpty()) {
+            File currentFile = new File(lastPath);
+            String mapDir = currentFile.getParent();
+            if (mapDir != null) {
+                // Try "MapaX.map" and "mapaX.map"
+                File try1 = new File(mapDir, "Mapa" + numMap + ".map");
+                if (try1.exists())
+                    return try1.getAbsolutePath();
+
+                File try2 = new File(mapDir, "mapa" + numMap + ".map");
+                if (try2.exists())
+                    return try2.getAbsolutePath();
             }
-        } catch (IOException e) {
-            System.err.println("Error reading map file: " + e.getMessage());
         }
 
-        if (data == null) {
-            System.err.println("Could not load mapa" + numMap + " data from: " + mapPath);
-            return;
+        // 2. Check configured maps path
+        String configuredPath = Options.INSTANCE.getMapsPath();
+        if (configuredPath != null && !configuredPath.isEmpty()) {
+            File try1 = new File(configuredPath, "Mapa" + numMap + ".map");
+            if (try1.exists())
+                return try1.getAbsolutePath();
+
+            File try2 = new File(configuredPath, "mapa" + numMap + ".map");
+            if (try2.exists())
+                return try2.getAbsolutePath();
         }
-        MapSaveOptions detectedOptions = detectSaveOptions(data);
-        initMap(data, detectedOptions);
+
+        // 3. Check default resources
+        File def1 = new File("resources/maps/mapa" + numMap + ".map");
+        if (def1.exists())
+            return def1.getAbsolutePath();
+
+        File def2 = new File("resources/maps/Mapa" + numMap + ".map"); // Just in case
+        if (def2.exists())
+            return def2.getAbsolutePath();
+
+        // 4. Try CWD fallback
+        File local = new File("mapa" + numMap + ".map");
+        if (local.exists())
+            return local.getAbsolutePath();
+
+        return null; // Not found
     }
 
     /**
@@ -212,6 +253,7 @@ public final class MapManager {
             for (int i = 0; i < GameData.charList.length; i++) {
                 GameData.charList[i] = new org.argentumforge.engine.game.models.Character();
             }
+
             GameData.mapData = null;
             GameData.mapProperties = new MapProperties();
 
@@ -219,6 +261,15 @@ public final class MapManager {
             byte[] data = Files.readAllBytes(Path.of(filePath));
             MapSaveOptions detectedOptions = detectSaveOptions(data);
             initMap(data, detectedOptions);
+
+            // Reserve User Slot (Index 1 usually) AFTER initMap (which wipes chars) but
+            // BEFORE loading entities
+            // We only mark it active to prevent NPCs from taking it. We do NOT fetch
+            // position or write to map yet.
+            int userCharIdx = org.argentumforge.engine.game.User.INSTANCE.getUserCharIndex();
+            if (userCharIdx <= 0)
+                userCharIdx = 1;
+            GameData.charList[userCharIdx].setActive(true);
 
             // Preparar para buscar archivos complementarios (.inf y .dat)
             String basePath = filePath.substring(0, filePath.lastIndexOf('.'));

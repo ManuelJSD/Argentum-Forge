@@ -62,8 +62,27 @@ public final class GameData {
         mapProperties = context.getMapProperties();
         charList = context.getCharList();
 
+        // Log char list status for debugging
+        if (org.argentumforge.engine.game.User.INSTANCE.getUserCharIndex() > 0 &&
+                charList.length > org.argentumforge.engine.game.User.INSTANCE.getUserCharIndex()) {
+            org.tinylog.Logger.info("setActiveContext: User Char Index=" +
+                    org.argentumforge.engine.game.User.INSTANCE.getUserCharIndex() +
+                    " Active=" + charList[org.argentumforge.engine.game.User.INSTANCE.getUserCharIndex()].isActive());
+        }
+
         // Restaurar lastChar del nuevo contexto
         org.argentumforge.engine.game.models.Character.lastChar = context.getLastChar();
+
+        // Enforce Walking Mode Persistence
+        // If walking mode is active, the user character MUST exist in the current
+        // context's charList.
+        if (org.argentumforge.engine.game.User.INSTANCE.isWalkingmode()) {
+            // CLEANUP: Remove any old user instances from this map context to prevent
+            // clones
+            org.argentumforge.engine.game.User.INSTANCE.removeInstanceFromMap();
+
+            org.argentumforge.engine.game.User.INSTANCE.refreshUserCharacter();
+        }
 
         if (!openMaps.contains(context)) {
             openMaps.add(context);
