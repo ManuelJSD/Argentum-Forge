@@ -71,19 +71,27 @@ public final class FInfoMap extends Form {
         // Auto-refresh si cambia la instancia de propiedades (nuevo mapa cargado)
         if (lastProps != GameData.mapProperties) {
             refreshData();
+            lastProps = GameData.mapProperties;
         }
 
         ImGui.setNextWindowSize(350, 300, ImGuiCond.Always);
         if (ImGui.begin(I18n.INSTANCE.get("map.info.title"),
                 ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoDocking)) {
 
+            // Name
             if (ImGui.inputText(I18n.INSTANCE.get("map.info.name"), mapName)) {
-                GameData.mapProperties.setName(mapName.get());
+                // Editando...
+            }
+            if (ImGui.isItemDeactivatedAfterEdit()) {
+                applyChange(p -> p.setName(mapName.get()));
             }
 
             ImGui.pushItemWidth(ImGui.getWindowWidth() * 0.5f);
             if (ImGui.inputInt(I18n.INSTANCE.get("map.info.music"), musicNum)) {
-                GameData.mapProperties.setMusicIndex(musicNum.get());
+                // Editando...
+            }
+            if (ImGui.isItemDeactivatedAfterEdit()) {
+                applyChange(p -> p.setMusicIndex(musicNum.get()));
             }
             ImGui.popItemWidth();
             ImGui.sameLine();
@@ -99,25 +107,28 @@ public final class FInfoMap extends Form {
             ImGui.separator();
 
             if (ImGui.checkbox(I18n.INSTANCE.get("map.info.noMagic"), magiaSinEfecto)) {
-                GameData.mapProperties.setMagiaSinEfecto(magiaSinEfecto.get() ? 1 : 0);
+                applyChange(p -> p.setMagiaSinEfecto(magiaSinEfecto.get() ? 1 : 0));
             }
 
             if (ImGui.checkbox(I18n.INSTANCE.get("map.info.noEncrypt"), noEncriptarMP)) {
-                GameData.mapProperties.setNoEncriptarMP(noEncriptarMP.get() ? 1 : 0);
+                applyChange(p -> p.setNoEncriptarMP(noEncriptarMP.get() ? 1 : 0));
             }
 
             if (ImGui.checkbox(I18n.INSTANCE.get("map.info.pk"), pk)) {
-                GameData.mapProperties.setPlayerKiller(pk.get() ? 1 : 0);
+                applyChange(p -> p.setPlayerKiller(pk.get() ? 1 : 0));
             }
 
             if (ImGui.checkbox(I18n.INSTANCE.get("map.info.restrict"), restringir)) {
-                GameData.mapProperties.setRestringir(restringir.get() ? 1 : 0);
+                applyChange(p -> p.setRestringir(restringir.get() ? 1 : 0));
             }
 
             ImGui.separator();
 
             if (ImGui.inputInt(I18n.INSTANCE.get("map.info.backup"), backupMap)) {
-                GameData.mapProperties.setBackup(backupMap.get());
+                // Editando...
+            }
+            if (ImGui.isItemDeactivatedAfterEdit()) {
+                applyChange(p -> p.setBackup(backupMap.get()));
             }
 
             // ComboBox para Zona
@@ -127,7 +138,8 @@ public final class FInfoMap extends Form {
                 for (String z : zonas) {
                     boolean isSelected = currentZona.equalsIgnoreCase(z);
                     if (ImGui.selectable(z, isSelected)) {
-                        GameData.mapProperties.setZona(z);
+                        zona.set(z);
+                        applyChange(p -> p.setZona(z));
                     }
                     if (isSelected) {
                         ImGui.setItemDefaultFocus();
@@ -143,7 +155,8 @@ public final class FInfoMap extends Form {
                 for (String t : terrenos) {
                     boolean isSelected = currentTerreno.equalsIgnoreCase(t);
                     if (ImGui.selectable(t, isSelected)) {
-                        GameData.mapProperties.setTerreno(t);
+                        terreno.set(t);
+                        applyChange(p -> p.setTerreno(t));
                     }
                     if (isSelected) {
                         ImGui.setItemDefaultFocus();
@@ -161,6 +174,41 @@ public final class FInfoMap extends Form {
 
             ImGui.end();
         }
+    }
+
+    private void applyChange(java.util.function.Consumer<MapProperties> changeAction) {
+        if (GameData.mapProperties == null)
+            return;
+
+        // Clone OLD state
+        MapProperties oldProps = cloneProperties(GameData.mapProperties);
+
+        // Clone NEW state (initially same as old)
+        MapProperties newProps = cloneProperties(GameData.mapProperties);
+
+        // Apply change to NEW state object
+        changeAction.accept(newProps);
+
+        // Execute Command (this will apply newProps to GameData.mapProperties)
+        org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
+                new org.argentumforge.engine.utils.editor.commands.MapPropertiesChangeCommand(oldProps, newProps));
+
+        // Refresh UI from the (now updated) GameData
+        refreshData();
+    }
+
+    private MapProperties cloneProperties(MapProperties src) {
+        MapProperties dest = new MapProperties();
+        dest.setName(src.getName());
+        dest.setMusicIndex(src.getMusicIndex());
+        dest.setMagiaSinEfecto(src.getMagiaSinEfecto());
+        dest.setNoEncriptarMP(src.getNoEncriptarMP());
+        dest.setPlayerKiller(src.getPlayerKiller());
+        dest.setRestringir(src.getRestringir());
+        dest.setBackup(src.getBackup());
+        dest.setZona(src.getZona());
+        dest.setTerreno(src.getTerreno());
+        return dest;
     }
 
     private void scanMusicFiles() {
