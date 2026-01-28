@@ -1,20 +1,20 @@
 ---
-name: Funcionalidad
-about: Proponer nueva funcionalidad dentro del juego
-title: "[FEAT] - "
+name: Sugerencia de Funcionalidad
+about: Proponer nuevas herramientas o mejoras para el editor de mapas.
+title: "[PROPUESTA] - "
 labels: enhancement
 assignees: ''
 
 ---
 
-**¿Su solicitud de funcionalidad está relacionada con un problema? Por favor describa.**
-Una descripción clara y concisa de cual es el problema. Ej. Siempre me siento frustrado cuando [...]
+**¿Tu propuesta resuelve algún problema o limitación actual?**
+Describe de forma clara qué aspecto del editor te gustaría mejorar o qué dificultad encuentras actualmente.
 
-**Describe la solución que te gustaría**
-Una descripción clara y concisa de lo que quieres que suceda.
+**Descripción de la nueva funcionalidad**
+Una descripción detallada de cómo imaginas que debería funcionar la nueva herramienta o mejora.
 
-**Describa las alternativas que ha considerado**
-Una descripción clara y concisa de cualquier solución o característica alternativa que haya considerado.
+**Alternativas consideradas**
+Si has pensado en otras formas de lograr lo mismo, menciónalas aquí.
 
 **Contexto adicional**
-Agregue cualquier otro contexto o capturas de pantalla sobre la solicitud de función aquí.
+Cualquier otra información, boceto o idea que ayude a entender la propuesta.
