@@ -30,7 +30,7 @@ public final class Engine {
     /** Flag que indica si el programa esta corriendo. */
     private static boolean prgRun = true;
     /** Versión del programa. */
-    public static final String VERSION = "1.0.0-beta2";
+    public static final String VERSION = "1.0.0-beta3";
     /** Ventana principal del motor grafico. */
     private final Window window = Window.INSTANCE;
     /** Sistema de interfaz grafica de usuario. */
@@ -95,7 +95,7 @@ public final class Engine {
             // Ya existen perfiles: Selector
             org.argentumforge.engine.gui.forms.FProfileSelector selector = new org.argentumforge.engine.gui.forms.FProfileSelector(
                     this::completeInitialization);
-            ImGUISystem.INSTANCE.show(selector);
+            guiSystem.show(selector);
         }
 
         isWaitingForSetup = true;
@@ -104,7 +104,7 @@ public final class Engine {
     /**
      * Completa la inicialización después del wizard o selector de perfil.
      */
-    private void completeInitialization() {
+    public void completeInitialization() {
         // En este punto, GameData ya ha sido inicializado por el formulario
         // correspondiente
         // y Window/GUI ya están inicializados por init()
@@ -116,6 +116,11 @@ public final class Engine {
         // Verificar recursos cargados
         if (!GameData.checkResources()) {
             ImGUISystem.INSTANCE.show(new org.argentumforge.engine.gui.forms.FRoutes());
+        }
+
+        // Si no hay mapa activo, crear uno nuevo
+        if (org.argentumforge.engine.utils.GameData.getActiveContext() == null) {
+            org.argentumforge.engine.utils.MapManager.createEmptyMap(100, 100);
         }
 
         if (currentScene != null)
@@ -132,6 +137,24 @@ public final class Engine {
         init();
         loop();
         close();
+    }
+
+    public Engine() {
+        INSTANCE = this;
+    }
+
+    public static Engine INSTANCE;
+
+    public void requestProfileChange() {
+        if (!org.argentumforge.engine.utils.MapManager.checkUnsavedChanges()) {
+            return;
+        }
+        currentScene = null;
+        isWaitingForSetup = true;
+        guiSystem.closeAllFrms();
+        org.argentumforge.engine.gui.forms.FProfileSelector selector = new org.argentumforge.engine.gui.forms.FProfileSelector(
+                this::completeInitialization);
+        guiSystem.show(selector);
     }
 
     /**

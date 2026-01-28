@@ -251,6 +251,12 @@ public final class MapManager {
             org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().clearHistory();
 
             Logger.info("Mapa cargado exitosamente");
+
+            // Si el usuario está en (0,0), moverlo a (50,50)
+            org.argentumforge.engine.game.User user = org.argentumforge.engine.game.User.INSTANCE;
+            if (user.getUserPos().getX() == 0 || user.getUserPos().getY() == 0) {
+                user.teleport(50, 50);
+            }
         } catch (IOException e) {
             Logger.error(e, "No se pudo cargar el mapa desde: {}", filePath);
         }
@@ -367,7 +373,10 @@ public final class MapManager {
         markAsSaved();
         org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().clearHistory();
 
-        Logger.info("Mapa vacío creado correctamente");
+        Logger.info("Mapa vacío creado ({}x{})", width, height);
+
+        // Teletransportar al usuario al centro (o 50,50)
+        org.argentumforge.engine.game.User.INSTANCE.teleport(50, 50);
     }
 
     /**

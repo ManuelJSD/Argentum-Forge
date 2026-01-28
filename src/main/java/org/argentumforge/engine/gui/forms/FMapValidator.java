@@ -25,7 +25,7 @@ public class FMapValidator extends Form {
     public void render() {
         ImGui.setNextWindowSize(600, 400, imgui.flag.ImGuiCond.FirstUseEver);
 
-        if (ImGui.begin("Validación de Mapa", open, ImGuiWindowFlags.NoCollapse)) {
+        if (ImGui.begin("Validación de Mapa", open, ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking)) {
 
             if (ImGui.button("Re-Escanear Mapa")) {
                 this.currentErrors = MapValidator.validateCurrentMap();
