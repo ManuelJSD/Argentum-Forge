@@ -1,5 +1,6 @@
 package org.argentumforge.engine.utils.editor.commands;
 
+import org.argentumforge.engine.i18n.I18n;
 import org.argentumforge.engine.utils.editor.Clipboard;
 import org.argentumforge.engine.utils.editor.Selection;
 import java.util.ArrayList;
@@ -10,6 +11,11 @@ import static org.argentumforge.engine.utils.GameData.mapData;
  * Comando para pegar múltiples entidades desde el portapapeles.
  */
 public class PasteEntitiesCommand implements Command {
+    @Override
+    public String getName() {
+        return I18n.INSTANCE.get("history.command.paste");
+    }
+
     private final List<Command> commands = new ArrayList<>();
 
     public PasteEntitiesCommand(List<Clipboard.ClipboardItem> items, int destX, int destY) {

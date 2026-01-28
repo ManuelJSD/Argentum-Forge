@@ -1,5 +1,6 @@
 package org.argentumforge.engine.utils.editor.commands;
 
+import org.argentumforge.engine.i18n.I18n;
 import java.util.Map;
 import java.util.Objects;
 import org.argentumforge.engine.utils.GameData;
@@ -9,6 +10,11 @@ import static org.argentumforge.engine.utils.GameData.initGrh;
  * Comando para cambios masivos de tiles (Relleno, Pinceles grandes).
  */
 public class BulkTileChangeCommand implements Command {
+    @Override
+    public String getName() {
+        return I18n.INSTANCE.get("history.command.bulk_tile");
+    }
+
     private final int layer;
     private final Map<TilePos, Integer> oldTiles;
     private final Map<TilePos, Integer> newTiles;

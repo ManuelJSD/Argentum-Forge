@@ -14,4 +14,11 @@ public interface Command {
      * Deshace la acción (Undo).
      */
     void undo();
+
+    /**
+     * Obtiene el nombre legible del comando para el historial.
+     * 
+     * @return Nombre localizado del comando.
+     */
+    String getName();
 }
