@@ -153,6 +153,14 @@ We welcome contributions! Here's how to get started:
 - Test your changes thoroughly
 - Update documentation if needed
 
+## 💖 Support the Project
+
+If you find this project useful and want to support its development, you can leave a star ⭐ on the repository!
+
+Also, if you're feeling generous, you can make a crypto donation:
+
+- **USDT (TRC20):** `TMBg4fdAnWcUFJALY74U2m8s4jVs2UDasA`
+
 ## 📄 License
 
 This project is licensed under the GNU General Public License v3.0 - see the LICENSE file for details.

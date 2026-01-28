@@ -152,6 +152,14 @@ Consulta [.github/RELEASE_GUIDE.md](.github/RELEASE_GUIDE.md) para instrucciones
 - Prueba tus cambios exhaustivamente
 - Actualiza la documentación si es necesario
 
+## 💖 Apoyar el Proyecto
+
+Si encuentras útil este proyecto y quieres apoyar su desarrollo, ¡puedes dejar una estrella ⭐ en el repositorio!
+
+Además, si te sientes generoso, puedes hacer una donación en criptomonedas:
+
+- **USDT (TRC20):** `TMBg4fdAnWcUFJALY74U2m8s4jVs2UDasA`
+
 ## 📄 Licencia
 
 Este proyecto está licenciado bajo la Licencia Pública General GNU v3.0 - consulta el archivo LICENSE para más detalles.
