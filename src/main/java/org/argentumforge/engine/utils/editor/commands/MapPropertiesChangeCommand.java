@@ -1,5 +1,6 @@
 package org.argentumforge.engine.utils.editor.commands;
 
+import org.argentumforge.engine.i18n.I18n;
 import org.argentumforge.engine.utils.GameData;
 import org.argentumforge.engine.utils.inits.MapProperties;
 
@@ -7,6 +8,10 @@ import org.argentumforge.engine.utils.inits.MapProperties;
  * Comando para gestionar cambios en las propiedades generales del mapa.
  */
 public class MapPropertiesChangeCommand implements Command {
+    @Override
+    public String getName() {
+        return I18n.INSTANCE.get("history.command.map_props");
+    }
 
     private final MapProperties oldProperties;
     private final MapProperties newProperties;

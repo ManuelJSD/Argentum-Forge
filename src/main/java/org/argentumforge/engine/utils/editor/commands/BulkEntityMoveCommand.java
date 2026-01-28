@@ -1,5 +1,6 @@
 package org.argentumforge.engine.utils.editor.commands;
 
+import org.argentumforge.engine.i18n.I18n;
 import org.argentumforge.engine.utils.editor.Selection;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,6 +9,11 @@ import java.util.List;
  * Comando para mover múltiples entidades en una sola operación atómica.
  */
 public class BulkEntityMoveCommand implements Command {
+
+    @Override
+    public String getName() {
+        return I18n.INSTANCE.get("history.command.bulk_entity_move");
+    }
 
     private static class MoveData {
         int srcX, srcY, destX, destY;

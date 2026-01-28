@@ -1,5 +1,6 @@
 package org.argentumforge.engine.utils.editor.commands;
 
+import org.argentumforge.engine.i18n.I18n;
 import java.util.Map;
 import static org.argentumforge.engine.utils.GameData.mapData;
 
@@ -8,6 +9,11 @@ import static org.argentumforge.engine.utils.GameData.mapData;
  * tiles.
  */
 public class ParticleChangeCommand implements Command {
+    @Override
+    public String getName() {
+        return I18n.INSTANCE.get("history.command.particle");
+    }
+
     private final Map<TilePos, Integer> oldStates;
     private final Map<TilePos, Integer> newStates;
 

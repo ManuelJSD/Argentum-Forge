@@ -1,7 +1,9 @@
 package org.argentumforge.engine.utils.editor.commands;
 
+import org.argentumforge.engine.i18n.I18n;
 import org.argentumforge.engine.game.models.Character;
 import org.argentumforge.engine.game.models.Direction;
+
 import org.argentumforge.engine.utils.AssetRegistry;
 import org.argentumforge.engine.utils.GameData;
 import org.argentumforge.engine.utils.editor.Selection;
@@ -14,6 +16,11 @@ import static org.argentumforge.engine.utils.GameData.mapData;
  * Comando para mover una entidad (NPC u Objeto) de una posición a otra.
  */
 public class MoveEntityCommand implements Command {
+
+    @Override
+    public String getName() {
+        return I18n.INSTANCE.get("history.command.move_entity");
+    }
 
     private final int srcX, srcY;
     private final int destX, destY;

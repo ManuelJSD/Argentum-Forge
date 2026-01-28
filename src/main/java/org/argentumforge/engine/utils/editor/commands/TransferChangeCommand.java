@@ -1,11 +1,17 @@
 package org.argentumforge.engine.utils.editor.commands;
 
+import org.argentumforge.engine.i18n.I18n;
 import static org.argentumforge.engine.utils.GameData.mapData;
 
 /**
  * Comando para registrar y revertir cambios en los traslados de un tile.
  */
 public class TransferChangeCommand implements Command {
+    @Override
+    public String getName() {
+        return I18n.INSTANCE.get("history.command.transfer");
+    }
+
     private final int x, y;
     private final int oldExitMap, oldExitX, oldExitY;
     private final int newExitMap, newExitX, newExitY;

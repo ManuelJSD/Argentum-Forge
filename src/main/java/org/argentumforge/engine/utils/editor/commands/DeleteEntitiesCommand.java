@@ -1,5 +1,6 @@
 package org.argentumforge.engine.utils.editor.commands;
 
+import org.argentumforge.engine.i18n.I18n;
 import org.argentumforge.engine.utils.editor.Selection;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,6 +9,11 @@ import java.util.List;
  * Comando para eliminar múltiples entidades en una sola operación atómica.
  */
 public class DeleteEntitiesCommand implements Command {
+    @Override
+    public String getName() {
+        return I18n.INSTANCE.get("history.command.delete_entity");
+    }
+
     private final List<Command> commands = new ArrayList<>();
 
     public DeleteEntitiesCommand(List<Selection.SelectedEntity> entities) {

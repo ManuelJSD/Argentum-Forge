@@ -1,5 +1,6 @@
 package org.argentumforge.engine.utils.editor.commands;
 
+import org.argentumforge.engine.i18n.I18n;
 import org.argentumforge.engine.utils.GameData;
 import static org.argentumforge.engine.utils.GameData.initGrh;
 
@@ -7,6 +8,11 @@ import static org.argentumforge.engine.utils.GameData.initGrh;
  * Comando para cambiar todas las capas de un tile (superficie).
  */
 public class SurfaceChangeCommand implements Command {
+    @Override
+    public String getName() {
+        return I18n.INSTANCE.get("history.command.surface");
+    }
+
     private final int x, y;
     private final int[] oldLayers;
     private final int[] newLayers;

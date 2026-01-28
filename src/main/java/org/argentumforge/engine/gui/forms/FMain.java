@@ -548,6 +548,10 @@ public final class FMain extends Form {
                     manager.redo();
                 }
 
+                if (ImGui.menuItem(I18n.INSTANCE.get("history.title"))) {
+                    ImGUISystem.INSTANCE.show(FHistory.getInstance());
+                }
+
                 ImGui.separator();
 
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.edit.cut"), "Ctrl+X", false,

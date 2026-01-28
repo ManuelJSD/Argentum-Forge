@@ -1,5 +1,6 @@
 package org.argentumforge.engine.utils.editor.commands;
 
+import org.argentumforge.engine.i18n.I18n;
 import java.util.Map;
 import static org.argentumforge.engine.utils.GameData.mapData;
 
@@ -7,6 +8,11 @@ import static org.argentumforge.engine.utils.GameData.mapData;
  * Comando para registrar y revertir cambios en los triggers de múltiples tiles.
  */
 public class TriggerChangeCommand implements Command {
+    @Override
+    public String getName() {
+        return I18n.INSTANCE.get("history.command.trigger");
+    }
+
     private final Map<TilePos, Short> oldStates;
     private final Map<TilePos, Short> newStates;
 
