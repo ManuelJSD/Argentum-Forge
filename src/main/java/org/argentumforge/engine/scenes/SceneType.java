@@ -27,7 +27,6 @@ package org.argentumforge.engine.scenes;
 
 public enum SceneType {
 
-    INTRO_SCENE,
     GAME_SCENE
 
 }
