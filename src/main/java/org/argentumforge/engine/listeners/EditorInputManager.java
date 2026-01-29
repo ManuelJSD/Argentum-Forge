@@ -71,13 +71,13 @@ public class EditorInputManager {
             }
 
             if (MouseListener.mouseButtonDown(GLFW_MOUSE_BUTTON_LEFT)) {
-                surface.surface_edit(x, y);
-                block.block_edit(x, y);
-                npc.npc_edit(x, y);
-                obj.obj_edit(x, y);
-                trigger.trigger_edit(x, y);
-                transfer.transfer_edit(x, y);
-                particle.particle_edit(x, y);
+                surface.surface_edit(GameData.getActiveContext(), x, y);
+                block.block_edit(GameData.getActiveContext(), x, y);
+                npc.npc_edit(GameData.getActiveContext(), x, y);
+                obj.obj_edit(GameData.getActiveContext(), x, y);
+                trigger.trigger_edit(GameData.getActiveContext(), x, y);
+                transfer.transfer_edit(GameData.getActiveContext(), x, y);
+                particle.particle_edit(GameData.getActiveContext(), x, y);
             }
 
             if (MouseListener.mouseButtonReleased(GLFW_MOUSE_BUTTON_LEFT)) {

@@ -1,6 +1,5 @@
 package org.argentumforge.engine.utils.editor;
 
-import static org.argentumforge.engine.utils.GameData.mapData;
 import org.argentumforge.engine.listeners.KeyHandler;
 
 /**
@@ -169,29 +168,34 @@ public class Surface {
         }
     }
 
-    public void surface_edit(int x, int y) {
+    public void surface_edit(org.argentumforge.engine.utils.MapContext context, int x, int y) {
+        if (context == null)
+            return;
+        var mapData = context.getMapData();
+
         if (mapData == null || x < 0 || x >= mapData.length || y < 0 || y >= mapData[0].length) {
             return;
         }
 
         if (mode == 3) { // Pick siempre es unitario
-            this.pick(x, y);
+            this.pick(context, x, y);
             return;
         }
 
         if (toolMode == ToolMode.MAGIC_WAND) {
-            this.magic_wand_select(x, y);
+            this.magic_wand_select(context, x, y);
             return;
         }
 
         if (toolMode == ToolMode.BUCKET) {
-            this.bucket_fill(x, y);
+            this.bucket_fill(context, x, y);
         } else {
-            this.brush_edit(x, y);
+            this.brush_edit(context, x, y);
         }
     }
 
-    private void magic_wand_select(int x, int y) {
+    private void magic_wand_select(org.argentumforge.engine.utils.MapContext context, int x, int y) {
+        var mapData = context.getMapData();
         if (mapData[x][y] == null)
             return;
 
@@ -250,7 +254,8 @@ public class Surface {
         // El selection manager pinta cuadros sobre selectedEntities automáticamente
     }
 
-    private void pick(int x, int y) {
+    private void pick(org.argentumforge.engine.utils.MapContext context, int x, int y) {
+        var mapData = context.getMapData();
         if (mapData != null && x >= 0 && x < mapData.length && y >= 0 && y < mapData[0].length) {
             int grhIdx = mapData[x][y].getLayer(layer).getGrhIndex();
             if (grhIdx > 0) {
@@ -261,9 +266,11 @@ public class Surface {
         }
     }
 
-    private void brush_edit(int x, int y) {
+    private void brush_edit(org.argentumforge.engine.utils.MapContext context, int x, int y) {
         if (mode == 0)
             return;
+
+        var mapData = context.getMapData();
 
         java.util.Map<org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos, Integer> oldTiles = new java.util.HashMap<>();
         java.util.Map<org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos, Integer> newTiles = new java.util.HashMap<>();
@@ -365,13 +372,13 @@ public class Surface {
             org.argentumforge.engine.utils.editor.commands.MacroCommand macro = new org.argentumforge.engine.utils.editor.commands.MacroCommand();
             if (!oldTiles.isEmpty()) {
                 macro.addCommand(new org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand(
-                        org.argentumforge.engine.utils.GameData.getActiveContext(), layer,
+                        context, layer,
                         oldTiles, newTiles));
             }
             if (!oldBlocks.isEmpty()) {
                 macro.addCommand(
                         new org.argentumforge.engine.utils.editor.commands.BlockChangeCommand(
-                                org.argentumforge.engine.utils.GameData.getActiveContext(), oldBlocks, newBlocks));
+                                context, oldBlocks, newBlocks));
             }
 
             if (isBatching && batchCommand != null) {
@@ -390,9 +397,11 @@ public class Surface {
         }
     }
 
-    private void bucket_fill(int x, int y) {
+    private void bucket_fill(org.argentumforge.engine.utils.MapContext context, int x, int y) {
         if (mode == 0)
             return;
+
+        var mapData = context.getMapData();
 
         int targetGrh = (mode == 1 ? surfaceIndex : (layer == 1 ? 1 : 0));
         int startGrh = mapData[x][y].getLayer(layer).getGrhIndex();
@@ -459,13 +468,13 @@ public class Surface {
             org.argentumforge.engine.utils.editor.commands.MacroCommand macro = new org.argentumforge.engine.utils.editor.commands.MacroCommand();
             if (!oldTiles.isEmpty()) {
                 macro.addCommand(new org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand(
-                        org.argentumforge.engine.utils.GameData.getActiveContext(), layer,
+                        context, layer,
                         oldTiles, newTiles));
             }
             if (!oldBlocks.isEmpty()) {
                 macro.addCommand(
                         new org.argentumforge.engine.utils.editor.commands.BlockChangeCommand(
-                                org.argentumforge.engine.utils.GameData.getActiveContext(), oldBlocks, newBlocks));
+                                context, oldBlocks, newBlocks));
             }
 
             // Bucket usually is a single action, but technically can be part of a batch if

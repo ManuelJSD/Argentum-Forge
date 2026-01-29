@@ -6,12 +6,21 @@ import org.argentumforge.engine.gui.widgets.UIComponents;
 import org.argentumforge.engine.i18n.I18n;
 import org.argentumforge.engine.utils.editor.Particle;
 
-public class FParticleEditor extends Form {
+import org.argentumforge.engine.utils.MapContext;
 
+public class FParticleEditor extends Form implements IMapEditor {
+
+    private MapContext context;
     private final ImInt particleId = new ImInt(0);
     private final ImInt brushSize = new ImInt(1);
 
     public FParticleEditor() {
+        this.context = org.argentumforge.engine.utils.GameData.getActiveContext();
+    }
+
+    @Override
+    public void setContext(MapContext context) {
+        this.context = context;
     }
 
     @Override

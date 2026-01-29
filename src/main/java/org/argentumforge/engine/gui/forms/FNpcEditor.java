@@ -20,14 +20,17 @@ import java.util.List;
 
 import static org.argentumforge.engine.utils.AssetRegistry.npcs;
 
+import org.argentumforge.engine.utils.MapContext;
+
 /**
  * Formulario de edición y colocación de NPCs en el mapa.
  * 
  * Permite buscar NPCs por nombre o ID, previsualizar su información
  * y alternar entre los modos de colocar o quitar NPCs en la rejilla del mapa.
  */
-public final class FNpcEditor extends Form {
+public final class FNpcEditor extends Form implements IMapEditor {
 
+    private MapContext context;
     private int selectedNpcNumber = -1;
     private final Npc npcEditor;
     private final ImString searchFilter = new ImString(100);
@@ -37,12 +40,18 @@ public final class FNpcEditor extends Form {
 
     public FNpcEditor() {
         npcEditor = Npc.getInstance();
+        this.context = org.argentumforge.engine.utils.GameData.getActiveContext();
 
         if (npcs != null && !npcs.isEmpty()) {
             selectedNpcNumber = npcs.keySet().stream().min(Integer::compareTo).orElse(-1);
             if (selectedNpcNumber > 0)
                 npcEditor.setNpcNumber(selectedNpcNumber);
         }
+    }
+
+    @Override
+    public void setContext(MapContext context) {
+        this.context = context;
     }
 
     @Override

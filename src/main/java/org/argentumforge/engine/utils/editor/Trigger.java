@@ -27,8 +27,10 @@ public class Trigger {
         return instance;
     }
 
-    public void trigger_edit(int x, int y) {
-        var mapData = org.argentumforge.engine.utils.GameData.getActiveContext().getMapData();
+    public void trigger_edit(org.argentumforge.engine.utils.MapContext context, int x, int y) {
+        if (context == null)
+            return;
+        var mapData = context.getMapData();
         if (!isActive || mapData == null)
             return;
 
@@ -65,7 +67,7 @@ public class Trigger {
         if (!oldStates.isEmpty()) {
             org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
                     new org.argentumforge.engine.utils.editor.commands.TriggerChangeCommand(
-                            org.argentumforge.engine.utils.GameData.getActiveContext(), oldStates, newStates));
+                            context, oldStates, newStates));
         }
     }
 

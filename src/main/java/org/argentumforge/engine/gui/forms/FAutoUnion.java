@@ -143,7 +143,8 @@ public final class FAutoUnion extends Form {
                 int s = southApply ? southMap.get() : -1;
                 int e = eastApply ? eastMap.get() : -1;
                 int w = westApply ? westMap.get() : -1;
-                Transfer.getInstance().autoUnionBorders(n, s, e, w);
+                Transfer.getInstance().autoUnionBorders(org.argentumforge.engine.utils.GameData.getActiveContext(), n,
+                        s, e, w);
             }
             ImGui.popStyleColor();
 

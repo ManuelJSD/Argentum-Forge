@@ -8,6 +8,13 @@ import org.argentumforge.engine.scenes.Camera;
  * Uses bitmasking to determine correct edge tiles between different terrain
  * types.
  */
+import org.argentumforge.engine.utils.MapContext;
+
+/**
+ * Utility class for automatic tile transitions (auto-coasting).
+ * Uses bitmasking to determine correct edge tiles between different terrain
+ * types.
+ */
 public class AutoTiler {
 
     /**
@@ -18,8 +25,11 @@ public class AutoTiler {
      * @param landGrh       GRH index for land tiles
      * @param coastGrhStart Starting GRH index for coast tiles (assumes 16-tile set)
      */
-    public static void applyCoasting(int layer, int waterGrh, int landGrh, int coastGrhStart) {
-        if (GameData.mapData == null)
+    public static void applyCoasting(MapContext context, int layer, int waterGrh, int landGrh, int coastGrhStart) {
+        if (context == null)
+            return;
+        var mapData = context.getMapData();
+        if (mapData == null)
             return;
 
         java.util.Map<org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos, Integer> oldTiles = new java.util.HashMap<>();
@@ -27,11 +37,11 @@ public class AutoTiler {
 
         for (int x = Camera.XMinMapSize; x <= Camera.XMaxMapSize; x++) {
             for (int y = Camera.YMinMapSize; y <= Camera.YMaxMapSize; y++) {
-                int currentGrh = GameData.mapData[x][y].getLayer(layer).getGrhIndex();
+                int currentGrh = mapData[x][y].getLayer(layer).getGrhIndex();
 
                 // Only process land tiles that border water
                 if (currentGrh == landGrh) {
-                    int bitmask = calculateBitmask(x, y, layer, waterGrh);
+                    int bitmask = calculateBitmask(context, x, y, layer, waterGrh);
 
                     if (bitmask > 0) {
                         // This land tile borders water, apply coast tile
@@ -62,23 +72,24 @@ public class AutoTiler {
      * Bit 2 (4) = South has water
      * Bit 3 (8) = West has water
      */
-    private static int calculateBitmask(int x, int y, int layer, int waterGrh) {
+    private static int calculateBitmask(MapContext context, int x, int y, int layer, int waterGrh) {
         int mask = 0;
+        var mapData = context.getMapData();
 
         // North
-        if (y > Camera.YMinMapSize && GameData.mapData[x][y - 1].getLayer(layer).getGrhIndex() == waterGrh) {
+        if (y > Camera.YMinMapSize && mapData[x][y - 1].getLayer(layer).getGrhIndex() == waterGrh) {
             mask |= 1;
         }
         // East
-        if (x < Camera.XMaxMapSize && GameData.mapData[x + 1][y].getLayer(layer).getGrhIndex() == waterGrh) {
+        if (x < Camera.XMaxMapSize && mapData[x + 1][y].getLayer(layer).getGrhIndex() == waterGrh) {
             mask |= 2;
         }
         // South
-        if (y < Camera.YMaxMapSize && GameData.mapData[x][y + 1].getLayer(layer).getGrhIndex() == waterGrh) {
+        if (y < Camera.YMaxMapSize && mapData[x][y + 1].getLayer(layer).getGrhIndex() == waterGrh) {
             mask |= 4;
         }
         // West
-        if (x > Camera.XMinMapSize && GameData.mapData[x - 1][y].getLayer(layer).getGrhIndex() == waterGrh) {
+        if (x > Camera.XMinMapSize && mapData[x - 1][y].getLayer(layer).getGrhIndex() == waterGrh) {
             mask |= 8;
         }
 
@@ -138,8 +149,11 @@ public class AutoTiler {
      * @param mosaicWidth  Width of mosaic pattern
      * @param mosaicHeight Height of mosaic pattern
      */
-    public static void applyMosaic(int layer, int baseGrh, int mosaicWidth, int mosaicHeight) {
-        if (GameData.mapData == null || mosaicWidth <= 1 || mosaicHeight <= 1)
+    public static void applyMosaic(MapContext context, int layer, int baseGrh, int mosaicWidth, int mosaicHeight) {
+        if (context == null)
+            return;
+        var mapData = context.getMapData();
+        if (mapData == null || mosaicWidth <= 1 || mosaicHeight <= 1)
             return;
 
         java.util.Map<org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos, Integer> oldTiles = new java.util.HashMap<>();
@@ -147,7 +161,7 @@ public class AutoTiler {
 
         for (int x = Camera.XMinMapSize; x <= Camera.XMaxMapSize; x++) {
             for (int y = Camera.YMinMapSize; y <= Camera.YMaxMapSize; y++) {
-                int currentGrh = GameData.mapData[x][y].getLayer(layer).getGrhIndex();
+                int currentGrh = mapData[x][y].getLayer(layer).getGrhIndex();
 
                 if (currentGrh == baseGrh) {
                     // Apply tiling pattern

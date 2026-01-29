@@ -1,6 +1,6 @@
 package org.argentumforge.engine.utils.editor;
 
-import static org.argentumforge.engine.utils.GameData.mapData;
+import org.argentumforge.engine.utils.MapContext;
 
 /**
  * Gestor de estado del editor para la manipulación de NPCs en el mapa.
@@ -66,16 +66,16 @@ public class Npc {
      * @param x Coordenada X del mapa.
      * @param y Coordenada Y del mapa.
      */
-    public void npc_edit(int x, int y) {
+    public void npc_edit(MapContext context, int x, int y) {
         switch (mode) {
             case 1:
-                place(x, y);
+                place(context, x, y);
                 break;
             case 2:
-                remove(x, y);
+                remove(context, x, y);
                 break;
             case 3:
-                pick(x, y);
+                pick(context, x, y);
                 break;
             default:
                 break;
@@ -88,7 +88,10 @@ public class Npc {
      * @param x Coordenada X del mapa.
      * @param y Coordenada Y del mapa.
      */
-    private void place(int x, int y) {
+    private void place(MapContext context, int x, int y) {
+        if (context == null)
+            return;
+        var mapData = context.getMapData();
         if (mapData != null && x >= 0 && x < mapData.length && y >= 0 && y < mapData[0].length) {
             int oldNpc = mapData[x][y].getNpcIndex();
             if (oldNpc == npcNumber)
@@ -96,12 +99,15 @@ public class Npc {
 
             org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
                     new org.argentumforge.engine.utils.editor.commands.NpcChangeCommand(
-                            org.argentumforge.engine.utils.GameData.getActiveContext(), x, y, oldNpc,
+                            context, x, y, oldNpc,
                             npcNumber));
         }
     }
 
-    private void remove(int x, int y) {
+    private void remove(MapContext context, int x, int y) {
+        if (context == null)
+            return;
+        var mapData = context.getMapData();
         if (mapData != null && x >= 0 && x < mapData.length && y >= 0 && y < mapData[0].length) {
             int oldNpc = mapData[x][y].getNpcIndex();
             if (oldNpc == 0)
@@ -109,14 +115,17 @@ public class Npc {
 
             org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
                     new org.argentumforge.engine.utils.editor.commands.NpcChangeCommand(
-                            org.argentumforge.engine.utils.GameData.getActiveContext(), x, y, oldNpc, 0));
+                            context, x, y, oldNpc, 0));
         }
     }
 
     /**
      * Captura el ID del NPC en las coordenadas dadas.
      */
-    private void pick(int x, int y) {
+    private void pick(MapContext context, int x, int y) {
+        if (context == null)
+            return;
+        var mapData = context.getMapData();
         if (mapData != null && x >= 0 && x < mapData.length && y >= 0 && y < mapData[0].length) {
             int npcIdx = mapData[x][y].getNpcIndex();
             if (npcIdx > 0) {

@@ -4,7 +4,7 @@ import org.argentumforge.engine.utils.AssetRegistry;
 
 import org.argentumforge.engine.utils.inits.ObjData;
 
-import static org.argentumforge.engine.utils.GameData.mapData;
+import org.argentumforge.engine.utils.MapContext;
 
 /**
  * Gestor de estado del editor para la manipulación de objetos en el mapa.
@@ -70,16 +70,16 @@ public class Obj {
      * @param x Coordenada X del mapa.
      * @param y Coordenada Y del mapa.
      */
-    public void obj_edit(int x, int y) {
+    public void obj_edit(MapContext context, int x, int y) {
         switch (mode) {
             case 1:
-                place(x, y);
+                place(context, x, y);
                 break;
             case 2:
-                remove(x, y);
+                remove(context, x, y);
                 break;
             case 3:
-                pick(x, y);
+                pick(context, x, y);
                 break;
             default:
                 break;
@@ -92,7 +92,10 @@ public class Obj {
      * @param x Coordenada X del mapa.
      * @param y Coordenada Y del mapa.
      */
-    private void place(int x, int y) {
+    private void place(MapContext context, int x, int y) {
+        if (context == null)
+            return;
+        var mapData = context.getMapData();
         if (mapData != null && x >= 0 && x < mapData.length && y >= 0 && y < mapData[0].length) {
             if (AssetRegistry.objs != null && AssetRegistry.objs.containsKey(objNumber)) {
                 ObjData data = AssetRegistry.objs.get(objNumber);
@@ -104,12 +107,15 @@ public class Obj {
 
                 org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
                         new org.argentumforge.engine.utils.editor.commands.ObjChangeCommand(
-                                org.argentumforge.engine.utils.GameData.getActiveContext(), x, y, oldGrh, newGrh));
+                                context, x, y, oldGrh, newGrh));
             }
         }
     }
 
-    private void remove(int x, int y) {
+    private void remove(MapContext context, int x, int y) {
+        if (context == null)
+            return;
+        var mapData = context.getMapData();
         if (mapData != null && x >= 0 && x < mapData.length && y >= 0 && y < mapData[0].length) {
             int oldGrh = mapData[x][y].getObjGrh().getGrhIndex();
             if (oldGrh == 0)
@@ -117,14 +123,17 @@ public class Obj {
 
             org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
                     new org.argentumforge.engine.utils.editor.commands.ObjChangeCommand(
-                            org.argentumforge.engine.utils.GameData.getActiveContext(), x, y, oldGrh, 0));
+                            context, x, y, oldGrh, 0));
         }
     }
 
     /**
      * Captura el ID del objeto en las coordenadas dadas.
      */
-    private void pick(int x, int y) {
+    private void pick(MapContext context, int x, int y) {
+        if (context == null)
+            return;
+        var mapData = context.getMapData();
         if (mapData != null && x >= 0 && x < mapData.length && y >= 0 && y < mapData[0].length) {
             int grhIdx = mapData[x][y].getObjGrh().getGrhIndex();
             if (grhIdx > 0) {

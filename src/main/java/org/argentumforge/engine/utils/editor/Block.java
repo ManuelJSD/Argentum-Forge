@@ -1,6 +1,6 @@
 package org.argentumforge.engine.utils.editor;
 
-import static org.argentumforge.engine.utils.GameData.mapData;
+import org.argentumforge.engine.utils.MapContext;
 
 /**
  * Clase singleton para gestionar la edición de bloqueos en el mapa.
@@ -71,8 +71,12 @@ public class Block {
      * @param x coordenada X del tile
      * @param y coordenada Y del tile
      */
-    public void block_edit(int x, int y) {
-        if (mode <= 0 || mapData == null)
+    public void block_edit(MapContext context, int x, int y) {
+        if (mode <= 0 || context == null)
+            return;
+
+        var mapData = context.getMapData();
+        if (mapData == null)
             return;
 
         java.util.Map<org.argentumforge.engine.utils.editor.commands.BlockChangeCommand.TilePos, Boolean> oldStates = new java.util.HashMap<>();
@@ -115,7 +119,7 @@ public class Block {
         if (!oldStates.isEmpty()) {
             org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
                     new org.argentumforge.engine.utils.editor.commands.BlockChangeCommand(
-                            org.argentumforge.engine.utils.GameData.getActiveContext(), oldStates, newStates));
+                            context, oldStates, newStates));
         }
     }
 
@@ -123,32 +127,35 @@ public class Block {
      * Bloquea los bordes del mapa según la lógica original de VB6.
      * Basado en un área de visión estándar de 13x11 (o similar configurable).
      */
-    public void blockBorders() {
-        applyGlobalAction(true, true);
+    public void blockBorders(MapContext context) {
+        applyGlobalAction(context, true, true);
     }
 
     /**
      * Limpia los bloqueos de los bordes del mapa.
      */
-    public void unblockBorders() {
-        applyGlobalAction(false, true);
+    public void unblockBorders(MapContext context) {
+        applyGlobalAction(context, false, true);
     }
 
     /**
      * Bloquea todos los tiles del mapa.
      */
-    public void blockAll() {
-        applyGlobalAction(true, false);
+    public void blockAll(MapContext context) {
+        applyGlobalAction(context, true, false);
     }
 
     /**
      * Desbloquea todos los tiles del mapa.
      */
-    public void unblockAll() {
-        applyGlobalAction(false, false);
+    public void unblockAll(MapContext context) {
+        applyGlobalAction(context, false, false);
     }
 
-    private void applyGlobalAction(boolean targetState, boolean bordersOnly) {
+    private void applyGlobalAction(MapContext context, boolean targetState, boolean bordersOnly) {
+        if (context == null)
+            return;
+        var mapData = context.getMapData();
         if (mapData == null)
             return;
 
@@ -183,7 +190,7 @@ public class Block {
         if (!oldStates.isEmpty()) {
             org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
                     new org.argentumforge.engine.utils.editor.commands.BlockChangeCommand(
-                            org.argentumforge.engine.utils.GameData.getActiveContext(), oldStates, newStates));
+                            context, oldStates, newStates));
         }
     }
 }

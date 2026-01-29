@@ -11,18 +11,27 @@ import org.argentumforge.engine.gui.widgets.UIComponents;
 import org.argentumforge.engine.i18n.I18n;
 import static org.argentumforge.engine.utils.GameData.options;
 
+import org.argentumforge.engine.utils.MapContext;
+
 /**
  * Editor de bloqueos del mapa.
  * Permite bloquear y desbloquear tiles, así como visualizar los bloqueos
  * existentes.
  */
-public class FBlockEditor extends Form {
+public class FBlockEditor extends Form implements IMapEditor {
 
+    private MapContext context;
     private Block block;
     // private int activeMode = 0; // Removed local state to avoid desync
 
     public FBlockEditor() {
         block = Block.getInstance();
+        this.context = org.argentumforge.engine.utils.GameData.getActiveContext();
+    }
+
+    @Override
+    public void setContext(MapContext context) {
+        this.context = context;
     }
 
     @Override
@@ -140,7 +149,7 @@ public class FBlockEditor extends Form {
                 I18n.INSTANCE.get("editor.block.blockBorders"),
                 I18n.INSTANCE.get("editor.block.confirm.blockBorders.msg"),
                 () -> {
-                    block.blockBorders();
+                    block.blockBorders(context);
                     options.getRenderSettings().setShowBlock(true);
                 });
 
@@ -149,7 +158,7 @@ public class FBlockEditor extends Form {
                 I18n.INSTANCE.get("editor.block.blockAll"),
                 I18n.INSTANCE.get("editor.block.confirm.blockAll.msg"),
                 () -> {
-                    block.blockAll();
+                    block.blockAll(context);
                     options.getRenderSettings().setShowBlock(true);
                 });
 
@@ -157,13 +166,13 @@ public class FBlockEditor extends Form {
                 I18n.INSTANCE.get("editor.block.confirm.clearBorders.title"),
                 I18n.INSTANCE.get("editor.block.clearBorders"),
                 I18n.INSTANCE.get("editor.block.confirm.clearBorders.msg"),
-                () -> block.unblockBorders());
+                () -> block.unblockBorders(context));
 
         UIComponents.confirmDialog(
                 I18n.INSTANCE.get("editor.block.confirm.clearAll.title"),
                 I18n.INSTANCE.get("editor.block.clearAll"),
                 I18n.INSTANCE.get("editor.block.confirm.clearAll.msg"),
-                () -> block.unblockAll());
+                () -> block.unblockAll(context));
 
         ImGui.separator();
         ImGui.text(I18n.INSTANCE.get("editor.block.opacity"));
