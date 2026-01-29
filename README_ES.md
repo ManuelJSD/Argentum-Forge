@@ -115,7 +115,11 @@ git push origin v1.0.0
 # - Publicará el release con ambos archivos
 ```
 
-Consulta [.github/RELEASE_GUIDE.md](.github/RELEASE_GUIDE.md) para instrucciones detalladas.
+### Documentación
+
+- [TRANSLATIONS_ES.md](docs/TRANSLATIONS_ES.md)
+- [USER_GUIDE_ES.md](docs/USER_GUIDE_ES.md) **¡Nuevo!**
+- [RELEASE_GUIDE_ES.md](.github/RELEASE_GUIDE_ES.md) para instrucciones detalladas.
 
 ### Notas de Desarrollo
 
