@@ -94,7 +94,6 @@ public enum ImGUISystem {
         io.setBackendRendererName("imgui_java_impl_lwjgl");
 
         // Teclado y raton.
-        setKeyboardMapping(io);
         setMouseMapping();
         setCallbacks(io);
 
@@ -103,35 +102,6 @@ public enum ImGUISystem {
 
         // Iniciamos ImGUI en OpenGL
         imGuiGl3.init();
-    }
-
-    private void setKeyboardMapping(ImGuiIO io) {
-        final int[] keyMap = new int[ImGuiKey.COUNT];
-
-        keyMap[ImGuiKey.Tab] = GLFW_KEY_TAB;
-        keyMap[ImGuiKey.LeftArrow] = GLFW_KEY_LEFT;
-        keyMap[ImGuiKey.RightArrow] = GLFW_KEY_RIGHT;
-        keyMap[ImGuiKey.UpArrow] = GLFW_KEY_UP;
-        keyMap[ImGuiKey.DownArrow] = GLFW_KEY_DOWN;
-        keyMap[ImGuiKey.PageUp] = GLFW_KEY_PAGE_UP;
-        keyMap[ImGuiKey.PageDown] = GLFW_KEY_PAGE_DOWN;
-        keyMap[ImGuiKey.Home] = GLFW_KEY_HOME;
-        keyMap[ImGuiKey.End] = GLFW_KEY_END;
-        keyMap[ImGuiKey.Insert] = GLFW_KEY_INSERT;
-        keyMap[ImGuiKey.Delete] = GLFW_KEY_DELETE;
-        keyMap[ImGuiKey.Backspace] = GLFW_KEY_BACKSPACE;
-        keyMap[ImGuiKey.Space] = GLFW_KEY_SPACE;
-        // keyMap[ImGuiKey.Enter] = GLFW_KEY_ENTER;
-        keyMap[ImGuiKey.Escape] = GLFW_KEY_ESCAPE;
-        keyMap[ImGuiKey.KeyPadEnter] = GLFW_KEY_KP_ENTER;
-        keyMap[ImGuiKey.A] = GLFW_KEY_A;
-        keyMap[ImGuiKey.C] = GLFW_KEY_C;
-        keyMap[ImGuiKey.V] = GLFW_KEY_V;
-        keyMap[ImGuiKey.X] = GLFW_KEY_X;
-        keyMap[ImGuiKey.Y] = GLFW_KEY_Y;
-        keyMap[ImGuiKey.Z] = GLFW_KEY_Z;
-
-        io.setKeyMap(keyMap);
     }
 
     private void setMouseMapping() {
@@ -196,7 +166,7 @@ public enum ImGUISystem {
     }
 
     public void destroy() {
-        imGuiGl3.dispose();
+        imGuiGl3.shutdown();
         ImGui.destroyContext();
     }
 
@@ -213,17 +183,14 @@ public enum ImGUISystem {
 
         io.setDisplaySize(winWidth[0], winHeight[0]);
         io.setDisplayFramebufferScale((float) fbWidth[0] / winWidth[0], (float) fbHeight[0] / winHeight[0]);
-        io.setMousePos((float) mousePosX[0], (float) mousePosY[0]);
+        io.addMousePosEvent((float) mousePosX[0], (float) mousePosY[0]);
         io.setDeltaTime(deltaTime);
 
-        final boolean[] mouseDown = new boolean[5];
-        mouseDown[0] = glfwGetMouseButton(window.getWindow(), GLFW_MOUSE_BUTTON_1) == GLFW_PRESS;
-        mouseDown[1] = glfwGetMouseButton(window.getWindow(), GLFW_MOUSE_BUTTON_2) == GLFW_PRESS;
-        mouseDown[2] = glfwGetMouseButton(window.getWindow(), GLFW_MOUSE_BUTTON_3) == GLFW_PRESS;
-        io.setMouseDown(mouseDown);
+        for (int i = 0; i < 5; i++) {
+            io.addMouseButtonEvent(i, glfwGetMouseButton(window.getWindow(), i) == GLFW_PRESS);
+        }
 
-        io.setMouseWheelH(MouseListener.getScrollX());
-        io.setMouseWheel(MouseListener.getScrollY());
+        io.addMouseWheelEvent(MouseListener.getScrollX(), MouseListener.getScrollY());
 
         // ACA HAY QUE LABURAR CON LOS CURSORES.
         if (window.isCursorCrosshair())
@@ -235,7 +202,7 @@ public enum ImGUISystem {
 
         // IMPORTANT!!
         // Any Dear ImGui code SHOULD go between NewFrame()/Render() methods
-
+        imGuiGl3.newFrame();
         ImGui.newFrame();
         if (showDebug) {
             ImGui.setNextWindowPos(5, 25, ImGuiCond.Always);

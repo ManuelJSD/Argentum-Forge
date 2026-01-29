@@ -119,7 +119,8 @@ public class MainToolbar {
         ImGui.pushID("btnSelect");
         if (toolbarIcons.getId() > 0) {
             ImGui.pushStyleVar(ImGuiStyleVar.FramePadding, 0, 0);
-            if (ImGui.imageButton(toolbarIcons.getId(), btnSize, btnSize, 2 * uvStep + zoom, 2 * uvStep + zoom,
+            if (ImGui.imageButton("##selectButton", (long) toolbarIcons.getId(), btnSize, btnSize, 2 * uvStep + zoom,
+                    2 * uvStep + zoom,
                     3 * uvStep - zoom,
                     3 * uvStep - zoom)) {
                 toggleSelection();
@@ -192,9 +193,11 @@ public class MainToolbar {
         if (toolbarIcons.getId() > 0) {
             // Eliminar padding para que el icono ocupe todo el botón
             ImGui.pushStyleVar(ImGuiStyleVar.FramePadding, 0, 0);
-            if (ImGui.imageButton(toolbarIcons.getId(), size, size, u0, v0, u1, v1)) {
+            ImGui.pushID("##iconButton");
+            if (ImGui.imageButton("##iconButton", (long) toolbarIcons.getId(), size, size, u0, v0, u1, v1)) {
                 toggleForm(isVisible, formInstance);
             }
+            ImGui.popID();
             ImGui.popStyleVar();
         } else {
             if (ImGui.button(fallbackLabel, size, size)) {

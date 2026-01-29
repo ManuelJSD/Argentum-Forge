@@ -65,7 +65,7 @@ public class ImageButton3State {
         ImGui.pushStyleColor(ImGuiCol.ButtonActive, 0f, 0f, 0f, 0f);
         ImGui.pushStyleVar(ImGuiStyleVar.FrameBorderSize, 0f);
 
-        boolean clicked = ImGui.imageButton(normalId, width, height);
+        boolean clicked = ImGui.imageButton("##imgBtn", (long) normalId, width, height, 0, 0, 1, 1);
         if (ImGui.isItemActive()) {
             ImGui.setCursorPos(x, y);
             ImGui.image(clickId, width, height);

@@ -352,7 +352,9 @@ public class FSurfaceEditor extends Form implements IMapEditor {
                         float u1 = (frameData.getsX() + frameData.getPixelWidth()) / (float) tex.getTex_width();
                         float v1 = frameData.getsY() / (float) tex.getTex_height();
 
-                        if (ImGui.imageButton(tex.getId(), (float) TILE_SIZE, (float) TILE_SIZE, u0, v1, u1, v0)) {
+                        if (ImGui.imageButton("##surfaceTile_" + i, (long) tex.getId(), (float) TILE_SIZE,
+                                (float) TILE_SIZE,
+                                u0, v1, u1, v0)) {
                             selectedGrhIndex = i;
                             surface.setSurfaceIndex(i);
                             surface.setMode(1); // Auto-activar insertar al seleccionar
