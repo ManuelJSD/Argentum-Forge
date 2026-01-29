@@ -221,7 +221,8 @@ public class Selection {
 
         // Ejecutar comando de movimiento masivo
         org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
-                new org.argentumforge.engine.utils.editor.commands.BulkEntityMoveCommand(selectedEntities, destX,
+                new org.argentumforge.engine.utils.editor.commands.BulkEntityMoveCommand(
+                        org.argentumforge.engine.utils.GameData.getActiveContext(), selectedEntities, destX,
                         destY));
 
         cancelDrag();

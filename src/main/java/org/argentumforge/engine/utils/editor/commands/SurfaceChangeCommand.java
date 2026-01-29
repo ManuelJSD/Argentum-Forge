@@ -1,13 +1,13 @@
 package org.argentumforge.engine.utils.editor.commands;
 
 import org.argentumforge.engine.i18n.I18n;
-import org.argentumforge.engine.utils.GameData;
+
 import static org.argentumforge.engine.utils.GameData.initGrh;
 
 /**
  * Comando para cambiar todas las capas de un tile (superficie).
  */
-public class SurfaceChangeCommand implements Command {
+public class SurfaceChangeCommand extends AbstractCommand {
     @Override
     public String getName() {
         return I18n.INSTANCE.get("history.command.surface");
@@ -17,7 +17,9 @@ public class SurfaceChangeCommand implements Command {
     private final int[] oldLayers;
     private final int[] newLayers;
 
-    public SurfaceChangeCommand(int x, int y, int[] oldLayers, int[] newLayers) {
+    public SurfaceChangeCommand(org.argentumforge.engine.utils.MapContext context, int x, int y, int[] oldLayers,
+            int[] newLayers) {
+        super(context);
         this.x = x;
         this.y = y;
         this.oldLayers = oldLayers;
@@ -37,9 +39,10 @@ public class SurfaceChangeCommand implements Command {
     private void applyLayers(int[] layers) {
         if (layers == null)
             return;
+        var mapData = context.getMapData();
         for (int i = 1; i <= 4; i++) {
-            GameData.mapData[x][y].getLayer(i).setGrhIndex(layers[i]);
-            initGrh(GameData.mapData[x][y].getLayer(i), layers[i], true);
+            mapData[x][y].getLayer(i).setGrhIndex(layers[i]);
+            initGrh(mapData[x][y].getLayer(i), layers[i], true);
         }
     }
 }

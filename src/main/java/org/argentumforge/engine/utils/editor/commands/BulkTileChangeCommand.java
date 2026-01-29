@@ -3,13 +3,13 @@ package org.argentumforge.engine.utils.editor.commands;
 import org.argentumforge.engine.i18n.I18n;
 import java.util.Map;
 import java.util.Objects;
-import org.argentumforge.engine.utils.GameData;
+
 import static org.argentumforge.engine.utils.GameData.initGrh;
 
 /**
  * Comando para cambios masivos de tiles (Relleno, Pinceles grandes).
  */
-public class BulkTileChangeCommand implements Command {
+public class BulkTileChangeCommand extends AbstractCommand {
     @Override
     public String getName() {
         return I18n.INSTANCE.get("history.command.bulk_tile");
@@ -43,7 +43,9 @@ public class BulkTileChangeCommand implements Command {
         }
     }
 
-    public BulkTileChangeCommand(int layer, Map<TilePos, Integer> oldTiles, Map<TilePos, Integer> newTiles) {
+    public BulkTileChangeCommand(org.argentumforge.engine.utils.MapContext context, int layer,
+            Map<TilePos, Integer> oldTiles, Map<TilePos, Integer> newTiles) {
+        super(context);
         this.layer = layer;
         this.oldTiles = oldTiles;
         this.newTiles = newTiles;
@@ -51,21 +53,23 @@ public class BulkTileChangeCommand implements Command {
 
     @Override
     public void execute() {
+        var mapData = context.getMapData();
         for (Map.Entry<TilePos, Integer> entry : newTiles.entrySet()) {
             TilePos pos = entry.getKey();
             int newGrh = entry.getValue();
-            GameData.mapData[pos.x][pos.y].getLayer(layer).setGrhIndex(newGrh);
-            initGrh(GameData.mapData[pos.x][pos.y].getLayer(layer), newGrh, true);
+            mapData[pos.x][pos.y].getLayer(layer).setGrhIndex(newGrh);
+            initGrh(mapData[pos.x][pos.y].getLayer(layer), newGrh, true);
         }
     }
 
     @Override
     public void undo() {
+        var mapData = context.getMapData();
         for (Map.Entry<TilePos, Integer> entry : oldTiles.entrySet()) {
             TilePos pos = entry.getKey();
             int oldGrh = entry.getValue();
-            GameData.mapData[pos.x][pos.y].getLayer(layer).setGrhIndex(oldGrh);
-            initGrh(GameData.mapData[pos.x][pos.y].getLayer(layer), oldGrh, true);
+            mapData[pos.x][pos.y].getLayer(layer).setGrhIndex(oldGrh);
+            initGrh(mapData[pos.x][pos.y].getLayer(layer), oldGrh, true);
         }
     }
 

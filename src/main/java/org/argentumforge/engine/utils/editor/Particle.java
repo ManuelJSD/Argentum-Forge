@@ -1,6 +1,5 @@
 package org.argentumforge.engine.utils.editor;
 
-import static org.argentumforge.engine.utils.GameData.mapData;
 import org.argentumforge.engine.utils.editor.commands.ParticleChangeCommand;
 import org.argentumforge.engine.utils.editor.commands.CommandManager;
 import java.util.HashMap;
@@ -34,6 +33,7 @@ public class Particle {
     }
 
     public void particle_edit(int x, int y) {
+        var mapData = org.argentumforge.engine.utils.GameData.getActiveContext().getMapData();
         if (!isActive || mapData == null)
             return;
 
@@ -67,7 +67,8 @@ public class Particle {
 
         if (!oldStates.isEmpty()) {
             CommandManager.getInstance().executeCommand(
-                    new ParticleChangeCommand(oldStates, newStates));
+                    new ParticleChangeCommand(org.argentumforge.engine.utils.GameData.getActiveContext(), oldStates,
+                            newStates));
         }
     }
 

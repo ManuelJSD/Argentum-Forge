@@ -114,7 +114,8 @@ public class Block {
 
         if (!oldStates.isEmpty()) {
             org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
-                    new org.argentumforge.engine.utils.editor.commands.BlockChangeCommand(oldStates, newStates));
+                    new org.argentumforge.engine.utils.editor.commands.BlockChangeCommand(
+                            org.argentumforge.engine.utils.GameData.getActiveContext(), oldStates, newStates));
         }
     }
 
@@ -181,7 +182,8 @@ public class Block {
 
         if (!oldStates.isEmpty()) {
             org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
-                    new org.argentumforge.engine.utils.editor.commands.BlockChangeCommand(oldStates, newStates));
+                    new org.argentumforge.engine.utils.editor.commands.BlockChangeCommand(
+                            org.argentumforge.engine.utils.GameData.getActiveContext(), oldStates, newStates));
         }
     }
 }

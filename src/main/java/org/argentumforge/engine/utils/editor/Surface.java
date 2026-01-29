@@ -364,12 +364,14 @@ public class Surface {
         if (!oldTiles.isEmpty() || !oldBlocks.isEmpty()) {
             org.argentumforge.engine.utils.editor.commands.MacroCommand macro = new org.argentumforge.engine.utils.editor.commands.MacroCommand();
             if (!oldTiles.isEmpty()) {
-                macro.addCommand(new org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand(layer,
+                macro.addCommand(new org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand(
+                        org.argentumforge.engine.utils.GameData.getActiveContext(), layer,
                         oldTiles, newTiles));
             }
             if (!oldBlocks.isEmpty()) {
                 macro.addCommand(
-                        new org.argentumforge.engine.utils.editor.commands.BlockChangeCommand(oldBlocks, newBlocks));
+                        new org.argentumforge.engine.utils.editor.commands.BlockChangeCommand(
+                                org.argentumforge.engine.utils.GameData.getActiveContext(), oldBlocks, newBlocks));
             }
 
             if (isBatching && batchCommand != null) {
@@ -456,12 +458,14 @@ public class Surface {
         if (!oldTiles.isEmpty() || !oldBlocks.isEmpty()) {
             org.argentumforge.engine.utils.editor.commands.MacroCommand macro = new org.argentumforge.engine.utils.editor.commands.MacroCommand();
             if (!oldTiles.isEmpty()) {
-                macro.addCommand(new org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand(layer,
+                macro.addCommand(new org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand(
+                        org.argentumforge.engine.utils.GameData.getActiveContext(), layer,
                         oldTiles, newTiles));
             }
             if (!oldBlocks.isEmpty()) {
                 macro.addCommand(
-                        new org.argentumforge.engine.utils.editor.commands.BlockChangeCommand(oldBlocks, newBlocks));
+                        new org.argentumforge.engine.utils.editor.commands.BlockChangeCommand(
+                                org.argentumforge.engine.utils.GameData.getActiveContext(), oldBlocks, newBlocks));
             }
 
             // Bucket usually is a single action, but technically can be part of a batch if

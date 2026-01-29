@@ -1,5 +1,5 @@
 <div align='center'>
-    <p align='right'><a href="README.md">🇬🇧 Read in English</a></p>
+    <p align='right'><a href="README_EN.md">🇬🇧 Read in English</a></p>
     <img width="512" height="512" alt="Argentum Forge Logo" src="https://github.com/user-attachments/assets/77ae11ca-8b34-489d-bf8b-010889771a25" />
     <br/>
     <a target="_blank"><img src="https://img.shields.io/badge/Built%20in-Java_17-43ca1f.svg?style=flat-square"></img></a>

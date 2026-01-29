@@ -36,7 +36,7 @@ public class ContextMenu {
             if (npcIndex > 0) {
                 if (ImGui.menuItem("Eliminar NPC (" + npcIndex + ")")) {
                     CommandManager.getInstance().executeCommand(
-                            new NpcChangeCommand(tileX, tileY, npcIndex, 0));
+                            new NpcChangeCommand(GameData.getActiveContext(), tileX, tileY, npcIndex, 0));
                 }
                 ImGui.separator();
             }
@@ -46,7 +46,7 @@ public class ContextMenu {
                 if (ImGui.menuItem("Eliminar Objeto")) {
                     int oldGrh = GameData.mapData[tileX][tileY].getObjGrh().getGrhIndex();
                     CommandManager.getInstance().executeCommand(
-                            new ObjChangeCommand(tileX, tileY, oldGrh, 0));
+                            new ObjChangeCommand(GameData.getActiveContext(), tileX, tileY, oldGrh, 0));
                 }
                 ImGui.separator();
             }
@@ -65,7 +65,8 @@ public class ContextMenu {
                     int oldX = GameData.mapData[tileX][tileY].getExitX();
                     int oldY = GameData.mapData[tileX][tileY].getExitY();
                     CommandManager.getInstance().executeCommand(
-                            new TransferChangeCommand(tileX, tileY, exitMap, oldX, oldY, 0, 0, 0));
+                            new TransferChangeCommand(GameData.getActiveContext(), tileX, tileY, exitMap, oldX, oldY, 0,
+                                    0, 0));
                 }
             }
 

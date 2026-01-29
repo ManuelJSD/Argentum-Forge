@@ -5,12 +5,11 @@ import org.argentumforge.engine.utils.editor.Clipboard;
 import org.argentumforge.engine.utils.editor.Selection;
 import java.util.ArrayList;
 import java.util.List;
-import static org.argentumforge.engine.utils.GameData.mapData;
 
 /**
  * Comando para pegar múltiples entidades desde el portapapeles.
  */
-public class PasteEntitiesCommand implements Command {
+public class PasteEntitiesCommand extends AbstractCommand {
     @Override
     public String getName() {
         return I18n.INSTANCE.get("history.command.paste");
@@ -18,7 +17,10 @@ public class PasteEntitiesCommand implements Command {
 
     private final List<Command> commands = new ArrayList<>();
 
-    public PasteEntitiesCommand(List<Clipboard.ClipboardItem> items, int destX, int destY) {
+    public PasteEntitiesCommand(org.argentumforge.engine.utils.MapContext context, List<Clipboard.ClipboardItem> items,
+            int destX, int destY) {
+        super(context);
+        var mapData = context.getMapData();
         if (mapData == null)
             return;
 
@@ -31,16 +33,16 @@ public class PasteEntitiesCommand implements Command {
 
             if (item.type == Selection.EntityType.NPC) {
                 int oldNpc = mapData[tx][ty].getNpcIndex();
-                commands.add(new NpcChangeCommand(tx, ty, oldNpc, item.id));
+                commands.add(new NpcChangeCommand(context, tx, ty, oldNpc, item.id));
             } else if (item.type == Selection.EntityType.OBJECT) {
                 int oldObj = mapData[tx][ty].getObjGrh().getGrhIndex();
-                commands.add(new ObjChangeCommand(tx, ty, oldObj, item.id));
+                commands.add(new ObjChangeCommand(context, tx, ty, oldObj, item.id));
             } else if (item.type == Selection.EntityType.TILE && item.layers != null) {
                 int[] oldLayers = new int[5];
                 for (int i = 1; i <= 4; i++) {
                     oldLayers[i] = mapData[tx][ty].getLayer(i).getGrhIndex();
                 }
-                commands.add(new SurfaceChangeCommand(tx, ty, oldLayers, item.layers));
+                commands.add(new SurfaceChangeCommand(context, tx, ty, oldLayers, item.layers));
             }
         }
     }

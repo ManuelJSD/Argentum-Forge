@@ -9,13 +9,10 @@ import org.argentumforge.engine.utils.GameData;
 import org.argentumforge.engine.utils.editor.Selection;
 import org.argentumforge.engine.utils.inits.NpcData;
 
-import static org.argentumforge.engine.utils.GameData.initGrh;
-import static org.argentumforge.engine.utils.GameData.mapData;
-
 /**
  * Comando para mover una entidad (NPC u Objeto) de una posición a otra.
  */
-public class MoveEntityCommand implements Command {
+public class MoveEntityCommand extends AbstractCommand {
 
     @Override
     public String getName() {
@@ -27,7 +24,9 @@ public class MoveEntityCommand implements Command {
     private final Selection.EntityType type;
     private final int id;
 
-    public MoveEntityCommand(int srcX, int srcY, int destX, int destY, Selection.EntityType type, int id) {
+    public MoveEntityCommand(org.argentumforge.engine.utils.MapContext context, int srcX, int srcY, int destX,
+            int destY, Selection.EntityType type, int id) {
+        super(context);
         this.srcX = srcX;
         this.srcY = srcY;
         this.destX = destX;
@@ -47,6 +46,7 @@ public class MoveEntityCommand implements Command {
     }
 
     private void move(int x1, int y1, int x2, int y2) {
+        var mapData = context.getMapData();
         if (type == Selection.EntityType.NPC) {
             // Eliminar de origen
             short oldChar = mapData[x1][y1].getCharIndex();
@@ -58,8 +58,12 @@ public class MoveEntityCommand implements Command {
             mapData[x2][y2].setNpcIndex((short) id);
             if (id > 0 && AssetRegistry.npcs.containsKey(id)) {
                 NpcData data = AssetRegistry.npcs.get(id);
-                for (short i = 1; i < GameData.charList.length; i++) {
-                    if (!GameData.charList[i].isActive()) {
+                var charList = context.getCharList();
+                for (short i = 1; i < charList.length; i++) {
+                    if (!charList[i].isActive()) {
+                        // TODO: Character.makeChar likely still uses static GameData or needs
+                        // refactoring.
+                        // For now we assume it works or we should refactor it later.
                         Character.makeChar(i, data.getBody(), data.getHead(), Direction.DOWN, x2, y2, 0, 0, 0);
                         break;
                     }
@@ -70,7 +74,9 @@ public class MoveEntityCommand implements Command {
             mapData[x1][y1].getObjGrh().setGrhIndex(0);
 
             // Colocar en destino
-            initGrh(mapData[x2][y2].getObjGrh(), (short) id, false);
+            // Usamos initGrh pero necesitamos saber si es static o no.
+            // GameData.initGrh is static.
+            org.argentumforge.engine.utils.GameData.initGrh(mapData[x2][y2].getObjGrh(), (short) id, false);
         }
     }
 }

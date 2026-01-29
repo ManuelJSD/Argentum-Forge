@@ -302,7 +302,8 @@ public final class FMain extends Form {
         int tx = EditorInputManager.getTileMouseX(mx);
         int ty = EditorInputManager.getTileMouseY(my);
 
-        CommandManager.getInstance().executeCommand(new PasteEntitiesCommand(clip.getItems(), tx, ty));
+        CommandManager.getInstance().executeCommand(new PasteEntitiesCommand(
+                org.argentumforge.engine.utils.GameData.getActiveContext(), clip.getItems(), tx, ty));
     }
 
     public void deleteSelection() {
@@ -310,7 +311,8 @@ public final class FMain extends Form {
         if (sel.getSelectedEntities().isEmpty())
             return;
 
-        CommandManager.getInstance().executeCommand(new DeleteEntitiesCommand(sel.getSelectedEntities()));
+        CommandManager.getInstance().executeCommand(new DeleteEntitiesCommand(
+                org.argentumforge.engine.utils.GameData.getActiveContext(), sel.getSelectedEntities()));
         sel.getSelectedEntities().clear();
     }
 

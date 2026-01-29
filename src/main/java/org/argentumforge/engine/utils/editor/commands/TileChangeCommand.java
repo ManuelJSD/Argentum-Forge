@@ -2,13 +2,13 @@ package org.argentumforge.engine.utils.editor.commands;
 
 import org.argentumforge.engine.i18n.I18n;
 import org.argentumforge.engine.utils.inits.GrhInfo;
-import static org.argentumforge.engine.utils.GameData.mapData;
+
 import static org.argentumforge.engine.utils.GameData.initGrh;
 
 /**
  * Comando para registrar y revertir cambios en las capas de superficie (1-4).
  */
-public class TileChangeCommand implements Command {
+public class TileChangeCommand extends AbstractCommand {
     @Override
     public String getName() {
         return I18n.INSTANCE.get("history.command.tile");
@@ -18,7 +18,9 @@ public class TileChangeCommand implements Command {
     private final short oldGrhIndex;
     private final short newGrhIndex;
 
-    public TileChangeCommand(int x, int y, int layer, short oldGrhIndex, short newGrhIndex) {
+    public TileChangeCommand(org.argentumforge.engine.utils.MapContext context, int x, int y, int layer,
+            short oldGrhIndex, short newGrhIndex) {
+        super(context);
         this.x = x;
         this.y = y;
         this.layer = layer;
@@ -37,6 +39,7 @@ public class TileChangeCommand implements Command {
     }
 
     private void apply(short grhIndex) {
+        var mapData = context.getMapData();
         GrhInfo layerGrh = mapData[x][y].getLayer(layer);
         layerGrh.setGrhIndex(grhIndex);
         initGrh(layerGrh, grhIndex, true);

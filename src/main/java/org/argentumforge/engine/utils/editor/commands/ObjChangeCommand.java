@@ -2,12 +2,11 @@ package org.argentumforge.engine.utils.editor.commands;
 
 import org.argentumforge.engine.i18n.I18n;
 import static org.argentumforge.engine.utils.GameData.initGrh;
-import static org.argentumforge.engine.utils.GameData.mapData;
 
 /**
  * Comando para colocar o quitar objetos decorativos.
  */
-public class ObjChangeCommand implements Command {
+public class ObjChangeCommand extends AbstractCommand {
     @Override
     public String getName() {
         return I18n.INSTANCE.get("history.command.obj");
@@ -17,7 +16,9 @@ public class ObjChangeCommand implements Command {
     private final int oldObjGrh;
     private final int newObjGrh;
 
-    public ObjChangeCommand(int x, int y, int oldObjGrh, int newObjGrh) {
+    public ObjChangeCommand(org.argentumforge.engine.utils.MapContext context, int x, int y, int oldObjGrh,
+            int newObjGrh) {
+        super(context);
         this.x = x;
         this.y = y;
         this.oldObjGrh = oldObjGrh;
@@ -35,6 +36,7 @@ public class ObjChangeCommand implements Command {
     }
 
     private void apply(int grhIndex) {
+        var mapData = context.getMapData();
         mapData[x][y].getObjGrh().setGrhIndex(0);
         if (grhIndex > 0) {
             initGrh(mapData[x][y].getObjGrh(), (short) grhIndex, false);

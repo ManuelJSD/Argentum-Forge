@@ -4,7 +4,6 @@ import org.argentumforge.engine.utils.AssetRegistry;
 
 import org.argentumforge.engine.utils.inits.ObjData;
 
-import static org.argentumforge.engine.utils.GameData.initGrh;
 import static org.argentumforge.engine.utils.GameData.mapData;
 
 /**
@@ -104,7 +103,8 @@ public class Obj {
                     return;
 
                 org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
-                        new org.argentumforge.engine.utils.editor.commands.ObjChangeCommand(x, y, oldGrh, newGrh));
+                        new org.argentumforge.engine.utils.editor.commands.ObjChangeCommand(
+                                org.argentumforge.engine.utils.GameData.getActiveContext(), x, y, oldGrh, newGrh));
             }
         }
     }
@@ -116,7 +116,8 @@ public class Obj {
                 return;
 
             org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
-                    new org.argentumforge.engine.utils.editor.commands.ObjChangeCommand(x, y, oldGrh, 0));
+                    new org.argentumforge.engine.utils.editor.commands.ObjChangeCommand(
+                            org.argentumforge.engine.utils.GameData.getActiveContext(), x, y, oldGrh, 0));
         }
     }
 

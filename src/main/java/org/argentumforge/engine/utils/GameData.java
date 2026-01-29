@@ -24,12 +24,15 @@ import java.util.*;
 public final class GameData {
 
     /** Datos de la rejilla del mapa actual. */
+    @Deprecated
     public static MapData[][] mapData;
 
     /** Lista global de personajes activos en el mundo. */
+    @Deprecated
     public static Character[] charList = new Character[10000 + 1];
 
     /** Propiedades generales del mapa actual (.dat). */
+    @Deprecated
     public static MapProperties mapProperties = new MapProperties();
     /** Instancia de configuración del usuario. */
     public static Options options = Options.INSTANCE;

@@ -1,7 +1,5 @@
 package org.argentumforge.engine.utils.editor;
 
-import static org.argentumforge.engine.utils.GameData.mapData;
-
 /**
  * Gestor de estado para el editor de traslados (teleports).
  * <p>
@@ -61,6 +59,7 @@ public class Transfer {
      * @param y Coordenada Y en el mapa
      */
     public void transfer_edit(int x, int y) {
+        var mapData = org.argentumforge.engine.utils.GameData.getActiveContext().getMapData();
         if (!isActive || mapData == null)
             return;
 
@@ -114,7 +113,8 @@ public class Transfer {
 
             if (oldMap != finalMap || oldX != finalX || oldY != finalY) {
                 org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
-                        new org.argentumforge.engine.utils.editor.commands.TransferChangeCommand(x, y,
+                        new org.argentumforge.engine.utils.editor.commands.TransferChangeCommand(
+                                org.argentumforge.engine.utils.GameData.getActiveContext(), x, y,
                                 oldMap, oldX, oldY,
                                 finalMap, finalX, finalY));
             }
@@ -126,7 +126,8 @@ public class Transfer {
 
             if (oldMap != 0) {
                 org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
-                        new org.argentumforge.engine.utils.editor.commands.TransferChangeCommand(x, y,
+                        new org.argentumforge.engine.utils.editor.commands.TransferChangeCommand(
+                                org.argentumforge.engine.utils.GameData.getActiveContext(), x, y,
                                 oldMap, oldX, oldY,
                                 0, 0, 0));
             }
@@ -155,6 +156,7 @@ public class Transfer {
      * @param west  Mapa al oeste
      */
     public void autoUnionBorders(int north, int south, int east, int west) {
+        var mapData = org.argentumforge.engine.utils.GameData.getActiveContext().getMapData();
         if (mapData == null)
             return;
 
@@ -212,13 +214,15 @@ public class Transfer {
      * Aplica un traslado automáticamente si es diferente al actual.
      */
     private void applyAutoTransfer(int x, int y, int destMap, int destX, int destY) {
+        var mapData = org.argentumforge.engine.utils.GameData.getActiveContext().getMapData();
         int oldMap = mapData[x][y].getExitMap();
         int oldX = mapData[x][y].getExitX();
         int oldY = mapData[x][y].getExitY();
 
         if (oldMap != destMap || oldX != destX || oldY != destY) {
             org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
-                    new org.argentumforge.engine.utils.editor.commands.TransferChangeCommand(x, y,
+                    new org.argentumforge.engine.utils.editor.commands.TransferChangeCommand(
+                            org.argentumforge.engine.utils.GameData.getActiveContext(), x, y,
                             oldMap, oldX, oldY,
                             destMap, destX, destY));
         }
