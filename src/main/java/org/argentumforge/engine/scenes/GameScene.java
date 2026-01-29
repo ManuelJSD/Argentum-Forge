@@ -158,6 +158,9 @@ public final class GameScene extends Scene {
         renderScreen(user.getUserPos().getX() - user.getAddToUserPos().getX(),
                 user.getUserPos().getY() - user.getAddToUserPos().getY(),
                 (int) (offSetCounterX), (int) (offSetCounterY));
+
+        // Update Auto-save
+        org.argentumforge.engine.utils.editor.AutoSaveManager.getInstance().update();
     }
 
     /**

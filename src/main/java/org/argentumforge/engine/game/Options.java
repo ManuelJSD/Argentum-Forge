@@ -37,6 +37,8 @@ public enum Options {
     private int moveSpeedWalk = 8;
     private java.util.List<String> recentMaps = new java.util.ArrayList<>();
     private static final int MAX_RECENT_MAPS = 10;
+    private boolean autoSaveEnabled = true;
+    private int autoSaveIntervalMinutes = 5;
     private java.util.Set<Integer> ignoredObjTypes = new java.util.HashSet<>(
             java.util.Arrays.asList(4, 6, 8, 10, 15, 20, 22, 27, 28));
 
@@ -140,6 +142,9 @@ public enum Options {
             write(writer, "RenderShowGrid", renderSettings.isShowGrid());
             write(writer, "RenderShowNpcBreathing", renderSettings.isShowNpcBreathing());
             write(writer, "RenderDisableAnimations", renderSettings.isDisableAnimations());
+
+            write(writer, "AutoSaveEnabled", autoSaveEnabled);
+            write(writer, "AutoSaveInterval", autoSaveIntervalMinutes);
 
             write(writer, "MoveSpeedNormal", moveSpeedNormal);
             write(writer, "MoveSpeedWalk", moveSpeedWalk);
@@ -398,6 +403,8 @@ public enum Options {
             case "RenderShowGrid" -> renderSettings.setShowGrid(Boolean.parseBoolean(value));
             case "RenderShowNpcBreathing" -> renderSettings.setShowNpcBreathing(Boolean.parseBoolean(value));
             case "RenderDisableAnimations" -> renderSettings.setDisableAnimations(Boolean.parseBoolean(value));
+            case "AutoSaveEnabled" -> autoSaveEnabled = Boolean.parseBoolean(value);
+            case "AutoSaveInterval" -> autoSaveIntervalMinutes = Integer.parseInt(value);
             case "IgnoredObjTypes" -> {
                 ignoredObjTypes.clear();
                 if (!value.isEmpty()) {
@@ -475,5 +482,21 @@ public enum Options {
 
     public void setUserWaterBody(int userWaterBody) {
         this.userWaterBody = userWaterBody;
+    }
+
+    public boolean isAutoSaveEnabled() {
+        return autoSaveEnabled;
+    }
+
+    public void setAutoSaveEnabled(boolean autoSaveEnabled) {
+        this.autoSaveEnabled = autoSaveEnabled;
+    }
+
+    public int getAutoSaveIntervalMinutes() {
+        return autoSaveIntervalMinutes;
+    }
+
+    public void setAutoSaveIntervalMinutes(int autoSaveIntervalMinutes) {
+        this.autoSaveIntervalMinutes = autoSaveIntervalMinutes;
     }
 }
