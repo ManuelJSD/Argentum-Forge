@@ -68,7 +68,9 @@ public enum MouseListener {
         mouseDown[4] = button == GLFW_MOUSE_BUTTON_5 && action != GLFW_RELEASE;
 
         final ImGuiIO io = ImGui.getIO();
-        io.setMouseDown(mouseDown);
+        for (int i = 0; i < 5; i++) {
+            io.addMouseButtonEvent(i, mouseDown[i]);
+        }
 
         if (!io.getWantCaptureMouse() && mouseDown[1])
             ImGui.setWindowFocus(null);
@@ -102,8 +104,7 @@ public enum MouseListener {
      */
     public static void mouseScrollCallback(long window, double xOffset, double yOffset) {
         final ImGuiIO io = ImGui.getIO();
-        io.setMouseWheelH(io.getMouseWheelH() + (float) xOffset);
-        io.setMouseWheel(io.getMouseWheel() + (float) yOffset);
+        io.addMouseWheelEvent((float) xOffset, (float) yOffset);
         scrollX = xOffset;
         scrollY = yOffset;
     }

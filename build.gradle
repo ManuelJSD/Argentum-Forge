@@ -1,8 +1,8 @@
 plugins {
     id 'java'
     id 'application'
-    id 'com.github.johnrengelman.shadow' version '8.1.1'
-    id 'com.diffplug.spotless' version '6.25.0'
+    id 'com.gradleup.shadow' version '9.3.1'
+    id 'com.diffplug.spotless' version '8.2.1'
 }
 
 java {
@@ -24,9 +24,9 @@ version = '1.0.0-beta3'
 
 import org.gradle.internal.os.OperatingSystem
 
-project.ext.lwjglVersion = "3.3.3"
-project.ext.jomlVersion = "1.10.5"
-project.ext.imguiVersion = "1.86.11"
+project.ext.lwjglVersion = "3.4.0"
+project.ext.jomlVersion = "1.10.8"
+project.ext.imguiVersion = "1.90.0"
 project.ext.loggerVersion = "2.7.0"
 
 switch (OperatingSystem.current()) {
@@ -100,7 +100,7 @@ dependencies {
     implementation "org.lwjgl:lwjgl-tinyfd"
     runtimeOnly "org.lwjgl:lwjgl-tinyfd::$lwjglNatives"
     implementation "org.joml:joml:${jomlVersion}"
-    implementation 'com.google.code.gson:gson:2.10.1'
+    implementation 'com.google.code.gson:gson:2.13.2'
     implementation 'javazoom:jlayer:1.0.1'
     implementation 'com.googlecode.soundlibs:mp3spi:1.9.5.4'
     if (lwjglNatives == "natives-macos" || lwjglNatives == "natives-macos-arm64") runtimeOnly "org.lwjgl:lwjgl-vulkan::$lwjglNatives"
