@@ -91,6 +91,34 @@ public final class FOptions extends Form {
                     ImGui.setTooltip(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.docking.tooltip"));
                 }
 
+                ImGui.separator();
+
+                // Auto-save Settings
+                ImGui.textColored(ImGui.getColorU32(0.2f, 0.7f, 1.0f, 1.0f),
+                        org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.autosave") + ":");
+                ImGui.dummy(0, 5);
+
+                if (ImGui.checkbox(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.autosave.enabled"),
+                        options.isAutoSaveEnabled())) {
+                    options.setAutoSaveEnabled(!options.isAutoSaveEnabled());
+                    options.save();
+                }
+
+                ImInt interval = new ImInt(options.getAutoSaveIntervalMinutes());
+                ImGui.setNextItemWidth(100);
+                if (ImGui.inputInt("##autosaveInterval", interval)) {
+                    if (interval.get() < 1)
+                        interval.set(1);
+                    if (interval.get() > 60)
+                        interval.set(60);
+                    options.setAutoSaveIntervalMinutes(interval.get());
+                    options.save();
+                    // Reset timer to apply new interval from now
+                    org.argentumforge.engine.utils.editor.AutoSaveManager.getInstance().resetTimer();
+                }
+                ImGui.sameLine();
+                ImGui.text(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.autosave.interval"));
+
                 ImGui.endTabItem();
             }
 
