@@ -199,11 +199,13 @@ public final class Character {
                 mapData[charList[loopC].getPos().getX()][charList[loopC].getPos().getY()].setCharIndex(loopC);
     }
 
-    /**
-     * Dibuja nuestro personaje!
-     */
     public static void drawCharacter(int charIndex, int PixelOffsetX, int PixelOffsetY, float alpha,
             RGBColor ambientcolor) {
+        drawCharacter(charIndex, PixelOffsetX, PixelOffsetY, alpha, ambientcolor, 1.0f, 1.0f, 0.0f);
+    }
+
+    public static void drawCharacter(int charIndex, int PixelOffsetX, int PixelOffsetY, float alpha,
+            RGBColor ambientcolor, float scaleX, float scaleY, float skewX) {
         boolean moved = false;
 
         // Calcular factor de respiración
@@ -289,7 +291,8 @@ public final class Character {
             if (charList[charIndex].getBody().getWalk(charList[charIndex].getHeading().getId())
                     .getGrhIndex() != 0) {
                 drawTexture(charList[charIndex].getBody().getWalk(charList[charIndex].getHeading().getId()),
-                        PixelOffsetX, PixelOffsetY, true, true, false, alpha, ambientcolor, 1.0f, breathingScale);
+                        PixelOffsetX, PixelOffsetY, true, true, false, alpha, ambientcolor, scaleX,
+                        breathingScale * scaleY, skewX);
             }
 
             if (charList[charIndex].getHead().getHead(charList[charIndex].getHeading().getId())
@@ -302,45 +305,37 @@ public final class Character {
                 // Opcional: breathingScale también para la cabeza? Queda raro (cara larga).
                 // Mejor solo desplazar.
                 drawTexture(charList[charIndex].getHead().getHead(charList[charIndex].getHeading().getId()),
-                        PixelOffsetX + (int) (charList[charIndex].getBody().getHeadOffset().getX() * scale),
+                        PixelOffsetX + (int) (charList[charIndex].getBody().getHeadOffset().getX() * scale * scaleX),
                         PixelOffsetY
-                                + (int) (charList[charIndex].getBody().getHeadOffset().getY() * scale * breathingScale),
-                        true, false, false, alpha, ambientcolor);
+                                + (int) (charList[charIndex].getBody().getHeadOffset().getY() * scale * breathingScale
+                                        * scaleY),
+                        true, false, false, alpha, ambientcolor, scaleX, scaleY, skewX);
 
-                if (charList[charIndex].getHelmet().getHead(charList[charIndex].getHeading().getId())
-                        .getGrhIndex() != 0) {
-                    drawTexture(charList[charIndex].getHelmet().getHead(charList[charIndex].getHeading().getId()),
-                            PixelOffsetX + (int) (charList[charIndex].getBody().getHeadOffset().getX() * scale),
-                            PixelOffsetY
-                                    + (int) (charList[charIndex].getBody().getHeadOffset().getY() * scale
-                                            * breathingScale)
-                                    - (int) (34 * scale), // -34 hardcoded? Mantenemos, quizás debería escalar su
-                                                          // offset?
-                            true, false, false, alpha, ambientcolor);
-                }
+                drawTexture(charList[charIndex].getHelmet().getHead(charList[charIndex].getHeading().getId()),
+                        PixelOffsetX + (int) (charList[charIndex].getBody().getHeadOffset().getX() * scale * scaleX),
+                        PixelOffsetY
+                                + (int) (charList[charIndex].getBody().getHeadOffset().getY() * scale
+                                        * breathingScale * scaleY)
+                                - (int) (34 * scale * scaleY),
+                        true, false, false, alpha, ambientcolor, scaleX, scaleY, skewX);
 
-                if (charList[charIndex].getWeapon().getWeaponWalk(charList[charIndex].getHeading().getId())
-                        .getGrhIndex() != 0) {
-                    // Arma respira? Mejor sí para que no flote separada del cuerpo.
-                    drawTexture(
-                            charList[charIndex].getWeapon().getWeaponWalk(charList[charIndex].getHeading().getId()),
-                            PixelOffsetX, PixelOffsetY, true, true, false, alpha, ambientcolor, 1.0f, breathingScale);
-                }
+                drawTexture(
+                        charList[charIndex].getWeapon().getWeaponWalk(charList[charIndex].getHeading().getId()),
+                        PixelOffsetX, PixelOffsetY, true, true, false, alpha, ambientcolor, scaleX,
+                        breathingScale * scaleY, skewX);
 
-                if (charList[charIndex].getShield().getShieldWalk(charList[charIndex].getHeading().getId())
-                        .getGrhIndex() != 0) {
-                    // Escudo también respira.
-                    drawTexture(
-                            charList[charIndex].getShield().getShieldWalk(charList[charIndex].getHeading().getId()),
-                            PixelOffsetX, PixelOffsetY, true, true, false, alpha, ambientcolor, 1.0f, breathingScale);
-                }
+                drawTexture(
+                        charList[charIndex].getShield().getShieldWalk(charList[charIndex].getHeading().getId()),
+                        PixelOffsetX, PixelOffsetY, true, true, false, alpha, ambientcolor, scaleX,
+                        breathingScale * scaleY, skewX);
 
             }
 
         } else {
             if (charList[charIndex].getBody().getWalk(charList[charIndex].getHeading().getId()).getGrhIndex() > 0) {
                 drawTexture(charList[charIndex].getBody().getWalk(charList[charIndex].getHeading().getId()),
-                        PixelOffsetX, PixelOffsetY, true, true, false, alpha, ambientcolor, 1.0f, breathingScale);
+                        PixelOffsetX, PixelOffsetY, true, true, false, alpha, ambientcolor, scaleX,
+                        breathingScale * scaleY, skewX);
             }
         }
 

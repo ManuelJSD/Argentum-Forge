@@ -43,6 +43,7 @@ public final class FMain extends Form {
     private FObjEditor objEditor;
     private FMinimap minimap;
     private FGrhLibrary grhLibrary;
+    private FPhotoMode photoModeUI = new FPhotoMode();
     private FTriggerEditor triggerEditor;
     private FTransferEditor transferEditor;
     private FParticleEditor particleEditor;
@@ -107,6 +108,11 @@ public final class FMain extends Form {
         // Actually, map contexts should probably be separate windows if we want full
         // docking power.
         // For this step, we keep the old tabs but might need to adjust Z-order.
+
+        if (options.getRenderSettings().isPhotoModeActive()) {
+            photoModeUI.render();
+            return;
+        }
 
         drawTabs();
         this.drawStatusBar();
@@ -830,6 +836,12 @@ public final class FMain extends Form {
                 }
 
                 ImGui.endMenu();
+            }
+
+            if (ImGui.menuItem(
+                    I18n.INSTANCE.get("menu.view.photoMode") != null ? I18n.INSTANCE.get("menu.view.photoMode")
+                            : "Modo Foto")) {
+                options.getRenderSettings().setPhotoModeActive(true);
             }
 
             if (ImGui.menuItem("Acerca de")) {
