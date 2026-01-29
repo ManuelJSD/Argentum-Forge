@@ -59,6 +59,8 @@ public final class FMain extends Form {
     private final MainToolbar toolbar;
     private final MainStatusBar statusBar;
 
+    private final java.util.List<IMapEditor> mapEditors = new java.util.ArrayList<>();
+
     public FMain() {
         ambientColorArr = new float[] {
                 org.argentumforge.engine.game.Weather.INSTANCE.getWeatherColor().getRed(),
@@ -76,11 +78,25 @@ public final class FMain extends Form {
         particleEditor = new FParticleEditor();
         speedControl = new FSpeedControl();
 
+        mapEditors.add(surfaceEditor);
+        mapEditors.add(blockEditor);
+        mapEditors.add(npcEditor);
+        mapEditors.add(objEditor);
+        mapEditors.add(triggerEditor);
+        mapEditors.add(transferEditor);
+        mapEditors.add(particleEditor);
+
         // Initialize reusable components
         this.menuBar = new MainMenuBar(this);
         this.toolbar = new MainToolbar(this);
         this.statusBar = new MainStatusBar();
 
+    }
+
+    private void updateEditorsContext(org.argentumforge.engine.utils.MapContext context) {
+        for (IMapEditor editor : mapEditors) {
+            editor.setContext(context);
+        }
     }
 
     @Override
@@ -187,6 +203,7 @@ public final class FMain extends Form {
                     if (ImGui.beginTabItem(context.getMapName() + "###Tab" + context.hashCode(), open, flags)) {
                         if (context != org.argentumforge.engine.utils.GameData.getActiveContext()) {
                             org.argentumforge.engine.utils.GameData.setActiveContext(context);
+                            updateEditorsContext(context);
                         }
                         ImGui.endTabItem();
                     }

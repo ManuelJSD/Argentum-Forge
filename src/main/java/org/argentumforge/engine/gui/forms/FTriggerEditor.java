@@ -11,8 +11,11 @@ import org.argentumforge.engine.i18n.I18n;
 
 import java.util.List;
 
-public class FTriggerEditor extends Form {
+import org.argentumforge.engine.utils.MapContext;
 
+public class FTriggerEditor extends Form implements IMapEditor {
+
+    private MapContext context;
     private final TriggerManager manager;
     private final Trigger tool;
     private int selectedIndex = -1;
@@ -21,6 +24,12 @@ public class FTriggerEditor extends Form {
     public FTriggerEditor() {
         this.manager = TriggerManager.getInstance();
         this.tool = Trigger.getInstance();
+        this.context = org.argentumforge.engine.utils.GameData.getActiveContext();
+    }
+
+    @Override
+    public void setContext(MapContext context) {
+        this.context = context;
     }
 
     @Override

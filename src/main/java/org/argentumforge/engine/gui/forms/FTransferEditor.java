@@ -13,8 +13,17 @@ import org.argentumforge.engine.i18n.I18n;
  * Permite configurar destinos de traslados, insertar y quitar traslados,
  * y activar la unión manual con mapas adyacentes.
  */
-public class FTransferEditor extends Form {
+import org.argentumforge.engine.utils.MapContext;
 
+/**
+ * Formulario de edición de traslados (teleports) en el mapa.
+ * <p>
+ * Permite configurar destinos de traslados, insertar y quitar traslados,
+ * y activar la unión manual con mapas adyacentes.
+ */
+public class FTransferEditor extends Form implements IMapEditor {
+
+    private MapContext context;
     private final Transfer transfer;
 
     // Campos de entrada para coordenadas de destino
@@ -27,6 +36,12 @@ public class FTransferEditor extends Form {
 
     public FTransferEditor() {
         this.transfer = Transfer.getInstance();
+        this.context = org.argentumforge.engine.utils.GameData.getActiveContext();
+    }
+
+    @Override
+    public void setContext(MapContext context) {
+        this.context = context;
     }
 
     @Override

@@ -32,8 +32,10 @@ public class Particle {
         return instance;
     }
 
-    public void particle_edit(int x, int y) {
-        var mapData = org.argentumforge.engine.utils.GameData.getActiveContext().getMapData();
+    public void particle_edit(org.argentumforge.engine.utils.MapContext context, int x, int y) {
+        if (context == null)
+            return;
+        var mapData = context.getMapData();
         if (!isActive || mapData == null)
             return;
 
@@ -67,7 +69,7 @@ public class Particle {
 
         if (!oldStates.isEmpty()) {
             CommandManager.getInstance().executeCommand(
-                    new ParticleChangeCommand(org.argentumforge.engine.utils.GameData.getActiveContext(), oldStates,
+                    new ParticleChangeCommand(context, oldStates,
                             newStates));
         }
     }

@@ -20,14 +20,17 @@ import java.util.List;
 
 import static org.argentumforge.engine.utils.AssetRegistry.objs;
 
+import org.argentumforge.engine.utils.MapContext;
+
 /**
  * Formulario de selección y previsualización de objetos para el editor.
  * 
  * Permite listar todos los objetos cargados en el AssetRegistry, buscarlos por
  * nombre o ID, y alternar entre vista de lista o rejilla visual.
  */
-public final class FObjEditor extends Form {
+public final class FObjEditor extends Form implements IMapEditor {
 
+    private MapContext context;
     private int selectedObjNumber = -1;
     private final Obj objEditor;
     private final ImString searchFilter = new ImString(100);
@@ -37,12 +40,18 @@ public final class FObjEditor extends Form {
 
     public FObjEditor() {
         objEditor = Obj.getInstance();
+        this.context = org.argentumforge.engine.utils.GameData.getActiveContext();
 
         if (objs != null && !objs.isEmpty()) {
             selectedObjNumber = objs.keySet().stream().min(Integer::compareTo).orElse(-1);
             if (selectedObjNumber > 0)
                 objEditor.setObjNumber(selectedObjNumber);
         }
+    }
+
+    @Override
+    public void setContext(MapContext context) {
+        this.context = context;
     }
 
     @Override

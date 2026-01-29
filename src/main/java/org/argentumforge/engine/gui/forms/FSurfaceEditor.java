@@ -15,15 +15,18 @@ import org.argentumforge.engine.renderer.Texture;
 import org.argentumforge.engine.gui.Theme;
 import org.argentumforge.engine.gui.widgets.UIComponents;
 import org.argentumforge.engine.i18n.I18n;
-
-import java.util.ArrayList;
 import java.util.List;
+import java.util.ArrayList;
+
+import org.argentumforge.engine.utils.MapContext;
 
 /**
  * Editor de Superficies Unificado.
  * Combina los controles de capa y modo con una paleta visual de tiles (GRHs).
  */
-public class FSurfaceEditor extends Form {
+public class FSurfaceEditor extends Form implements IMapEditor {
+
+    private MapContext context; // Contexto activo inyectado
 
     private final ImInt searchGrh = new ImInt(0);
     private int selectedGrhIndex = -1;
@@ -44,6 +47,10 @@ public class FSurfaceEditor extends Form {
         this.surface = Surface.getInstance();
         this.selectedGrhIndex = surface.getSurfaceIndex();
 
+        // Inicializar contexto por defecto (temporal hasta que FMain inyecte)
+        // Esto previene NPEs si FMain no llama a setContext inmediatamente
+        this.context = org.argentumforge.engine.utils.GameData.getActiveContext();
+
         // Sincronizar capa inicial
         for (int i = 0; i < capas.size(); i++) {
             if (capas.get(i) == surface.getLayer()) {
@@ -54,6 +61,16 @@ public class FSurfaceEditor extends Form {
 
         selectedBrushSize.set(surface.getBrushSize());
         scatterDensityArr[0] = surface.getScatterDensity();
+    }
+
+    @Override
+    public void setContext(MapContext context) {
+        this.context = context;
+        // Opcional: Si Surface dependiera del contexto para su estado interno,
+        // actualizarlo aquí.
+        // Surface es un singleton de *herramienta* (configuración de pincel), por lo
+        // que no cambia por mapa,
+        // pero las acciones que ejecuta sí dependen del contexto.
     }
 
     @Override
