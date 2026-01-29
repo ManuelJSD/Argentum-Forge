@@ -47,13 +47,18 @@ public class Clipboard {
     }
 
     public void copy(List<Selection.SelectedEntity> selectedEntities, int refX, int refY) {
+        var context = org.argentumforge.engine.utils.GameData.getActiveContext();
+        if (context == null || context.getMapData() == null)
+            return;
+        var mapData = context.getMapData();
+
         items.clear();
         for (Selection.SelectedEntity se : selectedEntities) {
             int[] layers = null;
             if (se.type == Selection.EntityType.TILE) {
                 layers = new int[5]; // Usamos 1-4 para coincidir con MapData
                 for (int i = 1; i <= 4; i++) {
-                    layers[i] = org.argentumforge.engine.utils.GameData.mapData[se.x][se.y].getLayer(i).getGrhIndex();
+                    layers[i] = mapData[se.x][se.y].getLayer(i).getGrhIndex();
                 }
             }
             items.add(new ClipboardItem(se.type, se.id, se.x - refX, se.y - refY, layers));

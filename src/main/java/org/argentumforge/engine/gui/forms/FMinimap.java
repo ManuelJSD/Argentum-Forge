@@ -59,7 +59,9 @@ public final class FMinimap extends Form {
                 }
             }
 
-            if (GameData.mapData != null) {
+            org.argentumforge.engine.utils.MapContext context = GameData.getActiveContext();
+            if (context != null && context.getMapData() != null) {
+                var mapData = context.getMapData();
                 for (int y = 1; y <= 100; y++) {
                     for (int x = 1; x <= 100; x++) {
                         // Dibujar capas seleccionadas
@@ -67,7 +69,7 @@ public final class FMinimap extends Form {
                             if (!Options.INSTANCE.getRenderSettings().getMinimapLayers()[layer - 1])
                                 continue;
 
-                            int grh = GameData.mapData[x][y].getLayer(layer).getGrhIndex();
+                            int grh = mapData[x][y].getLayer(layer).getGrhIndex();
                             if (grh > 0) {
                                 int color = getTileColor(grh);
                                 drawList.addRectFilled(
@@ -81,7 +83,7 @@ public final class FMinimap extends Form {
 
                         // Bloqueos (siempre en la parte superior si está en capa 1?)
                         if (Options.INSTANCE.getRenderSettings().isShowMinimapBlocks()
-                                && GameData.mapData[x][y].getBlocked()) {
+                                && mapData[x][y].getBlocked()) {
                             drawList.addRectFilled(
                                     contentX + (x - 1) * TILE_SIZE,
                                     contentY + (y - 1) * TILE_SIZE,
@@ -92,7 +94,7 @@ public final class FMinimap extends Form {
 
                         // Renderizar Traslados (Exits) - Azul
                         if (Options.INSTANCE.getRenderSettings().isShowMinimapExits()
-                                && GameData.mapData[x][y].getExitMap() > 0) {
+                                && mapData[x][y].getExitMap() > 0) {
                             drawList.addRectFilled(
                                     contentX + (x - 1) * TILE_SIZE,
                                     contentY + (y - 1) * TILE_SIZE,
@@ -103,7 +105,7 @@ public final class FMinimap extends Form {
 
                         // Renderizar Triggers - Violeta
                         if (Options.INSTANCE.getRenderSettings().isShowMinimapTriggers()
-                                && GameData.mapData[x][y].getTrigger() > 0) {
+                                && mapData[x][y].getTrigger() > 0) {
                             drawList.addRectFilled(
                                     contentX + (x - 1) * TILE_SIZE,
                                     contentY + (y - 1) * TILE_SIZE,
@@ -114,7 +116,7 @@ public final class FMinimap extends Form {
 
                         // Renderizar NPCs - Amarillo
                         // Usamos charIndex del mapa
-                        int charIndex = GameData.mapData[x][y].getCharIndex();
+                        int charIndex = mapData[x][y].getCharIndex();
                         if (Options.INSTANCE.getRenderSettings().isShowMinimapNPCs() && charIndex > 0) {
                             // Podríamos verificar si el char está activo o es usuario,
                             // pero charIndex en mapa suele estar sincronizado.

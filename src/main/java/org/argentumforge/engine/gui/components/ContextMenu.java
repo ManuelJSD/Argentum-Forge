@@ -27,53 +27,60 @@ public class ContextMenu {
         }
 
         if (ImGui.beginPopup("TileContextMenu")) {
+            var context = GameData.getActiveContext();
+            if (context == null || context.getMapData() == null) {
+                ImGui.textDisabled("Sin mapa cargado");
+                ImGui.endPopup();
+                return;
+            }
+            var mapData = context.getMapData();
 
             ImGui.textDisabled("Tile (" + tileX + ", " + tileY + ")");
             ImGui.separator();
 
             // --- NPC ---
-            int npcIndex = GameData.mapData[tileX][tileY].getNpcIndex();
+            int npcIndex = mapData[tileX][tileY].getNpcIndex();
             if (npcIndex > 0) {
                 if (ImGui.menuItem("Eliminar NPC (" + npcIndex + ")")) {
                     CommandManager.getInstance().executeCommand(
-                            new NpcChangeCommand(GameData.getActiveContext(), tileX, tileY, npcIndex, 0));
+                            new NpcChangeCommand(context, tileX, tileY, npcIndex, 0));
                 }
                 ImGui.separator();
             }
 
             // --- Object ---
-            if (GameData.mapData[tileX][tileY].getObjIndex() > 0) {
+            if (mapData[tileX][tileY].getObjIndex() > 0) {
                 if (ImGui.menuItem("Eliminar Objeto")) {
-                    int oldGrh = GameData.mapData[tileX][tileY].getObjGrh().getGrhIndex();
+                    int oldGrh = mapData[tileX][tileY].getObjGrh().getGrhIndex();
                     CommandManager.getInstance().executeCommand(
-                            new ObjChangeCommand(GameData.getActiveContext(), tileX, tileY, oldGrh, 0));
+                            new ObjChangeCommand(context, tileX, tileY, oldGrh, 0));
                 }
                 ImGui.separator();
             }
 
             // --- Transfer ---
-            int exitMap = GameData.mapData[tileX][tileY].getExitMap();
+            int exitMap = mapData[tileX][tileY].getExitMap();
             if (exitMap > 0) {
                 // "Capturar Coordenadas" (Recuperar el destino de este traslado)
                 if (ImGui.menuItem("Capturar Destino (" + exitMap + ")")) {
-                    int destX = GameData.mapData[tileX][tileY].getExitX();
-                    int destY = GameData.mapData[tileX][tileY].getExitY();
+                    int destX = mapData[tileX][tileY].getExitX();
+                    int destY = mapData[tileX][tileY].getExitY();
                     Transfer.getInstance().captureCoordinates(exitMap, destX, destY);
                 }
 
                 if (ImGui.menuItem("Eliminar Traslado")) {
-                    int oldX = GameData.mapData[tileX][tileY].getExitX();
-                    int oldY = GameData.mapData[tileX][tileY].getExitY();
+                    int oldX = mapData[tileX][tileY].getExitX();
+                    int oldY = mapData[tileX][tileY].getExitY();
                     CommandManager.getInstance().executeCommand(
-                            new TransferChangeCommand(GameData.getActiveContext(), tileX, tileY, exitMap, oldX, oldY, 0,
+                            new TransferChangeCommand(context, tileX, tileY, exitMap, oldX, oldY, 0,
                                     0, 0));
                 }
             }
 
             // --- Block ---
-            boolean isBlocked = GameData.mapData[tileX][tileY].getBlocked();
+            boolean isBlocked = mapData[tileX][tileY].getBlocked();
             if (ImGui.menuItem(isBlocked ? "Desbloquear" : "Bloquear")) {
-                GameData.mapData[tileX][tileY].setBlocked(!isBlocked);
+                mapData[tileX][tileY].setBlocked(!isBlocked);
             }
 
             ImGui.endPopup();

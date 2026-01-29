@@ -1,12 +1,10 @@
 package org.argentumforge.engine.game;
 
 import org.argentumforge.engine.game.models.*;
-
 import static org.argentumforge.engine.game.models.Character.*;
 import static org.argentumforge.engine.game.models.Direction.*;
 import static org.argentumforge.engine.scenes.Camera.*;
-import static org.argentumforge.engine.utils.GameData.*;
-import org.argentumforge.engine.utils.GameData; // Import class to avoid resolution errors
+import org.argentumforge.engine.utils.GameData;
 import org.argentumforge.engine.utils.AssetRegistry;
 import org.argentumforge.engine.utils.inits.BodyData;
 import org.argentumforge.engine.utils.inits.HeadData;
@@ -20,7 +18,6 @@ import org.argentumforge.engine.scenes.Camera;
  * Entidad del usuario principal.
  * Gestiona la posición, estado y movimiento del jugador en el mundo.
  */
-
 public enum User {
 
     INSTANCE;
@@ -56,36 +53,42 @@ public enum User {
             userCharIndex = 1;
         }
 
+        var context = GameData.getActiveContext();
+        if (context == null)
+            return;
+        var charList = context.getCharList();
+        var mapData = context.getMapData();
+
         org.tinylog.Logger.info("refreshUserCharacter START: Index=" + userCharIndex);
 
         // Asegurar que el slot esta activo y configurado
-        GameData.charList[userCharIndex].setActive(true);
-        GameData.charList[userCharIndex].getPos().setX(userPos.getX());
-        GameData.charList[userCharIndex].getPos().setY(userPos.getY());
-        GameData.charList[userCharIndex].setHeading(Direction.DOWN);
+        charList[userCharIndex].setActive(true);
+        charList[userCharIndex].getPos().setX(userPos.getX());
+        charList[userCharIndex].getPos().setY(userPos.getY());
+        charList[userCharIndex].setHeading(Direction.DOWN);
 
         // Aplicar apariencia persistente
-        GameData.charList[userCharIndex].setiBody((short) userBody);
-        GameData.charList[userCharIndex].setiHead((short) userHead);
+        charList[userCharIndex].setiBody((short) userBody);
+        charList[userCharIndex].setiHead((short) userHead);
 
         // Actualizar objetos de datos (Importante para renderizado!)
         if (AssetRegistry.bodyData != null && userBody < AssetRegistry.bodyData.length
                 && AssetRegistry.bodyData[userBody] != null) {
-            GameData.charList[userCharIndex].setBody(new BodyData(AssetRegistry.bodyData[userBody]));
+            charList[userCharIndex].setBody(new BodyData(AssetRegistry.bodyData[userBody]));
         } else {
-            GameData.charList[userCharIndex].setBody(new BodyData());
+            charList[userCharIndex].setBody(new BodyData());
         }
 
         if (AssetRegistry.headData != null && userHead < AssetRegistry.headData.length
                 && AssetRegistry.headData[userHead] != null) {
-            GameData.charList[userCharIndex].setHead(new HeadData(AssetRegistry.headData[userHead]));
+            charList[userCharIndex].setHead(new HeadData(AssetRegistry.headData[userHead]));
         } else {
-            GameData.charList[userCharIndex].setHead(new HeadData());
+            charList[userCharIndex].setHead(new HeadData());
         }
 
-        GameData.charList[userCharIndex].setHelmet(new HeadData()); // Dummy
-        GameData.charList[userCharIndex].setWeapon(new WeaponData());
-        GameData.charList[userCharIndex].setShield(new ShieldData());
+        charList[userCharIndex].setHelmet(new HeadData()); // Dummy
+        charList[userCharIndex].setWeapon(new WeaponData());
+        charList[userCharIndex].setShield(new ShieldData());
 
         // Update lastChar just in case
         if (userCharIndex > org.argentumforge.engine.game.models.Character.lastChar) {
@@ -93,12 +96,12 @@ public enum User {
         }
 
         // Actualizar mapa
-        if (GameData.mapData != null) {
+        if (mapData != null) {
             int x = userPos.getX();
             int y = userPos.getY();
             // Check bounds directly using mapData length
-            if (x >= 1 && x < GameData.mapData.length && y >= 1 && y < GameData.mapData[0].length) {
-                GameData.mapData[x][y].setCharIndex(userCharIndex);
+            if (x >= 1 && x < mapData.length && y >= 1 && y < mapData[0].length) {
+                mapData[x][y].setCharIndex(userCharIndex);
             }
         }
     }
@@ -135,6 +138,12 @@ public enum User {
      *                   direccion.
      */
     public void moveScreen(Direction nDirection) {
+        var context = GameData.getActiveContext();
+        if (context == null || context.getMapData() == null)
+            return;
+        var mapData = context.getMapData();
+        var charList = context.getCharList();
+
         int x = 0, y = 0;
         switch (nDirection) {
             case UP:
@@ -162,8 +171,8 @@ public enum User {
         if (!(tX < XMinMapSize || tX > XMaxMapSize || tY < YMinMapSize || tY > YMaxMapSize)) {
 
             // 1. Clean Old Position
-            if (GameData.mapData != null) {
-                GameData.mapData[userPos.getX()][userPos.getY()].setCharIndex(0);
+            if (mapData != null) {
+                mapData[userPos.getX()][userPos.getY()].setCharIndex(0);
             }
 
             // 2. Update User Position
@@ -175,16 +184,16 @@ public enum User {
             underCeiling = checkUnderCeiling();
 
             // 3. Update CharList Entry (Critical for Rendering & Map Logic)
-            if (userCharIndex > 0 && userCharIndex < GameData.charList.length) {
-                org.argentumforge.engine.game.models.Character chr = GameData.charList[userCharIndex];
+            if (userCharIndex > 0 && userCharIndex < charList.length) {
+                org.argentumforge.engine.game.models.Character chr = charList[userCharIndex];
 
                 // Sync Position
                 chr.getPos().setX(tX);
                 chr.getPos().setY(tY);
 
                 // Update Map
-                if (GameData.mapData != null) {
-                    GameData.mapData[tX][tY].setCharIndex(userCharIndex);
+                if (mapData != null) {
+                    mapData[tX][tY].setCharIndex(userCharIndex);
                 }
 
                 // Smooth Movement Setup (Offsets in Pixels)
@@ -202,7 +211,6 @@ public enum User {
                 }
             }
         }
-
     }
 
     /**
@@ -210,9 +218,14 @@ public enum User {
      * usuario.
      */
     public boolean checkUnderCeiling() {
-        return mapData[userPos.getX()][userPos.getY()].getTrigger() == 1 ||
-                mapData[userPos.getX()][userPos.getY()].getTrigger() == 2 ||
-                mapData[userPos.getX()][userPos.getY()].getTrigger() == 4;
+        var context = GameData.getActiveContext();
+        if (context == null || context.getMapData() == null)
+            return false;
+        var mapData = context.getMapData();
+
+        return mapData[userPos.getX()][userPos.getY()].getTrigger() == 1
+                || mapData[userPos.getX()][userPos.getY()].getTrigger() == 2
+                || mapData[userPos.getX()][userPos.getY()].getTrigger() == 4;
     }
 
     /**
@@ -221,6 +234,12 @@ public enum User {
      *                   direccion establecida en "nHeading".
      */
     public void moveCharbyHead(short charIndex, Direction nDirection) {
+        var context = GameData.getActiveContext();
+        if (context == null)
+            return;
+        var charList = context.getCharList();
+        var mapData = context.getMapData();
+
         int addX = 0, addY = 0;
         switch (nDirection) {
             case UP:
@@ -247,10 +266,13 @@ public enum User {
             return;
         }
 
-        mapData[nX][nY].setCharIndex(charIndex);
+        if (mapData != null) {
+            mapData[nX][nY].setCharIndex(charIndex);
+            mapData[x][y].setCharIndex(0);
+        }
+
         charList[charIndex].getPos().setX(nX);
         charList[charIndex].getPos().setY(nY);
-        mapData[x][y].setCharIndex(0);
 
         charList[charIndex].setMoveOffsetX(-1 * (TILE_PIXEL_SIZE * addX));
         charList[charIndex].setMoveOffsetY(-1 * (TILE_PIXEL_SIZE * addY));
@@ -260,7 +282,6 @@ public enum User {
 
         charList[charIndex].setScrollDirectionX(addX);
         charList[charIndex].setScrollDirectionY(addY);
-
     }
 
     /**
@@ -275,11 +296,15 @@ public enum User {
     }
 
     public boolean hayAgua(int x, int y) {
-        return ((mapData[x][y].getLayer(1).getGrhIndex() >= 1505 && mapData[x][y].getLayer(1).getGrhIndex() <= 1520) ||
-                (mapData[x][y].getLayer(1).getGrhIndex() >= 5665 && mapData[x][y].getLayer(1).getGrhIndex() <= 5680) ||
-                (mapData[x][y].getLayer(1).getGrhIndex() >= 13547 && mapData[x][y].getLayer(1).getGrhIndex() <= 13562))
-                &&
-                mapData[x][y].getLayer(2).getGrhIndex() == 0;
+        var context = GameData.getActiveContext();
+        if (context == null || context.getMapData() == null)
+            return false;
+        var mapData = context.getMapData();
+        return ((mapData[x][y].getLayer(1).getGrhIndex() >= 1505 && mapData[x][y].getLayer(1).getGrhIndex() <= 1520)
+                || (mapData[x][y].getLayer(1).getGrhIndex() >= 5665 && mapData[x][y].getLayer(1).getGrhIndex() <= 5680)
+                || (mapData[x][y].getLayer(1).getGrhIndex() >= 13547
+                        && mapData[x][y].getLayer(1).getGrhIndex() <= 13562))
+                && mapData[x][y].getLayer(2).getGrhIndex() == 0;
     }
 
     /**
@@ -289,6 +314,12 @@ public enum User {
      *                  direccion establecida en "nX" y "nY".
      */
     public void moveCharbyPos(short charIndex, int nX, int nY) {
+        var context = GameData.getActiveContext();
+        if (context == null)
+            return;
+        var charList = context.getCharList();
+        var mapData = context.getMapData();
+
         final int x = charList[charIndex].getPos().getX();
         final int y = charList[charIndex].getPos().getY();
 
@@ -304,10 +335,13 @@ public enum User {
         else if (sgn((short) addY) == 1)
             charList[charIndex].setHeading(DOWN);
 
-        mapData[nX][nY].setCharIndex(charIndex);
+        if (mapData != null) {
+            mapData[nX][nY].setCharIndex(charIndex);
+            mapData[x][y].setCharIndex(0);
+        }
+
         charList[charIndex].getPos().setX(nX);
         charList[charIndex].getPos().setY(nY);
-        mapData[x][y].setCharIndex(0);
 
         charList[charIndex].setMoveOffsetX(-1 * (TILE_PIXEL_SIZE * addX));
         charList[charIndex].setMoveOffsetY(-1 * (TILE_PIXEL_SIZE * addY));
@@ -324,6 +358,11 @@ public enum User {
      *                  posible.
      */
     public void moveTo(Direction direction) {
+        var context = GameData.getActiveContext();
+        if (context == null)
+            return;
+        var charList = context.getCharList();
+
         boolean legalOk = switch (direction) {
             case UP -> moveToLegalPos(userPos.getX(), userPos.getY() - 1);
             case RIGHT -> moveToLegalPos(userPos.getX() + 1, userPos.getY());
@@ -339,7 +378,7 @@ public enum User {
 
                 // Duplicate Trigger 1 check removed. Handled by EditorInputManager.
             }
-        } else if (walkingmode && charList[userCharIndex].getHeading() != direction) {
+        } else if (walkingmode && userCharIndex > 0 && charList[userCharIndex].getHeading() != direction) {
             // Solo cambiar el rumbo en modo caminata
             charList[userCharIndex].setHeading(direction);
         }
@@ -398,9 +437,12 @@ public enum User {
 
         // Si hay char index asociado, actualizar su posición
         if (userCharIndex > 0) {
-            charList[userCharIndex].getPos().setX(x);
-            charList[userCharIndex].getPos().setY(y);
-
+            var context = GameData.getActiveContext();
+            if (context != null) {
+                var charList = context.getCharList();
+                charList[userCharIndex].getPos().setX(x);
+                charList[userCharIndex].getPos().setY(y);
+            }
         }
     }
 
@@ -415,13 +457,18 @@ public enum User {
             if (Engine.getCurrentScene() instanceof GameScene) {
                 Camera cam = ((GameScene) Engine.getCurrentScene()).getCamera();
                 if (cam != null) {
-                    // Prevent Clones: Brute-force clear user from ENTIRE map
-                    // This ensures no ghost at 50,50 or anywhere else
-                    if (userCharIndex > 0 && GameData.mapData != null) {
-                        for (int x = XMinMapSize; x <= XMaxMapSize; x++) {
-                            for (int y = YMinMapSize; y <= YMaxMapSize; y++) {
-                                if (GameData.mapData[x][y].getCharIndex() == userCharIndex) {
-                                    GameData.mapData[x][y].setCharIndex(0);
+                    var context = GameData.getActiveContext();
+                    if (context != null) {
+                        var mapData = context.getMapData();
+
+                        // Prevent Clones: Brute-force clear user from ENTIRE map
+                        // This ensures no ghost at 50,50 or anywhere else
+                        if (userCharIndex > 0 && mapData != null) {
+                            for (int x = XMinMapSize; x <= XMaxMapSize; x++) {
+                                for (int y = YMinMapSize; y <= YMaxMapSize; y++) {
+                                    if (mapData[x][y].getCharIndex() == userCharIndex) {
+                                        mapData[x][y].setCharIndex(0);
+                                    }
                                 }
                             }
                         }
@@ -432,13 +479,18 @@ public enum User {
                 }
             }
 
+            var context = GameData.getActiveContext();
+            if (context == null)
+                return;
+            var charList = context.getCharList();
+
             if (userCharIndex <= 0) {
                 org.tinylog.Logger.warn("WalkingMode enabled with invalid UserCharIdx. Forcing refresh.");
                 refreshUserCharacter();
-            } else if (GameData.charList != null && userCharIndex < GameData.charList.length) {
+            } else if (charList != null && userCharIndex < charList.length) {
                 // Check if char slot is active/valid
-                if (!GameData.charList[userCharIndex].isActive()
-                        || GameData.charList[userCharIndex].getBody() == null) {
+                if (!charList[userCharIndex].isActive()
+                        || charList[userCharIndex].getBody() == null) {
                     org.tinylog.Logger.warn("WalkingMode enabled but CharInx " + userCharIndex
                             + " is inactive/empty. Forcing refresh.");
                     refreshUserCharacter();
@@ -459,6 +511,11 @@ public enum User {
      *         contrario.
      */
     private boolean moveToLegalPos(int x, int y) {
+        var context = GameData.getActiveContext();
+        if (context == null || context.getMapData() == null)
+            return false;
+        var mapData = context.getMapData();
+
         // Limite del mapa
         if (x < XMinMapSize || x > XMaxMapSize || y < YMinMapSize || y > YMaxMapSize)
             return false;
@@ -491,8 +548,13 @@ public enum User {
      * and refreshes the character.
      */
     public void checkAppearance() {
-        if (userCharIndex > 0 && GameData.charList != null && userCharIndex < GameData.charList.length) {
-            org.argentumforge.engine.game.models.Character chr = GameData.charList[userCharIndex];
+        var context = GameData.getActiveContext();
+        if (context == null)
+            return;
+        var charList = context.getCharList();
+
+        if (userCharIndex > 0 && charList != null && userCharIndex < charList.length) {
+            org.argentumforge.engine.game.models.Character chr = charList[userCharIndex];
             boolean onWater = hayAgua(userPos.getX(), userPos.getY());
 
             // Logic for appearance change
@@ -504,7 +566,9 @@ public enum User {
                     if (chr.getBody().getWalk(3).getGrhIndex() != AssetRegistry.bodyData[userWaterBody].getWalk(3)
                             .getGrhIndex()) {
                         chr.setBody(new BodyData(AssetRegistry.bodyData[userWaterBody]));
-                        chr.setHead(new HeadData()); // Empty head (invisible)
+                        chr.setHead(new HeadData()); // Empty
+                                                     // head
+                                                     // (invisible)
                     }
                 }
             } else {
@@ -526,6 +590,11 @@ public enum User {
         this.addToUserPos.setX(0);
         this.addToUserPos.setY(0);
 
+        var context = GameData.getActiveContext();
+        if (context == null)
+            return;
+        var charList = context.getCharList();
+
         if (userCharIndex > 0 && userCharIndex < charList.length) {
             charList[userCharIndex].setMoveOffsetX(0);
             charList[userCharIndex].setMoveOffsetY(0);
@@ -536,11 +605,16 @@ public enum User {
     }
 
     public void removeInstanceFromMap() {
-        if (userCharIndex > 0 && GameData.mapData != null) {
+        var context = GameData.getActiveContext();
+        if (context == null || context.getMapData() == null)
+            return;
+        var mapData = context.getMapData();
+
+        if (userCharIndex > 0 && mapData != null) {
             for (int x = XMinMapSize; x <= XMaxMapSize; x++) {
                 for (int y = YMinMapSize; y <= YMaxMapSize; y++) {
-                    if (GameData.mapData[x][y].getCharIndex() == userCharIndex) {
-                        GameData.mapData[x][y].setCharIndex(0);
+                    if (mapData[x][y].getCharIndex() == userCharIndex) {
+                        mapData[x][y].setCharIndex(0);
                     }
                 }
             }

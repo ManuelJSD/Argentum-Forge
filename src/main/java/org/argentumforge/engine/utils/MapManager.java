@@ -273,21 +273,21 @@ public final class MapManager {
             GameData.clearActiveContext();
 
             // Reiniciar estado para el nuevo mapa (sin borrar el anterior array)
-            org.argentumforge.engine.game.models.Character.lastChar = 0;
-            org.argentumforge.engine.utils.GameData.mapData = null;
+            // org.argentumforge.engine.game.models.Character.lastChar = 0; // Handled in
+            // context or locally
 
-            GameData.charList = new org.argentumforge.engine.game.models.Character[10001];
-            for (int i = 0; i < GameData.charList.length; i++) {
-                GameData.charList[i] = new org.argentumforge.engine.game.models.Character();
+            Character[] newCharList = new Character[10001];
+            for (int i = 0; i < newCharList.length; i++) {
+                newCharList[i] = new org.argentumforge.engine.game.models.Character();
             }
 
-            GameData.mapData = null;
-            GameData.mapProperties = new MapProperties();
+            MapProperties newMapProperties = new MapProperties();
 
+            // Cargar archivo principal de capas (.map)
             // Cargar archivo principal de capas (.map)
             byte[] data = Files.readAllBytes(Path.of(filePath));
             MapSaveOptions detectedOptions = detectSaveOptions(data);
-            initMap(data, detectedOptions);
+            MapData[][] newMapData = initMap(data, detectedOptions);
 
             // Reserve User Slot (Index 1 usually) AFTER initMap (which wipes chars) but
             // BEFORE loading entities
@@ -296,7 +296,7 @@ public final class MapManager {
             int userCharIdx = org.argentumforge.engine.game.User.INSTANCE.getUserCharIndex();
             if (userCharIdx <= 0)
                 userCharIdx = 1;
-            GameData.charList[userCharIdx].setActive(true);
+            newCharList[userCharIdx].setActive(true);
 
             // Preparar para buscar archivos complementarios (.inf y .dat)
             String basePath = filePath.substring(0, filePath.lastIndexOf('.'));
@@ -304,23 +304,37 @@ public final class MapManager {
             String infPath = basePath + ".inf";
 
             // Intentar cargar propiedades del mapa (.dat)
+            // Intentar cargar propiedades del mapa (.dat)
             if (Files.exists(Path.of(datPath))) {
-                loadMapProperties(datPath);
+                // Warning: loadMapProperties currently modifies GameData.mapProperties static.
+                // We should refactor it or copy values?
+                // For now, let's update loadMapProperties later or assume it sets the static
+                // one which we might still use temporarily,
+                // BUT we want to pass 'newMapProperties' to context.
+                // Let's manually parse or update loadMapProperties?
+                // Better: Update loadMapProperties to return MapProperties.
+                newMapProperties = loadMapProperties(datPath);
             } else {
-                GameData.mapProperties = new MapProperties();
+                newMapProperties = new MapProperties();
                 Logger.info("Archivo .dat no encontrado en {}, usando valores por defecto.", datPath);
             }
 
             // Intentar cargar información de entidades (.inf)
+            // Intentar cargar información de entidades (.inf)
+            // loadMapInfo needs mapData and charList. It currently uses static.
+            // We need to pass them. Refactor loadMapInfo signature.
+            // For now, we will defer loadMapInfo call or pass arguments?
+            // Refactoring loadMapInfo to accept (infPath, mapData, charList).
             if (Files.exists(Path.of(infPath))) {
-                loadMapInfo(infPath);
+                loadMapInfo(infPath, newMapData, newCharList);
             } else {
                 Logger.info("Archivo .inf no encontrado en {}, saltando carga de entidades.", infPath);
             }
 
             // Crear el contexto y registrarlo
-            MapContext context = new MapContext(filePath, GameData.mapData, GameData.mapProperties, GameData.charList);
-            context.setLastChar(org.argentumforge.engine.game.models.Character.lastChar);
+            // Crear el contexto y registrarlo
+            MapContext context = new MapContext(filePath, newMapData, newMapProperties, newCharList);
+            context.setLastChar((short) 0); // Reset lastChar locally
             context.setSaveOptions(detectedOptions);
             GameData.setActiveContext(context);
 
@@ -421,28 +435,27 @@ public final class MapManager {
         GameData.clearActiveContext();
 
         // Reiniciar estado
-        org.argentumforge.engine.game.models.Character.lastChar = 0;
-        GameData.charList = new org.argentumforge.engine.game.models.Character[10001];
-        for (int i = 0; i < GameData.charList.length; i++) {
-            GameData.charList[i] = new org.argentumforge.engine.game.models.Character();
+        Character[] newCharList = new Character[10001];
+        for (int i = 0; i < newCharList.length; i++) {
+            newCharList[i] = new org.argentumforge.engine.game.models.Character();
         }
 
         // Inicializar rejilla de datos
-        GameData.mapData = new MapData[width + 1][height + 1];
+        MapData[][] newMapData = new MapData[width + 1][height + 1];
         for (int x = 0; x <= width; x++) {
             for (int y = 0; y <= height; y++) {
                 MapData cell = new MapData();
                 // Inicializar Capa 1 con Grh 1 (Césped) por defecto
                 GameData.initGrh(cell.getLayer(1), 1, true);
-                GameData.mapData[x][y] = cell;
+                newMapData[x][y] = cell;
             }
         }
 
         // Resetear propiedades del mapa
-        GameData.mapProperties = new MapProperties();
+        MapProperties newMapProperties = new MapProperties();
 
-        MapContext context = new MapContext("", GameData.mapData, GameData.mapProperties, GameData.charList);
-        context.setLastChar(org.argentumforge.engine.game.models.Character.lastChar);
+        MapContext context = new MapContext("", newMapData, newMapProperties, newCharList);
+        context.setLastChar((short) 0);
         context.setSaveOptions(MapSaveOptions.extended());
         GameData.setActiveContext(context);
 
@@ -467,19 +480,19 @@ public final class MapManager {
      * @param data    Contenido binario del archivo .map.
      * @param options Opciones de guardado inferidas.
      */
-    static void initMap(byte[] data, MapSaveOptions options) {
+    static MapData[][] initMap(byte[] data, MapSaveOptions options) {
         GameData.reader.init(data);
 
-        GameData.mapData = new MapData[GameData.X_MAX_MAP_SIZE + 1][GameData.Y_MAX_MAP_SIZE + 1];
+        MapData[][] newMapData = new MapData[GameData.X_MAX_MAP_SIZE + 1][GameData.Y_MAX_MAP_SIZE + 1];
         for (int y = 0; y <= GameData.Y_MAX_MAP_SIZE; y++) {
             for (int x = 0; x <= GameData.X_MAX_MAP_SIZE; x++) {
-                GameData.mapData[x][y] = new MapData();
+                newMapData[x][y] = new MapData();
             }
         }
 
         // Leer versión y saltar cabecera heredada de VB6
         if (!GameData.reader.hasRemaining(2))
-            return;
+            return newMapData;
         final short mapversion = GameData.reader.readShort();
 
         // Debug logging for AOLibre analysis
@@ -523,75 +536,75 @@ public final class MapManager {
 
                 // Bit 1: Bloqueo
                 bloq = (byte) (byflags & 1);
-                GameData.mapData[x][y].setBlocked(bloq == 1);
+                newMapData[x][y].setBlocked(bloq == 1);
 
                 // Capa 1 (Siempre presente)
                 if (!GameData.reader.hasRemaining(indexSize))
                     break tileLoop;
                 int grh1 = useLongIndices ? GameData.reader.readInt() : GameData.reader.readUnsignedShort();
-                GameData.mapData[x][y].getLayer(1).setGrhIndex(grh1);
-                GameData.mapData[x][y].setLayer(1,
-                        GameData.initGrh(GameData.mapData[x][y].getLayer(1),
-                                GameData.mapData[x][y].getLayer(1).getGrhIndex(), true));
+                newMapData[x][y].getLayer(1).setGrhIndex(grh1);
+                newMapData[x][y].setLayer(1,
+                        GameData.initGrh(newMapData[x][y].getLayer(1),
+                                newMapData[x][y].getLayer(1).getGrhIndex(), true));
 
                 // Capa 2
                 if ((byte) (byflags & 2) != 0) {
                     if (!GameData.reader.hasRemaining(indexSize))
                         break tileLoop;
                     int grh2 = useLongIndices ? GameData.reader.readInt() : GameData.reader.readUnsignedShort();
-                    GameData.mapData[x][y].getLayer(2).setGrhIndex(grh2);
-                    GameData.mapData[x][y].setLayer(2,
-                            GameData.initGrh(GameData.mapData[x][y].getLayer(2),
-                                    GameData.mapData[x][y].getLayer(2).getGrhIndex(), true));
+                    newMapData[x][y].getLayer(2).setGrhIndex(grh2);
+                    newMapData[x][y].setLayer(2,
+                            GameData.initGrh(newMapData[x][y].getLayer(2),
+                                    newMapData[x][y].getLayer(2).getGrhIndex(), true));
 
                 } else
-                    GameData.mapData[x][y].getLayer(2).setGrhIndex(0);
+                    newMapData[x][y].getLayer(2).setGrhIndex(0);
 
                 // Capa 3
                 if ((byte) (byflags & 4) != 0) {
                     if (!GameData.reader.hasRemaining(indexSize))
                         break tileLoop;
                     int grh3 = useLongIndices ? GameData.reader.readInt() : GameData.reader.readUnsignedShort();
-                    GameData.mapData[x][y].getLayer(3).setGrhIndex(grh3);
-                    GameData.mapData[x][y].setLayer(3,
-                            GameData.initGrh(GameData.mapData[x][y].getLayer(3),
-                                    GameData.mapData[x][y].getLayer(3).getGrhIndex(), true));
+                    newMapData[x][y].getLayer(3).setGrhIndex(grh3);
+                    newMapData[x][y].setLayer(3,
+                            GameData.initGrh(newMapData[x][y].getLayer(3),
+                                    newMapData[x][y].getLayer(3).getGrhIndex(), true));
                 } else
-                    GameData.mapData[x][y].getLayer(3).setGrhIndex(0);
+                    newMapData[x][y].getLayer(3).setGrhIndex(0);
 
                 // Capa 4
                 if ((byte) (byflags & 8) != 0) {
                     if (!GameData.reader.hasRemaining(indexSize))
                         break tileLoop;
                     int grh4 = useLongIndices ? GameData.reader.readInt() : GameData.reader.readUnsignedShort();
-                    GameData.mapData[x][y].getLayer(4).setGrhIndex(grh4);
-                    GameData.mapData[x][y].setLayer(4,
-                            GameData.initGrh(GameData.mapData[x][y].getLayer(4),
-                                    GameData.mapData[x][y].getLayer(4).getGrhIndex(), true));
+                    newMapData[x][y].getLayer(4).setGrhIndex(grh4);
+                    newMapData[x][y].setLayer(4,
+                            GameData.initGrh(newMapData[x][y].getLayer(4),
+                                    newMapData[x][y].getLayer(4).getGrhIndex(), true));
                 } else
-                    GameData.mapData[x][y].getLayer(4).setGrhIndex(0);
+                    newMapData[x][y].getLayer(4).setGrhIndex(0);
 
                 // Triggers
                 if ((byte) (byflags & 16) != 0) {
                     if (!GameData.reader.hasRemaining(2))
                         break tileLoop;
-                    GameData.mapData[x][y].setTrigger(GameData.reader.readUnsignedShort());
+                    newMapData[x][y].setTrigger(GameData.reader.readUnsignedShort());
                 } else
-                    GameData.mapData[x][y].setTrigger(0);
+                    newMapData[x][y].setTrigger(0);
 
                 // Bit 5 (Valor 32): Partículas (AOLibre/Versiones nuevas)
                 if ((byflags & 32) != 0) {
                     if (!GameData.reader.hasRemaining(2))
                         break tileLoop;
                     int pId = GameData.reader.readShort();
-                    GameData.mapData[x][y].setParticleIndex(pId);
+                    newMapData[x][y].setParticleIndex(pId);
                     if (pId > 0)
                         particlesLoaded++;
                 } else {
-                    GameData.mapData[x][y].setParticleIndex(0);
+                    newMapData[x][y].setParticleIndex(0);
                 }
 
-                GameData.mapData[x][y].getObjGrh().setGrhIndex(0);
+                newMapData[x][y].getObjGrh().setGrhIndex(0);
             }
         }
 
@@ -600,15 +613,18 @@ public final class MapManager {
             GameData.options.getRenderSettings().setShowParticles(true);
         }
         Surface.INSTANCE.deleteAllTextures();
-        eraseAllChars();
+        // eraseAllChars(); // No longer needed/possible as we assume fresh list
+
+        return newMapData;
     }
 
     /**
      * Carga las propiedades generales del mapa (nombre, música, zona) desde un .dat
      *
      * @param filePath Ruta absoluta al archivo .dat del mapa.
+     * @return MapProperties objeto con las propiedades cargadas.
      */
-    private static void loadMapProperties(String filePath) {
+    private static MapProperties loadMapProperties(String filePath) {
         Logger.info("Cargando propiedades del mapa desde: {}", filePath);
         MapProperties props = new MapProperties();
 
@@ -658,9 +674,11 @@ public final class MapManager {
             Logger.error(e, "Error leyendo el archivo .dat del mapa: {}", filePath);
         }
 
-        GameData.mapProperties = props;
+        GameData.mapProperties = props; // Keep redundant static update for safety? Or remove?
+        // Let's keep it for now but return the object.
         Logger.info("Propiedades cargadas: Nombre='{}', Música={}, Zona='{}'", props.getName(), props.getMusicIndex(),
                 props.getZona());
+        return props;
     }
 
     /**
@@ -668,8 +686,10 @@ public final class MapManager {
      * Recrea las entidades visuales en el editor.
      *
      * @param filePath Ruta absoluta al archivo .inf
+     * @param mapData  Matriz de datos del mapa.
+     * @param charList Lista de personajes.
      */
-    private static void loadMapInfo(String filePath) {
+    private static void loadMapInfo(String filePath, MapData[][] mapData, Character[] charList) {
         try {
             byte[] data = Files.readAllBytes(Path.of(filePath));
             GameData.reader.init(data);
@@ -683,27 +703,56 @@ public final class MapManager {
                     if (!GameData.reader.hasRemaining())
                         break;
 
-                    if (GameData.mapData[x][y] == null)
+                    if (mapData[x][y] == null)
                         continue;
 
                     byte flags = GameData.reader.readByte();
 
                     // Bit 1: Traslados (Exits)
                     if ((flags & 1) != 0) {
-                        GameData.mapData[x][y].setExitMap(GameData.reader.readUnsignedShort());
-                        GameData.mapData[x][y].setExitX(GameData.reader.readUnsignedShort());
-                        GameData.mapData[x][y].setExitY(GameData.reader.readUnsignedShort());
+                        mapData[x][y].setExitMap(GameData.reader.readUnsignedShort());
+                        mapData[x][y].setExitX(GameData.reader.readUnsignedShort());
+                        mapData[x][y].setExitY(GameData.reader.readUnsignedShort());
                     }
 
                     // Bit 2: NPCs
                     if ((flags & 2) != 0) {
                         int npcIndex = GameData.reader.readUnsignedShort();
                         if (npcIndex > 0) {
-                            GameData.mapData[x][y].setNpcIndex(npcIndex);
+                            mapData[x][y].setNpcIndex(npcIndex);
                             NpcData npc = AssetRegistry.npcs.get(npcIndex);
                             if (npc != null) {
-                                Character.makeChar(GameData.nextOpenChar(), npc.getBody(), npc.getHead(),
-                                        Direction.fromID(npc.getHeading()), x, y, 0, 0, 0);
+                                // Find next open char manually in the local list
+                                int openCharIndex = 0;
+                                for (int i = 1; i < charList.length; i++) {
+                                    if (!charList[i].isActive()) {
+                                        openCharIndex = i;
+                                        break;
+                                    }
+                                }
+
+                                if (openCharIndex > 0) {
+                                    Character chr = charList[openCharIndex];
+                                    chr.setActive(true);
+                                    chr.setHeading(Direction.fromID(npc.getHeading()));
+                                    chr.getPos().setX(x);
+                                    chr.getPos().setY(y);
+
+                                    int bodyIdx = npc.getBody();
+                                    if (bodyIdx > 0 && bodyIdx < AssetRegistry.bodyData.length
+                                            && AssetRegistry.bodyData[bodyIdx] != null) {
+                                        chr.setBody(new BodyData(AssetRegistry.bodyData[bodyIdx]));
+                                    }
+
+                                    int headIdx = npc.getHead();
+                                    if (headIdx > 0 && headIdx < AssetRegistry.headData.length
+                                            && AssetRegistry.headData[headIdx] != null) {
+                                        chr.setHead(new HeadData(AssetRegistry.headData[headIdx]));
+                                    }
+
+                                    // Update map
+                                    mapData[x][y].setCharIndex((short) openCharIndex);
+                                }
                             }
                         }
                     }
@@ -713,13 +762,13 @@ public final class MapManager {
                         int objIndex = GameData.reader.readUnsignedShort();
                         int amount = GameData.reader.readUnsignedShort();
 
-                        GameData.mapData[x][y].setObjIndex(objIndex);
-                        GameData.mapData[x][y].setObjAmount(amount);
+                        mapData[x][y].setObjIndex(objIndex);
+                        mapData[x][y].setObjAmount(amount);
 
                         if (objIndex > 0) {
                             ObjData obj = AssetRegistry.objs.get(objIndex);
                             if (obj != null) {
-                                GameData.initGrh(GameData.mapData[x][y].getObjGrh(), obj.getGrhIndex(), false);
+                                GameData.initGrh(mapData[x][y].getObjGrh(), obj.getGrhIndex(), false);
                             } else {
                                 Logger.warn("Definición de objeto no encontrada para el índice: {}", objIndex);
                             }
@@ -764,26 +813,31 @@ public final class MapManager {
             java.nio.ByteBuffer bodyBuf = java.nio.ByteBuffer.allocate(estimatedSize);
             bodyBuf.order(java.nio.ByteOrder.LITTLE_ENDIAN);
 
+            MapContext context = GameData.getActiveContext();
+            if (context == null || context.getMapData() == null)
+                return;
+            MapData[][] mapData = context.getMapData();
+
             for (int y = GameData.Y_MIN_MAP_SIZE; y <= GameData.Y_MAX_MAP_SIZE; y++) {
                 for (int x = GameData.X_MIN_MAP_SIZE; x <= GameData.X_MAX_MAP_SIZE; x++) {
                     byte flags = 0;
-                    if (GameData.mapData[x][y].getBlocked())
+                    if (mapData[x][y].getBlocked())
                         flags |= 1;
-                    if (GameData.mapData[x][y].getLayer(2).getGrhIndex() > 0)
+                    if (mapData[x][y].getLayer(2).getGrhIndex() > 0)
                         flags |= 2;
-                    if (GameData.mapData[x][y].getLayer(3).getGrhIndex() > 0)
+                    if (mapData[x][y].getLayer(3).getGrhIndex() > 0)
                         flags |= 4;
-                    if (GameData.mapData[x][y].getLayer(4).getGrhIndex() > 0)
+                    if (mapData[x][y].getLayer(4).getGrhIndex() > 0)
                         flags |= 8;
-                    if (GameData.mapData[x][y].getTrigger() > 0)
+                    if (mapData[x][y].getTrigger() > 0)
                         flags |= 16;
-                    if (GameData.mapData[x][y].getParticleIndex() > 0)
+                    if (mapData[x][y].getParticleIndex() > 0)
                         flags |= 32;
 
                     bodyBuf.put(flags);
 
                     // Capa 1
-                    int grh1 = GameData.mapData[x][y].getLayer(1).getGrhIndex();
+                    int grh1 = mapData[x][y].getLayer(1).getGrhIndex();
                     if (!useLongIndices) {
                         bodyBuf.putShort((short) grh1);
                     } else {
@@ -791,31 +845,31 @@ public final class MapManager {
                     }
 
                     if ((flags & 2) != 0) {
-                        int grh = GameData.mapData[x][y].getLayer(2).getGrhIndex();
+                        int grh = mapData[x][y].getLayer(2).getGrhIndex();
                         if (!useLongIndices)
                             bodyBuf.putShort((short) grh);
                         else
                             bodyBuf.putInt(grh);
                     }
                     if ((flags & 4) != 0) {
-                        int grh = GameData.mapData[x][y].getLayer(3).getGrhIndex();
+                        int grh = mapData[x][y].getLayer(3).getGrhIndex();
                         if (!useLongIndices)
                             bodyBuf.putShort((short) grh);
                         else
                             bodyBuf.putInt(grh);
                     }
                     if ((flags & 8) != 0) {
-                        int grh = GameData.mapData[x][y].getLayer(4).getGrhIndex();
+                        int grh = mapData[x][y].getLayer(4).getGrhIndex();
                         if (!useLongIndices)
                             bodyBuf.putShort((short) grh);
                         else
                             bodyBuf.putInt(grh);
                     }
                     if ((flags & 16) != 0)
-                        bodyBuf.putShort((short) GameData.mapData[x][y].getTrigger());
+                        bodyBuf.putShort((short) mapData[x][y].getTrigger());
 
                     if ((flags & 32) != 0)
-                        bodyBuf.putShort((short) GameData.mapData[x][y].getParticleIndex());
+                        bodyBuf.putShort((short) mapData[x][y].getParticleIndex());
                 }
             }
 
@@ -828,19 +882,24 @@ public final class MapManager {
      * Serializa las propiedades del mapa en formato de texto (.dat).
      */
     private static void saveMapProperties(String filePath) throws IOException {
+        MapContext context = GameData.getActiveContext();
+        if (context == null)
+            return;
+        MapProperties props = context.getMapProperties();
+
         try (PrintWriter writer = new PrintWriter(
                 Files.newBufferedWriter(Path.of(filePath), StandardCharsets.ISO_8859_1))) {
             writer.println("[MAPA1]");
-            writer.println("Name=" + GameData.mapProperties.getName());
-            writer.println("MusicNum=" + GameData.mapProperties.getMusicIndex());
-            writer.println("MagiaSinefecto=" + GameData.mapProperties.getMagiaSinEfecto());
-            writer.println("NoEncriptarMP=" + GameData.mapProperties.getNoEncriptarMP());
-            writer.println("Pk=" + GameData.mapProperties.getPlayerKiller());
+            writer.println("Name=" + props.getName());
+            writer.println("MusicNum=" + props.getMusicIndex());
+            writer.println("MagiaSinefecto=" + props.getMagiaSinEfecto());
+            writer.println("NoEncriptarMP=" + props.getNoEncriptarMP());
+            writer.println("Pk=" + props.getPlayerKiller());
             writer.println("Restringir="
-                    + (GameData.mapProperties.getRestringir() == 0 ? "No" : GameData.mapProperties.getRestringir()));
-            writer.println("BackUp=" + GameData.mapProperties.getBackup());
-            writer.println("Zona=" + GameData.mapProperties.getZona());
-            writer.println("Terreno=" + GameData.mapProperties.getTerreno());
+                    + (props.getRestringir() == 0 ? "No" : props.getRestringir()));
+            writer.println("BackUp=" + props.getBackup());
+            writer.println("Zona=" + props.getZona());
+            writer.println("Terreno=" + props.getTerreno());
         }
     }
 
@@ -866,29 +925,34 @@ public final class MapManager {
             java.nio.ByteBuffer bodyBuf = java.nio.ByteBuffer.allocate(130000);
             bodyBuf.order(java.nio.ByteOrder.LITTLE_ENDIAN);
 
+            MapContext context = GameData.getActiveContext();
+            if (context == null || context.getMapData() == null)
+                return;
+            MapData[][] mapData = context.getMapData();
+
             for (int y = GameData.Y_MIN_MAP_SIZE; y <= GameData.Y_MAX_MAP_SIZE; y++) {
                 for (int x = GameData.X_MIN_MAP_SIZE; x <= GameData.X_MAX_MAP_SIZE; x++) {
                     byte flags = 0;
-                    if (GameData.mapData[x][y].getExitMap() > 0)
+                    if (mapData[x][y].getExitMap() > 0)
                         flags |= 1; // Traslado
-                    if (GameData.mapData[x][y].getNpcIndex() > 0)
+                    if (mapData[x][y].getNpcIndex() > 0)
                         flags |= 2; // NPC
-                    if (GameData.mapData[x][y].getObjIndex() > 0)
+                    if (mapData[x][y].getObjIndex() > 0)
                         flags |= 4; // Objeto
 
                     bodyBuf.put(flags);
 
                     if ((flags & 1) != 0) {
-                        bodyBuf.putShort((short) GameData.mapData[x][y].getExitMap());
-                        bodyBuf.putShort((short) GameData.mapData[x][y].getExitX());
-                        bodyBuf.putShort((short) GameData.mapData[x][y].getExitY());
+                        bodyBuf.putShort((short) mapData[x][y].getExitMap());
+                        bodyBuf.putShort((short) mapData[x][y].getExitX());
+                        bodyBuf.putShort((short) mapData[x][y].getExitY());
                     }
                     if ((flags & 2) != 0) {
-                        bodyBuf.putShort((short) GameData.mapData[x][y].getNpcIndex());
+                        bodyBuf.putShort((short) mapData[x][y].getNpcIndex());
                     }
                     if ((flags & 4) != 0) {
-                        bodyBuf.putShort((short) GameData.mapData[x][y].getObjIndex());
-                        bodyBuf.putShort((short) GameData.mapData[x][y].getObjAmount());
+                        bodyBuf.putShort((short) mapData[x][y].getObjIndex());
+                        bodyBuf.putShort((short) mapData[x][y].getObjAmount());
                     }
                 }
             }

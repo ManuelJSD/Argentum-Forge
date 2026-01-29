@@ -202,8 +202,26 @@ public final class FMain extends Form {
                     // Usamos el hash para unicidad en el ID del tab.
                     if (ImGui.beginTabItem(context.getMapName() + "###Tab" + context.hashCode(), open, flags)) {
                         if (context != org.argentumforge.engine.utils.GameData.getActiveContext()) {
+                            // Save current camera position to the PREVIOUS context
+                            org.argentumforge.engine.utils.MapContext prevContext = org.argentumforge.engine.utils.GameData
+                                    .getActiveContext();
+                            if (prevContext != null) {
+                                prevContext
+                                        .setSavedUserX(org.argentumforge.engine.game.User.INSTANCE.getUserPos().getX());
+                                prevContext
+                                        .setSavedUserY(org.argentumforge.engine.game.User.INSTANCE.getUserPos().getY());
+                            }
+
                             org.argentumforge.engine.utils.GameData.setActiveContext(context);
                             updateEditorsContext(context);
+
+                            // Restore camera position from the NEW context
+                            org.argentumforge.engine.game.User.INSTANCE.getUserPos().setX(context.getSavedUserX());
+                            org.argentumforge.engine.game.User.INSTANCE.getUserPos().setY(context.getSavedUserY());
+                            org.argentumforge.engine.game.User.INSTANCE.getAddToUserPos().setX(0); // Reset smooth
+                                                                                                   // scroll offset
+                            org.argentumforge.engine.game.User.INSTANCE.getAddToUserPos().setY(0);
+                            org.argentumforge.engine.game.User.INSTANCE.setUserMoving(false);
                         }
                         ImGui.endTabItem();
                     }

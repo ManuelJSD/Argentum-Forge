@@ -196,6 +196,11 @@ public class FMapGenerator extends Form {
     }
 
     private void applyBiomes(double[][] heightMap, double[][] moistureMap, int width, int height) {
+        var context = GameData.getActiveContext();
+        if (context == null || context.getMapData() == null)
+            return;
+        var mapData = context.getMapData();
+
         Map<TilePos, Integer> oldTiles = new HashMap<>();
         Map<TilePos, Integer> newTiles = new HashMap<>();
 
@@ -233,7 +238,7 @@ public class FMapGenerator extends Form {
                 int relY = y % biome.getHeight();
                 int newGrh = (biome.getGrhIndex() + (relY * biome.getWidth()) + relX);
 
-                int currentGrh = GameData.mapData[x][y].getLayer(1).getGrhIndex();
+                int currentGrh = mapData[x][y].getLayer(1).getGrhIndex();
                 if (currentGrh != newGrh) {
                     oldTiles.put(new TilePos(x, y), currentGrh);
                     newTiles.put(new TilePos(x, y), newGrh);

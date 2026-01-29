@@ -12,13 +12,14 @@ import org.argentumforge.engine.scenes.Camera;
 import org.argentumforge.engine.utils.editor.*;
 import org.argentumforge.engine.audio.Sound;
 import org.argentumforge.engine.utils.GameData;
+import org.argentumforge.engine.utils.inits.MapData;
 import java.io.File;
 
 import org.argentumforge.engine.gui.DialogManager;
 
 import static org.argentumforge.engine.game.console.FontStyle.REGULAR;
 import static org.argentumforge.engine.scenes.Camera.*;
-import static org.argentumforge.engine.utils.GameData.mapData;
+// import static org.argentumforge.engine.utils.GameData.mapData; // Removed static import
 import static org.lwjgl.glfw.GLFW.*;
 
 /**
@@ -128,24 +129,29 @@ public class EditorInputManager {
     }
 
     private void handleDoubleClick(int x, int y) {
+        var context = GameData.getActiveContext();
+        if (context == null)
+            return;
+        var mapData = context.getMapData();
+
         if (isValidTile(x, y) && mapData[x][y].getExitMap() > 0) {
             int destMap = mapData[x][y].getExitMap();
             int destX = mapData[x][y].getExitX();
             int destY = mapData[x][y].getExitY();
 
-            String lastPath = org.argentumforge.engine.utils.GameData.options.getLastMapPath();
+            String lastPath = org.argentumforge.engine.game.Options.INSTANCE.getLastMapPath();
             java.io.File currentFile = new java.io.File(lastPath);
             String mapDir = currentFile.getParent();
 
             if (mapDir == null) {
-                mapDir = org.argentumforge.engine.utils.GameData.options.getMapsPath();
+                mapDir = org.argentumforge.engine.game.Options.INSTANCE.getMapsPath();
             }
 
             String mapPath = mapDir + java.io.File.separator + "Mapa" + destMap + ".map";
             java.io.File mapFile = new java.io.File(mapPath);
 
             if (mapFile.exists()) {
-                org.argentumforge.engine.utils.GameData.loadMap(mapPath);
+                org.argentumforge.engine.utils.MapManager.loadMap(mapPath);
                 user.getUserPos().setX(destX);
                 user.getUserPos().setY(destY);
                 camera.update(destX, destY);
@@ -179,12 +185,15 @@ public class EditorInputManager {
                 Sound.stopMusic();
                 Console.INSTANCE.addMsgToConsole("Musica detenida.", REGULAR, new RGBColor(1f, 1f, 1f));
             } else {
-                int musicNum = GameData.mapProperties.getMusicIndex();
+                var context = GameData.getActiveContext();
+                if (context == null)
+                    return;
+                int musicNum = context.getMapProperties().getMusicIndex();
                 if (musicNum <= 0) {
                     Console.INSTANCE.addMsgToConsole("El mapa no tiene musica configurada.", REGULAR,
                             new RGBColor(1f, 0f, 0f));
                 } else {
-                    String musicPath = GameData.options.getMusicPath();
+                    String musicPath = org.argentumforge.engine.game.Options.INSTANCE.getMusicPath();
                     File oggFile = new File(musicPath, musicNum + ".ogg");
                     File midFile = new File(musicPath, musicNum + ".mid");
                     File midiFile = new File(musicPath, musicNum + ".midi");
@@ -238,108 +247,106 @@ public class EditorInputManager {
                     user.moveTo(Direction.RIGHT);
 
                 // Check for Map Transfer (Trigger 1) after move
+                // Check for Map Transfer (Trigger 1) after move
                 if (user.isWalkingmode()) {
-                    org.argentumforge.engine.game.models.Character userChar = org.argentumforge.engine.utils.GameData.charList[user
-                            .getUserCharIndex()];
-                    // Ensure userChar is valid before accessing
-                    if (userChar != null) {
-                        int x = userChar.getPos().getX();
-                        int y = userChar.getPos().getY();
-                        // Access mapData from GameData, ensure bounds
-                        // FIX: inMapBounds checks BORDERS, we need valid map coordinates (1-100)
-                        if (org.argentumforge.engine.utils.GameData.mapData != null && x >= 1 && x <= 100 && y >= 1
-                                && y <= 100) {
-                            int trig = org.argentumforge.engine.utils.GameData.mapData[x][y].getTrigger();
-                            // org.tinylog.Logger.info("WalkMode Check: Pos=" + x + "," + y + " Trig=" +
-                            // trig);
-                            // Debug Console Output (Non-blocking)
-                            // Only log if Trigger is found to avoid spam, or log every step if needed.
-                            // User asked for console debug.
-                            if (trig != 0) {
-                                org.tinylog.Logger.info("Debug: Pos=(" + x + "," + y + ") Trigger=" + trig);
-                            }
-                            // Also log if we are stepping on what looks like a transfer (visual check?) -
-                            // No, rely on data.
+                    var context = GameData.getActiveContext();
+                    if (context == null)
+                        return;
 
-                            // if (trig != 0) {
-                            // Also log if we are stepping on what looks like a transfer (visual check?) -
-                            // No, rely on data.
+                    var charList = context.getCharList();
+                    int userIdx = user.getUserCharIndex();
 
-                            // CHECK TRANSFER (Independent of Trigger value)
-                            // 1. Reset Ignore if we moved off the ignored tile
-                            if (transferIgnored && (x != ignoredX || y != ignoredY)) {
-                                transferIgnored = false;
-                                ignoredX = -1;
-                                ignoredY = -1;
-                            }
+                    if (userIdx > 0 && userIdx < charList.length) {
+                        org.argentumforge.engine.game.models.Character userChar = charList[userIdx];
 
-                            int destMap = org.argentumforge.engine.utils.GameData.mapData[x][y].getExitMap();
-                            if (destMap > 0) {
-                                org.tinylog.Logger.info("Transfer Found! DestMap=" + destMap);
+                        // Ensure userChar is valid before accessing
+                        if (userChar != null) {
+                            int x = userChar.getPos().getX();
+                            int y = userChar.getPos().getY();
+                            // Access mapData from GameData, ensure bounds
+                            var mapData = context.getMapData();
 
-                                // 2. Show Dialog ONLY if not ignored
-                                if (!transferIgnored && !isTransferDialogActive) {
-                                    isTransferDialogActive = true;
-                                    org.argentumforge.engine.listeners.KeyHandler.resetInputs(); // Stop walking
+                            if (mapData != null && x >= 1 && x <= 100 && y >= 1 && y <= 100) {
+                                int trig = mapData[x][y].getTrigger();
+                                // Debug logging if trigger found
+                                if (trig != 0) {
+                                    org.tinylog.Logger.info("Debug: Pos=(" + x + "," + y + ") Trigger=" + trig);
+                                }
 
-                                    DialogManager.getInstance().showConfirm(
-                                            "Traslado de Mapa",
-                                            "¿Desea viajar al Mapa " + destMap + "?",
-                                            () -> {
-                                                isTransferDialogActive = false;
+                                // CHECK TRANSFER
+                                // 1. Reset Ignore if we moved off the ignored tile
+                                if (transferIgnored && (x != ignoredX || y != ignoredY)) {
+                                    transferIgnored = false;
+                                    ignoredX = -1;
+                                    ignoredY = -1;
+                                }
 
-                                                // Capture Exit Coordinates BEFORE loading new map
-                                                int destX = org.argentumforge.engine.utils.GameData.mapData[x][y]
-                                                        .getExitX();
-                                                int destY = org.argentumforge.engine.utils.GameData.mapData[x][y]
-                                                        .getExitY();
+                                int destMap = mapData[x][y].getExitMap();
+                                if (destMap > 0) {
+                                    org.tinylog.Logger.info("Transfer Found! DestMap=" + destMap);
 
-                                                // Update User Map ID
-                                                user.setUserMap((short) destMap);
+                                    // 2. Show Dialog ONLY if not ignored
+                                    if (!transferIgnored && !isTransferDialogActive) {
+                                        isTransferDialogActive = true;
+                                        org.argentumforge.engine.listeners.KeyHandler.resetInputs(); // Stop walking
 
-                                                // Resolve Path & Load
-                                                String mapPath = org.argentumforge.engine.utils.MapManager
-                                                        .resolveMapPath(destMap);
+                                        DialogManager.getInstance().showConfirm(
+                                                "Traslado de Mapa",
+                                                "¿Desea viajar al Mapa " + destMap + "?",
+                                                () -> {
+                                                    isTransferDialogActive = false;
 
-                                                if (mapPath != null) {
-                                                    user.removeInstanceFromMap();
-                                                    org.argentumforge.engine.utils.MapManager.loadMap(mapPath);
-                                                } else {
-                                                    org.argentumforge.engine.game.console.Console.INSTANCE
-                                                            .addMsgToConsole(
-                                                                    "Error: No se encontró el mapa " + destMap
-                                                                            + " (o sus variantes)",
-                                                                    org.argentumforge.engine.game.console.FontStyle.REGULAR,
-                                                                    new org.argentumforge.engine.renderer.RGBColor(1f,
-                                                                            0f, 0f));
-                                                    return;
-                                                }
+                                                    int destX = mapData[x][y].getExitX();
+                                                    int destY = mapData[x][y].getExitY();
 
-                                                // Update User Pos
-                                                user.getUserPos().setX(destX);
-                                                user.getUserPos().setY(destY);
+                                                    // Update User Map ID
+                                                    user.setUserMap((short) destMap);
 
-                                                // Update Camera
-                                                camera.update(destX, destY);
+                                                    // Resolve Path & Load
+                                                    String mapPath = org.argentumforge.engine.utils.MapManager
+                                                            .resolveMapPath(destMap);
 
-                                                // Refresh Character (places at new pos)
-                                                user.refreshUserCharacter();
+                                                    if (mapPath != null) {
+                                                        user.removeInstanceFromMap();
+                                                        org.argentumforge.engine.utils.MapManager.loadMap(mapPath);
+                                                    } else {
+                                                        org.argentumforge.engine.game.console.Console.INSTANCE
+                                                                .addMsgToConsole(
+                                                                        "Error: No se encontró el mapa " + destMap
+                                                                                + " (o sus variantes)",
+                                                                        org.argentumforge.engine.game.console.FontStyle.REGULAR,
+                                                                        new org.argentumforge.engine.renderer.RGBColor(
+                                                                                1f,
+                                                                                0f, 0f));
+                                                        return;
+                                                    }
 
-                                                // Ensure movement state is clean
-                                                user.resetMovement();
-                                                org.argentumforge.engine.listeners.KeyHandler.resetInputs();
-                                            },
-                                            () -> {
-                                                isTransferDialogActive = false;
-                                                // User said NO - IGNORE this tile until we move away
-                                                transferIgnored = true;
-                                                ignoredX = x;
-                                                ignoredY = y;
-                                                org.argentumforge.engine.listeners.KeyHandler.resetInputs();
-                                                org.tinylog.Logger.info(
-                                                        "Transfer Cancelled. Ignoring tile (" + x + "," + y
-                                                                + ") until move.");
-                                            });
+                                                    // Update User Pos
+                                                    user.getUserPos().setX(destX);
+                                                    user.getUserPos().setY(destY);
+
+                                                    // Update Camera
+                                                    camera.update(destX, destY);
+
+                                                    // Refresh Character (places at new pos)
+                                                    user.refreshUserCharacter();
+
+                                                    // Ensure movement state is clean
+                                                    user.resetMovement();
+                                                    org.argentumforge.engine.listeners.KeyHandler.resetInputs();
+                                                },
+                                                () -> {
+                                                    isTransferDialogActive = false;
+                                                    // User said NO - IGNORE this tile until we move away
+                                                    transferIgnored = true;
+                                                    ignoredX = x;
+                                                    ignoredY = y;
+                                                    org.argentumforge.engine.listeners.KeyHandler.resetInputs();
+                                                    org.tinylog.Logger.info(
+                                                            "Transfer Cancelled. Ignoring tile (" + x + "," + y
+                                                                    + ") until move.");
+                                                });
+                                    }
                                 }
                             }
                         }
@@ -366,6 +373,11 @@ public class EditorInputManager {
     }
 
     private boolean isValidTile(int x, int y) {
-        return mapData != null && x >= 1 && x < mapData.length && y >= 1 && y < mapData[0].length;
+        var context = GameData.getActiveContext();
+        if (context != null && context.getMapData() != null) {
+            MapData[][] mapData = context.getMapData();
+            return x >= 1 && x < mapData.length && y >= 1 && y < mapData[0].length;
+        }
+        return false;
     }
 }
