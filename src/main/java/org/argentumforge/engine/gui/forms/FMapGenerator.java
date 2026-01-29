@@ -242,7 +242,8 @@ public class FMapGenerator extends Form {
         }
 
         if (!newTiles.isEmpty()) {
-            CommandManager.getInstance().executeCommand(new BulkTileChangeCommand(1, oldTiles, newTiles));
+            CommandManager.getInstance()
+                    .executeCommand(new BulkTileChangeCommand(GameData.getActiveContext(), 1, oldTiles, newTiles));
         }
     }
 }

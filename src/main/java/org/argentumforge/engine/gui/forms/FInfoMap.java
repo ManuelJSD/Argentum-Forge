@@ -11,6 +11,8 @@ import org.argentumforge.engine.utils.GameData;
 import org.argentumforge.engine.utils.inits.MapProperties;
 import org.argentumforge.engine.i18n.I18n;
 import org.argentumforge.engine.audio.Sound;
+import org.argentumforge.engine.utils.editor.commands.CommandManager;
+import org.argentumforge.engine.utils.editor.commands.MapPropertiesChangeCommand;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -190,8 +192,9 @@ public final class FInfoMap extends Form {
         changeAction.accept(newProps);
 
         // Execute Command (this will apply newProps to GameData.mapProperties)
-        org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
-                new org.argentumforge.engine.utils.editor.commands.MapPropertiesChangeCommand(oldProps, newProps));
+        // Ejecutar comando
+        CommandManager.getInstance()
+                .executeCommand(new MapPropertiesChangeCommand(GameData.getActiveContext(), oldProps, newProps));
 
         // Refresh UI from the (now updated) GameData
         refreshData();

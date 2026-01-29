@@ -1,12 +1,11 @@
 package org.argentumforge.engine.utils.editor.commands;
 
 import org.argentumforge.engine.i18n.I18n;
-import static org.argentumforge.engine.utils.GameData.mapData;
 
 /**
  * Comando para registrar y revertir cambios en los traslados de un tile.
  */
-public class TransferChangeCommand implements Command {
+public class TransferChangeCommand extends AbstractCommand {
     @Override
     public String getName() {
         return I18n.INSTANCE.get("history.command.transfer");
@@ -16,9 +15,10 @@ public class TransferChangeCommand implements Command {
     private final int oldExitMap, oldExitX, oldExitY;
     private final int newExitMap, newExitX, newExitY;
 
-    public TransferChangeCommand(int x, int y,
+    public TransferChangeCommand(org.argentumforge.engine.utils.MapContext context, int x, int y,
             int oldExitMap, int oldExitX, int oldExitY,
             int newExitMap, int newExitX, int newExitY) {
+        super(context);
         this.x = x;
         this.y = y;
         this.oldExitMap = oldExitMap;
@@ -40,6 +40,7 @@ public class TransferChangeCommand implements Command {
     }
 
     private void apply(int exitMap, int exitX, int exitY) {
+        var mapData = context.getMapData();
         mapData[x][y].setExitMap(exitMap);
         mapData[x][y].setExitX(exitX);
         mapData[x][y].setExitY(exitY);

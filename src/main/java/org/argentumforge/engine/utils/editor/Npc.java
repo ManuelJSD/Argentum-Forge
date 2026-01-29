@@ -95,7 +95,8 @@ public class Npc {
                 return;
 
             org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
-                    new org.argentumforge.engine.utils.editor.commands.NpcChangeCommand(x, y, oldNpc,
+                    new org.argentumforge.engine.utils.editor.commands.NpcChangeCommand(
+                            org.argentumforge.engine.utils.GameData.getActiveContext(), x, y, oldNpc,
                             npcNumber));
         }
     }
@@ -107,7 +108,8 @@ public class Npc {
                 return;
 
             org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
-                    new org.argentumforge.engine.utils.editor.commands.NpcChangeCommand(x, y, oldNpc, 0));
+                    new org.argentumforge.engine.utils.editor.commands.NpcChangeCommand(
+                            org.argentumforge.engine.utils.GameData.getActiveContext(), x, y, oldNpc, 0));
         }
     }
 

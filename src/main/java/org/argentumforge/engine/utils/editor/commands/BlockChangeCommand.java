@@ -2,13 +2,13 @@ package org.argentumforge.engine.utils.editor.commands;
 
 import org.argentumforge.engine.i18n.I18n;
 import java.util.Map;
-import static org.argentumforge.engine.utils.GameData.mapData;
+import org.argentumforge.engine.utils.MapContext;
 
 /**
  * Comando para registrar y revertir cambios de bloqueos.
  * Soporta cambios en múltiples tiles (útil para pinceles).
  */
-public class BlockChangeCommand implements Command {
+public class BlockChangeCommand extends AbstractCommand {
     @Override
     public String getName() {
         return I18n.INSTANCE.get("history.command.block");
@@ -20,13 +20,16 @@ public class BlockChangeCommand implements Command {
     public static record TilePos(int x, int y) {
     }
 
-    public BlockChangeCommand(Map<TilePos, Boolean> oldStates, Map<TilePos, Boolean> newStates) {
+    public BlockChangeCommand(org.argentumforge.engine.utils.MapContext context, Map<TilePos, Boolean> oldStates,
+            Map<TilePos, Boolean> newStates) {
+        super(context);
         this.oldStates = oldStates;
         this.newStates = newStates;
     }
 
     @Override
     public void execute() {
+        var mapData = context.getMapData();
         for (Map.Entry<TilePos, Boolean> entry : newStates.entrySet()) {
             mapData[entry.getKey().x][entry.getKey().y].setBlocked(entry.getValue());
         }
@@ -34,6 +37,7 @@ public class BlockChangeCommand implements Command {
 
     @Override
     public void undo() {
+        var mapData = context.getMapData();
         for (Map.Entry<TilePos, Boolean> entry : oldStates.entrySet()) {
             mapData[entry.getKey().x][entry.getKey().y].setBlocked(entry.getValue());
         }

@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * Comando para eliminar múltiples entidades en una sola operación atómica.
  */
-public class DeleteEntitiesCommand implements Command {
+public class DeleteEntitiesCommand extends AbstractCommand {
     @Override
     public String getName() {
         return I18n.INSTANCE.get("history.command.delete_entity");
@@ -16,21 +16,23 @@ public class DeleteEntitiesCommand implements Command {
 
     private final List<Command> commands = new ArrayList<>();
 
-    public DeleteEntitiesCommand(List<Selection.SelectedEntity> entities) {
+    public DeleteEntitiesCommand(org.argentumforge.engine.utils.MapContext context,
+            List<Selection.SelectedEntity> entities) {
+        super(context);
         for (Selection.SelectedEntity se : entities) {
             if (se.type == Selection.EntityType.NPC) {
-                commands.add(new NpcChangeCommand(se.x, se.y, se.id, 0));
+                commands.add(new NpcChangeCommand(context, se.x, se.y, se.id, 0));
             } else if (se.type == Selection.EntityType.OBJECT) {
-                commands.add(new ObjChangeCommand(se.x, se.y, se.id, 0));
+                commands.add(new ObjChangeCommand(context, se.x, se.y, se.id, 0));
             } else if (se.type == Selection.EntityType.TILE) {
                 int[] oldLayers = new int[5];
                 int[] newLayers = new int[5]; // Todo a 0
                 for (int i = 1; i <= 4; i++) {
-                    oldLayers[i] = org.argentumforge.engine.utils.GameData.mapData[se.x][se.y].getLayer(i)
+                    oldLayers[i] = context.getMapData()[se.x][se.y].getLayer(i)
                             .getGrhIndex();
                     newLayers[i] = 0;
                 }
-                commands.add(new SurfaceChangeCommand(se.x, se.y, oldLayers, newLayers));
+                commands.add(new SurfaceChangeCommand(context, se.x, se.y, oldLayers, newLayers));
             }
         }
     }

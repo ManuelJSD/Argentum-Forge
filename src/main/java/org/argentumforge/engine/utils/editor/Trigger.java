@@ -1,7 +1,5 @@
 package org.argentumforge.engine.utils.editor;
 
-import static org.argentumforge.engine.utils.GameData.mapData;
-
 public class Trigger {
 
     public enum BrushShape {
@@ -30,6 +28,7 @@ public class Trigger {
     }
 
     public void trigger_edit(int x, int y) {
+        var mapData = org.argentumforge.engine.utils.GameData.getActiveContext().getMapData();
         if (!isActive || mapData == null)
             return;
 
@@ -65,7 +64,8 @@ public class Trigger {
 
         if (!oldStates.isEmpty()) {
             org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
-                    new org.argentumforge.engine.utils.editor.commands.TriggerChangeCommand(oldStates, newStates));
+                    new org.argentumforge.engine.utils.editor.commands.TriggerChangeCommand(
+                            org.argentumforge.engine.utils.GameData.getActiveContext(), oldStates, newStates));
         }
     }
 

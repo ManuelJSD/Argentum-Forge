@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * Comando para mover múltiples entidades en una sola operación atómica.
  */
-public class BulkEntityMoveCommand implements Command {
+public class BulkEntityMoveCommand extends AbstractCommand {
 
     @Override
     public String getName() {
@@ -33,13 +33,15 @@ public class BulkEntityMoveCommand implements Command {
     private final List<MoveData> moves = new ArrayList<>();
     private final List<MoveEntityCommand> subCommands = new ArrayList<>();
 
-    public BulkEntityMoveCommand(List<Selection.SelectedEntity> entities, int anchorDestX, int anchorDestY) {
+    public BulkEntityMoveCommand(org.argentumforge.engine.utils.MapContext context,
+            List<Selection.SelectedEntity> entities, int anchorDestX, int anchorDestY) {
+        super(context);
         for (Selection.SelectedEntity se : entities) {
             int nx = anchorDestX + se.offsetX;
             int ny = anchorDestY + se.offsetY;
             if (se.x != nx || se.y != ny) {
                 moves.add(new MoveData(se.x, se.y, nx, ny, se.type, se.id));
-                subCommands.add(new MoveEntityCommand(se.x, se.y, nx, ny, se.type, se.id));
+                subCommands.add(new MoveEntityCommand(context, se.x, se.y, nx, ny, se.type, se.id));
             }
         }
     }

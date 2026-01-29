@@ -49,7 +49,8 @@ public class AutoTiler {
 
         if (!newTiles.isEmpty()) {
             org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
-                    new org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand(layer, oldTiles,
+                    new org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand(
+                            GameData.getActiveContext(), layer, oldTiles,
                             newTiles));
         }
     }
@@ -168,7 +169,8 @@ public class AutoTiler {
 
         if (!newTiles.isEmpty()) {
             org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
-                    new org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand(layer, oldTiles,
+                    new org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand(
+                            GameData.getActiveContext(), layer, oldTiles,
                             newTiles));
         }
     }
