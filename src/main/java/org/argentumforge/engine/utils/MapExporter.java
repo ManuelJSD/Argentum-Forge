@@ -12,7 +12,7 @@ import java.nio.IntBuffer;
 
 import static org.argentumforge.engine.game.models.Character.drawCharacter;
 import static org.argentumforge.engine.renderer.Drawn.drawTexture;
-import static org.argentumforge.engine.utils.GameData.mapData;
+// import static org.argentumforge.engine.utils.GameData.mapData; // Removed static import
 import static org.argentumforge.engine.utils.AssetRegistry.grhData;
 
 import static org.lwjgl.opengl.GL11.*;
@@ -24,8 +24,11 @@ public class MapExporter {
     private static final int TILE_SIZE = 32;
 
     public static void exportMap(String filePath) {
-        if (mapData == null)
+        var context = GameData.getActiveContext();
+        if (context == null || context.getMapData() == null)
             return;
+
+        var mapData = context.getMapData();
 
         int mapWidth = mapData.length;
         int mapHeight = mapData[0].length;
@@ -79,7 +82,7 @@ public class MapExporter {
         glClear(GL_COLOR_BUFFER_BIT);
 
         Engine.batch.begin();
-        renderMapContent(mapWidth, mapHeight);
+        renderMapContent(mapData, mapWidth, mapHeight);
         Engine.batch.end();
 
         // Leer Píxeles
@@ -121,7 +124,8 @@ public class MapExporter {
         System.out.println("Mapa exportado a: " + filePath);
     }
 
-    private static void renderMapContent(int mapWidth, int mapHeight) {
+    private static void renderMapContent(org.argentumforge.engine.utils.inits.MapData[][] mapData, int mapWidth,
+            int mapHeight) {
         RenderSettings renderSettings = Options.INSTANCE.getRenderSettings();
         Weather weather = Weather.INSTANCE;
 

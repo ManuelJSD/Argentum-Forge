@@ -8,7 +8,7 @@ import org.argentumforge.engine.utils.AssetRegistry;
 import static org.argentumforge.engine.game.models.Direction.DOWN;
 import static org.argentumforge.engine.renderer.Drawn.drawTexture;
 
-import static org.argentumforge.engine.utils.GameData.*;
+// static import removed
 import static org.argentumforge.engine.utils.AssetRegistry.*;
 import static org.argentumforge.engine.utils.Time.timerTicksPerFrame;
 
@@ -88,8 +88,17 @@ public final class Character {
     /**
      * Crea un nuevo personaje segun los parametros establecidos.
      */
+    /**
+     * Crea un nuevo personaje segun los parametros establecidos.
+     */
     public static void makeChar(short charIndex, int body, int head, Direction direction, int x, int y, int weapon,
             int shield, int helmet) {
+        var context = org.argentumforge.engine.utils.GameData.getActiveContext();
+        if (context == null)
+            return;
+        var charList = context.getCharList();
+        var mapData = context.getMapData();
+
         // apuntamos al ultimo char
         if (charIndex > lastChar)
             lastChar = charIndex;
@@ -148,6 +157,12 @@ public final class Character {
      *                  Elimina un personaje del array de personajes.
      */
     public static void eraseChar(short charIndex) {
+        var context = org.argentumforge.engine.utils.GameData.getActiveContext();
+        if (context == null)
+            return;
+        var charList = context.getCharList();
+        var mapData = context.getMapData();
+
         charList[charIndex].setActive(false);
 
         if (charIndex == lastChar) {
@@ -172,6 +187,12 @@ public final class Character {
      * elimina todos los personajes de nuestro array charList.
      */
     public static void eraseAllChars() {
+        var context = org.argentumforge.engine.utils.GameData.getActiveContext();
+        if (context == null)
+            return;
+        var charList = context.getCharList();
+        var mapData = context.getMapData();
+
         for (short i = 1; i < charList.length; i++) {
             if (charList[i] != null && charList[i].isActive()) {
                 mapData[charList[i].getPos().getX()][charList[i].getPos().getY()].setCharIndex(0);
@@ -186,14 +207,22 @@ public final class Character {
      *                  Resetea los atributos del personaje.
      */
     private static void resetCharInfo(short charIndex) {
-        charList[charIndex] = new Character(); // al crear un obj nuevo, el viejo sera eliminado por el recolector de
-                                               // basura de java.
+        var context = org.argentumforge.engine.utils.GameData.getActiveContext();
+        if (context != null) {
+            context.getCharList()[charIndex] = new Character();
+        }
     }
 
     /**
      * Actualiza todos los personajes visibles.
      */
     public static void refreshAllChars() {
+        var context = org.argentumforge.engine.utils.GameData.getActiveContext();
+        if (context == null)
+            return;
+        var charList = context.getCharList();
+        var mapData = context.getMapData();
+
         for (int loopC = 1; loopC <= lastChar; loopC++)
             if (charList[loopC] != null && charList[loopC].isActive())
                 mapData[charList[loopC].getPos().getX()][charList[loopC].getPos().getY()].setCharIndex(loopC);
@@ -206,6 +235,11 @@ public final class Character {
 
     public static void drawCharacter(int charIndex, int PixelOffsetX, int PixelOffsetY, float alpha,
             RGBColor ambientcolor, float scaleX, float scaleY, float skewX) {
+        var context = org.argentumforge.engine.utils.GameData.getActiveContext();
+        if (context == null)
+            return;
+        var charList = context.getCharList();
+
         boolean moved = false;
 
         // Calcular factor de respiración

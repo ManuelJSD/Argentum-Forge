@@ -22,11 +22,31 @@ public class MapContext {
     private final Stack<Command> redoStack = new Stack<>();
     private int savedUndoStackSize = 0;
 
+    // Persistent Camera/User Position
+    private int savedUserX = 50;
+    private int savedUserY = 50;
+
     public MapContext(String filePath, MapData[][] mapData, MapProperties mapProperties, Character[] charList) {
         this.filePath = filePath;
         this.mapData = mapData;
         this.mapProperties = mapProperties;
         this.charList = charList;
+    }
+
+    public int getSavedUserX() {
+        return savedUserX;
+    }
+
+    public void setSavedUserX(int x) {
+        this.savedUserX = x;
+    }
+
+    public int getSavedUserY() {
+        return savedUserY;
+    }
+
+    public void setSavedUserY(int y) {
+        this.savedUserY = y;
     }
 
     public MapManager.MapSaveOptions getSaveOptions() {

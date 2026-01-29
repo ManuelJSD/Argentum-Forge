@@ -2,7 +2,9 @@ package org.argentumforge.engine.utils.editor;
 
 import java.util.ArrayList;
 import java.util.List;
-import static org.argentumforge.engine.utils.GameData.mapData;
+import org.argentumforge.engine.utils.GameData;
+import org.argentumforge.engine.utils.inits.MapData;
+// import static org.argentumforge.engine.utils.GameData.mapData; // Removed static import
 
 /**
  * Gestor de estado para la herramienta de selección y movimiento.
@@ -105,7 +107,12 @@ public class Selection {
      * @param ctrlPressed Si se está pulsando Ctrl (para añadir a selección)
      */
     public void tryGrab(int x, int y, boolean multiSelectPressed) {
-        if (mapData == null || x < 0 || x >= mapData.length || y < 0 || y >= mapData[0].length)
+        var context = GameData.getActiveContext();
+        if (context == null || context.getMapData() == null)
+            return;
+        var mapData = context.getMapData();
+
+        if (x < 0 || x >= mapData.length || y < 0 || y >= mapData[0].length)
             return;
 
         // ¿Hemos pinchado en algo ya seleccionado?
@@ -121,7 +128,7 @@ public class Selection {
             }
         } else {
             // Intentar seleccionar algo nuevo
-            SelectedEntity newEntity = getAt(x, y);
+            SelectedEntity newEntity = getAt(mapData, x, y);
             if (newEntity != null) {
                 if (!multiSelectPressed)
                     selectedEntities.clear();
@@ -152,7 +159,7 @@ public class Selection {
         return null;
     }
 
-    private SelectedEntity getAt(int x, int y) {
+    private SelectedEntity getAt(MapData[][] mapData, int x, int y) {
         if (mapData[x][y].getNpcIndex() > 0) {
             return new SelectedEntity(EntityType.NPC, mapData[x][y].getNpcIndex(), x, y);
         } else if (mapData[x][y].getObjGrh().getGrhIndex() > 0) {

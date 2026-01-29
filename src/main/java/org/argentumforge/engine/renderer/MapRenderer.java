@@ -12,7 +12,7 @@ import static org.argentumforge.engine.game.models.Character.drawCharacter;
 import static org.argentumforge.engine.renderer.Drawn.drawTexture;
 import static org.argentumforge.engine.renderer.Drawn.drawGrhIndex;
 import static org.argentumforge.engine.scenes.Camera.*;
-import static org.argentumforge.engine.utils.GameData.mapData;
+// static import removed
 import static org.argentumforge.engine.utils.AssetRegistry.grhData;
 import static org.argentumforge.engine.utils.AssetRegistry.objs;
 import org.argentumforge.engine.utils.inits.ObjData;
@@ -37,19 +37,22 @@ public class MapRenderer {
     }
 
     public void render(int pixelOffsetX, int pixelOffsetY) {
-        if (mapData == null)
+        var context = org.argentumforge.engine.utils.GameData.getActiveContext();
+        if (context == null || context.getMapData() == null)
             return;
+
+        var mapData = context.getMapData();
         RenderSettings renderSettings = Options.INSTANCE.getRenderSettings();
 
-        renderFirstLayer(renderSettings, pixelOffsetX, pixelOffsetY);
-        renderSecondLayer(renderSettings, pixelOffsetX, pixelOffsetY);
-        renderThirdLayer(renderSettings, pixelOffsetX, pixelOffsetY);
-        renderFourthLayer(renderSettings, pixelOffsetX, pixelOffsetY);
+        renderFirstLayer(mapData, renderSettings, pixelOffsetX, pixelOffsetY);
+        renderSecondLayer(mapData, renderSettings, pixelOffsetX, pixelOffsetY);
+        renderThirdLayer(mapData, renderSettings, pixelOffsetX, pixelOffsetY);
+        renderFourthLayer(mapData, renderSettings, pixelOffsetX, pixelOffsetY);
 
         // Ocultar overlays técnicos en modo foto
         if (!renderSettings.isPhotoModeActive()) {
-            renderBlockOverlays(renderSettings, pixelOffsetX, pixelOffsetY);
-            renderTranslationOverlays(renderSettings, pixelOffsetX, pixelOffsetY);
+            renderBlockOverlays(mapData, renderSettings, pixelOffsetX, pixelOffsetY);
+            renderTranslationOverlays(mapData, renderSettings, pixelOffsetX, pixelOffsetY);
         }
 
         if (renderSettings.isPhotoModeActive()) {
@@ -57,7 +60,8 @@ public class MapRenderer {
         }
     }
 
-    private void renderFirstLayer(RenderSettings renderSettings, final int pixelOffsetX, final int pixelOffsetY) {
+    private void renderFirstLayer(org.argentumforge.engine.utils.inits.MapData[][] mapData,
+            RenderSettings renderSettings, final int pixelOffsetX, final int pixelOffsetY) {
         if (renderSettings.getShowLayer()[0]) {
             camera.setScreenY(camera.getMinYOffset() - TILE_BUFFER_SIZE);
             for (int y = camera.getMinY(); y <= camera.getMaxY(); y++) {
@@ -78,7 +82,8 @@ public class MapRenderer {
         }
     }
 
-    private void renderSecondLayer(RenderSettings renderSettings, final int pixelOffsetX, final int pixelOffsetY) {
+    private void renderSecondLayer(org.argentumforge.engine.utils.inits.MapData[][] mapData,
+            RenderSettings renderSettings, final int pixelOffsetX, final int pixelOffsetY) {
         if (!renderSettings.getShowLayer()[1] && !renderSettings.getShowOJBs())
             return;
 
@@ -159,7 +164,8 @@ public class MapRenderer {
         drawCharacter(charIndex, x, y, alpha, new RGBColor(0, 0, 0), scaleX, scaleY, skewX);
     }
 
-    private void renderThirdLayer(RenderSettings renderSettings, final int pixelOffsetX, final int pixelOffsetY) {
+    private void renderThirdLayer(org.argentumforge.engine.utils.inits.MapData[][] mapData,
+            RenderSettings renderSettings, final int pixelOffsetX, final int pixelOffsetY) {
         camera.setScreenY(camera.getMinYOffset() - TILE_BUFFER_SIZE);
         for (int y = camera.getMinY(); y <= camera.getMaxY(); y++) {
             camera.setScreenX(camera.getMinXOffset() - TILE_BUFFER_SIZE);
@@ -262,7 +268,8 @@ public class MapRenderer {
         }
     }
 
-    private void renderFourthLayer(RenderSettings renderSettings, final int pixelOffsetX, final int pixelOffsetY) {
+    private void renderFourthLayer(org.argentumforge.engine.utils.inits.MapData[][] mapData,
+            RenderSettings renderSettings, final int pixelOffsetX, final int pixelOffsetY) {
         if (renderSettings.getShowLayer()[3]) {
             checkEffectCeiling();
             if (alphaCeiling > 0.0f) {
@@ -284,7 +291,8 @@ public class MapRenderer {
         }
     }
 
-    private void renderBlockOverlays(RenderSettings renderSettings, final int pixelOffsetX, final int pixelOffsetY) {
+    private void renderBlockOverlays(org.argentumforge.engine.utils.inits.MapData[][] mapData,
+            RenderSettings renderSettings, final int pixelOffsetX, final int pixelOffsetY) {
         if (renderSettings.getShowBlock()) {
             int grhBlock = 4;
             camera.setScreenY(camera.getMinYOffset() - TILE_BUFFER_SIZE);
@@ -305,7 +313,8 @@ public class MapRenderer {
         }
     }
 
-    private void renderTranslationOverlays(RenderSettings renderSettings, final int pixelOffsetX,
+    private void renderTranslationOverlays(org.argentumforge.engine.utils.inits.MapData[][] mapData,
+            RenderSettings renderSettings, final int pixelOffsetX,
             final int pixelOffsetY) {
         if (renderSettings.getShowMapTransfer()) {
             int grhTrans = 3;
@@ -360,8 +369,10 @@ public class MapRenderer {
             camera.setScreenY(camera.getMinYOffset() - TILE_BUFFER_SIZE);
             imgui.ImDrawList drawList = imgui.ImGui.getBackgroundDrawList();
 
-            if (mapData == null)
+            var context = org.argentumforge.engine.utils.GameData.getActiveContext();
+            if (context == null || context.getMapData() == null)
                 return;
+            var mapData = context.getMapData();
 
             for (int y = camera.getMinY(); y <= camera.getMaxY(); y++) {
                 camera.setScreenX(camera.getMinXOffset() - TILE_BUFFER_SIZE);
