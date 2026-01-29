@@ -53,55 +53,23 @@ public final class Drawn {
      */
     public static void geometryBoxRender(int grh_index, int x, int y, int src_width, int src_height, float sX, float sY,
             boolean blend, float alpha, RGBColor color) {
-        geometryBoxRender(grh_index, x, y, src_width, src_height, sX, sY, blend, alpha, color, 1.0f, 1.0f);
+        geometryBoxRender(grh_index, x, y, src_width, src_height, sX, sY, blend, alpha, color, 1.0f, 1.0f, 0.0f);
     }
 
     public static void geometryBoxRender(int grh_index, int x, int y, int src_width, int src_height, float sX, float sY,
-            boolean blend, float alpha, RGBColor color, float scaleX, float scaleY) {
+            boolean blend, float alpha, RGBColor color, float scaleX, float scaleY, float skewX) {
         if (grhData == null)
             return;
         final Texture texture = Surface.INSTANCE.getTexture(grhData[grh_index].getFileNum());
         float globalScale = org.argentumforge.engine.scenes.Camera.getZoomScale();
 
-        // Ajustar Y para que el escalado sea desde abajo (pivot bottom-center o
-        // bottom-left)
-        // Por defecto batch.draw dibuja desde top-left o bottom-left? Depende de la
-        // coord system.
-        // En este engine parece (0,0) top-left.
-        // Si escalo Y > 1.0, el sprite crece hacia abajo.
-        // Si queremos respiración (crecer hacia arriba desde los pies), necesitamos
-        // ajustar Y.
-        // El ajuste sería: y - (height * globalScale * scaleY - height * globalScale)
-        // O más simple: drawHeight = src_height * globalScale * scaleY.
-
         float drawWidth = src_width * globalScale * scaleX;
         float drawHeight = src_height * globalScale * scaleY;
 
-        // Ajuste para centrado horizontal si escala X cambia (opcional, por ahora
-        // asumimos X=1.0)
-        // Ajuste para pivote vertical (pies):
-        // Si scaleY cambia, la imagen crece. Si crece hacia abajo y la posicion (x,y)
-        // es top-left, los pies bajan.
-        // Queremos que los pies se mantengan fijos.
-        // Normalmente (x,y) es top-left del tile/sprite.
-        // Si el sprite es mas alto que el tile (personajes altos), se dibuja hacia
-        // arriba?
-        // En `drawTexture` hay logica de centrado `center`.
-
-        // Dado que no quiero romper todo, aplicaré el scale tal cual y veré si flota.
-        // Si flota, corregiré en Character.java ajustando Y.
-
-        // Corrección de pivote inferior (asumiendo Y crece hacia abajo en pantalla y
-        // dibujamos desde top-left):
-        // Si scaleY > 1, height aumenta.
-        // Para que los pies queden igual, debemos subir Y (restar) la diferencia de
-        // altura.
         float heightDiff = drawHeight - (src_height * globalScale);
 
-        // PERO 'y' aquí ya viene calculado desde drawTexture.
-        // Aplicaré el scale directo.
-
-        batch.draw(texture, x, y - heightDiff, sX, sY, src_width, src_height, drawWidth, drawHeight, blend, alpha,
+        batch.draw(texture, x, y - heightDiff, sX, sY, src_width, src_height, drawWidth, drawHeight, skewX, blend,
+                alpha,
                 color);
     }
 
@@ -110,9 +78,14 @@ public final class Drawn {
      */
     public static void geometryBoxRender(Texture texture, int x, int y, int src_width, int src_height, float sX,
             float sY, boolean blend, float alpha, RGBColor color) {
+        geometryBoxRender(texture, x, y, src_width, src_height, sX, sY, 0.0f, blend, alpha, color);
+    }
+
+    public static void geometryBoxRender(Texture texture, int x, int y, int src_width, int src_height, float sX,
+            float sY, float skewX, boolean blend, float alpha, RGBColor color) {
         float scale = org.argentumforge.engine.scenes.Camera.getZoomScale();
-        batch.draw(texture, x, y, sX, sY, src_width, src_height, src_width * scale, src_height * scale, blend, alpha,
-                color);
+        batch.draw(texture, x, y, sX, sY, src_width, src_height, src_width * scale, src_height * scale, skewX, blend,
+                alpha, color);
     }
 
     /**
@@ -120,11 +93,16 @@ public final class Drawn {
      */
     public static void drawTexture(GrhInfo grh, int x, int y, boolean center, boolean animate, boolean blend,
             float alpha, RGBColor color) {
-        drawTexture(grh, x, y, center, animate, blend, alpha, color, 1.0f, 1.0f);
+        drawTexture(grh, x, y, center, animate, blend, alpha, color, 1.0f, 1.0f, 0.0f);
     }
 
     public static void drawTexture(GrhInfo grh, int x, int y, boolean center, boolean animate, boolean blend,
             float alpha, RGBColor color, float scaleX, float scaleY) {
+        drawTexture(grh, x, y, center, animate, blend, alpha, color, scaleX, scaleY, 0.0f);
+    }
+
+    public static void drawTexture(GrhInfo grh, int x, int y, boolean center, boolean animate, boolean blend,
+            float alpha, RGBColor color, float scaleX, float scaleY, float skewX) {
         if (grhData == null)
             return;
         if (grh.getGrhIndex() <= 0 || grh.getGrhIndex() >= grhData.length || grhData[grh.getGrhIndex()] == null
@@ -177,7 +155,71 @@ public final class Drawn {
                 grhData[currentGrhIndex].getPixelWidth(),
                 grhData[currentGrhIndex].getPixelHeight(),
                 grhData[currentGrhIndex].getsX(),
-                grhData[currentGrhIndex].getsY(), blend, alpha, color, scaleX, scaleY);
+                grhData[currentGrhIndex].getsY(), blend, alpha, color, scaleX, scaleY, skewX);
+    }
+
+    /**
+     * Dibuja una textura con un gradiente de color por vértice.
+     */
+    public static void drawGradient(Texture texture, int x, int y, int width, int height,
+            float r1, float g1, float b1, float a1,
+            float r2, float g2, float b2, float a2,
+            float r3, float g3, float b3, float a3,
+            float r4, float g4, float b4, float a4) {
+        // Usar blend=false para GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA (transparencia
+        // estándar)
+        batch.draw(texture, x, y, 0, 0, texture.getTex_width(), texture.getTex_height(),
+                width, height, false,
+                r1, g1, b1, a1,
+                r2, g2, b2, a2,
+                r3, g3, b3, a3,
+                r4, g4, b4, a4);
+    }
+
+    /**
+     * Dibuja un efecto de viñeta (oscurecimiento de bordes) sobre toda la pantalla.
+     * Mapeo de Vértices: V1=Top-Left, V0=Bottom-Left, V2=Top-Right, V3=Bottom-Right
+     */
+    public static void drawVignette(int width, int height, float intensity) {
+        Texture white = Surface.INSTANCE.getWhiteTexture();
+        int vSize = (int) (Math.min(width, height) * 0.4f);
+
+        // Top: Oscuro arriba (V1, V2), Transparente abajo (V0, V3)
+        drawGradient(white, 0, 0, width, vSize,
+                0, 0, 0, 0, // V0 (Bottom-Left)
+                0, 0, 0, intensity, // V1 (Top-Left)
+                0, 0, 0, intensity, // V2 (Top-Right)
+                0, 0, 0, 0 // V3 (Bottom-Right)
+        );
+
+        // Bottom: Transparente arriba (V1, V2), Oscuro abajo (V0, V3)
+        drawGradient(white, 0, height - vSize, width, vSize,
+                0, 0, 0, intensity, // V0 (Bottom-Left)
+                0, 0, 0, 0, // V1 (Top-Left)
+                0, 0, 0, 0, // V2 (Top-Right)
+                0, 0, 0, intensity // V3 (Bottom-Right)
+        );
+
+        // Left: Oscuro izquierda (V0, V1), Transparente derecha (V2, V3)
+        drawGradient(white, 0, 0, vSize, height,
+                0, 0, 0, intensity, // V0 (Bottom-Left)
+                0, 0, 0, intensity, // V1 (Top-Left)
+                0, 0, 0, 0, // V2 (Top-Right)
+                0, 0, 0, 0 // V3 (Bottom-Right)
+        );
+
+        // Right: Transparente izquierda (V0, V1), Oscuro derecha (V2, V3)
+        drawGradient(white, width - vSize, 0, vSize, height,
+                0, 0, 0, 0, // V0 (Bottom-Left)
+                0, 0, 0, 0, // V1 (Top-Left)
+                0, 0, 0, intensity, // V2 (Top-Right)
+                0, 0, 0, intensity // V3 (Bottom-Right)
+        );
+    }
+
+    public static void drawRect(int x, int y, int width, int height, float r, float g, float b, float a) {
+        batch.draw(Surface.INSTANCE.getWhiteTexture(), x, y, 0, 0, 1, 1, width, height, false, a,
+                new RGBColor(r, g, b));
     }
 
     /**

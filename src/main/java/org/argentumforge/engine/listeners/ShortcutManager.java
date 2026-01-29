@@ -132,6 +132,9 @@ public class ShortcutManager {
                 case MAP_PROPERTIES:
                     ImGUISystem.INSTANCE.show(new org.argentumforge.engine.gui.forms.FInfoMap());
                     break;
+                case TAKE_SCREENSHOT:
+                    org.argentumforge.engine.utils.ScreenshotUtils.takeScreenshot();
+                    break;
                 default:
                     break;
             }

@@ -14,6 +14,9 @@ import static org.argentumforge.engine.renderer.Drawn.drawGrhIndex;
 import static org.argentumforge.engine.scenes.Camera.*;
 import static org.argentumforge.engine.utils.GameData.mapData;
 import static org.argentumforge.engine.utils.AssetRegistry.grhData;
+import static org.argentumforge.engine.utils.AssetRegistry.objs;
+import org.argentumforge.engine.utils.inits.ObjData;
+import org.argentumforge.engine.game.models.ObjectType;
 
 /**
  * Encargado de renderizar las capas del mapa y los overlays técnicos.
@@ -27,6 +30,7 @@ public class MapRenderer {
     private final User user = User.INSTANCE;
 
     private float alphaCeiling = 1.0f;
+    private PostProcessor postProcessor;
 
     public MapRenderer(Camera camera) {
         this.camera = camera;
@@ -41,8 +45,16 @@ public class MapRenderer {
         renderSecondLayer(renderSettings, pixelOffsetX, pixelOffsetY);
         renderThirdLayer(renderSettings, pixelOffsetX, pixelOffsetY);
         renderFourthLayer(renderSettings, pixelOffsetX, pixelOffsetY);
-        renderBlockOverlays(renderSettings, pixelOffsetX, pixelOffsetY);
-        renderTranslationOverlays(renderSettings, pixelOffsetX, pixelOffsetY);
+
+        // Ocultar overlays técnicos en modo foto
+        if (!renderSettings.isPhotoModeActive()) {
+            renderBlockOverlays(renderSettings, pixelOffsetX, pixelOffsetY);
+            renderTranslationOverlays(renderSettings, pixelOffsetX, pixelOffsetY);
+        }
+
+        if (renderSettings.isPhotoModeActive()) {
+            renderPhotoEffects(renderSettings);
+        }
     }
 
     private void renderFirstLayer(RenderSettings renderSettings, final int pixelOffsetX, final int pixelOffsetY) {
@@ -52,9 +64,11 @@ public class MapRenderer {
                 camera.setScreenX(camera.getMinXOffset() - TILE_BUFFER_SIZE);
                 for (int x = camera.getMinX(); x <= camera.getMaxX(); x++) {
                     if (mapData[x][y].getLayer(1).getGrhIndex() != 0) {
+                        int finalX = POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX;
+                        int finalY = POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY;
+
                         drawTexture(mapData[x][y].getLayer(1),
-                                POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX,
-                                POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY,
+                                finalX, finalY,
                                 true, true, false, 1.0f, weather.getWeatherColor());
                     }
                     camera.incrementScreenX();
@@ -97,9 +111,21 @@ public class MapRenderer {
                             }
 
                             if (!isDragged) {
-                                drawTexture(mapData[x][y].getObjGrh(),
-                                        POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX,
-                                        POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY,
+                                int drawX = POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX;
+                                int drawY = POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY;
+
+                                // Sombras proyectadas para objetos pequeños
+                                if (renderSettings.isPhotoModeActive() && renderSettings.isPhotoShadows()) {
+                                    ObjData objModel = objs.get(mapData[x][y].getObjIndex());
+                                    boolean isDoor = objModel != null && objModel.getType() == ObjectType.DOOR.getId();
+
+                                    if (!isDoor) {
+                                        renderShadow(mapData[x][y].getObjGrh(), drawX + 2, drawY + 1,
+                                                0.35f, 1.0f, 0.45f, 22.0f, renderSettings.isPhotoSoftShadows());
+                                    }
+                                }
+
+                                drawTexture(mapData[x][y].getObjGrh(), drawX, drawY,
                                         true, true, false, 1.0f, weather.getWeatherColor());
                             }
                         }
@@ -109,6 +135,28 @@ public class MapRenderer {
             }
             camera.incrementScreenY();
         }
+    }
+
+    private void renderShadow(org.argentumforge.engine.utils.inits.GrhInfo grh, int x, int y, float alpha, float scaleX,
+            float scaleY, float skewX, boolean soft) {
+        if (soft) {
+            float softAlpha = alpha * 0.4f;
+            drawTexture(grh, x - 1, y, true, true, false, softAlpha, new RGBColor(0, 0, 0), scaleX, scaleY, skewX);
+            drawTexture(grh, x + 1, y, true, true, false, softAlpha, new RGBColor(0, 0, 0), scaleX, scaleY, skewX);
+            drawTexture(grh, x, y - 1, true, true, false, softAlpha, new RGBColor(0, 0, 0), scaleX, scaleY, skewX);
+        }
+        drawTexture(grh, x, y, true, true, false, alpha, new RGBColor(0, 0, 0), scaleX, scaleY, skewX);
+    }
+
+    private void renderCharShadow(int charIndex, int x, int y, float alpha, float scaleX, float scaleY, float skewX,
+            boolean soft) {
+        if (soft) {
+            float softAlpha = alpha * 0.4f;
+            drawCharacter(charIndex, x - 1, y, softAlpha, new RGBColor(0, 0, 0), scaleX, scaleY, skewX);
+            drawCharacter(charIndex, x + 1, y, softAlpha, new RGBColor(0, 0, 0), scaleX, scaleY, skewX);
+            drawCharacter(charIndex, x, y - 1, softAlpha, new RGBColor(0, 0, 0), scaleX, scaleY, skewX);
+        }
+        drawCharacter(charIndex, x, y, alpha, new RGBColor(0, 0, 0), scaleX, scaleY, skewX);
     }
 
     private void renderThirdLayer(RenderSettings renderSettings, final int pixelOffsetX, final int pixelOffsetY) {
@@ -133,9 +181,21 @@ public class MapRenderer {
                             }
 
                             if (!isDragged) {
-                                drawTexture(mapData[x][y].getObjGrh(),
-                                        POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX,
-                                        POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY,
+                                int drawX = POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX;
+                                int drawY = POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY;
+
+                                // Sombras proyectadas para objetos grandes
+                                if (renderSettings.isPhotoModeActive() && renderSettings.isPhotoShadows()) {
+                                    ObjData objModel = objs.get(mapData[x][y].getObjIndex());
+                                    boolean isDoor = objModel != null && objModel.getType() == ObjectType.DOOR.getId();
+
+                                    if (!isDoor) {
+                                        renderShadow(mapData[x][y].getObjGrh(), drawX + 2, drawY + 1,
+                                                0.35f, 1.0f, 0.45f, 25.0f, renderSettings.isPhotoSoftShadows());
+                                    }
+                                }
+
+                                drawTexture(mapData[x][y].getObjGrh(), drawX, drawY,
                                         true, true, false, 1.0f, weather.getWeatherColor());
                             }
                         }
@@ -156,21 +216,26 @@ public class MapRenderer {
 
                     if (!isDragged) {
                         final boolean isUserChar = charIndex == user.getUserCharIndex();
+                        int drawX = POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX;
+                        int drawY = POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY;
+
                         if (isUserChar) {
                             if (user.isWalkingmode()) {
-                                drawCharacter(charIndex,
-                                        POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX,
-                                        POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY,
-                                        1.0f,
-                                        weather.getWeatherColor());
+                                // Sombra para el usuario (Proyectada y Suave)
+                                if (renderSettings.isPhotoModeActive() && renderSettings.isPhotoShadows()) {
+                                    renderCharShadow(charIndex, drawX + 1, drawY + 1, 0.45f,
+                                            1.0f, 0.45f, 25.0f, renderSettings.isPhotoSoftShadows());
+                                }
+                                drawCharacter(charIndex, drawX, drawY, 1.0f, weather.getWeatherColor());
                             }
                         } else {
                             if (renderSettings.getShowNPCs()) {
-                                drawCharacter(charIndex,
-                                        POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX,
-                                        POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY,
-                                        1.0f,
-                                        weather.getWeatherColor());
+                                // Sombra para NPCs (Proyectada y Suave)
+                                if (renderSettings.isPhotoModeActive() && renderSettings.isPhotoShadows()) {
+                                    renderCharShadow(charIndex, drawX + 1, drawY + 1, 0.45f,
+                                            1.0f, 0.45f, 25.0f, renderSettings.isPhotoSoftShadows());
+                                }
+                                drawCharacter(charIndex, drawX, drawY, 1.0f, weather.getWeatherColor());
                             }
                         }
                     }
@@ -178,9 +243,16 @@ public class MapRenderer {
 
                 if (renderSettings.getShowLayer()[2]) {
                     if (mapData[x][y].getLayer(3).getGrhIndex() != 0) {
-                        drawTexture(mapData[x][y].getLayer(3),
-                                POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX,
-                                POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY,
+                        int drawX = POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX;
+                        int drawY = POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY;
+
+                        // Sombras proyectadas para capas de Tiles (paredes, edificios)
+                        if (renderSettings.isPhotoModeActive() && renderSettings.isPhotoShadows()) {
+                            renderShadow(mapData[x][y].getLayer(3), drawX + 4, drawY + 4,
+                                    0.4f, 1.0f, 0.5f, 30.0f, renderSettings.isPhotoSoftShadows());
+                        }
+
+                        drawTexture(mapData[x][y].getLayer(3), drawX, drawY,
                                 true, true, false, 1.0f, weather.getWeatherColor());
                     }
                 }
@@ -277,6 +349,9 @@ public class MapRenderer {
      */
     public void renderImGuiOverlays(int pixelOffsetX, int pixelOffsetY) {
         RenderSettings renderSettings = Options.INSTANCE.getRenderSettings();
+        if (renderSettings.isPhotoModeActive())
+            return;
+
         if (org.argentumforge.engine.utils.editor.Trigger.getInstance().isActive()
                 || renderSettings.getShowTriggers()
                 || org.argentumforge.engine.utils.editor.Particle.getInstance().isActive()
@@ -299,11 +374,9 @@ public class MapRenderer {
                         String idText = String.valueOf(mapData[x][y].getTrigger());
                         float textWidth = imgui.ImGui.calcTextSize(idText).x;
                         float textX = screenX + (TILE_PIXEL_SIZE - textWidth) / 2;
-                        float textY = screenY + (TILE_PIXEL_SIZE - 28) / 2; // Arriba si hay partículas? No, centrado.
+                        float textY = screenY + (TILE_PIXEL_SIZE - 28) / 2;
 
-                        // Sombra Negra (offset +1)
                         drawList.addText(textX + 1, textY + 1, 0xFF000000, idText);
-                        // Texto Blanco (con opacidad completa)
                         drawList.addText(textX, textY, 0xFFFFFFFF, idText);
                     }
 
@@ -314,17 +387,47 @@ public class MapRenderer {
                         String idText = "P" + mapData[x][y].getParticleIndex();
                         float textWidth = imgui.ImGui.calcTextSize(idText).x;
                         float textX = screenX + (TILE_PIXEL_SIZE - textWidth) / 2;
-                        float textY = screenY + (TILE_PIXEL_SIZE + 4) / 2; // Un poco más abajo que el centro
+                        float textY = screenY + (TILE_PIXEL_SIZE + 4) / 2;
 
-                        // Sombra Negra (offset +1)
                         drawList.addText(textX + 1, textY + 1, 0xFF000000, idText);
-                        // Texto Cian para partículas (Visible)
                         drawList.addText(textX, textY, 0xFFFFFF00, idText);
                     }
                     camera.incrementScreenX();
                 }
                 camera.incrementScreenY();
             }
+        }
+    }
+
+    private void renderPhotoEffects(RenderSettings renderSettings) {
+        // Run Post-Processor for all "Ultra" effects (Filters, Bloom, DoF, Grain, Zoom,
+        // Color Grading)
+        // FLUSH BEFORE CAPTURE: glCopyTexImage2D needs pixels to be on the buffer
+        // already
+        org.argentumforge.engine.Engine.batch.end();
+
+        int winWidth = org.argentumforge.engine.Window.INSTANCE.getWidth();
+        int winHeight = org.argentumforge.engine.Window.INSTANCE.getHeight();
+
+        if (postProcessor == null) {
+            postProcessor = new PostProcessor(winWidth, winHeight);
+        } else if (postProcessor.getWidth() != winWidth || postProcessor.getHeight() != winHeight) {
+            postProcessor.resize(winWidth, winHeight);
+        }
+        postProcessor.apply(renderSettings, org.argentumforge.engine.utils.Time.getRunningTime());
+
+        // RE-BEGIN: For subsequent UI or vignettes
+        org.argentumforge.engine.Engine.batch.begin();
+
+        // 2. Vignette (Drawn via Batch after Post-Process)
+        if (renderSettings.isPhotoVignette()) {
+            float intensity = renderSettings.getVignetteIntensity();
+            if (user.isUnderCeiling())
+                intensity = Math.min(0.95f, intensity + 0.15f);
+
+            Drawn.drawVignette(org.argentumforge.engine.Window.INSTANCE.getWidth(),
+                    org.argentumforge.engine.Window.INSTANCE.getHeight(),
+                    intensity);
         }
     }
 }

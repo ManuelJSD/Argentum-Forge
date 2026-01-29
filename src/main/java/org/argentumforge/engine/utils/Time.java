@@ -4,17 +4,24 @@ import static org.lwjgl.glfw.GLFW.glfwGetTime;
 
 /**
  * <p>
- * Es una clase final con metodos estaticos que proporciona funcionalidad esencial para el manejo del tiempo en el ciclo de
- * renderizado. Se encarga de calcular y rastrear el tiempo transcurrido entre fotogramas (deltaTime), lo que permite que las
- * animaciones y movimientos sean consistentes independientemente de la velocidad de renderizado.
+ * Es una clase final con metodos estaticos que proporciona funcionalidad
+ * esencial para el manejo del tiempo en el ciclo de
+ * renderizado. Se encarga de calcular y rastrear el tiempo transcurrido entre
+ * fotogramas (deltaTime), lo que permite que las
+ * animaciones y movimientos sean consistentes independientemente de la
+ * velocidad de renderizado.
  * <p>
- * Adicionalmente, esta clase contiene la logica para calcular y mostrar los FPS, lo que es util para medir el rendimiento del
+ * Adicionalmente, esta clase contiene la logica para calcular y mostrar los
+ * FPS, lo que es util para medir el rendimiento del
  * juego.
  * <p>
- * Esta clase es crucial para que todos los elementos animados del juego (personajes, efectos, etc.) se muevan a velocidades
- * consistentes en diferentes sistemas, ajustandose automaticamente a las variaciones en la tasa de fotogramas.
+ * Esta clase es crucial para que todos los elementos animados del juego
+ * (personajes, efectos, etc.) se muevan a velocidades
+ * consistentes en diferentes sistemas, ajustandose automaticamente a las
+ * variaciones en la tasa de fotogramas.
  * <p>
- * Al ser una clase utilitaria con metodos estaticos, no es necesario instanciarla para usar su funcionalidad.
+ * Al ser una clase utilitaria con metodos estaticos, no es necesario
+ * instanciarla para usar su funcionalidad.
  *
  * @see GameData
  */
@@ -32,7 +39,7 @@ public final class Time {
     private static int contFPS = 0;
 
     /**
-     *  Inicializamos las variables necesarias para calcular el tiempo
+     * Inicializamos las variables necesarias para calcular el tiempo
      */
     public static void initTime() {
         beginTime = (float) glfwGetTime();
@@ -40,7 +47,7 @@ public final class Time {
     }
 
     /**
-     *  Actualizamos los timers, incluido los FPS
+     * Actualizamos los timers, incluido los FPS
      */
     public static void updateTime() {
         updateFPS();
@@ -49,11 +56,22 @@ public final class Time {
         deltaTime = endTime - beginTime;
         beginTime = endTime;
 
-        timerTicksPerFrame = (deltaTime * ENGINE_BASE_SPEED);
+        boolean timeStopped = org.argentumforge.engine.utils.GameData.options.getRenderSettings().isPhotoTimeStop()
+                && org.argentumforge.engine.utils.GameData.options.getRenderSettings().isPhotoModeActive();
+
+        if (timeStopped) {
+            timerTicksPerFrame = 0;
+        } else {
+            timerTicksPerFrame = (deltaTime * ENGINE_BASE_SPEED);
+        }
+    }
+
+    public static float getRunningTime() {
+        return (float) glfwGetTime();
     }
 
     /**
-     *  Actualizamos los FPS
+     * Actualizamos los FPS
      */
     private static void updateFPS() {
         // paso 1 seg?

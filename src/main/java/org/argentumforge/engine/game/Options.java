@@ -142,6 +142,10 @@ public enum Options {
             write(writer, "RenderShowGrid", renderSettings.isShowGrid());
             write(writer, "RenderShowNpcBreathing", renderSettings.isShowNpcBreathing());
             write(writer, "RenderDisableAnimations", renderSettings.isDisableAnimations());
+            write(writer, "PhotoVignette", renderSettings.isPhotoVignette());
+            write(writer, "PhotoShadows", renderSettings.isPhotoShadows());
+            write(writer, "PhotoWater", renderSettings.isPhotoWater());
+            write(writer, "VignetteIntensity", renderSettings.getVignetteIntensity());
 
             write(writer, "AutoSaveEnabled", autoSaveEnabled);
             write(writer, "AutoSaveInterval", autoSaveIntervalMinutes);
@@ -403,6 +407,10 @@ public enum Options {
             case "RenderShowGrid" -> renderSettings.setShowGrid(Boolean.parseBoolean(value));
             case "RenderShowNpcBreathing" -> renderSettings.setShowNpcBreathing(Boolean.parseBoolean(value));
             case "RenderDisableAnimations" -> renderSettings.setDisableAnimations(Boolean.parseBoolean(value));
+            case "PhotoVignette" -> renderSettings.setPhotoVignette(Boolean.parseBoolean(value));
+            case "PhotoShadows" -> renderSettings.setPhotoShadows(Boolean.parseBoolean(value));
+            case "PhotoWater" -> renderSettings.setPhotoWater(Boolean.parseBoolean(value));
+            case "VignetteIntensity" -> renderSettings.setVignetteIntensity(Float.parseFloat(value));
             case "AutoSaveEnabled" -> autoSaveEnabled = Boolean.parseBoolean(value);
             case "AutoSaveInterval" -> autoSaveIntervalMinutes = Integer.parseInt(value);
             case "IgnoredObjTypes" -> {
