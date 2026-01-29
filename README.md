@@ -1,8 +1,7 @@
-
 <div align='center'>
-    <br/>
     <p align='right'><a href="README_ES.md">🇪🇸 Leer en Español</a></p>
-    <img width="1024" height="1024" alt="Argentum Forge Logo" src="https://github.com/user-attachments/assets/77ae11ca-8b34-489d-bf8b-010889771a25" />
+    <img width="512" height="512" alt="Argentum Forge Logo" src="https://github.com/user-attachments/assets/77ae11ca-8b34-489d-bf8b-010889771a25" />
+    <br/>
     <a target="_blank"><img src="https://img.shields.io/badge/Built%20in-Java_17-43ca1f.svg?style=flat-square"></img></a>
     <a target="_blank"><img src="https://img.shields.io/badge/Made%20in-IntelliJ%20Community-be27e9.svg?style=flat-square"></img></a>
     <a target="_blank"><img src="https://img.shields.io/badge/License-GNU%20General%20Public%20License%20-e98227.svg?style=flat-square"></img></a>
