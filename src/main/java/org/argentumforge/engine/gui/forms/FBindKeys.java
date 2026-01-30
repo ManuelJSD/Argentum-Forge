@@ -3,6 +3,8 @@ package org.argentumforge.engine.gui.forms;
 import imgui.ImGui;
 import imgui.flag.ImGuiCond;
 import imgui.flag.ImGuiWindowFlags;
+import imgui.flag.ImGuiCol;
+import imgui.flag.ImGuiTreeNodeFlags;
 import org.argentumforge.engine.game.models.Key;
 import org.argentumforge.engine.listeners.KeyHandler;
 
@@ -61,60 +63,106 @@ public class FBindKeys extends Form {
     @Override
     public void render() {
         ImGui.setNextWindowFocus();
-        ImGui.setNextWindowSize(400, 400, ImGuiCond.Always);
+        ImGui.setNextWindowSize(500, 600, ImGuiCond.FirstUseEver);
 
         if (ImGui.begin(I18n.INSTANCE.get("options.keys.title"),
-                ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize)) {
+                ImGuiWindowFlags.NoCollapse)) {
 
-            // Use columns to separate Labels (Left) and Buttons (Right)
-            ImGui.columns(2, "BindKeysCols", false); // false = no border resize
+            // Calculate height for the child window (leave space for bottom buttons)
+            // Calculate height for the child window (leave space for bottom buttons)
+            // If there is an error message, we need more space in the footer
+            float footerHeight = (KeyHandler.bindError != null) ? 80 : 50;
+            float childHeight = ImGui.getWindowHeight() - footerHeight - ImGui.getCursorPosY() - 10;
 
-            // Set fixed width for the second column (Buttons) roughly 140px
-            // The first column takes the remaining space
-            float windowWidth = ImGui.getWindowWidth();
-            ImGui.setColumnWidth(0, windowWidth - 140);
+            if (ImGui.beginChild("KeyList", 0, childHeight, true)) {
 
-            renderGroupHeader(I18n.INSTANCE.get("options.keys.movement"));
-            renderKeyBindRow(I18n.INSTANCE.get("options.keys.up"), Key.UP);
-            renderKeyBindRow(I18n.INSTANCE.get("options.keys.down"), Key.DOWN);
-            renderKeyBindRow(I18n.INSTANCE.get("options.keys.left"), Key.LEFT);
-            renderKeyBindRow(I18n.INSTANCE.get("options.keys.right"), Key.RIGHT);
-            ImGui.dummy(0, 10);
+                // MOVEMENT
+                if (ImGui.collapsingHeader(I18n.INSTANCE.get("options.keys.movement"),
+                        ImGuiTreeNodeFlags.DefaultOpen)) {
+                    ImGui.columns(2, "BindKeysCols_Movement", false);
+                    ImGui.setColumnWidth(0, ImGui.getWindowWidth() - 160);
 
-            renderGroupHeader(I18n.INSTANCE.get("options.keys.personal"));
-            // Audio keys removed as per request
-            ImGui.dummy(0, 10);
+                    renderKeyBindRow(I18n.INSTANCE.get("options.keys.up"), Key.UP);
+                    renderKeyBindRow(I18n.INSTANCE.get("options.keys.down"), Key.DOWN);
+                    renderKeyBindRow(I18n.INSTANCE.get("options.keys.left"), Key.LEFT);
+                    renderKeyBindRow(I18n.INSTANCE.get("options.keys.right"), Key.RIGHT);
 
-            renderGroupHeader(I18n.INSTANCE.get("options.keys.other"));
-            renderKeyBindRow(I18n.INSTANCE.get("options.keys.screenshot"), Key.TAKE_SCREENSHOT);
-            renderKeyBindRow(I18n.INSTANCE.get("options.keys.showOptions"), Key.SHOW_OPTIONS);
-            renderKeyBindRow(I18n.INSTANCE.get("options.keys.showDebug"), Key.DEBUG_SHOW);
-            renderKeyBindRow(I18n.INSTANCE.get("options.keys.walkMode"), Key.TOGGLE_WALKING_MODE);
-            renderKeyBindRow(I18n.INSTANCE.get("options.keys.toggleGrid"), Key.TOGGLE_GRID);
-            renderKeyBindRow(I18n.INSTANCE.get("options.keys.photoMode"), Key.TOGGLE_PHOTO_MODE);
-            renderKeyBindRow(I18n.INSTANCE.get("options.keys.mapProperties"), Key.MAP_PROPERTIES);
+                    ImGui.columns(1); // End columns
+                    ImGui.dummy(0, 5);
+                }
 
-            renderGroupHeader(I18n.INSTANCE.get("options.keys.selectionTools"));
-            renderKeyBindRow(I18n.INSTANCE.get("options.keys.multiSelect"), Key.MULTI_SELECT);
+                // OTHER
+                if (ImGui.collapsingHeader(I18n.INSTANCE.get("options.keys.other"), ImGuiTreeNodeFlags.DefaultOpen)) {
+                    ImGui.columns(2, "BindKeysCols_Other", false);
+                    ImGui.setColumnWidth(0, ImGui.getWindowWidth() - 160);
 
-            renderGroupHeader(I18n.INSTANCE.get("options.keys.tools"));
-            renderKeyBindRow(I18n.INSTANCE.get("options.keys.brush"), Key.TOOL_BRUSH);
-            renderKeyBindRow(I18n.INSTANCE.get("options.keys.bucket"), Key.TOOL_BUCKET);
-            renderKeyBindRow(I18n.INSTANCE.get("options.keys.eraser"), Key.TOOL_ERASER);
-            renderKeyBindRow(I18n.INSTANCE.get("options.keys.picker"), Key.TOOL_PICK);
-            renderKeyBindRow(I18n.INSTANCE.get("options.keys.magicWand"), Key.TOOL_MAGIC_WAND);
+                    renderKeyBindRow(I18n.INSTANCE.get("options.keys.screenshot"), Key.TAKE_SCREENSHOT);
+                    renderKeyBindRow(I18n.INSTANCE.get("options.keys.showOptions"), Key.SHOW_OPTIONS);
+                    renderKeyBindRow(I18n.INSTANCE.get("options.keys.showDebug"), Key.DEBUG_SHOW);
+                    renderKeyBindRow(I18n.INSTANCE.get("options.keys.walkMode"), Key.TOGGLE_WALKING_MODE);
+                    renderKeyBindRow(I18n.INSTANCE.get("options.keys.toggleGrid"), Key.TOGGLE_GRID);
+                    renderKeyBindRow(I18n.INSTANCE.get("options.keys.photoMode"), Key.TOGGLE_PHOTO_MODE);
+                    renderKeyBindRow(I18n.INSTANCE.get("options.keys.mapProperties"), Key.MAP_PROPERTIES);
 
-            renderKeyBindRow(I18n.INSTANCE.get("options.keys.exit"), Key.EXIT_GAME);
+                    ImGui.columns(1);
+                    ImGui.dummy(0, 5);
+                }
 
-            ImGui.columns(1); // End columns
+                // SELECTION
+                if (ImGui.collapsingHeader(I18n.INSTANCE.get("options.keys.selectionTools"),
+                        ImGuiTreeNodeFlags.DefaultOpen)) {
+                    ImGui.columns(2, "BindKeysCols_Sel", false);
+                    ImGui.setColumnWidth(0, ImGui.getWindowWidth() - 160);
+
+                    renderKeyBindRow(I18n.INSTANCE.get("options.keys.multiSelect"), Key.MULTI_SELECT);
+
+                    ImGui.columns(1);
+                    ImGui.dummy(0, 5);
+                }
+
+                // TOOLS
+                if (ImGui.collapsingHeader(I18n.INSTANCE.get("options.keys.tools"), ImGuiTreeNodeFlags.DefaultOpen)) {
+                    ImGui.columns(2, "BindKeysCols_Tools", false);
+                    ImGui.setColumnWidth(0, ImGui.getWindowWidth() - 160);
+
+                    renderKeyBindRow(I18n.INSTANCE.get("options.keys.brush"), Key.TOOL_BRUSH);
+                    renderKeyBindRow(I18n.INSTANCE.get("options.keys.bucket"), Key.TOOL_BUCKET);
+                    renderKeyBindRow(I18n.INSTANCE.get("options.keys.eraser"), Key.TOOL_ERASER);
+                    renderKeyBindRow(I18n.INSTANCE.get("options.keys.picker"), Key.TOOL_PICK);
+                    renderKeyBindRow(I18n.INSTANCE.get("options.keys.magicWand"), Key.TOOL_MAGIC_WAND);
+
+                    ImGui.columns(1);
+                    ImGui.dummy(0, 5);
+                }
+
+                // EXIT
+                ImGui.separator();
+                ImGui.dummy(0, 5);
+                ImGui.columns(2, "BindKeysCols_Exit", false);
+                ImGui.setColumnWidth(0, ImGui.getWindowWidth() - 160);
+                renderKeyBindRow(I18n.INSTANCE.get("options.keys.exit"), Key.EXIT_GAME);
+                ImGui.columns(1);
+
+                ImGui.endChild();
+            }
 
             ImGui.separator();
             ImGui.dummy(0, 10);
 
             // Bottom buttons centered
-            float buttonWidth = 140;
-            float spacing = 20;
-            float totalWidth = (buttonWidth * 2) + spacing;
+            float buttonWidth = 110;
+            float spacing = 10;
+            float totalWidth = (buttonWidth * 3) + (spacing * 2);
+            float windowWidth = ImGui.getWindowWidth();
+
+            // Error Display
+            if (KeyHandler.bindError != null) {
+                // Center text
+                float textWidth = ImGui.calcTextSize(KeyHandler.bindError).x;
+                ImGui.setCursorPosX((windowWidth - textWidth) / 2);
+                ImGui.textColored(1.0f, 0.2f, 0.2f, 1.0f, KeyHandler.bindError);
+                ImGui.dummy(0, 5); // spacing
+            }
 
             ImGui.setCursorPosX((windowWidth - totalWidth) / 2);
 
@@ -124,17 +172,22 @@ public class FBindKeys extends Form {
 
             ImGui.sameLine();
 
-            if (ImGui.button(I18n.INSTANCE.get("options.keys.saveAndExit"), buttonWidth, 30)) {
-                buttonSave();
+            if (ImGui.button("Guardar", buttonWidth, 30)) {
+                Key.saveKeys();
+                org.argentumforge.engine.game.console.Console.INSTANCE.addMsgToConsole(
+                        "Teclas guardadas.",
+                        org.argentumforge.engine.game.console.FontStyle.REGULAR,
+                        new org.argentumforge.engine.renderer.RGBColor(0, 1, 0));
+            }
+
+            ImGui.sameLine();
+
+            if (ImGui.button("Salir", buttonWidth, 30)) {
+                close();
             }
 
             ImGui.end();
         }
-    }
-
-    private void renderGroupHeader(String title) {
-        ImGui.textColored(1.0f, 0.84f, 0.0f, 1.0f, title); // Gold color
-        ImGui.separator();
     }
 
     private void renderKeyBindRow(String label, Key key) {
@@ -152,21 +205,19 @@ public class FBindKeys extends Form {
         // Ensure we always get the LATEST key code from Key map
         String actual = getKeyName(key.getKeyCode()).toUpperCase();
 
-        if (key.getPreparedToBind()) {
+        // Store initial state to ensure Push/Pop symmetry even if state changes
+        // mid-frame
+        boolean isBinding = key.getPreparedToBind();
+
+        if (isBinding) {
             actual = I18n.INSTANCE.get("options.keys.pressKey");
+            // Push Style Color for "Waiting for input" state (Gold/Yellow)
+            ImGui.pushStyleColor(ImGuiCol.Button, 0.8f, 0.6f, 0.1f, 1.0f);
+            ImGui.pushStyleColor(ImGuiCol.ButtonHovered, 0.9f, 0.7f, 0.2f, 1.0f);
+            ImGui.pushStyleColor(ImGuiCol.ButtonActive, 0.7f, 0.5f, 0.0f, 1.0f);
         }
 
         // Use ### to ensure the ID is stable but let the label change?
-        // Actually, button(label) uses label as ID. If label changes, ID changes,
-        // preventing animation?
-        // But if label stays "F12" because of logic...
-
-        // Let's force a unique ID for the button that is NOT the label, so ImGui
-        // handles it correctly
-        // and we can change the label freely.
-        // But ImGui.button(text) uses text as ID.
-        // We can use "Label###ID" format.
-
         String buttonId = actual + "###" + label + "_btn";
 
         if (ImGui.button(buttonId, buttonWidth, 0)) {
@@ -175,8 +226,13 @@ public class FBindKeys extends Form {
             } else {
                 if (!Key.checkIsBinding()) {
                     key.setPreparedToBind(true);
+                    KeyHandler.bindError = null; // Clear any previous error when starting new bind
                 }
             }
+        }
+
+        if (isBinding) {
+            ImGui.popStyleColor(3); // Pop the 3 pushed colors
         }
 
         ImGui.nextColumn(); // Go back to column 0 for next row
@@ -188,12 +244,6 @@ public class FBindKeys extends Form {
 
         Key.loadDefaultKeys();
         KeyHandler.updateMovementKeys();
-        close();
-    }
-
-    private void buttonSave() {
-
-        Key.saveKeys();
         close();
     }
 }
