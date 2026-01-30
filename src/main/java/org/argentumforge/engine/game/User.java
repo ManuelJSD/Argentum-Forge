@@ -65,7 +65,12 @@ public enum User {
         charList[userCharIndex].setActive(true);
         charList[userCharIndex].getPos().setX(userPos.getX());
         charList[userCharIndex].getPos().setY(userPos.getY());
-        charList[userCharIndex].setHeading(Direction.DOWN);
+
+        // Preserve heading if valid, otherwise default to DOWN
+        if (charList[userCharIndex].getHeading() == null) {
+            charList[userCharIndex].setHeading(Direction.DOWN);
+        }
+        // else: keep current heading to avoid "jumping" animations during refresh
 
         // Aplicar apariencia persistente
         charList[userCharIndex].setiBody((short) userBody);
@@ -170,20 +175,33 @@ public enum User {
 
         if (!(tX < XMinMapSize || tX > XMaxMapSize || tY < YMinMapSize || tY > YMaxMapSize)) {
 
-            // 1. Clean Old Position
+            // 1. Clean Old Position (Safe Clear)
             if (mapData != null) {
-                mapData[userPos.getX()][userPos.getY()].setCharIndex(0);
+                // GLOBAL Clone Sweep (Entire Map)
+                // The user reported clones 11+ tiles away. A small range is insufficient.
+                // We scan the entire 100x100 map to guarantee the user exists NOWHERE else.
+                // 10,000 iterations is negligible for modern CPUs.
+                for (int xScan = XMinMapSize; xScan <= XMaxMapSize; xScan++) {
+                    for (int yScan = YMinMapSize; yScan <= YMaxMapSize; yScan++) {
+                        if (mapData[xScan][yScan].getCharIndex() == userCharIndex) {
+                            mapData[xScan][yScan].setCharIndex(0);
+                            // Optional debug
+                            // org.tinylog.Logger.info("GlobalSweeper: Cleared user at (" + xScan + "," +
+                            // yScan + ")");
+                        }
+                    }
+                }
             }
 
             // 2. Update User Position
-            addToUserPos.setX(x); // Keep this for camera/legacy User logic
+            addToUserPos.setX(x);
             userPos.setX(tX);
             addToUserPos.setY(y);
             userPos.setY(tY);
             userMoving = true;
             underCeiling = checkUnderCeiling();
 
-            // 3. Update CharList Entry (Critical for Rendering & Map Logic)
+            // 3. Update CharList Entry
             if (userCharIndex > 0 && userCharIndex < charList.length) {
                 org.argentumforge.engine.game.models.Character chr = charList[userCharIndex];
 
@@ -194,10 +212,10 @@ public enum User {
                 // Update Map
                 if (mapData != null) {
                     mapData[tX][tY].setCharIndex(userCharIndex);
+                    org.tinylog.Logger.info("  -> SET New Position (" + tX + "," + tY + ")");
                 }
 
-                // Smooth Movement Setup (Offsets in Pixels)
-                // Assuming TILE_PIXEL_SIZE is 32. Using constants if available.
+                // Smooth Movement Setup
                 chr.setMoveOffsetX(-1 * (32 * x));
                 chr.setMoveOffsetY(-1 * (32 * y));
                 chr.setMoving(true);
@@ -205,7 +223,7 @@ public enum User {
                 chr.setScrollDirectionX(x);
                 chr.setScrollDirectionY(y);
 
-                // 4. Handle Walking Mode Appearance (Swimming)
+                // 4. Handle Walking Mode Appearance
                 if (walkingmode) {
                     checkAppearance();
                 }
@@ -429,19 +447,50 @@ public enum User {
         if (x < XMinMapSize || x > XMaxMapSize || y < YMinMapSize || y > YMaxMapSize)
             return;
 
+        var context = GameData.getActiveContext();
+        if (context == null)
+            return;
+        var mapData = context.getMapData();
+        var charList = context.getCharList();
+
+        // 1. Remove from old position in Map logic
+        if (userCharIndex > 0 && mapData != null) {
+            // We use the current (old) userPos
+            int oldX = userPos.getX();
+            int oldY = userPos.getY();
+            // Check bounds just in case, though userPos should be valid
+            if (oldX >= XMinMapSize && oldX <= XMaxMapSize && oldY >= YMinMapSize && oldY <= YMaxMapSize) {
+                if (mapData[oldX][oldY].getCharIndex() == userCharIndex) {
+                    mapData[oldX][oldY].setCharIndex(0);
+                }
+            }
+        }
+
+        // 2. Update User logical position
         userPos.setX(x);
         userPos.setY(y);
-        addToUserPos.setX(0); // Reset smooth movement offset if any
+        addToUserPos.setX(0); // Reset smooth movement offset
         addToUserPos.setY(0);
         underCeiling = checkUnderCeiling();
 
-        // Si hay char index asociado, actualizar su posición
-        if (userCharIndex > 0) {
-            var context = GameData.getActiveContext();
-            if (context != null) {
-                var charList = context.getCharList();
-                charList[userCharIndex].getPos().setX(x);
-                charList[userCharIndex].getPos().setY(y);
+        // 3. Update Character Entity & New Map Position
+        if (userCharIndex > 0 && userCharIndex < charList.length) {
+            org.argentumforge.engine.game.models.Character chr = charList[userCharIndex];
+
+            // Sync Position
+            chr.getPos().setX(x);
+            chr.getPos().setY(y);
+
+            // Reset Movement Interpolation (Prevent "Jumping")
+            chr.setMoveOffsetX(0);
+            chr.setMoveOffsetY(0);
+            chr.setMoving(false);
+            chr.setScrollDirectionX(0);
+            chr.setScrollDirectionY(0);
+
+            // Update Map with new position
+            if (mapData != null) {
+                mapData[x][y].setCharIndex(userCharIndex);
             }
         }
     }
