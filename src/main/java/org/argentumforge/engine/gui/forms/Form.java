@@ -14,9 +14,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.ByteBuffer;
-
-import static org.argentumforge.engine.Window.SCREEN_HEIGHT;
-import static org.argentumforge.engine.Window.SCREEN_WIDTH;
 import org.tinylog.Logger;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -88,12 +85,8 @@ public abstract class Form {
 
         float barHeight = 10.0f; // Altura de la "barra de título"
         ImVec2 windowPos = ImGui.getWindowPos();
-        ImVec2 mousePos = ImGui.getMousePos();
 
-        boolean isHovered = ImGui.isWindowHovered();
-        boolean isClicked = ImGui.isMouseDown(0);
-
-        // Simluando una barra para que nos permita mover la ventana ( - 32 por si hay
+        // Simulando una barra para que nos permita mover la ventana ( - 32 por si hay
         // algun boton de cerrar en el frm).
         ImGui.invisibleButton("title_bar", ImGui.getWindowSizeX() - 32, barHeight);
         boolean isTitleBarActive = ImGui.isItemActive();

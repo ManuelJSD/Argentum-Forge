@@ -29,14 +29,9 @@ public enum ProfileManager {
     private List<Profile> profiles = new ArrayList<>();
     private Profile currentProfile;
 
-    // Necesitamos saber si es la primera ejecución REAL global (sin perfiles)
-    // distinto de Options.isFirstRun que chequeaba options.ini
-    private boolean isFirstRunGlobal = false;
-
     public void load() {
         File file = new File(PROFILES_FILE);
         if (!file.exists()) {
-            isFirstRunGlobal = true;
             ensureProfilesDir();
             return;
         }
@@ -49,12 +44,10 @@ public enum ProfileManager {
 
             if (profiles == null) {
                 profiles = new ArrayList<>();
-                isFirstRunGlobal = true;
             }
         } catch (IOException e) {
             Logger.error(e, "Error al cargar profiles.json");
             profiles = new ArrayList<>();
-            isFirstRunGlobal = true;
         }
     }
 
