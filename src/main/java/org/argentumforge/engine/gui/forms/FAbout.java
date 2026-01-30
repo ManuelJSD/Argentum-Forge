@@ -29,7 +29,7 @@ public class FAbout extends Form {
             ImGui.textColored(Theme.COLOR_PRIMARY, title);
 
             // Version
-            String version = "Versión 1.0.0-beta3";
+            String version = "Versión " + org.argentumforge.engine.Engine.VERSION;
             float verWidth = ImGui.calcTextSize(version).x;
             ImGui.setCursorPosX((windowWidth - verWidth) / 2f);
             ImGui.textColored(0.7f, 0.7f, 0.7f, 1.0f, version);
