@@ -47,6 +47,9 @@ public enum KeyHandler {
     private static int lastKeyPressed = -1;
     private static int lastMovementKeyPressed = -1;
 
+    // Store binding error message to display in UI
+    public static String bindError = null;
+
     public static void keyCallback(long window, int key, int scancode, int action, int mods) {
         if (action != GLFW_PRESS && action != GLFW_RELEASE)
             return;
@@ -143,7 +146,29 @@ public enum KeyHandler {
                     if (success) {
                         keyToBind.setPreparedToBind(false); // no hace falta seguir bindeando.
                         keyJustPressed[key] = false;
+                        bindError = null; // Clear error on success
                         updateMovementKeys();
+
+                        org.argentumforge.engine.game.console.Console.INSTANCE.addMsgToConsole(
+                                "Tecla asignada correctamente.",
+                                org.argentumforge.engine.game.console.FontStyle.REGULAR,
+                                new org.argentumforge.engine.renderer.RGBColor(0, 1, 0));
+                    } else {
+                        // Failed (probably used)
+                        Key existing = Key.getKey(key);
+                        String msg = "Error al asignar.";
+                        if (existing != null) {
+                            msg = "Tecla ya en uso por: " + existing.name();
+                        }
+
+                        bindError = msg; // Update UI message
+
+                        org.argentumforge.engine.game.console.Console.INSTANCE.addMsgToConsole(
+                                msg,
+                                org.argentumforge.engine.game.console.FontStyle.BOLD,
+                                new org.argentumforge.engine.renderer.RGBColor(1, 0, 0));
+
+                        // We do NOT turn off preparedToBind, so user can try another key immediately.
                     }
                 }
             }

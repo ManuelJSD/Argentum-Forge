@@ -244,23 +244,13 @@ public enum Key {
             return false;
         }
 
-        // Verifica conflictos
-        Key existingKey = codeToKeyMap.get(newKeyCode);
+        // Check if the key is already used by another action
+        // codeToKeyMap holds key codes -> Key actions.
+        Key existingKey = getKey(newKeyCode);
         if (existingKey != null && existingKey != this) {
-            // Swap logic: if the key is taken, give the old key of 'this' to 'existingKey'?
-            // Or just swap them.
-            int myOldCode = this.getKeyCode();
-
-            // Assign my old code to the other key (swapping)
-            if (isValidKeyCode(myOldCode)) {
-                keyCodeMap.put(existingKey, myOldCode);
-            } else {
-                // If my old code was invalid (shouldnt happen but safety), just unbind
-                // existingKey?
-                // Actually Key enum always has a code.
-                // Force switch
-                keyCodeMap.put(existingKey, myOldCode);
-            }
+            // Conflict! Key is already used.
+            // We just return false, and let the UI/Handler notify the user.
+            return false;
         }
 
         keyCodeMap.put(this, newKeyCode);
