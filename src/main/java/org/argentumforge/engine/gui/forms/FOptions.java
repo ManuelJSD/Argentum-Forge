@@ -93,6 +93,15 @@ public final class FOptions extends Form {
 
                 ImGui.separator();
 
+                // Pre-releases Option
+                if (ImGui.checkbox(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.general.check_prereleases"),
+                        options.isCheckPreReleases())) {
+                    options.setCheckPreReleases(!options.isCheckPreReleases());
+                    options.save();
+                }
+
+                ImGui.separator();
+
                 // Auto-save Settings
                 ImGui.textColored(ImGui.getColorU32(0.2f, 0.7f, 1.0f, 1.0f),
                         org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.autosave") + ":");
@@ -164,6 +173,30 @@ public final class FOptions extends Form {
                 ImGui.dummy(0, 10);
                 ImGui.textDisabled("(Los cambios se ven en tiempo real)");
 
+                ImGui.dummy(0, 10);
+                ImGui.text("Interfaz de Usuario:");
+                ImGui.separator();
+
+                String[] styles = { "Clásico", "Oscuro", "Claro", "Moderno (Premium)" };
+                org.argentumforge.engine.gui.Theme.StyleType[] styleTypes = org.argentumforge.engine.gui.Theme.StyleType
+                        .values();
+
+                // Determinamos el índice actual (podríamos guardarlo en options, por ahora
+                // moderno por defecto)
+                // Para simplificar, usaremos un estado estático o simplemente el selector
+                if (ImGui.beginCombo("Tema Visual", options.getVisualTheme())) {
+                    for (int i = 0; i < styles.length; i++) {
+                        boolean isSelected = styleTypes[i].name().equals(options.getVisualTheme());
+                        if (ImGui.selectable(styles[i], isSelected)) {
+                            options.setVisualTheme(styleTypes[i].name());
+                            org.argentumforge.engine.gui.Theme.applyStyle(styleTypes[i]);
+                            options.save();
+                        }
+                    }
+                    ImGui.endCombo();
+                }
+
+                ImGui.dummy(0, 10);
                 ImGui.endTabItem();
             }
 
@@ -265,7 +298,6 @@ public final class FOptions extends Form {
         // Botón Teclas
         ImGui.setCursorPosX(startX);
         if (ImGui.button(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.keys"), buttonWidth, 25)) {
-            Sound.playSound(Sound.SND_CLICK);
             org.argentumforge.engine.gui.ImGUISystem.INSTANCE.show(new FBindKeys());
         }
 
@@ -273,7 +305,6 @@ public final class FOptions extends Form {
 
         // Botón Rutas
         if (ImGui.button(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.paths"), buttonWidth, 25)) {
-            Sound.playSound(Sound.SND_CLICK);
             org.argentumforge.engine.gui.ImGUISystem.INSTANCE.show(new FRoutes());
         }
 

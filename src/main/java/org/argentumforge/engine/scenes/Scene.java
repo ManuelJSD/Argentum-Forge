@@ -49,7 +49,7 @@ public abstract class Scene {
     public void init() {
         this.visible = true;
         this.camera = new Camera();
-        this.background = new RGBColor(0.0f, 0.0f, 0.0f);
+        this.background = new RGBColor(0.12f, 0.12f, 0.12f);
     }
 
     /**

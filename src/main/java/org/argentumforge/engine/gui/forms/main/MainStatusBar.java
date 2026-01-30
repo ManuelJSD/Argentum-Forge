@@ -5,26 +5,29 @@ import imgui.ImGuiViewport;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiWindowFlags;
 import org.argentumforge.engine.game.User;
+import org.argentumforge.engine.i18n.I18n;
 import org.argentumforge.engine.listeners.EditorInputManager;
 import org.argentumforge.engine.listeners.MouseListener;
 import org.argentumforge.engine.scenes.Camera;
+import org.argentumforge.engine.utils.GithubReleaseChecker;
 import org.argentumforge.engine.utils.Time;
+
+import java.awt.Desktop;
+import java.net.URI;
 
 /**
  * Componente para renderizar la barra de estado inferior.
  */
 public class MainStatusBar {
 
-    private static final float STATUS_BAR_HEIGHT = 30.0f;
-
     public void render() {
-        // Altura de la barra
-        float statusHeight = STATUS_BAR_HEIGHT;
         ImGuiViewport viewport = ImGui.getMainViewport();
-        // Posición en la parte inferior de la ventana
-        ImGui.setNextWindowPos(0, viewport.getSizeY() - statusHeight);
-        // Ancho completo
-        ImGui.setNextWindowSize(viewport.getSizeX(), statusHeight);
+        float statusHeight = 25.0f;
+
+        // Anclar al fondo del área de trabajo (abajo)
+        ImGui.setNextWindowPos(viewport.getWorkPosX(), viewport.getWorkPosY() + viewport.getWorkSizeY() - statusHeight);
+        ImGui.setNextWindowSize(viewport.getWorkSizeX(), statusHeight);
+        ImGui.setNextWindowViewport(viewport.getID());
 
         // Estilo: Fondo oscuro, sin bordes ni decoraciones
         ImGui.pushStyleColor(ImGuiCol.WindowBg, 0.1f, 0.1f, 0.1f, 0.9f);
@@ -80,7 +83,42 @@ public class MainStatusBar {
             // Version info at the right
             String versionText = "v" + org.argentumforge.engine.Engine.VERSION;
             float versionWidth = ImGui.calcTextSize(versionText).x;
-            ImGui.sameLine(viewport.getSizeX() - versionWidth - 20);
+            float rightMargin = 20.0f;
+            float cursorX = viewport.getSizeX() - versionWidth - rightMargin;
+
+            if (GithubReleaseChecker.isUpdateAvailable()) {
+                String icon = "(!)";
+                float iconWidth = ImGui.calcTextSize(icon).x;
+                float spacing = 5.0f;
+
+                float iconPos = cursorX - iconWidth - spacing;
+
+                ImGui.sameLine(iconPos);
+                ImGui.textColored(1.0f, 0.8f, 0.0f, 1.0f, icon);
+
+                if (ImGui.isItemHovered()) {
+                    GithubReleaseChecker.ReleaseInfo release = GithubReleaseChecker.getLatestRelease();
+                    String tooltip = I18n.INSTANCE.get("update.available_short");
+                    if (release != null)
+                        tooltip += ": " + release.tagName;
+                    tooltip += "\n" + I18n.INSTANCE.get("update.click_to_download");
+
+                    ImGui.setTooltip(tooltip);
+
+                    if (ImGui.isMouseClicked(0) && release != null) {
+                        try {
+                            Desktop.getDesktop().browse(new URI(release.htmlUrl));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            } else {
+                // Nothing specific if no update
+            }
+
+            // Draw version text at its absolute calculated position
+            ImGui.sameLine(cursorX);
             ImGui.textDisabled(versionText);
 
         }

@@ -7,8 +7,12 @@ import org.argentumforge.engine.Engine;
 import org.argentumforge.engine.Window;
 import org.argentumforge.engine.game.User;
 import org.argentumforge.engine.gui.widgets.ImageButton3State;
+import org.argentumforge.engine.i18n.I18n;
+import org.argentumforge.engine.utils.GithubReleaseChecker;
 
+import java.awt.Desktop;
 import java.io.IOException;
+import java.net.URI;
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ENTER;
 
@@ -23,6 +27,7 @@ public final class FLauncher extends Form {
     private ImageButton3State btnCargarMapa;
     private ImageButton3State btnExit;
     private boolean connectPressed = false;
+    private boolean updatePopupShown = false;
 
     public FLauncher() {
         try {
@@ -55,6 +60,9 @@ public final class FLauncher extends Form {
             // el constructor fallará.
             System.err.println("Error loading launcher textures: " + e.getMessage());
         }
+
+        // Trigger update check
+        GithubReleaseChecker.checkForUpdates();
     }
 
     @Override
@@ -119,6 +127,46 @@ public final class FLauncher extends Form {
         // Versión (Izquierda)
         ImGui.setCursorPos(x + marginX, y + imageHeight - marginBottom);
         ImGui.textColored(0.7f, 0.7f, 0.7f, 1.0f, version);
+
+        // Update Notification Logic
+        if (GithubReleaseChecker.isUpdateAvailable() && !updatePopupShown) {
+            ImGui.openPopup(I18n.INSTANCE.get("update.available"));
+            updatePopupShown = true;
+        }
+
+        if (ImGui.beginPopupModal(I18n.INSTANCE.get("update.available"), ImGuiWindowFlags.AlwaysAutoResize)) {
+            ImGui.text(I18n.INSTANCE.get("update.available"));
+            ImGui.spacing();
+
+            GithubReleaseChecker.ReleaseInfo release = GithubReleaseChecker.getLatestRelease();
+            if (release != null) {
+                ImGui.textColored(0.2f, 0.8f, 0.2f, 1.0f, release.tagName);
+                ImGui.textWrapped(release.name);
+            }
+
+            ImGui.spacing();
+            ImGui.separator();
+            ImGui.spacing();
+
+            if (ImGui.button(I18n.INSTANCE.get("update.download"), 200, 30)) {
+                if (release != null) {
+                    try {
+                        Desktop.getDesktop().browse(new URI(release.htmlUrl));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                ImGui.closeCurrentPopup();
+            }
+
+            ImGui.sameLine();
+
+            if (ImGui.button(I18n.INSTANCE.get("update.close"), 100, 30)) {
+                ImGui.closeCurrentPopup();
+            }
+
+            ImGui.endPopup();
+        }
 
         ImGui.end();
     }

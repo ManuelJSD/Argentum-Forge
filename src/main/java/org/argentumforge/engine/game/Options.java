@@ -19,6 +19,7 @@ public enum Options {
     private boolean fullscreen = false;
     private boolean vsync = true;
     private boolean dockingEnabled = true;
+    private String visualTheme = "MODERN";
 
     private String language = "es_ES";
     private String graphicsPath = "";
@@ -41,6 +42,10 @@ public enum Options {
     private int autoSaveIntervalMinutes = 5;
     private java.util.Set<Integer> ignoredObjTypes = new java.util.HashSet<>(
             java.util.Arrays.asList(4, 6, 8, 10, 15, 20, 22, 27, 28));
+
+    // Updates
+    private boolean checkPreReleases = true;
+    private String ignoredUpdateTag = "";
 
     // Appearance
     private int userBody = 1;
@@ -117,6 +122,7 @@ public enum Options {
             write(writer, "Fullscreen", fullscreen);
             write(writer, "VSYNC", vsync);
             write(writer, "DockingEnabled", dockingEnabled);
+            write(writer, "VisualTheme", visualTheme);
 
             write(writer, "Language", language);
             write(writer, "ScreenWidth", screenWidth);
@@ -166,6 +172,9 @@ public enum Options {
             String ignoredStr = ignoredObjTypes.stream().map(String::valueOf)
                     .collect(java.util.stream.Collectors.joining(","));
             write(writer, "IgnoredObjTypes", ignoredStr);
+
+            write(writer, "CheckPreReleases", checkPreReleases);
+            write(writer, "IgnoredUpdateTag", ignoredUpdateTag);
         } catch (IOException e) {
             Logger.error("¡No se pudo escribir en el archivo de opciones: {}!", configPath);
         }
@@ -375,6 +384,7 @@ public enum Options {
             case "Fullscreen" -> fullscreen = Boolean.parseBoolean(value);
             case "VSYNC" -> vsync = Boolean.parseBoolean(value);
             case "DockingEnabled" -> dockingEnabled = Boolean.parseBoolean(value);
+            case "VisualTheme" -> visualTheme = value;
 
             case "Language" -> {
                 if ("es".equalsIgnoreCase(value)) {
@@ -428,6 +438,8 @@ public enum Options {
             case "UserBody" -> userBody = Integer.parseInt(value);
             case "UserHead" -> userHead = Integer.parseInt(value);
             case "UserWaterBody" -> userWaterBody = Integer.parseInt(value);
+            case "CheckPreReleases" -> checkPreReleases = Boolean.parseBoolean(value);
+            case "IgnoredUpdateTag" -> ignoredUpdateTag = value;
             default -> {
                 if (option.startsWith("Recent")) {
                     if (!recentMaps.contains(value) && new java.io.File(value).exists()) {
@@ -506,5 +518,29 @@ public enum Options {
 
     public void setAutoSaveIntervalMinutes(int autoSaveIntervalMinutes) {
         this.autoSaveIntervalMinutes = autoSaveIntervalMinutes;
+    }
+
+    public String getVisualTheme() {
+        return visualTheme;
+    }
+
+    public void setVisualTheme(String visualTheme) {
+        this.visualTheme = visualTheme;
+    }
+
+    public boolean isCheckPreReleases() {
+        return checkPreReleases;
+    }
+
+    public void setCheckPreReleases(boolean checkPreReleases) {
+        this.checkPreReleases = checkPreReleases;
+    }
+
+    public String getIgnoredUpdateTag() {
+        return ignoredUpdateTag;
+    }
+
+    public void setIgnoredUpdateTag(String ignoredUpdateTag) {
+        this.ignoredUpdateTag = ignoredUpdateTag;
     }
 }

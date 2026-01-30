@@ -2,12 +2,8 @@ package org.argentumforge.engine.gui.forms;
 
 import imgui.type.ImBoolean;
 import imgui.ImGui;
-import imgui.ImGuiViewport;
 import imgui.flag.*;
 import org.argentumforge.engine.game.console.Console;
-import org.argentumforge.engine.gui.ImGUISystem;
-import org.argentumforge.engine.gui.DialogManager;
-import org.argentumforge.engine.renderer.RenderSettings;
 import org.argentumforge.engine.gui.Theme;
 import org.argentumforge.engine.utils.editor.*;
 import org.argentumforge.engine.gui.forms.main.MainMenuBar;
@@ -16,7 +12,9 @@ import org.argentumforge.engine.gui.forms.main.MainToolbar;
 import org.argentumforge.engine.i18n.I18n;
 
 import static org.argentumforge.engine.utils.GameData.options;
-import static org.argentumforge.engine.utils.Time.FPS;
+import org.argentumforge.engine.utils.GithubReleaseChecker;
+import java.awt.Desktop;
+import java.net.URI;
 import org.argentumforge.engine.renderer.RGBColor;
 import static org.argentumforge.engine.game.console.FontStyle.REGULAR;
 import org.argentumforge.engine.utils.editor.commands.*;
@@ -38,7 +36,6 @@ import static org.lwjgl.glfw.GLFW.*;
 public final class FMain extends Form {
 
     private static final int TRANSPARENT_COLOR = Theme.TRANSPARENT;
-    private static final float STATUS_BAR_HEIGHT = 30.0f;
 
     private FSurfaceEditor surfaceEditor;
     private FBlockEditor blockEditor;
@@ -47,6 +44,7 @@ public final class FMain extends Form {
     private FMinimap minimap;
     private FGrhLibrary grhLibrary;
     private FPhotoMode photoModeUI = new FPhotoMode();
+    private boolean updatePopupShown = false;
     private FTriggerEditor triggerEditor;
     private FTransferEditor transferEditor;
     private FParticleEditor particleEditor;
@@ -101,49 +99,52 @@ public final class FMain extends Form {
 
     @Override
     public void render() {
-        // Setup DockSpace
-        ImGuiViewport viewport = ImGui.getMainViewport();
-        ImGui.setNextWindowPos(0, 0);
-        ImGui.setNextWindowSize(viewport.getSizeX(), viewport.getSizeY() - STATUS_BAR_HEIGHT);
+        boolean isPhoto = options.getRenderSettings().isPhotoModeActive();
+
+        // 1. BARRA DE MENÚ (Sistema principal)
+        if (!isPhoto) {
+            menuBar.render();
+        }
+
+        // 2. VENTANA RAÍZ PARA DOCKING
+        imgui.ImGuiViewport viewport = ImGui.getMainViewport();
+        ImGui.setNextWindowPos(viewport.getWorkPosX(), viewport.getWorkPosY());
+        ImGui.setNextWindowSize(viewport.getWorkSizeX(), viewport.getWorkSizeY());
         ImGui.setNextWindowViewport(viewport.getID());
 
-        int windowFlags = ImGuiWindowFlags.MenuBar | ImGuiWindowFlags.NoDocking;
+        // Estilo para que la ventana sea invisible y cubra el área de trabajo
+        ImGui.pushStyleVar(imgui.flag.ImGuiStyleVar.WindowRounding, 0.0f);
+        ImGui.pushStyleVar(imgui.flag.ImGuiStyleVar.WindowBorderSize, 0.0f);
+        ImGui.pushStyleVar(imgui.flag.ImGuiStyleVar.WindowPadding, 0.0f, 0.0f);
+
+        int windowFlags = ImGuiWindowFlags.NoDocking;
         windowFlags |= ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize
                 | ImGuiWindowFlags.NoMove;
         windowFlags |= ImGuiWindowFlags.NoBringToFrontOnFocus | ImGuiWindowFlags.NoNavFocus
-                | ImGuiWindowFlags.NoBackground;
+                | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse;
 
-        ImGui.pushStyleVar(ImGuiStyleVar.WindowRounding, 0.0f);
-        // ImGui.pushStyleVar(ImGuiStyleVar.WindowBorderSize, 0.0f); // User requested
-        // border
-        ImGui.pushStyleVar(ImGuiStyleVar.WindowPadding, 0.0f, 0.0f);
+        ImGui.begin("MainDockSpaceHolder", windowFlags);
+        ImGui.popStyleVar(3);
 
-        ImGui.begin("DockSpace Demo", windowFlags);
-        ImGui.popStyleVar(2);
-
-        int dockspaceId = ImGui.getID("MyDockSpace");
+        // Crear el DockSpace real
+        int dockspaceId = ImGui.getID("MainEditorDockSpace");
         ImGui.dockSpace(dockspaceId, 0.0f, 0.0f, ImGuiDockNodeFlags.PassthruCentralNode);
 
-        menuBar.render();
+        ImGui.end();
 
-        ImGui.end(); // End DockSpace window
+        // 3. RENDERIZADO DE COMPONENTES FIJOS (Se apoyan en el DockSpace o WorkArea)
+        if (!isPhoto) {
+            statusBar.render();
+            toolbar.render();
+        }
 
-        // drawTabs(); // Tabs are redundant with docking potentially, but let's keep
-        // them logic-wise if needed or refactor later.
-        // For now, let's look if we can integrate them or just keep them floating for a
-        // moment.
-        // Actually, map contexts should probably be separate windows if we want full
-        // docking power.
-        // For this step, we keep the old tabs but might need to adjust Z-order.
-
-        if (options.getRenderSettings().isPhotoModeActive()) {
+        if (isPhoto) {
             photoModeUI.render();
             return;
         }
 
+        // 3. RENDERIZADO DE TABS DE MAPAS
         drawTabs();
-        statusBar.render();
-        toolbar.render();
 
         Console.INSTANCE.drawConsole();
         handleShortcuts();
@@ -177,6 +178,68 @@ public final class FMain extends Form {
             ImGui.endPopup();
         }
 
+        // Update Notification Logic (Moved from FLauncher)
+        if (GithubReleaseChecker.isUpdateAvailable() && !updatePopupShown) {
+            GithubReleaseChecker.ReleaseInfo r = GithubReleaseChecker.getLatestRelease();
+            String ignored = org.argentumforge.engine.game.Options.INSTANCE.getIgnoredUpdateTag();
+
+            if (r != null && !r.tagName.equals(ignored)) {
+                ImGui.openPopup(I18n.INSTANCE.get("update.available"));
+                updatePopupShown = true;
+            }
+        }
+
+        if (ImGui.beginPopupModal(I18n.INSTANCE.get("update.available"), ImGuiWindowFlags.AlwaysAutoResize)) {
+            ImGui.text(I18n.INSTANCE.get("update.available"));
+            ImGui.spacing();
+
+            GithubReleaseChecker.ReleaseInfo release = GithubReleaseChecker.getLatestRelease();
+            if (release != null) {
+                ImGui.textColored(0.2f, 0.8f, 0.2f, 1.0f, release.tagName);
+                if (release.isPrerelease) {
+                    ImGui.sameLine();
+                    ImGui.textColored(1.0f, 0.5f, 0.0f, 1.0f, "(Pre-release)");
+                }
+                ImGui.textWrapped(release.name);
+            }
+
+            ImGui.spacing();
+            ImGui.separator();
+            ImGui.spacing();
+
+            if (ImGui.button(I18n.INSTANCE.get("update.download"), 200, 30)) {
+                if (release != null) {
+                    try {
+                        Desktop.getDesktop().browse(new URI(release.htmlUrl));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                ImGui.closeCurrentPopup();
+            }
+
+            ImGui.sameLine();
+
+            if (ImGui.button(I18n.INSTANCE.get("update.close"), 100, 30)) {
+                ImGui.closeCurrentPopup();
+            }
+
+            // "Don't show again" button
+            ImGui.spacing();
+            if (ImGui.button(I18n.INSTANCE.get("update.skip"), 308, 20)) {
+                if (release != null) {
+                    org.argentumforge.engine.game.Options.INSTANCE.setIgnoredUpdateTag(release.tagName);
+                    org.argentumforge.engine.game.Options.INSTANCE.save();
+                }
+                ImGui.closeCurrentPopup();
+            }
+            if (ImGui.isItemHovered()) {
+                ImGui.setTooltip(I18n.INSTANCE.get("update.skip_tooltip"));
+            }
+
+            ImGui.endPopup();
+        }
+
     }
 
     private void drawTabs() {
@@ -185,11 +248,20 @@ public final class FMain extends Form {
         if (openMaps.isEmpty())
             return;
 
-        ImGuiViewport viewport = ImGui.getMainViewport();
-        ImGui.setNextWindowPos(0, 19); // Debajo de la barra de menú Principal
-        ImGui.setNextWindowSize(viewport.getSizeX(), 30);
+        imgui.ImGuiViewport viewport = ImGui.getMainViewport();
+        float toolbarHeight = 52.0f;
+        float tabsHeight = 22.0f;
+
+        // Anclar debajo de la toolbar
+        ImGui.setNextWindowPos(viewport.getWorkPosX(), viewport.getWorkPosY() + toolbarHeight);
+        ImGui.setNextWindowSize(viewport.getWorkSizeX(), tabsHeight);
+        ImGui.setNextWindowViewport(viewport.getID());
+
+        // Las pestañas ahora se dibujan de forma más limpia
         if (ImGui.begin("WorkspaceTabsWindow", ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoBackground
                 | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoSavedSettings)) {
+            // Reducir padding interno para las pestañas
+            ImGui.pushStyleVar(ImGuiStyleVar.FramePadding, 10.0f, 2.0f);
             if (ImGui.beginTabBar("##WorkspaceTabs", ImGuiTabBarFlags.AutoSelectNewTabs)) {
                 org.argentumforge.engine.utils.MapContext contextToClose = null;
 
@@ -246,6 +318,7 @@ public final class FMain extends Form {
 
                 ImGui.endTabBar();
             }
+            ImGui.popStyleVar();
         }
         ImGui.end();
     }

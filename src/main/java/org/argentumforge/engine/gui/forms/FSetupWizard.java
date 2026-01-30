@@ -49,6 +49,9 @@ public final class FSetupWizard extends Form {
     private final ImInt clientWidth = new ImInt(13);
     private final ImInt clientHeight = new ImInt(11);
 
+    private final ImInt styleIndex = new ImInt(0);
+    private final String[] styles = { "MODERN", "DARK", "CLASSIC", "LIGHT" };
+
     private final ImBoolean generateMinimap = new ImBoolean(true);
 
     private final ImBoolean windowOpen = new ImBoolean(true);
@@ -107,6 +110,15 @@ public final class FSetupWizard extends Form {
                 break;
             }
         }
+
+        // Detectar estilo actual
+        String currentStyle = opts.getVisualTheme();
+        for (int i = 0; i < styles.length; i++) {
+            if (styles[i].equals(currentStyle)) {
+                styleIndex.set(i);
+                break;
+            }
+        }
     }
 
     private org.argentumforge.engine.renderer.Texture backgroundTexture;
@@ -140,9 +152,9 @@ public final class FSetupWizard extends Form {
             case STEP_WELCOME -> 250;
             case STEP_PROFILE -> 200;
             case STEP_ROUTES -> 350;
-            case STEP_PREFERENCES -> 420;
+            case STEP_PREFERENCES -> 450;
             case STEP_MINIMAP -> 320;
-            case STEP_CONFIRMATION -> 400; // Un poco más alto por el nuevo campo
+            case STEP_CONFIRMATION -> 400;
             default -> 400;
         };
 
@@ -152,7 +164,8 @@ public final class FSetupWizard extends Form {
                 (org.argentumforge.engine.Window.INSTANCE.getHeight() - windowHeight) * 0.70f,
                 ImGuiCond.Always);
 
-        int flags = ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize;
+        int flags = ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoScrollbar
+                | ImGuiWindowFlags.NoScrollWithMouse;
 
         if (ImGui.begin(I18n.INSTANCE.get("wizard.title"), windowOpen, flags)) {
             switch (currentStep) {
@@ -192,8 +205,7 @@ public final class FSetupWizard extends Form {
         ImGui.separator();
         ImGui.spacing();
 
-        ImGui.textWrapped(
-                "Antes de continuar, asigna un nombre a este perfil de configuración (por ejemplo, el nombre del servidor o mod con el que trabajarás).");
+        ImGui.textWrapped(I18n.INSTANCE.get("wizard.profile.description"));
         ImGui.spacing();
 
         ImGui.text(I18n.INSTANCE.get("wizard.profile.name"));
@@ -258,8 +270,8 @@ public final class FSetupWizard extends Form {
 
         ImGui.text(I18n.INSTANCE.get("wizard.prefs.clientSize"));
         ImGui.pushItemWidth(100);
-        ImGui.inputInt("Width (tiles)", clientWidth);
-        ImGui.inputInt("Height (tiles)", clientHeight);
+        ImGui.inputInt(I18n.INSTANCE.get("wizard.prefs.width"), clientWidth);
+        ImGui.inputInt(I18n.INSTANCE.get("wizard.prefs.height"), clientHeight);
         ImGui.popItemWidth();
         ImGui.spacing();
 
@@ -268,7 +280,14 @@ public final class FSetupWizard extends Form {
         ImGui.spacing();
 
         ImGui.checkbox(I18n.INSTANCE.get("wizard.prefs.fullscreen"), fullscreen);
+        ImGui.spacing();
 
+        ImGui.text(I18n.INSTANCE.get("options.visualTheme"));
+        if (ImGui.combo("##visualStyle", styleIndex, styles)) {
+            // Aplicar estilo inmediatamente para previsualización
+            org.argentumforge.engine.gui.Theme.applyStyle(
+                    org.argentumforge.engine.gui.Theme.StyleType.valueOf(styles[styleIndex.get()]));
+        }
     }
 
     private void renderMinimap() {
@@ -307,6 +326,7 @@ public final class FSetupWizard extends Form {
         ImGui.bulletText(I18n.INSTANCE.get("wizard.prefs.resolution") + " " + resolutions[resolutionIndex.get()]);
         ImGui.bulletText(
                 I18n.INSTANCE.get("wizard.prefs.clientSize") + " " + clientWidth.get() + "x" + clientHeight.get());
+        ImGui.bulletText(I18n.INSTANCE.get("options.visualTheme") + ": " + styles[styleIndex.get()]);
         ImGui.spacing();
         ImGui.bulletText(I18n.INSTANCE.get("wizard.minimap.generate") + ": " + (generateMinimap.get() ? "Sí" : "No"));
     }
@@ -384,7 +404,7 @@ public final class FSetupWizard extends Form {
     private boolean validateCurrentStep() {
         if (currentStep == STEP_PROFILE) {
             if (profileName.get().trim().isEmpty()) {
-                errorMessage = "El nombre del perfil no puede estar vacío.";
+                errorMessage = I18n.INSTANCE.get("wizard.profile.error.empty");
                 return false;
             }
         }
@@ -440,7 +460,7 @@ public final class FSetupWizard extends Form {
         // Crear perfil nuevo mediante ProfileManager
         String pName = profileName.get().trim();
         if (pName.isEmpty())
-            pName = "Default";
+            pName = I18n.INSTANCE.get("wizard.profile.defaultName");
 
         org.argentumforge.engine.utils.Profile newProfile = org.argentumforge.engine.utils.ProfileManager.INSTANCE
                 .createProfile(pName);
@@ -467,6 +487,8 @@ public final class FSetupWizard extends Form {
         String[] res = resolutions[resolutionIndex.get()].split("x");
         opts.setScreenWidth(Integer.parseInt(res[0]));
         opts.setScreenHeight(Integer.parseInt(res[1]));
+
+        opts.setVisualTheme(styles[styleIndex.get()]);
 
         // Guardar en el archivo del perfil
         opts.save();

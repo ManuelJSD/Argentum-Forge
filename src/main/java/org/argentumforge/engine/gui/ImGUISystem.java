@@ -5,9 +5,11 @@ import imgui.callback.ImStrConsumer;
 import imgui.callback.ImStrSupplier;
 import imgui.flag.*;
 import imgui.gl3.ImGuiImplGl3;
+import imgui.glfw.ImGuiImplGlfw;
 import org.argentumforge.engine.Window;
 import org.argentumforge.engine.game.console.ImGuiFonts;
 import org.argentumforge.engine.gui.forms.Form;
+import org.argentumforge.engine.listeners.KeyHandler;
 import org.argentumforge.engine.listeners.MouseListener;
 
 import java.util.ArrayList;
@@ -43,19 +45,10 @@ public enum ImGUISystem {
 
     // LWJGL3 rendered itself (SHOULD be initialized)
     private final ImGuiImplGl3 imGuiGl3 = new ImGuiImplGl3();
+    private final ImGuiImplGlfw imGuiGlfw = new ImGuiImplGlfw();
 
     // Cursores del mouse proporcionados por GLFW
     private final long[] mouseCursors = new long[ImGuiMouseCursor.COUNT];
-
-    // Those are used to track window size properties
-    private final int[] winWidth = new int[1];
-    private final int[] winHeight = new int[1];
-    private final int[] fbWidth = new int[1];
-    private final int[] fbHeight = new int[1];
-
-    // For mouse tracking
-    private final double[] mousePosX = new double[1];
-    private final double[] mousePosY = new double[1];
 
     // arreglo de ventanas gui
     private final List<Form> frms = new ArrayList<>();
@@ -76,18 +69,22 @@ public enum ImGUISystem {
         ImGui.createContext();
 
         /*
-         * ImGui proporciona 3 esquemas de color diferentes para diseñar. Usaremos el
-         * clásico aquí.
-         * Pruebe otros con los métodos ImGui.styleColors().
+         * Aplicamos el estilo guardado en las opciones.
          */
-        ImGui.styleColorsClassic();
+        try {
+            Theme.StyleType savedStyle = Theme.StyleType
+                    .valueOf(org.argentumforge.engine.game.Options.INSTANCE.getVisualTheme());
+            Theme.applyStyle(savedStyle);
+        } catch (Exception e) {
+            Theme.applyModernStyle();
+        }
 
         // Iniciamos la configuracion de ImGuiIO
         final ImGuiIO io = ImGui.getIO();
 
         io.setIniFilename("resources/gui.ini"); // Guardamos en un archivo .ini
-        io.setConfigFlags(ImGuiConfigFlags.NavEnableKeyboard | ImGuiConfigFlags.DockingEnable); // Navegacion con el
-                                                                                                // teclado y Docking
+        io.setConfigFlags(ImGuiConfigFlags.NavEnableKeyboard | ImGuiConfigFlags.DockingEnable
+                | ImGuiConfigFlags.ViewportsEnable); // Navegacion con el teclado, Docking y Viewports (Multi-monitor)
         io.setBackendFlags(ImGuiBackendFlags.HasMouseCursors); // Cursores del mouse para mostrar al cambiar el tamaño
                                                                // de las ventanas, etc.
         io.setBackendPlatformName("imgui_java_impl_glfw");
@@ -95,13 +92,67 @@ public enum ImGUISystem {
 
         // Teclado y raton.
         setMouseMapping();
-        setCallbacks(io);
-
+        setupClipboard(io);
         // Configuracion de Fonts
         loadImGUIFonts(io);
 
         // Iniciamos ImGUI en OpenGL
+        // Usamos installCallbacks = false para que no sobreescriba nuestros listeners,
+        // nosotros los envolveremos manualmente en setupEngineCallbacksWrapper.
+        imGuiGlfw.init(window.getWindow(), false);
+
+        // Re-enlazamos nuestros listeners del motor envolviendo los de ImGui.
+        // Esto es necesario porque imGuiGlfw.init(..., true) sobreescribe los callbacks
+        // de Window.java.
+        setupEngineCallbacksWrapper();
+
         imGuiGl3.init();
+    }
+
+    /**
+     * Envuelve los callbacks de ImGui para llamar también a nuestros listeners del
+     * motor.
+     */
+    private void setupEngineCallbacksWrapper() {
+        final long win = window.getWindow();
+
+        // El binding de imgui-java no permite "encadenar" fácilmente,
+        // así que reimplementamos la llamada a nuestros listeners aquí.
+        // ImGui ya tiene sus callbacks instalados, nosotros simplemente añadimos los
+        // nuestros.
+
+        glfwSetKeyCallback(win, (w, k, s, a, m) -> {
+            imGuiGlfw.keyCallback(w, k, s, a, m);
+            KeyHandler.keyCallback(w, k, s, a, m);
+        });
+
+        glfwSetMouseButtonCallback(win, (w, b, a, m) -> {
+            imGuiGlfw.mouseButtonCallback(w, b, a, m);
+            MouseListener.mouseButtonCallback(w, b, a, m);
+        });
+
+        glfwSetCursorPosCallback(win, (w, x, y) -> {
+            imGuiGlfw.cursorPosCallback(w, x, y);
+            MouseListener.mousePosCallback(w, x, y);
+        });
+
+        glfwSetScrollCallback(win, (w, x, y) -> {
+            imGuiGlfw.scrollCallback(w, x, y);
+            MouseListener.mouseScrollCallback(w, x, y);
+        });
+
+        glfwSetCharCallback(win, (w, c) -> {
+            imGuiGlfw.charCallback(w, c);
+        });
+
+        // Otros callbacks necesarios para ImGui viewports y gestion de foco
+        glfwSetWindowFocusCallback(win, (w, f) -> {
+            imGuiGlfw.windowFocusCallback(w, f);
+        });
+
+        glfwSetCursorEnterCallback(win, (w, e) -> {
+            imGuiGlfw.cursorEnterCallback(w, e);
+        });
     }
 
     private void setMouseMapping() {
@@ -116,12 +167,7 @@ public enum ImGUISystem {
         mouseCursors[ImGuiMouseCursor.NotAllowed] = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
     }
 
-    private void setCallbacks(ImGuiIO io) {
-        glfwSetCharCallback(window.getWindow(), (w, c) -> {
-            if (c != GLFW_KEY_DELETE)
-                io.addInputCharacter(c);
-        });
-
+    private void setupClipboard(ImGuiIO io) {
         io.setSetClipboardTextFn(new ImStrConsumer() {
             @Override
             public void accept(final String s) {
@@ -167,43 +213,31 @@ public enum ImGUISystem {
 
     public void destroy() {
         imGuiGl3.shutdown();
+        imGuiGlfw.shutdown();
         ImGui.destroyContext();
     }
 
     public void renderGUI() {
-        if (deltaTime <= 0)
+        if (deltaTime < 0)
             return;
 
         final ImGuiIO io = ImGui.getIO();
-
-        // Get window size properties and mouse position
-        glfwGetWindowSize(window.getWindow(), winWidth, winHeight);
-        glfwGetFramebufferSize(window.getWindow(), fbWidth, fbHeight);
-        glfwGetCursorPos(window.getWindow(), mousePosX, mousePosY);
-
-        io.setDisplaySize(winWidth[0], winHeight[0]);
-        io.setDisplayFramebufferScale((float) fbWidth[0] / winWidth[0], (float) fbHeight[0] / winHeight[0]);
-        io.addMousePosEvent((float) mousePosX[0], (float) mousePosY[0]);
         io.setDeltaTime(deltaTime);
 
-        for (int i = 0; i < 5; i++) {
-            io.addMouseButtonEvent(i, glfwGetMouseButton(window.getWindow(), i) == GLFW_PRESS);
-        }
-
-        io.addMouseWheelEvent(MouseListener.getScrollX(), MouseListener.getScrollY());
-
-        // ACA HAY QUE LABURAR CON LOS CURSORES.
-        if (window.isCursorCrosshair())
+        // Window size and framebuffer scale are now handled by imGuiGlfw.newFrame()
+        // NOTA: No llamamos a glfwSetCursor aquí, dejamos que ImGui lo gestione
+        // globalmente
+        // si no estamos en modo "Crosshair" del juego.
+        if (window.isCursorCrosshair()) {
             glfwSetCursor(window.getWindow(), glfwCreateStandardCursor(GLFW_CROSSHAIR_CURSOR));
-        else {
-            glfwSetCursor(window.getWindow(), mouseCursors[ImGui.getMouseCursor()]);
-            glfwSetInputMode(window.getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         }
 
         // IMPORTANT!!
         // Any Dear ImGui code SHOULD go between NewFrame()/Render() methods
+        imGuiGlfw.newFrame();
         imGuiGl3.newFrame();
         ImGui.newFrame();
+
         if (showDebug) {
             ImGui.setNextWindowPos(5, 25, ImGuiCond.Always);
             ImGui.begin("InputDebug", ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize |
@@ -223,6 +257,13 @@ public enum ImGUISystem {
         // After ImGui#render call we provide draw data into LWJGL3 renderer.
         // At that moment ImGui will be rendered to the current OpenGL context.
         imGuiGl3.renderDrawData(ImGui.getDrawData());
+
+        if (ImGui.getIO().hasConfigFlags(ImGuiConfigFlags.ViewportsEnable)) {
+            final long backupWindowPtr = glfwGetCurrentContext();
+            ImGui.updatePlatformWindows();
+            ImGui.renderPlatformWindowsDefault();
+            glfwMakeContextCurrent(backupWindowPtr);
+        }
 
         MouseListener.endFrame();
     }
@@ -302,5 +343,18 @@ public enum ImGUISystem {
             }
         }
         return null;
+    }
+
+    public void setViewportsEnabled(boolean enabled) {
+        ImGuiIO io = ImGui.getIO();
+        if (enabled) {
+            io.addConfigFlags(ImGuiConfigFlags.ViewportsEnable);
+        } else {
+            io.removeConfigFlags(ImGuiConfigFlags.ViewportsEnable);
+        }
+    }
+
+    public ImGuiImplGlfw getImGuiGlfw() {
+        return imGuiGlfw;
     }
 }
