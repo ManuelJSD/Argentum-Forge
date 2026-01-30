@@ -24,7 +24,8 @@ class MapContextTest {
     @DisplayName("Should return file name from path")
     void shouldReturnFileNameFromPath() {
         // Arrange
-        String path = "C:\\maps\\map1.map";
+        // Use File constructor to ensure correct separator for the OS
+        String path = new java.io.File("maps", "map1.map").getAbsolutePath();
         MapContext context = new MapContext(path, null, null, null);
 
         // Act
