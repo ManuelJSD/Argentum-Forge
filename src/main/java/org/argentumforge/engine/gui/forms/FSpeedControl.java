@@ -3,7 +3,6 @@ package org.argentumforge.engine.gui.forms;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.flag.ImGuiWindowFlags;
-import imgui.flag.ImGuiCol;
 import org.argentumforge.engine.i18n.I18n;
 import static org.argentumforge.engine.utils.GameData.options;
 

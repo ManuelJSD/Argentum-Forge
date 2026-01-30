@@ -26,8 +26,6 @@ import org.argentumforge.engine.utils.MapContext;
  */
 public class FSurfaceEditor extends Form implements IMapEditor {
 
-    private MapContext context; // Contexto activo inyectado
-
     private final ImInt searchGrh = new ImInt(0);
     private int selectedGrhIndex = -1;
     private final ImInt selectedLayer = new ImInt(0);
@@ -47,9 +45,7 @@ public class FSurfaceEditor extends Form implements IMapEditor {
         this.surface = Surface.getInstance();
         this.selectedGrhIndex = surface.getSurfaceIndex();
 
-        // Inicializar contexto por defecto (temporal hasta que FMain inyecte)
-        // Esto previene NPEs si FMain no llama a setContext inmediatamente
-        this.context = org.argentumforge.engine.utils.GameData.getActiveContext();
+        // Contexto no usado localmente
 
         // Sincronizar capa inicial
         for (int i = 0; i < capas.size(); i++) {
@@ -65,7 +61,8 @@ public class FSurfaceEditor extends Form implements IMapEditor {
 
     @Override
     public void setContext(MapContext context) {
-        this.context = context;
+        // Contexto no usado localmente
+
         // Opcional: Si Surface dependiera del contexto para su estado interno,
         // actualizarlo aquí.
         // Surface es un singleton de *herramienta* (configuración de pincel), por lo

@@ -7,7 +7,6 @@ package org.argentumforge.engine.utils;
  * integrando la lógica con el {@link GameData} y las opciones de usuario.
  */
 import org.argentumforge.engine.game.Options;
-import org.argentumforge.engine.gui.FileDialog;
 import org.argentumforge.engine.i18n.I18n;
 
 import java.io.File;
