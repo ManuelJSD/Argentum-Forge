@@ -8,8 +8,6 @@ import org.argentumforge.engine.listeners.KeyHandler;
 
 import org.argentumforge.engine.i18n.I18n;
 
-import static org.argentumforge.engine.audio.Sound.SND_CLICK;
-import static org.argentumforge.engine.audio.Sound.playSound;
 import static org.lwjgl.glfw.GLFW.*;
 
 public class FBindKeys extends Form {
@@ -53,7 +51,7 @@ public class FBindKeys extends Form {
                 case GLFW_KEY_F12 -> "F12";
 
                 // tecla inreconocible
-                default -> "???";
+                default -> "KEY " + key;
             };
         }
 
@@ -93,6 +91,7 @@ public class FBindKeys extends Form {
             renderKeyBindRow(I18n.INSTANCE.get("options.keys.showDebug"), Key.DEBUG_SHOW);
             renderKeyBindRow(I18n.INSTANCE.get("options.keys.walkMode"), Key.TOGGLE_WALKING_MODE);
             renderKeyBindRow(I18n.INSTANCE.get("options.keys.toggleGrid"), Key.TOGGLE_GRID);
+            renderKeyBindRow(I18n.INSTANCE.get("options.keys.photoMode"), Key.TOGGLE_PHOTO_MODE);
             renderKeyBindRow(I18n.INSTANCE.get("options.keys.mapProperties"), Key.MAP_PROPERTIES);
 
             renderGroupHeader(I18n.INSTANCE.get("options.keys.selectionTools"));
@@ -150,13 +149,27 @@ public class FBindKeys extends Form {
         // Column 1: Button
         float buttonWidth = ImGui.getColumnWidth() - 10; // Fill column with small padding
 
+        // Ensure we always get the LATEST key code from Key map
         String actual = getKeyName(key.getKeyCode()).toUpperCase();
 
         if (key.getPreparedToBind()) {
             actual = I18n.INSTANCE.get("options.keys.pressKey");
         }
 
-        if (ImGui.button(actual, buttonWidth, 0)) {
+        // Use ### to ensure the ID is stable but let the label change?
+        // Actually, button(label) uses label as ID. If label changes, ID changes,
+        // preventing animation?
+        // But if label stays "F12" because of logic...
+
+        // Let's force a unique ID for the button that is NOT the label, so ImGui
+        // handles it correctly
+        // and we can change the label freely.
+        // But ImGui.button(text) uses text as ID.
+        // We can use "Label###ID" format.
+
+        String buttonId = actual + "###" + label + "_btn";
+
+        if (ImGui.button(buttonId, buttonWidth, 0)) {
             if (key.getPreparedToBind()) {
                 key.setPreparedToBind(false);
             } else {
@@ -172,7 +185,6 @@ public class FBindKeys extends Form {
     }
 
     private void buttonDefault() {
-        playSound(SND_CLICK);
 
         Key.loadDefaultKeys();
         KeyHandler.updateMovementKeys();
@@ -180,7 +192,6 @@ public class FBindKeys extends Form {
     }
 
     private void buttonSave() {
-        playSound(SND_CLICK);
 
         Key.saveKeys();
         close();

@@ -47,7 +47,9 @@ public enum Key {
     TOOL_MAGIC_WAND(GLFW_KEY_H),
 
     // Vistas
-    TOGGLE_GRID(GLFW_KEY_G);
+    // Vistas
+    TOGGLE_GRID(GLFW_KEY_G),
+    TOGGLE_PHOTO_MODE(GLFW_KEY_F12);
 
     private static final String KEYS_CONFIG_FILE = "resources/keys.properties";
     private static final Logger LOGGER = Logger.getLogger(Key.class.getName());
@@ -230,7 +232,7 @@ public enum Key {
      * Valida si un keyCode es valido para GLFW.
      */
     private static boolean isValidKeyCode(int keyCode) {
-        return keyCode >= GLFW_KEY_SPACE && keyCode <= GLFW_KEY_LAST;
+        return keyCode > 0;
     }
 
     public int getKeyCode() {
@@ -238,13 +240,28 @@ public enum Key {
     }
 
     public boolean setKeyCode(int newKeyCode) {
-        if (!isValidKeyCode(newKeyCode))
+        if (!isValidKeyCode(newKeyCode)) {
             return false;
+        }
 
         // Verifica conflictos
         Key existingKey = codeToKeyMap.get(newKeyCode);
-        if (existingKey != null && existingKey != this)
-            return false;
+        if (existingKey != null && existingKey != this) {
+            // Swap logic: if the key is taken, give the old key of 'this' to 'existingKey'?
+            // Or just swap them.
+            int myOldCode = this.getKeyCode();
+
+            // Assign my old code to the other key (swapping)
+            if (isValidKeyCode(myOldCode)) {
+                keyCodeMap.put(existingKey, myOldCode);
+            } else {
+                // If my old code was invalid (shouldnt happen but safety), just unbind
+                // existingKey?
+                // Actually Key enum always has a code.
+                // Force switch
+                keyCodeMap.put(existingKey, myOldCode);
+            }
+        }
 
         keyCodeMap.put(this, newKeyCode);
         updateMaps();

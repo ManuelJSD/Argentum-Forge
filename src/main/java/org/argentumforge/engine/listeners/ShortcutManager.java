@@ -32,7 +32,10 @@ public class ShortcutManager {
     public void update() {
         // Si ImGui está capturando texto (ej. en buscadores), no procesamos atajos
         // globales
-        if (ImGui.getIO().getWantTextInput()) {
+        // Si ImGui está capturando texto (ej. en buscadores) o estamos configurando
+        // teclas, no procesamos atajos
+        if (ImGui.getIO().getWantTextInput() || Key.checkIsBinding()
+                || ImGUISystem.INSTANCE.isFormVisible("FBindKeys")) {
             return;
         }
 
@@ -86,6 +89,10 @@ public class ShortcutManager {
                     Options.INSTANCE.getRenderSettings()
                             .setShowGrid(!Options.INSTANCE.getRenderSettings().isShowGrid());
                     Options.INSTANCE.save();
+                    break;
+                case TOGGLE_PHOTO_MODE:
+                    Options.INSTANCE.getRenderSettings().setPhotoModeActive(
+                            !Options.INSTANCE.getRenderSettings().isPhotoModeActive());
                     break;
                 case TOOL_BRUSH:
                     org.argentumforge.engine.utils.editor.Surface.getInstance().setMode(1);

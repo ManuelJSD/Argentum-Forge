@@ -2,7 +2,6 @@ package org.argentumforge.engine.utils.editor.commands;
 
 import org.argentumforge.engine.i18n.I18n;
 import java.util.Map;
-import org.argentumforge.engine.utils.MapContext;
 
 /**
  * Comando para registrar y revertir cambios de bloqueos.

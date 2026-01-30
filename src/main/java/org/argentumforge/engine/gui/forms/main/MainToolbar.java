@@ -35,17 +35,23 @@ public class MainToolbar {
 
     public void render() {
         ImGuiViewport viewport = ImGui.getMainViewport();
-        ImGui.setNextWindowPos(0, 49);
-        ImGui.setNextWindowSize(viewport.getSizeX(), 60); // Ajustado al ancho del viewport
-        if (ImGui.begin("ToolBar", ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoBackground
-                | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoSavedSettings)) {
+        float toolbarHeight = 52.0f;
+
+        // Anclar justo debajo del menú (WorkPos lo tiene en cuenta)
+        ImGui.setNextWindowPos(viewport.getWorkPosX(), viewport.getWorkPosY());
+        ImGui.setNextWindowSize(viewport.getWorkSizeX(), toolbarHeight);
+        ImGui.setNextWindowViewport(viewport.getID());
+
+        if (ImGui.begin("ToolBar", ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoBackground
+                | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoMove
+                | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse)) {
             drawEditorButtons();
         }
         ImGui.end();
     }
 
     private void drawEditorButtons() {
-        ImGui.setCursorPos(10, 5); // Alineado arriba dentro de la mini-ventana
+        ImGui.setCursorPos(10, 2); // Centrado verticalmente (52-48)/2
 
         // Configuración de estilo par botones
         float btnSize = 48;
@@ -56,27 +62,29 @@ public class MainToolbar {
 
         // --- GRUPO 1: EDICIÓN (Visual) ---
 
+        boolean mapOpen = !org.argentumforge.engine.utils.GameData.getOpenMaps().isEmpty();
+
         // Superficies (Fila 0, Col 0)
         drawIconButton("Su", I18n.INSTANCE.get("toolbar.surface"), "FSurfaceEditor", parent.getSurfaceEditor(),
-                btnSize, 0 * uvStep + zoom, 0 * uvStep + zoom, 1 * uvStep - zoom, 1 * uvStep - zoom);
+                btnSize, 0 * uvStep + zoom, 0 * uvStep + zoom, 1 * uvStep - zoom, 1 * uvStep - zoom, mapOpen);
 
         ImGui.sameLine();
 
         // Objetos (Fila 1, Col 1)
         drawIconButton("Ob", I18n.INSTANCE.get("menu.view.objects"), "FObjEditor", parent.getObjEditor(),
-                btnSize, 1 * uvStep + zoom, 1 * uvStep + zoom, 2 * uvStep - zoom, 2 * uvStep - zoom);
+                btnSize, 1 * uvStep + zoom, 1 * uvStep + zoom, 2 * uvStep - zoom, 2 * uvStep - zoom, mapOpen);
 
         ImGui.sameLine();
 
         // NPCs (Fila 1, Col 0)
         drawIconButton("NP", I18n.INSTANCE.get("menu.view.npcs"), "FNpcEditor", parent.getNpcEditor(),
-                btnSize, 0 * uvStep + zoom, 1 * uvStep + zoom, 1 * uvStep - zoom, 2 * uvStep - zoom);
+                btnSize, 0 * uvStep + zoom, 1 * uvStep + zoom, 1 * uvStep - zoom, 2 * uvStep - zoom, mapOpen);
 
         ImGui.sameLine();
 
         // Partículas (Fila 2, Col 0)
         drawIconButton("Pa", I18n.INSTANCE.get("menu.view.particles"), "FParticleEditor", parent.getParticleEditor(),
-                btnSize, 0 * uvStep + zoom, 2 * uvStep + zoom, 1 * uvStep - zoom, 3 * uvStep - zoom);
+                btnSize, 0 * uvStep + zoom, 2 * uvStep + zoom, 1 * uvStep - zoom, 3 * uvStep - zoom, mapOpen);
 
         // --- SEPARADOR ---
         drawToolbarSeparator();
@@ -85,19 +93,19 @@ public class MainToolbar {
 
         // Bloqueos (Fila 0, Col 1)
         drawIconButton("Bl", I18n.INSTANCE.get("menu.view.blocks"), "FBlockEditor", parent.getBlockEditor(),
-                btnSize, 1 * uvStep + zoom, 0 * uvStep + zoom, 2 * uvStep - zoom, 1 * uvStep - zoom);
+                btnSize, 1 * uvStep + zoom, 0 * uvStep + zoom, 2 * uvStep - zoom, 1 * uvStep - zoom, mapOpen);
 
         ImGui.sameLine();
 
         // Triggers (Fila 0, Col 2)
         drawIconButton("Tg", I18n.INSTANCE.get("menu.view.triggers"), "FTriggerEditor", parent.getTriggerEditor(),
-                btnSize, 2 * uvStep + zoom, 0 * uvStep + zoom, 3 * uvStep - zoom, 1 * uvStep - zoom);
+                btnSize, 2 * uvStep + zoom, 0 * uvStep + zoom, 3 * uvStep - zoom, 1 * uvStep - zoom, mapOpen);
 
         ImGui.sameLine();
 
         // Traslados (Fila 1, Col 2)
         drawIconButton("Tl", I18n.INSTANCE.get("menu.view.transfers"), "FTransferEditor", parent.getTransferEditor(),
-                btnSize, 2 * uvStep + zoom, 1 * uvStep + zoom, 3 * uvStep - zoom, 2 * uvStep - zoom);
+                btnSize, 2 * uvStep + zoom, 1 * uvStep + zoom, 3 * uvStep - zoom, 2 * uvStep - zoom, mapOpen);
 
         // --- SEPARADOR ---
         drawToolbarSeparator();
@@ -106,7 +114,7 @@ public class MainToolbar {
 
         // Minimapa (Fila 2, Col 1)
         drawIconButton("MM", I18n.INSTANCE.get("menu.view.minimap"), "FMinimap", parent.getMinimap(),
-                btnSize, 1 * uvStep + zoom, 2 * uvStep + zoom, 2 * uvStep - zoom, 3 * uvStep - zoom);
+                btnSize, 1 * uvStep + zoom, 2 * uvStep + zoom, 2 * uvStep - zoom, 3 * uvStep - zoom, mapOpen);
 
         ImGui.sameLine();
 
@@ -119,12 +127,16 @@ public class MainToolbar {
         ImGui.pushID("btnSelect");
         if (toolbarIcons.getId() > 0) {
             ImGui.pushStyleVar(ImGuiStyleVar.FramePadding, 0, 0);
+            if (!mapOpen)
+                ImGui.beginDisabled();
             if (ImGui.imageButton("##selectButton", (long) toolbarIcons.getId(), btnSize, btnSize, 2 * uvStep + zoom,
                     2 * uvStep + zoom,
                     3 * uvStep - zoom,
                     3 * uvStep - zoom)) {
                 toggleSelection();
             }
+            if (!mapOpen)
+                ImGui.endDisabled();
             ImGui.popStyleVar();
         } else {
             if (ImGui.button("Sel", btnSize, btnSize)) {
@@ -181,7 +193,9 @@ public class MainToolbar {
     }
 
     private void drawIconButton(String fallbackLabel, String tooltip, String formName, Form formInstance,
-            float size, float u0, float v0, float u1, float v1) {
+            float size, float u0, float v0, float u1, float v1, boolean enabled) {
+        if (!enabled)
+            ImGui.beginDisabled();
         ImGui.pushID(formName);
         // Resaltar si está activo (visible)
         boolean isVisible = ImGUISystem.INSTANCE.isFormVisible(formName);
@@ -212,6 +226,8 @@ public class MainToolbar {
         if (ImGui.isItemHovered()) {
             ImGui.setTooltip(tooltip);
         }
+        if (!enabled)
+            ImGui.endDisabled();
         ImGui.popID();
     }
 

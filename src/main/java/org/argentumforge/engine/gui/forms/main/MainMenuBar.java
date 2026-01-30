@@ -32,8 +32,32 @@ public class MainMenuBar {
         this.parent = parent;
     }
 
+    private String getKeyName(int key) {
+        int scancode = org.lwjgl.glfw.GLFW.glfwGetKeyScancode(key);
+        String keyName = org.lwjgl.glfw.GLFW.glfwGetKeyName(key, scancode);
+
+        if (keyName == null) {
+            return switch (key) {
+                case org.lwjgl.glfw.GLFW.GLFW_KEY_F1 -> "F1";
+                case org.lwjgl.glfw.GLFW.GLFW_KEY_F2 -> "F2";
+                case org.lwjgl.glfw.GLFW.GLFW_KEY_F3 -> "F3";
+                case org.lwjgl.glfw.GLFW.GLFW_KEY_F4 -> "F4";
+                case org.lwjgl.glfw.GLFW.GLFW_KEY_F5 -> "F5";
+                case org.lwjgl.glfw.GLFW.GLFW_KEY_F6 -> "F6";
+                case org.lwjgl.glfw.GLFW.GLFW_KEY_F7 -> "F7";
+                case org.lwjgl.glfw.GLFW.GLFW_KEY_F8 -> "F8";
+                case org.lwjgl.glfw.GLFW.GLFW_KEY_F9 -> "F9";
+                case org.lwjgl.glfw.GLFW.GLFW_KEY_F10 -> "F10";
+                case org.lwjgl.glfw.GLFW.GLFW_KEY_F11 -> "F11";
+                case org.lwjgl.glfw.GLFW.GLFW_KEY_F12 -> "F12";
+                default -> "KEY " + key;
+            };
+        }
+        return keyName.toUpperCase();
+    }
+
     public void render() {
-        if (ImGui.beginMenuBar()) {
+        if (ImGui.beginMainMenuBar()) {
 
             RenderSettings renderSettings = GameData.options.getRenderSettings();
 
@@ -67,11 +91,14 @@ public class MainMenuBar {
 
                 ImGui.separator();
 
-                if (ImGui.menuItem(I18n.INSTANCE.get("menu.file.save"), "Ctrl+S")) {
+                org.argentumforge.engine.utils.MapContext context = GameData.getActiveContext();
+                boolean isModified = context != null && context.isModified();
+
+                if (ImGui.menuItem(I18n.INSTANCE.get("menu.file.save"), "Ctrl+S", false, isModified)) {
                     MapFileUtils.quickSaveMap();
                 }
 
-                if (ImGui.menuItem(I18n.INSTANCE.get("menu.file.saveAs"), "Ctrl+Shift+S")) {
+                if (ImGui.menuItem(I18n.INSTANCE.get("menu.file.saveAs"), "Ctrl+Shift+S", false, context != null)) {
                     MapFileUtils.saveMapAs();
                 }
 
@@ -137,7 +164,8 @@ public class MainMenuBar {
             }
 
             if (ImGui.beginMenu(I18n.INSTANCE.get("menu.map"))) {
-                if (ImGui.menuItem(I18n.INSTANCE.get("menu.map.properties"), "F6")) {
+                String propsKey = getKeyName(org.argentumforge.engine.game.models.Key.MAP_PROPERTIES.getKeyCode());
+                if (ImGui.menuItem(I18n.INSTANCE.get("menu.map.properties"), propsKey)) {
                     ImGUISystem.INSTANCE.show(new FInfoMap());
                 }
 
@@ -152,7 +180,8 @@ public class MainMenuBar {
 
                 ImGui.separator();
 
-                if (ImGui.menuItem(I18n.INSTANCE.get("menu.edit.goto"), "F4")) {
+                String gotoKey = getKeyName(org.argentumforge.engine.game.models.Key.GOTO_POS.getKeyCode());
+                if (ImGui.menuItem(I18n.INSTANCE.get("menu.edit.goto"), gotoKey)) {
                     ImGUISystem.INSTANCE.show(new FGoTo());
                 }
                 ImGui.endMenu();
@@ -162,8 +191,6 @@ public class MainMenuBar {
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.view.resetZoom"), "Ctrl+0")) {
                     Camera.setTileSize(32);
                 }
-
-                ImGui.separator();
 
                 if (ImGui.beginMenu(I18n.INSTANCE.get("menu.view.layers"))) {
                     if (ImGui.menuItem(I18n.INSTANCE.get("menu.view.layer1"), "", renderSettings.getShowLayer()[0])) {
@@ -217,7 +244,8 @@ public class MainMenuBar {
 
                 ImGui.separator();
 
-                if (ImGui.menuItem(I18n.INSTANCE.get("menu.view.grid"), "G", renderSettings.isShowGrid())) {
+                String gridKey = getKeyName(org.argentumforge.engine.game.models.Key.TOGGLE_GRID.getKeyCode());
+                if (ImGui.menuItem(I18n.INSTANCE.get("menu.view.grid"), gridKey, renderSettings.isShowGrid())) {
                     renderSettings.setShowGrid(!renderSettings.isShowGrid());
                     GameData.options.save();
                 }
@@ -300,6 +328,15 @@ public class MainMenuBar {
             }
 
             if (ImGui.beginMenu(I18n.INSTANCE.get("menu.misc"))) {
+
+                String photoKey = getKeyName(org.argentumforge.engine.game.models.Key.TOGGLE_PHOTO_MODE.getKeyCode());
+                if (ImGui.menuItem("Modo Foto", photoKey)) {
+                    GameData.options.getRenderSettings().setPhotoModeActive(
+                            !GameData.options.getRenderSettings().isPhotoModeActive());
+                }
+
+                ImGui.separator();
+
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.misc.walkMode"), "",
                         User.INSTANCE.isWalkingmode())) {
                     User.INSTANCE
@@ -333,7 +370,7 @@ public class MainMenuBar {
                 }
                 ImGui.endMenu();
             }
-            ImGui.endMenuBar();
+            ImGui.endMainMenuBar();
         }
     }
 }

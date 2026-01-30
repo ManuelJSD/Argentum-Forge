@@ -152,10 +152,14 @@ public enum Console {
             clearConsole();
 
         ImGuiViewport viewport = ImGui.getMainViewport();
-        ImGui.setNextWindowPos(10, viewport.getSizeY() - CONSOLE_HEIGHT - 45);
-        ImGui.setNextWindowSize(CONSOLE_WIDTH, CONSOLE_HEIGHT, ImGuiCond.Once);
+        float xPadding = 10.0f;
+        float yPadding = 45.0f; // Espacio para la barra de estado
+        ImGui.setNextWindowPos(viewport.getWorkPosX() + xPadding,
+                viewport.getWorkPosY() + viewport.getWorkSizeY() - CONSOLE_HEIGHT - yPadding);
+        ImGui.setNextWindowSize(CONSOLE_WIDTH, CONSOLE_HEIGHT, ImGuiCond.Always);
         ImGui.begin("console", ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoResize
-                | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoInputs);
+                | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoScrollbar
+                | ImGuiWindowFlags.NoScrollWithMouse);
         ImGui.setCursorPos(5, 0);
         ImGui.beginChild("ScrollingRegion", 0, 0, false, ImGuiWindowFlags.HorizontalScrollbar);
 

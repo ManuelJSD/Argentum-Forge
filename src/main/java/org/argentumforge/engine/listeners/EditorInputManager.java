@@ -52,7 +52,7 @@ public class EditorInputManager {
     }
 
     public void updateMouse() {
-        if (imgui.ImGui.getIO().getWantCaptureMouse()) {
+        if (imgui.ImGui.getIO().getWantCaptureMouse() || ImGUISystem.INSTANCE.isFormVisible("FBindKeys")) {
             if (!ImGUISystem.INSTANCE.isMainLast()) {
                 return;
             }
@@ -178,6 +178,9 @@ public class EditorInputManager {
     }
 
     public void updateKeys() {
+        if (ImGUISystem.INSTANCE.isFormVisible("FBindKeys"))
+            return;
+
         ShortcutManager.getInstance().update();
 
         if (KeyHandler.isKeyJustPressed(GLFW_KEY_M)) {

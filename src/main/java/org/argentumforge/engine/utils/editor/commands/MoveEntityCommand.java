@@ -5,7 +5,6 @@ import org.argentumforge.engine.game.models.Character;
 import org.argentumforge.engine.game.models.Direction;
 
 import org.argentumforge.engine.utils.AssetRegistry;
-import org.argentumforge.engine.utils.GameData;
 import org.argentumforge.engine.utils.editor.Selection;
 import org.argentumforge.engine.utils.inits.NpcData;
 

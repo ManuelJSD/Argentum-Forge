@@ -40,12 +40,6 @@ import javax.sound.midi.*;
 
 public final class Sound {
 
-    public static final String SND_CLICK = "click.ogg";
-    public static final String SND_PASOS1 = "23.ogg";
-    public static final String SND_PASOS2 = "24.ogg";
-    public static final String SND_NAVEGANDO = "50.ogg";
-    public static final String SND_OVER = "click2.ogg";
-    public static final String SND_DICE = "cupdice.ogg";
     public static final int MAX_SOUNDS = 30;
     public static final int MAX_MUSIC = 2;
 

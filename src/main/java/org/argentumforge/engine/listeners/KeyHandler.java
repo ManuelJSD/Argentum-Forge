@@ -138,21 +138,19 @@ public enum KeyHandler {
                 Key keyToBind = Key.getKeyBinding(); // dame la key a bindear
 
                 if (keyToBind != null) {
-                    keyToBind.setKeyCode(key); // bindeala!
-                    keyToBind.setPreparedToBind(false); // no hace falta seguir bindeando.
+                    boolean success = keyToBind.setKeyCode(key); // bindeala!
 
-                    // reseteamos por si se modifico las teclas de movimiento.
-                    updateMovementKeys();
+                    if (success) {
+                        keyToBind.setPreparedToBind(false); // no hace falta seguir bindeando.
+                        keyJustPressed[key] = false;
+                        updateMovementKeys();
+                    }
                 }
             }
 
         } else if (!isPressed && keyPressed[key])
             keyJustReleased[key] = true;
         keyPressed[key] = isPressed;
-        int imGuiKey = getImGuiKey(key);
-        if (imGuiKey != imgui.flag.ImGuiKey.None) {
-            imGuiIo.addKeyEvent(imGuiKey, isPressed);
-        }
     }
 
     /**
@@ -318,63 +316,5 @@ public enum KeyHandler {
         baseMovementKey = -1;
         temporaryMovementKey = -1;
         lastMovementKeyPressed = -1;
-
-        // Limpiar tambien en ImGui por si acaso
-        for (int i = 0; i < keyPressed.length; i++) {
-            if (keyPressed[i]) {
-                imGuiIo.addKeyEvent(getImGuiKey(i), false);
-            }
-        }
-    }
-
-    private static int getImGuiKey(int glfwKey) {
-        switch (glfwKey) {
-            case GLFW_KEY_TAB:
-                return imgui.flag.ImGuiKey.Tab;
-            case GLFW_KEY_LEFT:
-                return imgui.flag.ImGuiKey.LeftArrow;
-            case GLFW_KEY_RIGHT:
-                return imgui.flag.ImGuiKey.RightArrow;
-            case GLFW_KEY_UP:
-                return imgui.flag.ImGuiKey.UpArrow;
-            case GLFW_KEY_DOWN:
-                return imgui.flag.ImGuiKey.DownArrow;
-            case GLFW_KEY_PAGE_UP:
-                return imgui.flag.ImGuiKey.PageUp;
-            case GLFW_KEY_PAGE_DOWN:
-                return imgui.flag.ImGuiKey.PageDown;
-            case GLFW_KEY_HOME:
-                return imgui.flag.ImGuiKey.Home;
-            case GLFW_KEY_END:
-                return imgui.flag.ImGuiKey.End;
-            case GLFW_KEY_INSERT:
-                return imgui.flag.ImGuiKey.Insert;
-            case GLFW_KEY_DELETE:
-                return imgui.flag.ImGuiKey.Delete;
-            case GLFW_KEY_BACKSPACE:
-                return imgui.flag.ImGuiKey.Backspace;
-            case GLFW_KEY_SPACE:
-                return imgui.flag.ImGuiKey.Space;
-            case GLFW_KEY_ENTER:
-                return imgui.flag.ImGuiKey.Enter;
-            case GLFW_KEY_ESCAPE:
-                return imgui.flag.ImGuiKey.Escape;
-            case GLFW_KEY_KP_ENTER:
-                return imgui.flag.ImGuiKey.KeypadEnter;
-            case GLFW_KEY_A:
-                return imgui.flag.ImGuiKey.A;
-            case GLFW_KEY_C:
-                return imgui.flag.ImGuiKey.C;
-            case GLFW_KEY_V:
-                return imgui.flag.ImGuiKey.V;
-            case GLFW_KEY_X:
-                return imgui.flag.ImGuiKey.X;
-            case GLFW_KEY_Y:
-                return imgui.flag.ImGuiKey.Y;
-            case GLFW_KEY_Z:
-                return imgui.flag.ImGuiKey.Z;
-            default:
-                return imgui.flag.ImGuiKey.None;
-        }
     }
 }

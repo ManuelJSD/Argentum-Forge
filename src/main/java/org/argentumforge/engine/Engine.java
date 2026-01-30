@@ -1,5 +1,6 @@
 package org.argentumforge.engine;
 
+import imgui.ImGui;
 import org.argentumforge.engine.audio.Sound;
 import org.argentumforge.engine.gui.ImGUISystem;
 import org.argentumforge.engine.listeners.KeyHandler;
@@ -79,6 +80,7 @@ public final class Engine {
         window.init();
         window.setResizable(false); // Bloquear resize durante Wizard/Selector
         guiSystem.init();
+        guiSystem.setViewportsEnabled(false); // Desactivar viewports en el arranque
 
         // Inicializar idioma por defecto (Español) para que la UI tenga texto
         // Posteriormente, al cargar el perfil, se recargará el idioma configurado si es
@@ -126,6 +128,13 @@ public final class Engine {
             return;
         changeScene(org.argentumforge.engine.scenes.SceneType.GAME_SCENE);
         isWaitingForSetup = false;
+
+        // Habilitar Viewports y Docking tras el setup
+        guiSystem.setViewportsEnabled(true);
+        ImGui.getIO().addConfigFlags(imgui.flag.ImGuiConfigFlags.DockingEnable);
+
+        // Check for updates
+        org.argentumforge.engine.utils.GithubReleaseChecker.checkForUpdates();
     }
 
     /**
@@ -190,7 +199,7 @@ public final class Engine {
                             currentScene.getBackground().getBlue(), 1.0f);
                 } else {
                     // Color por defecto mientras se espera el wizard
-                    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+                    glClearColor(0.12f, 0.12f, 0.12f, 1.0f);
                 }
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

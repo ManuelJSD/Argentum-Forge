@@ -59,20 +59,8 @@ public enum MouseListener {
      * Funcion callBack para detectar los botones pulsados.
      */
     public static void mouseButtonCallback(long window, int button, int action, int mods) {
-        final boolean[] mouseDown = new boolean[5];
-
-        mouseDown[0] = button == GLFW_MOUSE_BUTTON_1 && action != GLFW_RELEASE;
-        mouseDown[1] = button == GLFW_MOUSE_BUTTON_2 && action != GLFW_RELEASE;
-        mouseDown[2] = button == GLFW_MOUSE_BUTTON_3 && action != GLFW_RELEASE;
-        mouseDown[3] = button == GLFW_MOUSE_BUTTON_4 && action != GLFW_RELEASE;
-        mouseDown[4] = button == GLFW_MOUSE_BUTTON_5 && action != GLFW_RELEASE;
-
         final ImGuiIO io = ImGui.getIO();
-        for (int i = 0; i < 5; i++) {
-            io.addMouseButtonEvent(i, mouseDown[i]);
-        }
-
-        if (!io.getWantCaptureMouse() && mouseDown[1])
+        if (!io.getWantCaptureMouse() && button == GLFW_MOUSE_BUTTON_2 && action == GLFW_PRESS)
             ImGui.setWindowFocus(null);
 
         if (action == GLFW_PRESS) {
@@ -103,8 +91,6 @@ public enum MouseListener {
      * otra.
      */
     public static void mouseScrollCallback(long window, double xOffset, double yOffset) {
-        final ImGuiIO io = ImGui.getIO();
-        io.addMouseWheelEvent((float) xOffset, (float) yOffset);
         scrollX = xOffset;
         scrollY = yOffset;
     }
