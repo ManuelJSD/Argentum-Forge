@@ -249,14 +249,53 @@ tasks.named('spotlessJavaCheck') {
     enabled = false
 }
 
-// Disable test task to avoid 'Type T not present' error in Gradle 8.12.1+Java 21+
-// We clear the dependencies of 'check' so it doesn't trigger 'test' task instantiation
-tasks.named('check') {
-    dependsOn = []
+// Workaround for 'Type T not present' error in Gradle 8.12.1+Java 21+
+// This bug prevents any task of type 'Test' from being created.
+// SOLUTION: Use JavaExec to run JUnit ConsoleLauncher directly.
+
+configurations {
+    junitConsole
 }
 
-tasks.named('test') {
-    enabled = false
+dependencies {
+    // Add Console Launcher dependency
+    junitConsole 'org.junit.platform:junit-platform-console-standalone:1.10.0'
+}
+
+gradle.taskGraph.whenReady {
+    tasks.matching { it.name == 'test' }.configureEach {
+        it.enabled = false
+    }
+}
+
+tasks.named('check') {
+    dependsOn = ['compileJava', 'compileTestJava', 'runTests']
+}
+
+task runTests(type: JavaExec) {
+    description = 'Runs unit tests using ConsoleLauncher (bypass Gradle Test task bug)'
+    group = 'verification'
+    
+    // Ensure code is compiled before running tests
+    dependsOn compileJava, compileTestJava
+    
+    classpath = configurations.junitConsole
+    mainClass = 'org.junit.platform.console.ConsoleLauncher'
+    
+    // Dependencies + Compiled Main + Compiled Tests
+    def fullClasspath = sourceSets.test.runtimeClasspath.getAsPath()
+    
+    args = [
+        '--classpath', fullClasspath,
+        '--scan-classpath',
+        '--reports-dir', "${buildDir}/test-results"
+    ]
+    
+    // JVM arguments for module access
+    jvmArgs = [
+        '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.util=ALL-UNNAMED'
+    ]
 }
 
 // Disable spotlessJava to avoid 'NoSuchMethodError' in JDK 21+ during release build

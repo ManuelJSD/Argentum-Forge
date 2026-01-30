@@ -184,20 +184,23 @@ public enum Options {
         return renderSettings;
     }
 
+    private boolean music = true;
+    private boolean sound = true;
+
     public boolean isMusic() {
-        return true;
+        return music;
     }
 
     public void setMusic(boolean music) {
-        // Ignored
+        this.music = music;
     }
 
     public boolean isSound() {
-        return true;
+        return sound;
     }
 
     public void setSound(boolean sound) {
-        // Ignored
+        this.sound = sound;
     }
 
     public boolean isFullscreen() {
