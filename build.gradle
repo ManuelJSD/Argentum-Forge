@@ -20,7 +20,7 @@ tasks.withType(JavaCompile) {
 }
 
 group = 'org.argentumforge'
-version = '1.0.0-beta3'
+version = '1.0.0-beta4'
 
 import org.gradle.internal.os.OperatingSystem
 
