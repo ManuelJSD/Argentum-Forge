@@ -94,26 +94,7 @@ public final class Drawn {
                 || grhData[grh.getGrhIndex()].getNumFrames() == 0)
             return;
         if (animate && grh.isStarted()) {
-            // Check if animations are disabled in options
-            if (org.argentumforge.engine.game.Options.INSTANCE.getRenderSettings().isDisableAnimations()) {
-                // If disabled, just ensure we are using the first frame logic or just not
-                // updating frame counter
-            } else {
-                int gIdx = grh.getGrhIndex();
-                if (gIdx >= grhData.length || grhData[gIdx] == null)
-                    return;
-                grh.setFrameCounter(
-                        grh.getFrameCounter() + (deltaTime * grhData[gIdx].getNumFrames() / grh.getSpeed()));
-                if (grh.getFrameCounter() > grhData[gIdx].getNumFrames()) {
-                    grh.setFrameCounter((grh.getFrameCounter() % grhData[gIdx].getNumFrames()) + 1);
-                    if (grh.getLoops() != -1) {
-                        if (grh.getLoops() > 0)
-                            grh.setLoops(grh.getLoops() - 1);
-                        else
-                            grh.setStarted(false);
-                    }
-                }
-            }
+            grh.update(deltaTime);
         }
 
         int gIdx2 = grh.getGrhIndex();

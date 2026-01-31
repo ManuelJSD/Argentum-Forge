@@ -85,4 +85,32 @@ public final class GrhInfo {
         this.angle = angle;
     }
 
+    public void update(float timer) {
+        if (!started)
+            return;
+
+        // Check if animations are disabled
+        if (org.argentumforge.engine.game.Options.INSTANCE.getRenderSettings().isDisableAnimations()) {
+            return;
+        }
+
+        org.argentumforge.engine.utils.inits.GrhData[] grhData = org.argentumforge.engine.utils.AssetRegistry.grhData;
+
+        if (grhData == null || grhIndex >= grhData.length || grhData[grhIndex] == null)
+            return;
+
+        float speedModifier = grhData[grhIndex].getNumFrames() / speed;
+        frameCounter += timer * speedModifier;
+
+        if (frameCounter > grhData[grhIndex].getNumFrames()) {
+            frameCounter = (frameCounter % grhData[grhIndex].getNumFrames()) + 1;
+            if (loops != -1) {
+                if (loops > 0)
+                    loops--;
+                else
+                    started = false;
+            }
+        }
+    }
+
 }
