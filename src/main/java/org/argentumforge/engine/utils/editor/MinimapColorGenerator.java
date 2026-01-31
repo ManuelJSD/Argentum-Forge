@@ -34,9 +34,9 @@ public class MinimapColorGenerator {
         progress = 0.0f;
 
         new Thread(() -> {
-            String fileName = ProfileManager.PROFILES_DIR + "/minimap.bin";
+            String fileName = ProfileManager.INSTANCE.getProfilesDir() + "/minimap.bin";
             if (org.argentumforge.engine.utils.ProfileManager.INSTANCE.getCurrentProfile() != null) {
-                fileName = ProfileManager.PROFILES_DIR + "/minimap_"
+                fileName = ProfileManager.INSTANCE.getProfilesDir() + "/minimap_"
                         + org.argentumforge.engine.utils.ProfileManager.INSTANCE.getCurrentProfile().getName() + ".bin";
             }
             Path outputPath = Path.of(fileName);

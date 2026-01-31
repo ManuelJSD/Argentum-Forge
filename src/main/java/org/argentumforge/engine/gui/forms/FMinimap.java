@@ -43,9 +43,9 @@ public final class FMinimap extends Form {
                     ImGui.getColorU32(0.1f, 0.1f, 0.1f, 1.0f));
 
             // Warning si no hay colores generados (o minimap.bin no existe en root)
-            String fileName = org.argentumforge.engine.utils.ProfileManager.PROFILES_DIR + "/minimap.bin";
+            String fileName = org.argentumforge.engine.utils.ProfileManager.INSTANCE.getProfilesDir() + "/minimap.bin";
             if (org.argentumforge.engine.utils.ProfileManager.INSTANCE.getCurrentProfile() != null) {
-                fileName = org.argentumforge.engine.utils.ProfileManager.PROFILES_DIR + "/minimap_"
+                fileName = org.argentumforge.engine.utils.ProfileManager.INSTANCE.getProfilesDir() + "/minimap_"
                         + org.argentumforge.engine.utils.ProfileManager.INSTANCE.getCurrentProfile().getName() + ".bin";
             }
             boolean binExists = java.nio.file.Files.exists(java.nio.file.Path.of(fileName));

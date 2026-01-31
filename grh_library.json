@@ -1,0 +1,959 @@
+[
+  {
+    "name": "Agua",
+    "records": [
+      {
+        "name": "Agua",
+        "grhIndex": 1505,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      }
+    ]
+  },
+  {
+    "name": "Pasto",
+    "records": [
+      {
+        "name": "(PRD) Terreno",
+        "grhIndex": 6000,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "(PRD) Terreno Gastado 1",
+        "grhIndex": 6016,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "(PRD) Terreno Gastado 3",
+        "grhIndex": 6048,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "(PRD)(LAD) Arriba",
+        "grhIndex": 6064,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "(PRD)(LAD) Abajo",
+        "grhIndex": 6080,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "(PRD)(LAD) Izquierda",
+        "grhIndex": 6096,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "(PRD)(LAD) Derecha",
+        "grhIndex": 6112,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "(PRD)(CRV) Arriba-Izquierda",
+        "grhIndex": 6128,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "(PRD)(CRV) Arriba-Derecha",
+        "grhIndex": 6144,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "(PRD)(CRV) Abajo-Izquierda",
+        "grhIndex": 6160,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "(PRD)(CRV) Abajo-Derecha",
+        "grhIndex": 6176,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "(PRD)(CRV)(E) Arriba-Izquierda",
+        "grhIndex": 6192,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "(PRD)(CRV)(E) Arriba-Derecha",
+        "grhIndex": 6208,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "(PRD)(CRV)(E) Abajo-Izquierda",
+        "grhIndex": 6224,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "(PRD)(CRV)(E) Abajo-Derecha",
+        "grhIndex": 6240,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "(PRD)(SUB) Arriba",
+        "grhIndex": 6256,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "(PRD)(SUB) Abajo",
+        "grhIndex": 6272,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "(PRD)(SUB) Izquierda",
+        "grhIndex": 6288,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "(PRD)(SUB) Derecha",
+        "grhIndex": 6544,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "(PRD)(CAM) Izquierda Gastado",
+        "grhIndex": 6304,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "(PRD)(CAM) Horizontal",
+        "grhIndex": 6320,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "(PRD)(CAM) Derecha Gastado",
+        "grhIndex": 6336,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "(PRD)(CAM) Arriba Gastado",
+        "grhIndex": 6352,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "(PRD)(CAM) Vertical",
+        "grhIndex": 6368,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "(PRD)(CAM) Abajo Gastado",
+        "grhIndex": 6384,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "(PRD)(CAM)(CRV) Arriba-Derecha",
+        "grhIndex": 6416,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "(PRD)(CAM)(CRV) Abajo-Izquierda",
+        "grhIndex": 6432,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "(PRD)(CAM)(CRV) Abajo-Derecha",
+        "grhIndex": 6448,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      }
+    ]
+  },
+  {
+    "name": "Paredes",
+    "records": [
+      {
+        "name": "Pared 1",
+        "grhIndex": 9087,
+        "layer": 1,
+        "autoBlock": true,
+        "width": 3,
+        "height": 3
+      },
+      {
+        "name": "Pared 2",
+        "grhIndex": 9096,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 3,
+        "height": 3
+      },
+      {
+        "name": "Pared 3",
+        "grhIndex": 9105,
+        "layer": 1,
+        "autoBlock": true,
+        "width": 3,
+        "height": 3
+      },
+      {
+        "name": "Pared 4",
+        "grhIndex": 9114,
+        "layer": 1,
+        "autoBlock": true,
+        "width": 3,
+        "height": 3
+      },
+      {
+        "name": "Pared 5",
+        "grhIndex": 9123,
+        "layer": 1,
+        "autoBlock": true,
+        "width": 3,
+        "height": 3
+      },
+      {
+        "name": "Pared 6",
+        "grhIndex": 9132,
+        "layer": 1,
+        "autoBlock": true,
+        "width": 4,
+        "height": 4
+      }
+    ]
+  },
+  {
+    "name": "Techo",
+    "records": [
+      {
+        "name": "Techo 1",
+        "grhIndex": 9141,
+        "layer": 4,
+        "autoBlock": true,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Techo 2",
+        "grhIndex": 9145,
+        "layer": 4,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Techo 3",
+        "grhIndex": 9149,
+        "layer": 4,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Techo 4",
+        "grhIndex": 9153,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Techo 5",
+        "grhIndex": 9157,
+        "layer": 4,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Techo 6",
+        "grhIndex": 9161,
+        "layer": 4,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Techo 7",
+        "grhIndex": 9165,
+        "layer": 4,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Techo 8",
+        "grhIndex": 9169,
+        "layer": 4,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Techo 9",
+        "grhIndex": 9173,
+        "layer": 4,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Techo 10",
+        "grhIndex": 9177,
+        "layer": 4,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Techo 11",
+        "grhIndex": 9181,
+        "layer": 4,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Techo 12",
+        "grhIndex": 9185,
+        "layer": 4,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Techo 13",
+        "grhIndex": 9189,
+        "layer": 4,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      }
+    ]
+  },
+  {
+    "name": "Piso",
+    "records": [
+      {
+        "name": "Piso 1",
+        "grhIndex": 8686,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Piso 2",
+        "grhIndex": 8690,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Piso 3",
+        "grhIndex": 8694,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Piso 4",
+        "grhIndex": 8698,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Piso 5",
+        "grhIndex": 8702,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Piso 6",
+        "grhIndex": 8706,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Piso 7",
+        "grhIndex": 8710,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Piso 8",
+        "grhIndex": 8714,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Piso 9",
+        "grhIndex": 8718,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Piso 10",
+        "grhIndex": 8722,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Piso 11",
+        "grhIndex": 8726,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Piso 11",
+        "grhIndex": 8726,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Piso 12",
+        "grhIndex": 8730,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Piso 13",
+        "grhIndex": 8734,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Piso 14",
+        "grhIndex": 8738,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Piso 15",
+        "grhIndex": 8742,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Piso 16",
+        "grhIndex": 8746,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Piso 17",
+        "grhIndex": 8750,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Piso 18",
+        "grhIndex": 8754,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Piso 19",
+        "grhIndex": 8758,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Piso 20",
+        "grhIndex": 8762,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Piso 21",
+        "grhIndex": 8766,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Piso 21",
+        "grhIndex": 8766,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Piso 23",
+        "grhIndex": 8774,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Piso 24",
+        "grhIndex": 8778,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Piso 25",
+        "grhIndex": 8782,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Piso 26",
+        "grhIndex": 8786,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Piso 27",
+        "grhIndex": 8770,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Piso 27",
+        "grhIndex": 8790,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Piso 28",
+        "grhIndex": 8794,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Piso 29",
+        "grhIndex": 8798,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Piso 30",
+        "grhIndex": 8802,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Piso 31",
+        "grhIndex": 8806,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Piso 32",
+        "grhIndex": 8810,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Piso 33",
+        "grhIndex": 5500,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      }
+    ]
+  },
+  {
+    "name": "Casa",
+    "records": [
+      {
+        "name": "Piso Madera",
+        "grhIndex": 5500,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Arriba",
+        "grhIndex": 5590,
+        "layer": 3,
+        "autoBlock": false,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Medio",
+        "grhIndex": 5589,
+        "layer": 3,
+        "autoBlock": false,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Techo",
+        "grhIndex": 5591,
+        "layer": 4,
+        "autoBlock": false,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Puerta Abierta",
+        "grhIndex": 5592,
+        "layer": 3,
+        "autoBlock": false,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Puerta Cerrada",
+        "grhIndex": 5593,
+        "layer": 3,
+        "autoBlock": false,
+        "width": 1,
+        "height": 1
+      }
+    ]
+  },
+  {
+    "name": "Costa Pasto",
+    "records": [
+      {
+        "name": "Angulo Abajo Der.",
+        "grhIndex": 7315,
+        "layer": 2,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Angulo Arriba Izq.",
+        "grhIndex": 7299,
+        "layer": 2,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Angulo Abajo Izq.",
+        "grhIndex": 7303,
+        "layer": 2,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Angulo Arriba Der.",
+        "grhIndex": 7311,
+        "layer": 2,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Esquina Abajo Izq.",
+        "grhIndex": 7283,
+        "layer": 2,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Esquina Arriba Izq.",
+        "grhIndex": 7287,
+        "layer": 2,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Esquina Abajo Der.",
+        "grhIndex": 7291,
+        "layer": 2,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Esquina Arriba Der.",
+        "grhIndex": 7295,
+        "layer": 2,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Arriba",
+        "grhIndex": 7323,
+        "layer": 2,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Abajo",
+        "grhIndex": 7327,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Izquierda",
+        "grhIndex": 7307,
+        "layer": 2,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Derecha",
+        "grhIndex": 7319,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      }
+    ]
+  },
+  {
+    "name": "Costa Desierto",
+    "records": [
+      {
+        "name": "Esquina Arriba Izq.",
+        "grhIndex": 7335,
+        "layer": 2,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Esquina Abajo Izq.",
+        "grhIndex": 7331,
+        "layer": 2,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Esquina Arriba Der.",
+        "grhIndex": 7343,
+        "layer": 2,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Esquina Abajo Izq.",
+        "grhIndex": 7331,
+        "layer": 2,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Angulo Arriba Izq.",
+        "grhIndex": 7347,
+        "layer": 2,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Angulo Abajo Izq.",
+        "grhIndex": 7351,
+        "layer": 2,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Angulo Arriba Der.",
+        "grhIndex": 7363,
+        "layer": 2,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Angulo Abajo Der.",
+        "grhIndex": 7367,
+        "layer": 2,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Arriba",
+        "grhIndex": 7355,
+        "layer": 2,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Izquierda",
+        "grhIndex": 7359,
+        "layer": 2,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Abajo",
+        "grhIndex": 7375,
+        "layer": 2,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Derecha",
+        "grhIndex": 7371,
+        "layer": 2,
+        "autoBlock": false,
+        "width": 2,
+        "height": 2
+      }
+    ]
+  },
+  {
+    "name": "Desierto",
+    "records": [
+      {
+        "name": "Arena",
+        "grhIndex": 7704,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      }
+    ]
+  }
+]

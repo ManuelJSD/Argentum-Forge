@@ -64,13 +64,13 @@ public class MainMenuBar {
             if (ImGui.beginMenu(I18n.INSTANCE.get("menu.file"))) {
 
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.file.new"))) {
-                    parent.newMap();
+                    org.argentumforge.engine.game.EditorController.INSTANCE.newMap();
                 }
 
                 ImGui.separator();
 
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.file.open"))) {
-                    parent.loadMapAction();
+                    org.argentumforge.engine.game.EditorController.INSTANCE.loadMapAction();
                 }
 
                 if (ImGui.beginMenu(I18n.INSTANCE.get("menu.file.recent"))) {
@@ -142,22 +142,22 @@ public class MainMenuBar {
 
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.edit.cut"), "Ctrl+X", false,
                         !Selection.getInstance().getSelectedEntities().isEmpty())) {
-                    parent.cutSelection();
+                    org.argentumforge.engine.game.EditorController.INSTANCE.cutSelection();
                 }
 
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.edit.copy"), "Ctrl+C", false,
                         !Selection.getInstance().getSelectedEntities().isEmpty())) {
-                    parent.copySelection();
+                    org.argentumforge.engine.game.EditorController.INSTANCE.copySelection();
                 }
 
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.edit.paste"), "Ctrl+V", false,
                         !Clipboard.getInstance().isEmpty())) {
-                    parent.pasteSelection();
+                    org.argentumforge.engine.game.EditorController.INSTANCE.pasteSelection();
                 }
 
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.edit.delete"), "Supr", false,
                         !Selection.getInstance().getSelectedEntities().isEmpty())) {
-                    parent.deleteSelection();
+                    org.argentumforge.engine.game.EditorController.INSTANCE.deleteSelection();
                 }
 
                 ImGui.endMenu();

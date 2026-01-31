@@ -67,7 +67,7 @@ public final class Sound {
      */
     public Sound(String filepath, boolean loops) {
         // Verifica si el audio esta disponible antes de cargar el sonido
-        if (!Window.INSTANCE.isAudioAvailable()) {
+        if (!AudioSystem.INSTANCE.isAudioAvailable()) {
             System.out.println("Audio not available, skipping sound loading: " + filepath);
             this.filepath = filepath;
             return;
@@ -129,7 +129,7 @@ public final class Sound {
      */
     public Sound(String filepath, DecodedSoundData data) {
         // Verifica si el audio esta disponible antes de cargar el sonido
-        if (!Window.INSTANCE.isAudioAvailable()) {
+        if (!AudioSystem.INSTANCE.isAudioAvailable()) {
             System.out.println("Audio not available, skipping sound loading: " + filepath);
             this.filepath = filepath;
             return;
@@ -181,7 +181,7 @@ public final class Sound {
      *                  {@code resources/sounds/}.
      */
     public static void playSound(String soundName) {
-        if (options.isSound() && Window.INSTANCE.isAudioAvailable()) {
+        if (options.isSound() && AudioSystem.INSTANCE.isAudioAvailable()) {
             File file = new File("resources/sounds/" + soundName);
             if (sounds.containsKey(file.getAbsolutePath()))
                 sounds.get(file.getAbsolutePath()).play();
@@ -213,7 +213,7 @@ public final class Sound {
      *                  {@code resources/music/}.
      */
     public static void playMusic(String musicName) {
-        if (!Window.INSTANCE.isAudioAvailable()) {
+        if (!AudioSystem.INSTANCE.isAudioAvailable()) {
             System.out.println("Audio not available, skipping music playback: " + musicName);
             return;
         }
@@ -266,7 +266,7 @@ public final class Sound {
      * sistema.
      */
     public static void renderMusic() {
-        if (preloadedMusic != null && Window.INSTANCE.isAudioAvailable()) {
+        if (preloadedMusic != null && AudioSystem.INSTANCE.isAudioAvailable()) {
             stopMusic();
             if (musics.containsKey(preloadedMusic.filepath)) {
                 if (options.isMusic())
@@ -274,7 +274,7 @@ public final class Sound {
             } else if (options.isMusic())
                 addMusic(preloadedMusic.filepath).play();
             preloadedMusic = null; // Establece como null para que se prepare para cargar otro archivo
-        } else if (preloadedMusic != null && !Window.INSTANCE.isAudioAvailable())
+        } else if (preloadedMusic != null && !AudioSystem.INSTANCE.isAudioAvailable())
             preloadedMusic = null; // Si no hay audio disponible, limpia la musica precargada
     }
 
@@ -321,7 +321,7 @@ public final class Sound {
      */
     public void play() {
         // Si el sonido no es valido o no hay audio disponible
-        if (!validSound || !Window.INSTANCE.isAudioAvailable())
+        if (!validSound || !AudioSystem.INSTANCE.isAudioAvailable())
             return;
 
         if (isMidi) {
@@ -358,7 +358,7 @@ public final class Sound {
      * incluyendo informacion sobre el archivo de sonido involucrado.
      */
     public void stop() {
-        if (!validSound || !Window.INSTANCE.isAudioAvailable())
+        if (!validSound || !AudioSystem.INSTANCE.isAudioAvailable())
             return;
 
         if (isMidi) {
@@ -392,7 +392,7 @@ public final class Sound {
      *         contrario o si ocurre un error.
      */
     public boolean isPlaying() {
-        if (!validSound || !Window.INSTANCE.isAudioAvailable())
+        if (!validSound || !AudioSystem.INSTANCE.isAudioAvailable())
             return false;
 
         if (isMidi) {
@@ -487,7 +487,7 @@ public final class Sound {
      * se estan reproduciendo.
      */
     public static void stopMusic() {
-        if (Window.INSTANCE.isAudioAvailable())
+        if (AudioSystem.INSTANCE.isAudioAvailable())
             musics.forEach((m, musicReproducing) -> musicReproducing.stop());
     }
 
@@ -497,7 +497,7 @@ public final class Sound {
      * @return true si hay musica reproduciendose, false de lo contrario.
      */
     public static boolean isMusicPlaying() {
-        if (!Window.INSTANCE.isAudioAvailable())
+        if (!AudioSystem.INSTANCE.isAudioAvailable())
             return false;
         for (Sound s : musics.values()) {
             if (s.isPlaying())
