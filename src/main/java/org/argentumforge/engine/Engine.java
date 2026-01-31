@@ -165,6 +165,7 @@ public final class Engine {
         currentScene = null;
         isWaitingForSetup = true;
         guiSystem.closeAllFrms();
+        guiSystem.setViewportsEnabled(false);
         org.argentumforge.engine.gui.forms.FProfileSelector selector = new org.argentumforge.engine.gui.forms.FProfileSelector(
                 this::completeInitialization);
         guiSystem.show(selector);
