@@ -4,7 +4,8 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class PostProcessor {
     private ShaderProgram shader;
-    private int screenTexture;
+    // private int screenTexture; // REMOVED
+
     private int width, height;
 
     private static final String VERTEX_SHADER = "#version 120\n" +
@@ -104,6 +105,8 @@ public class PostProcessor {
             "    gl_FragColor = vec4(color, texColor.a);\n" +
             "}\n";
 
+    private FrameBuffer fbo;
+
     public PostProcessor(int width, int height) {
         this.width = width;
         this.height = height;
@@ -116,24 +119,35 @@ public class PostProcessor {
         shader.createFragmentShader(FRAGMENT_SHADER);
         shader.link();
 
-        screenTexture = glGenTextures();
-        glBindTexture(GL_TEXTURE_2D, screenTexture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
-                (java.nio.ByteBuffer) null);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        // Inicializar FrameBuffer en lugar de texture vacía
+        fbo = new FrameBuffer(width, height);
     }
 
     public void resize(int newWidth, int newHeight) {
         this.width = newWidth;
         this.height = newHeight;
-        glDeleteTextures(screenTexture);
-        screenTexture = glGenTextures();
-        glBindTexture(GL_TEXTURE_2D, screenTexture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
-                (java.nio.ByteBuffer) null);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        if (fbo != null) {
+            fbo.resize(newWidth, newHeight);
+        }
+    }
+
+    public void beginCapture() {
+        if (fbo != null) {
+            fbo.bind();
+            // Limpiar el FBO (Color + Depth) ahora que estamos dibujando en él
+            glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // O el color de fondo de la escena
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        }
+    }
+
+    public void endCapture() {
+        if (fbo != null) {
+            fbo.unbind();
+        }
+    }
+
+    public FrameBuffer getFbo() {
+        return fbo;
     }
 
     public int getWidth() {
@@ -145,9 +159,7 @@ public class PostProcessor {
     }
 
     public void apply(RenderSettings settings, float time) {
-        // 1. Capture the screen backbuffer to our texture
-        glBindTexture(GL_TEXTURE_2D, screenTexture);
-        glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, width, height, 0);
+        // YA NO HACEMOS glCopyTexImage2D. El contenido ya está en fbo.getTextureId()
 
         // 2. Prepare to draw full-screen quad with shader
         shader.bind();
@@ -173,7 +185,7 @@ public class PostProcessor {
         shader.setUniform("uZoom", settings.getPhotoZoom());
 
         glEnable(GL_TEXTURE_2D);
-        glBindTexture(GL_TEXTURE_2D, screenTexture);
+        glBindTexture(GL_TEXTURE_2D, fbo.getTextureId());
 
         // Reset state for post-process quad
         glDisable(GL_BLEND);
@@ -197,6 +209,7 @@ public class PostProcessor {
     public void cleanup() {
         if (shader != null)
             shader.cleanup();
-        glDeleteTextures(screenTexture);
+        if (fbo != null)
+            fbo.cleanup();
     }
 }

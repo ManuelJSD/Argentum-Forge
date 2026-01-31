@@ -238,4 +238,10 @@ public class MainToolbar {
             ImGUISystem.INSTANCE.show(formInstance);
         }
     }
+
+    public void cleanup() {
+        if (toolbarIcons != null) {
+            toolbarIcons.cleanup();
+        }
+    }
 }

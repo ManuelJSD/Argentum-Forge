@@ -92,6 +92,12 @@ public final class FMain extends Form {
     }
 
     @Override
+    public void close() {
+        toolbar.cleanup();
+        super.close();
+    }
+
+    @Override
     public void render() {
         boolean isPhoto = options.getRenderSettings().isPhotoModeActive();
 

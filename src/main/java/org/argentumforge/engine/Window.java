@@ -158,10 +158,7 @@ public enum Window {
         // Make the OpenGL context current
         glfwMakeContextCurrent(window);
 
-        if (options.isVsync())
-            glfwSwapInterval(1);
-        else
-            glfwSwapInterval(0);
+        setVSync(options.isVsync());
 
         // Make the window visible
         glfwShowWindow(window);
@@ -295,10 +292,7 @@ public enum Window {
             } // the stack frame is popped automatically
         }
 
-        if (options.isVsync())
-            glfwSwapInterval(1);
-        else
-            glfwSwapInterval(0);
+        setVSync(options.isVsync());
 
     }
 
@@ -382,6 +376,14 @@ public enum Window {
             glfwSetWindowTitle(window, title);
         } else {
             glfwSetWindowTitle(window, title + " - " + extension);
+        }
+    }
+
+    public void setVSync(boolean enabled) {
+        if (enabled) {
+            glfwSwapInterval(1);
+        } else {
+            glfwSwapInterval(0);
         }
     }
 

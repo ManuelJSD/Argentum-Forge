@@ -3,7 +3,8 @@ package org.argentumforge.engine.renderer;
 import static org.lwjgl.opengl.GL20.*;
 
 public class ShaderProgram {
-    private final int programId;
+    final int programId;
+
     private int vertexShaderId;
     private int fragmentShaderId;
 
