@@ -27,7 +27,6 @@ public class MapRenderer {
     private final User user = User.INSTANCE;
 
     private float alphaCeiling = 1.0f;
-    private PostProcessor postProcessor;
 
     public MapRenderer(Camera camera) {
         this.camera = camera;
@@ -52,9 +51,6 @@ public class MapRenderer {
             renderTranslationOverlays(mapData, renderSettings, pixelOffsetX, pixelOffsetY);
         }
 
-        if (renderSettings.isPhotoModeActive()) {
-            renderPhotoEffects(renderSettings);
-        }
     }
 
     private void renderFirstLayer(org.argentumforge.engine.utils.inits.MapData[][] mapData,
@@ -407,35 +403,4 @@ public class MapRenderer {
         }
     }
 
-    private void renderPhotoEffects(RenderSettings renderSettings) {
-        // Run Post-Processor for all "Ultra" effects (Filters, Bloom, DoF, Grain, Zoom,
-        // Color Grading)
-        // FLUSH BEFORE CAPTURE: glCopyTexImage2D needs pixels to be on the buffer
-        // already
-        org.argentumforge.engine.Engine.batch.end();
-
-        int winWidth = org.argentumforge.engine.Window.INSTANCE.getWidth();
-        int winHeight = org.argentumforge.engine.Window.INSTANCE.getHeight();
-
-        if (postProcessor == null) {
-            postProcessor = new PostProcessor(winWidth, winHeight);
-        } else if (postProcessor.getWidth() != winWidth || postProcessor.getHeight() != winHeight) {
-            postProcessor.resize(winWidth, winHeight);
-        }
-        postProcessor.apply(renderSettings, org.argentumforge.engine.utils.Time.getRunningTime());
-
-        // RE-BEGIN: For subsequent UI or vignettes
-        org.argentumforge.engine.Engine.batch.begin();
-
-        // 2. Vignette (Drawn via Batch after Post-Process)
-        if (renderSettings.isPhotoVignette()) {
-            float intensity = renderSettings.getVignetteIntensity();
-            if (user.isUnderCeiling())
-                intensity = Math.min(0.95f, intensity + 0.15f);
-
-            Drawn.drawVignette(org.argentumforge.engine.Window.INSTANCE.getWidth(),
-                    org.argentumforge.engine.Window.INSTANCE.getHeight(),
-                    intensity);
-        }
-    }
 }

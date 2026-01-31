@@ -42,7 +42,15 @@ public enum Surface {
      * sistema de gestion de texturas.
      */
     public void deleteAllTextures() {
+        for (Texture texture : textures.values()) {
+            texture.cleanup();
+        }
         textures.clear();
+
+        if (whiteTexture != null) {
+            whiteTexture.cleanup();
+            whiteTexture = null;
+        }
     }
 
     /**
@@ -105,6 +113,10 @@ public enum Surface {
     }
 
     public Texture getWhiteTexture() {
+        if (whiteTexture == null) {
+            whiteTexture = new Texture();
+            whiteTexture.createWhitePixel();
+        }
         return whiteTexture;
     }
 

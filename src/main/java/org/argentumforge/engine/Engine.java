@@ -111,6 +111,10 @@ public final class Engine {
         // y Window/GUI ya están inicializados por init()
         GameData.init();
 
+        // Aplicar configuraciones de pantalla cargadas del perfil
+        Window.INSTANCE.setVSync(options.isVsync());
+        Window.INSTANCE.updateResolution(options.getScreenWidth(), options.getScreenHeight());
+
         Surface.INSTANCE.init();
         batch = new BatchRenderer();
 
@@ -244,6 +248,8 @@ public final class Engine {
         Window.INSTANCE.setResizable(currentScene.isResizable());
     }
 
+    private org.argentumforge.engine.renderer.PostProcessor postProcessor;
+
     /**
      * Gestiona el renderizado del frame actual.
      * Verifica si es necesario cambiar de escena (si la actual no es visible)
@@ -261,11 +267,52 @@ public final class Engine {
         if (!currentScene.isVisible())
             changeScene(currentScene.getChangeScene());
 
+        // Configurar PostProcessor si es necesario (Photo Mode)
+        org.argentumforge.engine.renderer.RenderSettings settings = org.argentumforge.engine.utils.GameData.options
+                .getRenderSettings();
+        boolean usePostProcessing = settings.isPhotoModeActive();
+
+        if (usePostProcessing) {
+            int winWidth = Window.INSTANCE.getWidth();
+            int winHeight = Window.INSTANCE.getHeight();
+
+            if (postProcessor == null) {
+                postProcessor = new org.argentumforge.engine.renderer.PostProcessor(winWidth, winHeight);
+            } else if (postProcessor.getWidth() != winWidth || postProcessor.getHeight() != winHeight) {
+                postProcessor.resize(winWidth, winHeight);
+            }
+
+            // Iniciar captura al FBO
+            postProcessor.beginCapture();
+        }
+
         batch.begin();
         currentScene.mouseEvents();
         currentScene.keyEvents();
         currentScene.render();
         batch.end();
+
+        if (usePostProcessing) {
+            // Finalizar captura y renderizar efecto
+            postProcessor.endCapture();
+            postProcessor.apply(settings, org.argentumforge.engine.utils.Time.getRunningTime());
+
+            // Renderizar Vignette (Overlay)
+            if (settings.isPhotoVignette()) {
+                // Reiniciar batch para dibujar UI/Vignette sobre el post-procesado
+                batch.begin();
+                float intensity = settings.getVignetteIntensity();
+                if (org.argentumforge.engine.game.User.INSTANCE.isUnderCeiling())
+                    intensity = Math.min(0.95f, intensity + 0.15f);
+
+                org.argentumforge.engine.renderer.Drawn.drawVignette(
+                        Window.INSTANCE.getWidth(),
+                        Window.INSTANCE.getHeight(),
+                        intensity);
+                batch.end();
+            }
+        }
+
         guiSystem.renderGUI();
 
         Sound.renderMusic();
