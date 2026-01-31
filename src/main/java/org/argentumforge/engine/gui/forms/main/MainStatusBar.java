@@ -12,9 +12,6 @@ import org.argentumforge.engine.scenes.Camera;
 import org.argentumforge.engine.utils.GithubReleaseChecker;
 import org.argentumforge.engine.utils.Time;
 
-import java.awt.Desktop;
-import java.net.URI;
-
 /**
  * Componente para renderizar la barra de estado inferior.
  */
@@ -106,11 +103,7 @@ public class MainStatusBar {
                     ImGui.setTooltip(tooltip);
 
                     if (ImGui.isMouseClicked(0) && release != null) {
-                        try {
-                            Desktop.getDesktop().browse(new URI(release.htmlUrl));
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+                        org.argentumforge.engine.gui.forms.Form.openURL(release.htmlUrl);
                     }
                 }
             } else {

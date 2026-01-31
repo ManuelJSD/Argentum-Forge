@@ -10,9 +10,7 @@ import org.argentumforge.engine.gui.widgets.ImageButton3State;
 import org.argentumforge.engine.i18n.I18n;
 import org.argentumforge.engine.utils.GithubReleaseChecker;
 
-import java.awt.Desktop;
 import java.io.IOException;
-import java.net.URI;
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ENTER;
 
@@ -150,11 +148,7 @@ public final class FLauncher extends Form {
 
             if (ImGui.button(I18n.INSTANCE.get("update.download"), 200, 30)) {
                 if (release != null) {
-                    try {
-                        Desktop.getDesktop().browse(new URI(release.htmlUrl));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                    Form.openURL(release.htmlUrl);
                 }
                 ImGui.closeCurrentPopup();
             }

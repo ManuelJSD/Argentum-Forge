@@ -5,21 +5,22 @@ import org.argentumforge.engine.utils.AssetRegistry;
 import org.argentumforge.engine.utils.ProfileManager;
 import org.argentumforge.engine.utils.inits.GrhData;
 import org.tinylog.Logger;
+import org.lwjgl.stb.STBImage;
+import org.lwjgl.system.MemoryStack;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.IntBuffer;
 import java.nio.file.Path;
 
 /**
  * Herramienta para generar el archivo de colores del minimapa (minimap.bin).
  * Escanea todos los gráficos cargados, lee sus imágenes y calcula el color
- * promedio.
+ * promedio, utilizando STBImage para compatibilidad sin AWT.
  */
 public class MinimapColorGenerator {
 
@@ -124,15 +125,11 @@ public class MinimapColorGenerator {
     }
 
     private static int calculateAverageColor(GrhData grh, int index) {
-        // Validación básica
         if (grh.getFileNum() <= 0)
             return 0;
 
-        // Si es animación, tomamos el primer frame (recursivo seguro porque
-        // GrhData.fileNum > 0 indica frame base)
+        // Si es animación, tomamos el primer frame
         if (grh.getNumFrames() > 1) {
-            // El array de frames tiene índices a otros GRH.
-            // Tomamos el frame 1 (índice 1 en array 1-based de AO)
             int firstFrameIndex = grh.getFrame(1);
             if (firstFrameIndex > 0 && firstFrameIndex < AssetRegistry.grhData.length
                     && AssetRegistry.grhData[firstFrameIndex] != null) {
@@ -141,50 +138,54 @@ public class MinimapColorGenerator {
             return 0;
         }
 
-        File file = new File(Options.INSTANCE.getGraphicsPath(), grh.getFileNum() + ".png");
-        // Fallback a bmp si no existe png? AO usa png modernamente
-        if (!file.exists()) {
-            file = new File(Options.INSTANCE.getGraphicsPath(), grh.getFileNum() + ".bmp");
-            if (!file.exists())
+        String graphicsPath = Options.INSTANCE.getGraphicsPath();
+        String filePath = graphicsPath + File.separator + grh.getFileNum() + ".png";
+
+        File f = new File(filePath);
+        if (!f.exists()) {
+            filePath = graphicsPath + File.separator + grh.getFileNum() + ".bmp";
+            if (!new File(filePath).exists())
                 return 0;
         }
 
-        try {
-            BufferedImage image = ImageIO.read(file);
-            if (image == null)
-                return 0;
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            IntBuffer w = stack.mallocInt(1);
+            IntBuffer h = stack.mallocInt(1);
+            IntBuffer comp = stack.mallocInt(1);
 
-            long rSum = 0, gSum = 0, bSum = 0;
-            long count = 0;
-
-            // Coordenadas de recorte
-            int sx = (int) grh.getsX();
-            int sy = (int) grh.getsY();
-            int w = (int) grh.getPixelWidth();
-            int h = (int) grh.getPixelHeight();
-
-            if (sx < 0 || sy < 0 || w <= 0 || h <= 0 || sx + w > image.getWidth() || sy + h > image.getHeight()) {
-                Logger.warn("GRH {} fuera de limites de imagen: sx={}, sy={}, w={}, h={}, imgW={}, imgH={}",
-                        index, sx, sy, w, h, image.getWidth(), image.getHeight());
+            // Force 4 channels (RGBA)
+            ByteBuffer image = STBImage.stbi_load(filePath, w, h, comp, 4);
+            if (image == null) {
+                // Logger.warn("Error cargando imagen {}: {}", filePath,
+                // STBImage.stbi_failure_reason());
                 return 0;
             }
 
-            for (int y = 0; y < h; y++) {
-                for (int x = 0; x < w; x++) {
-                    int pixel = image.getRGB(sx + x, sy + y);
-                    // Check transparency/alpha/black
-                    // VB6 code checks for vbBlack (0). Usually we check alpha or pure black if no
-                    // alpha.
-                    // Assuming PNG with alpha or RGB with magentamask?
-                    // VB6 code snippet: If tempGetPixel = vbBlack Then InvalidPixels
-                    // Let's assume strict black keying or alpha if present.
+            int width = w.get(0);
+            int height = h.get(0);
+            long rSum = 0, gSum = 0, bSum = 0;
+            long count = 0;
 
-                    int alpha = (pixel >> 24) & 0xFF;
-                    int r = (pixel >> 16) & 0xFF;
-                    int g = (pixel >> 8) & 0xFF;
-                    int b = pixel & 0xFF;
+            int sx = (int) grh.getsX();
+            int sy = (int) grh.getsY();
+            int regionW = (int) grh.getPixelWidth();
+            int regionH = (int) grh.getPixelHeight();
 
-                    // Fuzzy check for Magenta (R>245, B>245, G<10) to catch compression artifacts
+            if (sx < 0 || sy < 0 || regionW <= 0 || regionH <= 0 || sx + regionW > width || sy + regionH > height) {
+                STBImage.stbi_image_free(image);
+                return 0;
+            }
+
+            for (int y = 0; y < regionH; y++) {
+                for (int x = 0; x < regionW; x++) {
+                    // Calculate index in ByteBuffer (RGBA = 4 bytes per pixel)
+                    int pixelIdx = ((sy + y) * width + (sx + x)) * 4;
+
+                    int r = image.get(pixelIdx) & 0xFF;
+                    int g = image.get(pixelIdx + 1) & 0xFF;
+                    int b = image.get(pixelIdx + 2) & 0xFF;
+                    int alpha = image.get(pixelIdx + 3) & 0xFF;
+
                     boolean isTransparent = (alpha == 0) || (r == 0 && g == 0 && b == 0)
                             || (r > 245 && g < 10 && b > 245);
 
@@ -197,19 +198,16 @@ public class MinimapColorGenerator {
                 }
             }
 
+            STBImage.stbi_image_free(image);
+
             if (count > 0) {
                 int rAvg = (int) (rSum / count);
                 int gAvg = (int) (gSum / count);
                 int bAvg = (int) (bSum / count);
-
-                // Retornar formato VB6 Long RGB: R + G*256 + B*65536
-                // Memoria: R, G, B, 0
                 return (rAvg) | (gAvg << 8) | (bAvg << 16);
             }
-
-        } catch (IOException e) {
-            // Ignorar imagen rota
         }
+
         return 0;
     }
 }
