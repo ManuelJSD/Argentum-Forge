@@ -1,17 +1,16 @@
 package org.argentumforge.engine.renderer;
 
 import org.lwjgl.BufferUtils;
+import org.lwjgl.stb.STBImage;
+import org.lwjgl.system.MemoryStack;
 import org.tinylog.Logger;
 
-import javax.imageio.ImageIO;
-import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
+
 import static org.lwjgl.opengl.GL11.*;
 import org.argentumforge.engine.game.Options;
 
@@ -19,17 +18,10 @@ import org.argentumforge.engine.game.Options;
  * La clase {@code Texture} representa una textura en OpenGL para el renderizado
  * grafico.
  * <p>
- * OpenGL guarda las texturas creadas con un identificador numerico (ID), que
- * esta clase almacena junto con informacion sobre el
- * tamaño de la textura. Proporciona funcionalidad para cargar texturas desde
- * archivos comprimidos, y metodos para vincular y
- * desvincular texturas durante el proceso de renderizado.
- * <p>
- * Esta clase es fundamental en el sistema de renderizado, ya que permite que
- * las texturas sean cargadas en memoria grafica y se
- * puedan dibujar en pantalla de manera eficiente a traves de OpenGL.
+ * Implementación moderna usando STBImage para evitar dependencia de AWT
+ * (Desktop/ImageIO).
+ * Esto permite una carga más rápida y mayor portabilidad.
  */
-
 public class Texture {
 
     private int id;
@@ -41,16 +33,12 @@ public class Texture {
     }
 
     public void loadTexture(Texture refTexture, String compressedFile, String file, boolean isGUI) {
-        final ByteBuffer pixels;
-        final BufferedImage bi;
+        ByteBuffer imageBuffer = null;
+        ByteBuffer rawDataBuffer = null;
 
         try {
-            // Generar textura en la GPU
-            this.id = glGenTextures();
-            glBindTexture(GL_TEXTURE_2D, id);
-
-            // Lee los datos del recurso
-            final byte[] resourceData;
+            // Lee los datos del recurso a un buffer de bytes
+            byte[] resourceData;
             if (compressedFile.equals("graphics.ao")) {
                 resourceData = loadLocalGraphic(file);
             } else {
@@ -70,49 +58,81 @@ public class Texture {
                 return;
             }
 
-            final InputStream is = new ByteArrayInputStream(resourceData);
-            final BufferedImage image = ImageIO.read(is);
+            // Convertir byte[] a DirectByteBuffer para STB
+            rawDataBuffer = BufferUtils.createByteBuffer(resourceData.length);
+            rawDataBuffer.put(resourceData);
+            rawDataBuffer.flip();
 
-            refTexture.tex_width = image.getWidth();
-            refTexture.tex_height = image.getHeight();
+            // Cargar imagen usando STBImage
+            try (MemoryStack stack = MemoryStack.stackPush()) {
+                IntBuffer w = stack.mallocInt(1);
+                IntBuffer h = stack.mallocInt(1);
+                IntBuffer comp = stack.mallocInt(1);
 
-            bi = new BufferedImage(refTexture.tex_width, refTexture.tex_height, BufferedImage.TYPE_4BYTE_ABGR);
+                // Flip verticalmente al cargar (Convención usada en Engines OpenGL)
+                // UPDATE: Desactivado porque BatchRenderer asume UV origin Top-Left (V=0 -> Top
+                // of Image)
+                // Al cargar sin flip (Top-Down), el byte 0 es el Top de la imagen.
+                // OpenGL interpreta byte 0 como Bottom. Por tanto V=0 apunta al byte 0 (Top
+                // Image).
+                STBImage.stbi_set_flip_vertically_on_load(false);
 
-            Graphics2D g = bi.createGraphics();
-            g.scale(1, -1);
-            g.drawImage(image, 0, 0, refTexture.tex_width, -refTexture.tex_height, null);
+                // Cargar decodificando
+                imageBuffer = STBImage.stbi_load_from_memory(rawDataBuffer, w, h, comp, 4); // Forzar 4 canales (RGBA)
 
-            final byte[] data = new byte[4 * refTexture.tex_width * refTexture.tex_height];
-            bi.getRaster().getDataElements(0, 0, refTexture.tex_width, refTexture.tex_height, data);
+                if (imageBuffer == null) {
+                    Logger.error("Error al decodificar textura " + file + ": " + STBImage.stbi_failure_reason());
+                    return;
+                }
 
+                refTexture.tex_width = w.get(0);
+                refTexture.tex_height = h.get(0);
+            }
+
+            // Procesar Transparencia (Magic Black Key) si NO es GUI
             if (!isGUI) {
-                for (int j = 0; j < refTexture.tex_width * refTexture.tex_height; j++) {
-                    if (data[j * 4] == 0 && data[j * 4 + 1] == 0 && data[j * 4 + 2] == 0) {
-                        data[j * 4] = -1;
-                        data[j * 4 + 1] = -1;
-                        data[j * 4 + 2] = -1;
-                        data[j * 4 + 3] = 0;
-                    } else
-                        data[j * 4 + 3] = -1;
+                // STB devuelve los datos como RGBA directos
+                // Iterar sobre los pixeles para aplicar colorkey (0,0,0 -> transparente)
+                int pixelCount = refTexture.tex_width * refTexture.tex_height;
+                for (int i = 0; i < pixelCount; i++) {
+                    int offset = i * 4;
+                    byte r = imageBuffer.get(offset);
+                    byte g = imageBuffer.get(offset + 1);
+                    byte b = imageBuffer.get(offset + 2);
+
+                    // Chequear si es negro absoluto (0,0,0)
+                    if (r == 0 && g == 0 && b == 0) {
+                        // Hacer transparente
+                        imageBuffer.put(offset, (byte) 0); // R
+                        imageBuffer.put(offset + 1, (byte) 0); // G
+                        imageBuffer.put(offset + 2, (byte) 0); // B
+                        imageBuffer.put(offset + 3, (byte) 0); // A (Alpha 0)
+                    } else {
+                        // Si no es negro, usar alpha actual (que viene del PNG o es 255 si BMP/JPG)
+                    }
                 }
             }
 
-            pixels = BufferUtils.createByteBuffer(data.length);
-            pixels.put(data);
-            pixels.rewind();
+            // Generar textura en la GPU
+            this.id = glGenTextures();
+            glBindTexture(GL_TEXTURE_2D, id);
 
+            // Subir datos a VRAM
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
-                    refTexture.tex_width, refTexture.tex_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+                    refTexture.tex_width, refTexture.tex_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageBuffer);
 
             // Establecer parámetros de la textura
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
+        } finally {
+            if (imageBuffer != null) {
+                STBImage.stbi_image_free(imageBuffer);
+            }
         }
     }
 
@@ -158,7 +178,6 @@ public class Texture {
         }
 
         // 3. Fallback: Intentar cargar como recurso embebido (dentro del JAR)
-        // Buscamos en /graphics/ o /fonts/graphics/ según convenga
         try (java.io.InputStream is = Texture.class.getResourceAsStream("/graphics/" + fileNum + ".png")) {
             if (is != null)
                 return is.readAllBytes();
@@ -193,9 +212,8 @@ public class Texture {
         this.tex_width = 1;
         this.tex_height = 1;
 
-        // Limpiar cualquier bindeo previo para evitar que se pisen texturas
+        // Limpiar cualquier bindeo previo, generar y bindear nueva
         glBindTexture(GL_TEXTURE_2D, 0);
-
         this.id = glGenTextures();
         glBindTexture(GL_TEXTURE_2D, id);
 
@@ -207,8 +225,6 @@ public class Texture {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-        // Desvincular texture
         glBindTexture(GL_TEXTURE_2D, 0);
     }
-
 }

@@ -218,9 +218,10 @@ public final class GameData {
      */
     private static void loadMiniMapColors() {
         // 1. Intentar cargar binario (más rápido y completo)
-        String fileName = ProfileManager.PROFILES_DIR + "/minimap.bin";
+        String fileName = ProfileManager.INSTANCE.getProfilesDir() + "/minimap.bin";
         if (ProfileManager.INSTANCE.getCurrentProfile() != null) {
-            fileName = ProfileManager.PROFILES_DIR + "/minimap_" + ProfileManager.INSTANCE.getCurrentProfile().getName()
+            fileName = ProfileManager.INSTANCE.getProfilesDir() + "/minimap_"
+                    + ProfileManager.INSTANCE.getCurrentProfile().getName()
                     + ".bin";
         }
         Path binPath = Path.of(fileName);

@@ -255,6 +255,7 @@ public class BatchRenderer {
 
     private void renderBatch(int start, int count, Texture texture, boolean blend) {
         texture.bind();
+        glEnable(GL_BLEND); // Ensure blending is enabled
         if (blend) {
             glBlendFunc(GL_SRC_ALPHA, GL_ONE);
         } else {

@@ -17,7 +17,8 @@ import java.util.List;
  * Gestiona la carga y guardado de la biblioteca de GRHs en formato JSON.
  */
 public class GrhLibraryManager {
-    private static final String LIBRARY_FILENAME = "grh_library.json";
+    private static final String DEFAULT_LIBRARY_FILENAME = "grh_library.json";
+    private String libraryFilename = DEFAULT_LIBRARY_FILENAME;
     private static GrhLibraryManager instance;
     private final Gson gson;
     private List<GrhCategory> categories = new ArrayList<>();
@@ -34,12 +35,22 @@ public class GrhLibraryManager {
         return instance;
     }
 
+    /**
+     * Set the library filename. Useful for testing.
+     * 
+     * @param filename Path to the JSON file.
+     */
+    public void setLibraryFilename(String filename) {
+        this.libraryFilename = filename;
+        load(); // Reload from new file
+    }
+
     public List<GrhCategory> getCategories() {
         return categories;
     }
 
     public void load() {
-        File file = new File(LIBRARY_FILENAME);
+        File file = new File(libraryFilename);
         if (!file.exists()) {
             createDefaultLibrary();
             save();
@@ -53,13 +64,13 @@ public class GrhLibraryManager {
             if (categories == null)
                 categories = new ArrayList<>();
         } catch (IOException e) {
-            Logger.error(e, "Error al cargar la biblioteca de GRHs");
+            Logger.error(e, "Error al cargar la biblioteca de GRHs desde: " + libraryFilename);
             createDefaultLibrary();
         }
     }
 
     public void save() {
-        try (Writer writer = new OutputStreamWriter(new FileOutputStream(LIBRARY_FILENAME), StandardCharsets.UTF_8)) {
+        try (Writer writer = new OutputStreamWriter(new FileOutputStream(libraryFilename), StandardCharsets.UTF_8)) {
             gson.toJson(categories, writer);
         } catch (IOException e) {
             Logger.error(e, "Error al guardar la biblioteca de GRHs");

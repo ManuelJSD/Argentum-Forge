@@ -3,16 +3,13 @@ package org.argentumforge.engine.renderer;
 import org.argentumforge.engine.game.Options;
 import org.argentumforge.engine.game.Weather;
 import org.argentumforge.engine.scenes.Camera;
-
 import org.argentumforge.engine.utils.editor.Selection;
 import org.argentumforge.engine.utils.editor.Selection.SelectedEntity;
 import org.argentumforge.engine.game.User;
-
 import static org.argentumforge.engine.game.models.Character.drawCharacter;
 import static org.argentumforge.engine.renderer.Drawn.drawTexture;
 import static org.argentumforge.engine.renderer.Drawn.drawGrhIndex;
 import static org.argentumforge.engine.scenes.Camera.*;
-// static import removed
 import static org.argentumforge.engine.utils.AssetRegistry.grhData;
 import static org.argentumforge.engine.utils.AssetRegistry.objs;
 import org.argentumforge.engine.utils.inits.ObjData;

@@ -8,8 +8,6 @@ import static org.argentumforge.engine.utils.AssetRegistry.grhData;
 import static org.argentumforge.engine.utils.Time.deltaTime;
 import org.argentumforge.engine.Engine;
 
-import static org.lwjgl.opengl.GL11.*;
-
 /**
  * <p>
  * Clase utilitaria central para el sistema de renderizado que proporciona
@@ -17,24 +15,11 @@ import static org.lwjgl.opengl.GL11.*;
  * <p>
  * Esta clase estatica contiene los metodos principales que permiten dibujar en
  * la pantalla de renderizado, ofreciendo funciones
- * para renderizar texturas, figuras geometricas, lineas, rectangulos y otros
- * elementos graficos con diferentes propiedades y
- * transformaciones.
+ * para renderizar texturas, figuras geometricas y otros elementos graficos.
  * <p>
- * Implementa la funcionalidad de bajo nivel para el renderizado mediante
- * OpenGL, encapsulando las operaciones complejas en
- * metodos faciles de usar. Maneja aspectos como la aplicacion de efectos de
- * mezcla (blending), transparencia, colores y
- * transformaciones de coordenadas.
- * <p>
- * Es utilizada por todos los subsistemas graficos del juego para dibujar desde
- * elementos de la interfaz de usuario hasta
- * personajes, objetos del mapa y efectos visuales. La mayor parte del
- * renderizado visible pasa por los metodos de esta clase.
- * <p>
- * El dibujado especifico de personajes se encuentra en la clase
- * {@link Character}, el de la interfaz de usuario en
- * {@code ElementGUI} y los textos en la clase {@code FontText}.
+ * Modernizada para eliminar el modo inmediato (OpenGL Legacy) y utilizar
+ * exclusivamente {@link BatchRenderer} para un pipeline grafico eficiente y
+ * portable (preparado para OpenGL Core / GLES).
  */
 
 public final class Drawn {
@@ -113,8 +98,6 @@ public final class Drawn {
             if (org.argentumforge.engine.game.Options.INSTANCE.getRenderSettings().isDisableAnimations()) {
                 // If disabled, just ensure we are using the first frame logic or just not
                 // updating frame counter
-                // But we still want to draw the current frame.
-                // If we don't update frame counter, it stays static.
             } else {
                 int gIdx = grh.getGrhIndex();
                 if (gIdx >= grhData.length || grhData[gIdx] == null)
@@ -166,8 +149,6 @@ public final class Drawn {
             float r2, float g2, float b2, float a2,
             float r3, float g3, float b3, float a3,
             float r4, float g4, float b4, float a4) {
-        // Usar blend=false para GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA (transparencia
-        // estándar)
         batch.draw(texture, x, y, 0, 0, texture.getTex_width(), texture.getTex_height(),
                 width, height, false,
                 r1, g1, b1, a1,
@@ -177,14 +158,13 @@ public final class Drawn {
     }
 
     /**
-     * Dibuja un efecto de viñeta (oscurecimiento de bordes) sobre toda la pantalla.
-     * Mapeo de Vértices: V1=Top-Left, V0=Bottom-Left, V2=Top-Right, V3=Bottom-Right
+     * Dibuja un efecto de viñeta (oscurecimiento de bordes).
      */
     public static void drawVignette(int width, int height, float intensity) {
         Texture white = Surface.INSTANCE.getWhiteTexture();
         int vSize = (int) (Math.min(width, height) * 0.4f);
 
-        // Top: Oscuro arriba (V1, V2), Transparente abajo (V0, V3)
+        // Top
         drawGradient(white, 0, 0, width, vSize,
                 0, 0, 0, 0, // V0 (Bottom-Left)
                 0, 0, 0, intensity, // V1 (Top-Left)
@@ -192,29 +172,26 @@ public final class Drawn {
                 0, 0, 0, 0 // V3 (Bottom-Right)
         );
 
-        // Bottom: Transparente arriba (V1, V2), Oscuro abajo (V0, V3)
+        // Bottom
         drawGradient(white, 0, height - vSize, width, vSize,
-                0, 0, 0, intensity, // V0 (Bottom-Left)
-                0, 0, 0, 0, // V1 (Top-Left)
-                0, 0, 0, 0, // V2 (Top-Right)
-                0, 0, 0, intensity // V3 (Bottom-Right)
-        );
+                0, 0, 0, intensity,
+                0, 0, 0, 0,
+                0, 0, 0, 0,
+                0, 0, 0, intensity);
 
-        // Left: Oscuro izquierda (V0, V1), Transparente derecha (V2, V3)
+        // Left
         drawGradient(white, 0, 0, vSize, height,
-                0, 0, 0, intensity, // V0 (Bottom-Left)
-                0, 0, 0, intensity, // V1 (Top-Left)
-                0, 0, 0, 0, // V2 (Top-Right)
-                0, 0, 0, 0 // V3 (Bottom-Right)
-        );
+                0, 0, 0, intensity,
+                0, 0, 0, intensity,
+                0, 0, 0, 0,
+                0, 0, 0, 0);
 
-        // Right: Transparente izquierda (V0, V1), Oscuro derecha (V2, V3)
+        // Right
         drawGradient(white, width - vSize, 0, vSize, height,
-                0, 0, 0, 0, // V0 (Bottom-Left)
-                0, 0, 0, 0, // V1 (Top-Left)
-                0, 0, 0, intensity, // V2 (Top-Right)
-                0, 0, 0, intensity // V3 (Bottom-Right)
-        );
+                0, 0, 0, 0,
+                0, 0, 0, 0,
+                0, 0, 0, intensity,
+                0, 0, 0, intensity);
     }
 
     public static void drawRect(int x, int y, int width, int height, float r, float g, float b, float a) {
@@ -248,219 +225,40 @@ public final class Drawn {
 
     /**
      * ===============================================================
-     * Dibujado sin batch (lo hago para el frmCrearPersonaje).
+     * Métodos Legacy redirigidos al BatchRenderer
      * ===============================================================
      */
 
-    /**
-     * Dibuja una textura en la pantalla
-     */
     public static void drawTextureNoBatch(GrhInfo grh, int x, int y, boolean center, boolean animate, boolean blend,
             float alpha, RGBColor color) {
-        if (grhData == null)
-            return;
-        if (grh.getGrhIndex() <= 0 || grh.getGrhIndex() >= grhData.length || grhData[grh.getGrhIndex()] == null
-                || grhData[grh.getGrhIndex()].getNumFrames() == 0)
-            return;
-        if (animate && grh.isStarted()) {
-            // Check if animations are disabled
-            if (org.argentumforge.engine.game.Options.INSTANCE.getRenderSettings().isDisableAnimations()) {
-                // Do nothing, effectively freezing the animation
-            } else {
-                int gIdx = grh.getGrhIndex();
-                if (gIdx >= grhData.length || grhData[gIdx] == null)
-                    return;
-                grh.setFrameCounter(
-                        grh.getFrameCounter() + (deltaTime * grhData[gIdx].getNumFrames() / grh.getSpeed()));
-                if (grh.getFrameCounter() > grhData[gIdx].getNumFrames()) {
-                    grh.setFrameCounter((grh.getFrameCounter() % grhData[gIdx].getNumFrames()) + 1);
-                    if (grh.getLoops() != -1) {
-                        if (grh.getLoops() > 0)
-                            grh.setLoops(grh.getLoops() - 1);
-                        else
-                            grh.setStarted(false);
-                    }
-                }
-            }
-        }
-
-        int gIdx2 = grh.getGrhIndex();
-        if (gIdx2 >= grhData.length || grhData[gIdx2] == null)
-            return;
-        final int currentGrhIndex = grhData[gIdx2].getFrame((int) (grh.getFrameCounter()));
-
-        if (currentGrhIndex <= 0 || currentGrhIndex >= grhData.length || grhData[currentGrhIndex] == null)
-            return;
-
-        if (center) {
-            if (grhData[currentGrhIndex].getTileWidth() != 1)
-                x = x - (int) (grhData[currentGrhIndex].getTileWidth() * TILE_PIXEL_SIZE / 2) + TILE_PIXEL_SIZE / 2;
-            if (grhData[currentGrhIndex].getTileHeight() != 1)
-                y = y - (int) (grhData[currentGrhIndex].getTileHeight() * TILE_PIXEL_SIZE) + TILE_PIXEL_SIZE;
-        }
-
-        if (currentGrhIndex == 0 || grhData[currentGrhIndex].getFileNum() == 0)
-            return;
-
-        geometryBoxRenderNoBatch(currentGrhIndex, x, y,
-                grhData[currentGrhIndex].getPixelWidth(),
-                grhData[currentGrhIndex].getPixelHeight(),
-                grhData[currentGrhIndex].getsX(),
-                grhData[currentGrhIndex].getsY(), blend, alpha, color);
+        // Redirigir a la implementación con Batch, ya que el modo inmediato es obsoleto
+        drawTexture(grh, x, y, center, animate, blend, alpha, color);
     }
 
-    /**
-     * Dibujamos sin animacion
-     */
     public static void drawGrhIndexNoBatch(int grhIndex, int x, int y, RGBColor color) {
-        if (color == null)
-            color = new RGBColor(1.0f, 1.0f, 1.0f);
-        geometryBoxRenderNoBatch(grhIndex, x, y,
-                grhData[grhIndex].getPixelWidth(),
-                grhData[grhIndex].getPixelHeight(),
-                grhData[grhIndex].getsX(),
-                grhData[grhIndex].getsY(), false, 1.0f, color);
+        drawGrhIndex(grhIndex, x, y, 1.0f, color);
     }
 
+    @Deprecated(forRemoval = true)
     public static void geometryBoxRenderNoBatch(int grh_index, int x, int y, int src_width, int src_height, float sX,
             float sY, boolean blend, float alpha, RGBColor color) {
-        if (grhData == null)
-            return;
-        if (blend)
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-
-        final Texture texture = Surface.INSTANCE.getTexture(grhData[grh_index].getFileNum());
-        final float src_right = sX + src_width;
-        final float src_bottom = sY + src_height;
-
-        texture.bind();
-        glBegin(GL_QUADS);
-
-        {
-            float scale = org.argentumforge.engine.scenes.Camera.getZoomScale();
-            float dWidth = src_width * scale;
-            float dHeight = src_height * scale;
-
-            // 0----0
-            // | |
-            // 1----0
-            glColor4f(color.getRed(), color.getGreen(), color.getBlue(), alpha);
-            glTexCoord2f(sX / texture.getTex_width(), (src_bottom) / texture.getTex_height());
-            glVertex2d(x, y + dHeight);
-
-            // 1----0
-            // | |
-            // 0----0
-            glColor4f(color.getRed(), color.getGreen(), color.getBlue(), alpha);
-            glTexCoord2f(sX / texture.getTex_width(), sY / texture.getTex_height());
-            glVertex2d(x, y);
-
-            // 0----1
-            // | |
-            // 0----0
-            glColor4f(color.getRed(), color.getGreen(), color.getBlue(), alpha);
-            glTexCoord2f((src_right) / texture.getTex_width(), sY / texture.getTex_height());
-            glVertex2d(x + dWidth, y);
-
-            // 0----0
-            // | |
-            // 0----1
-            glColor4f(color.getRed(), color.getGreen(), color.getBlue(), alpha);
-            glTexCoord2f((src_right) / texture.getTex_width(), (src_bottom) / texture.getTex_height());
-            glVertex2d(x + dWidth, y + dHeight);
-        }
-
-        texture.unbind();
-        glEnd();
-
-        if (blend)
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        // Redirigido a la versión con Batch
+        geometryBoxRender(grh_index, x, y, src_width, src_height, sX, sY, blend, alpha, color);
     }
 
     public static void geometryBoxRenderGUI(Texture texture, int x, int y, float alpha) {
-        texture.bind();
-        glBegin(GL_QUADS);
-
-        {
-            // 0----0
-            // | |,
-            // 1----0
-            glColor4f(1.0f, 1.0f, 1.0f, alpha);
-            glTexCoord2f(0, 1);
-            glVertex2d(x, y + texture.getTex_height());
-
-            // 1----0
-            // | |
-            // 0----0
-            glColor4f(1.0f, 1.0f, 1.0f, alpha);
-            glTexCoord2f(0, 0);
-            glVertex2d(x, y);
-
-            // 0----1
-            // | |
-            // 0----0
-            glColor4f(1.0f, 1.0f, 1.0f, alpha);
-            glTexCoord2f(1, 0);
-            glVertex2d(x + texture.getTex_width(), y);
-
-            // 0----0
-            // | |
-            // 0----1
-            glColor4f(1.0f, 1.0f, 1.0f, alpha);
-            glTexCoord2f(1, 1);
-            glVertex2d(x + texture.getTex_width(), y + texture.getTex_height());
-        }
-
-        texture.unbind();
-        glEnd();
+        geometryBoxRenderGUI(texture, x, y, texture.getTex_width(), texture.getTex_height(), alpha);
     }
 
     /**
-     * Versión sobrecargada que permite especificar ancho y alto personalizados.
-     * Útil para escalar texturas a diferentes tamaños de ventana.
+     * Versión GUI optimizada con BatchRenderer
      */
     public static void geometryBoxRenderGUI(Texture texture, int x, int y, int width, int height, float alpha) {
-        texture.bind();
-        glBegin(GL_QUADS);
-
-        {
-            // 0----0
-            // | |
-            // 1----0
-            glColor4f(1.0f, 1.0f, 1.0f, alpha);
-            glTexCoord2f(0, 1);
-            glVertex2d(x, y + height);
-
-            // 1----0
-            // | |
-            // 0----0
-            glColor4f(1.0f, 1.0f, 1.0f, alpha);
-            glTexCoord2f(0, 0);
-            glVertex2d(x, y);
-
-            // 0----1
-            // | |
-            // 0----0
-            glColor4f(1.0f, 1.0f, 1.0f, alpha);
-            glTexCoord2f(1, 0);
-            glVertex2d(x + width, y);
-
-            // 0----0
-            // | |
-            // 0----1
-            glColor4f(1.0f, 1.0f, 1.0f, alpha);
-            glTexCoord2f(1, 1);
-            glVertex2d(x + width, y + height);
-        }
-
-        texture.unbind();
-        glEnd();
+        // En GUI no usamos escala de cámara, dibujamos directo en coords de pantalla
+        batch.draw(texture, x, y, 0, 0, texture.getTex_width(), texture.getTex_height(),
+                width, height, 0.0f, true, alpha, new RGBColor(1, 1, 1));
     }
 
-    /**
-     * Dibuja un rectángulo de color sólido sin textura.
-     * Útil para overlays y efectos visuales.
-     */
     /**
      * Dibuja un rectángulo coloreado en pantalla utilizando el sistema de batching.
      */

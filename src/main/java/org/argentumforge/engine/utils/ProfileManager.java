@@ -19,18 +19,29 @@ import java.util.List;
 public enum ProfileManager {
     INSTANCE;
 
-    private static final String PROFILES_FILE = "profiles.json";
-    public static final String PROFILES_DIR = "profiles";
+    private static final String DEFAULT_PROFILES_FILE = "profiles.json";
+    private static final String DEFAULT_PROFILES_DIR = "profiles";
+
+    private String profilesFile = DEFAULT_PROFILES_FILE;
+    private String profilesDir = DEFAULT_PROFILES_DIR;
 
     public String getProfilesDir() {
-        return PROFILES_DIR;
+        return profilesDir;
+    }
+
+    public void setProfilesFile(String profilesFile) {
+        this.profilesFile = profilesFile;
+    }
+
+    public void setProfilesDir(String profilesDir) {
+        this.profilesDir = profilesDir;
     }
 
     private List<Profile> profiles = new ArrayList<>();
     private Profile currentProfile;
 
     public void load() {
-        File file = new File(PROFILES_FILE);
+        File file = new File(profilesFile);
         if (!file.exists()) {
             ensureProfilesDir();
             return;
@@ -46,17 +57,17 @@ public enum ProfileManager {
                 profiles = new ArrayList<>();
             }
         } catch (IOException e) {
-            Logger.error(e, "Error al cargar profiles.json");
+            Logger.error(e, "Error al cargar " + profilesFile);
             profiles = new ArrayList<>();
         }
     }
 
     public void save() {
-        try (Writer writer = new FileWriter(PROFILES_FILE)) {
+        try (Writer writer = new FileWriter(profilesFile)) {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             gson.toJson(profiles, writer);
         } catch (IOException e) {
-            Logger.error(e, "Error al guardar profiles.json");
+            Logger.error(e, "Error al guardar " + profilesFile);
         }
     }
 
@@ -64,7 +75,7 @@ public enum ProfileManager {
         ensureProfilesDir();
         // Sanitizar nombre para nombre de archivo
         String safeName = name.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
-        String configFileName = PROFILES_DIR + "/" + safeName + ".ini";
+        String configFileName = profilesDir + "/" + safeName + ".ini";
 
         Profile newProfile = new Profile(name, configFileName);
         profiles.add(newProfile);
@@ -108,7 +119,7 @@ public enum ProfileManager {
     }
 
     private void ensureProfilesDir() {
-        File dir = new File(PROFILES_DIR);
+        File dir = new File(profilesDir);
         if (!dir.exists()) {
             dir.mkdirs();
         }

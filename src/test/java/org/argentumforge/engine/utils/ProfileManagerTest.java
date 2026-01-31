@@ -18,32 +18,14 @@ class ProfileManagerTest {
     @TempDir
     Path tempDir;
 
-    private static final String TEST_PROFILES_FILE = "test_profiles.json";
-    private static final String TEST_PROFILES_DIR = "test_profiles";
-
     @BeforeEach
     void setUp() throws IOException {
-        // Clear ProfileManager state for clean tests
-        ProfileManager.INSTANCE.getProfiles().clear();
-        ProfileManager.INSTANCE.setCurrentProfile(null);
+        TestUtils.isolateProfileManager(tempDir);
     }
 
     @AfterEach
     void tearDown() throws IOException {
-        // Clean up test files
-        new File(TEST_PROFILES_FILE).delete();
-        Path testProfilesPath = Path.of(TEST_PROFILES_DIR);
-        if (Files.exists(testProfilesPath)) {
-            Files.walk(testProfilesPath)
-                    .sorted((a, b) -> -a.compareTo(b)) // Delete files before directories
-                    .forEach(path -> {
-                        try {
-                            Files.delete(path);
-                        } catch (IOException e) {
-                            // Ignore
-                        }
-                    });
-        }
+        TestUtils.resetProfileManager();
     }
 
     @Test
@@ -140,7 +122,8 @@ class ProfileManagerTest {
     @DisplayName("Should return profiles directory path")
     void shouldReturnProfilesDirectory() {
         String profilesDir = ProfileManager.INSTANCE.getProfilesDir();
-        assertThat(profilesDir).isEqualTo("profiles");
+        assertThat(profilesDir).contains("profiles");
+        assertThat(Path.of(profilesDir)).isAbsolute();
     }
 
     @Test
@@ -154,7 +137,7 @@ class ProfileManagerTest {
     @DisplayName("Should create profiles directory when creating first profile")
     void shouldCreateProfilesDirectory() {
         // Arrange
-        File profilesDir = new File("profiles");
+        File profilesDir = new File(ProfileManager.INSTANCE.getProfilesDir());
         if (profilesDir.exists()) {
             profilesDir.delete();
         }

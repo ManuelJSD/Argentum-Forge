@@ -18,35 +18,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class GrhLibraryManagerTest {
 
-    private static final String LIBRARY_FILE = "grh_library.json";
-    private static File backupFile;
+    @org.junit.jupiter.api.io.TempDir
+    static java.nio.file.Path tempDir;
+    private static File testLibraryFile;
 
     @BeforeAll
-    static void setUpClass() throws IOException {
-        // Backup original library if it exists
-        File original = new File(LIBRARY_FILE);
-        if (original.exists()) {
-            backupFile = new File("grh_library_test_backup.json");
-            Files.copy(original.toPath(), backupFile.toPath(),
-                    java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-            original.delete(); // Force recreation of default library
-        }
+    static void setUpClass() {
+        // Set the library manager to use a temp file in the temp directory
+        testLibraryFile = tempDir.resolve("grh_library_test.json").toFile();
+        GrhLibraryManager.getInstance().setLibraryFilename(testLibraryFile.getAbsolutePath());
     }
 
     @AfterAll
-    static void tearDownClass() throws IOException {
-        // Restore backup
-        File current = new File(LIBRARY_FILE);
-        if (backupFile != null && backupFile.exists()) {
-            if (current.exists()) {
-                current.delete();
-            }
-            Files.move(backupFile.toPath(), current.toPath(),
-                    java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-        } else {
-            // Clean up test file if no backup existed
-            current.delete();
-        }
+    static void tearDownClass() {
+        // Reset to default for safety (though JVM shutdown usually handles it, good
+        // practice for suite runs)
+        GrhLibraryManager.getInstance().setLibraryFilename("grh_library.json");
     }
 
     @Test
@@ -165,7 +152,7 @@ class GrhLibraryManagerTest {
         manager.save();
 
         // Verify file exists
-        File libraryFile = new File(LIBRARY_FILE);
+        File libraryFile = testLibraryFile;
         assertThat(libraryFile).exists();
         assertThat(libraryFile).isFile();
 
@@ -188,7 +175,7 @@ class GrhLibraryManagerTest {
     @DisplayName("Should handle library file creation")
     void shouldHandleFileCreation() {
         // Assert - file should exist after getInstance() and save()
-        File libraryFile = new File(LIBRARY_FILE);
+        File libraryFile = testLibraryFile;
         assertThat(libraryFile).exists();
     }
 }
