@@ -31,6 +31,12 @@ public class RenderSettings {
     private boolean photoWater = true;
     private float vignetteIntensity = 0.8f;
 
+    // Viewport Overlay (Reference Frame)
+    private boolean showViewportOverlay = false;
+    private int viewportWidth = 17;
+    private int viewportHeight = 15;
+    private float[] viewportColor = { 1.0f, 1.0f, 1.0f, 0.5f }; // White semi-transparent
+
     // --- PHOTO MODE ULTRA ---
     private boolean photoBloom = false;
     private float bloomIntensity = 0.5f;
@@ -390,4 +396,35 @@ public class RenderSettings {
         this.photoColorFilter = ColorFilter.NONE;
     }
 
+    public boolean isShowViewportOverlay() {
+        return showViewportOverlay;
+    }
+
+    public void setShowViewportOverlay(boolean showViewportOverlay) {
+        this.showViewportOverlay = showViewportOverlay;
+    }
+
+    public int getViewportWidth() {
+        return viewportWidth;
+    }
+
+    public void setViewportWidth(int viewportWidth) {
+        this.viewportWidth = viewportWidth;
+    }
+
+    public int getViewportHeight() {
+        return viewportHeight;
+    }
+
+    public void setViewportHeight(int viewportHeight) {
+        this.viewportHeight = viewportHeight;
+    }
+
+    public float[] getViewportColor() {
+        return viewportColor;
+    }
+
+    public void setViewportColor(float[] viewportColor) {
+        this.viewportColor = viewportColor;
+    }
 }

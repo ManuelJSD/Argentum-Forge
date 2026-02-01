@@ -153,6 +153,14 @@ public enum Options {
             write(writer, "PhotoWater", renderSettings.isPhotoWater());
             write(writer, "VignetteIntensity", renderSettings.getVignetteIntensity());
 
+            write(writer, "ViewportOverlayEnabled", renderSettings.isShowViewportOverlay());
+            write(writer, "ViewportWidth", renderSettings.getViewportWidth());
+            write(writer, "ViewportHeight", renderSettings.getViewportHeight());
+            write(writer, "ViewportColorR", renderSettings.getViewportColor()[0]);
+            write(writer, "ViewportColorG", renderSettings.getViewportColor()[1]);
+            write(writer, "ViewportColorB", renderSettings.getViewportColor()[2]);
+            write(writer, "ViewportColorA", renderSettings.getViewportColor()[3]);
+
             write(writer, "AutoSaveEnabled", autoSaveEnabled);
             write(writer, "AutoSaveInterval", autoSaveIntervalMinutes);
 
@@ -424,6 +432,13 @@ public enum Options {
             case "PhotoShadows" -> renderSettings.setPhotoShadows(Boolean.parseBoolean(value));
             case "PhotoWater" -> renderSettings.setPhotoWater(Boolean.parseBoolean(value));
             case "VignetteIntensity" -> renderSettings.setVignetteIntensity(Float.parseFloat(value));
+            case "ViewportOverlayEnabled" -> renderSettings.setShowViewportOverlay(Boolean.parseBoolean(value));
+            case "ViewportWidth" -> renderSettings.setViewportWidth(Integer.parseInt(value));
+            case "ViewportHeight" -> renderSettings.setViewportHeight(Integer.parseInt(value));
+            case "ViewportColorR" -> renderSettings.getViewportColor()[0] = Float.parseFloat(value);
+            case "ViewportColorG" -> renderSettings.getViewportColor()[1] = Float.parseFloat(value);
+            case "ViewportColorB" -> renderSettings.getViewportColor()[2] = Float.parseFloat(value);
+            case "ViewportColorA" -> renderSettings.getViewportColor()[3] = Float.parseFloat(value);
             case "AutoSaveEnabled" -> autoSaveEnabled = Boolean.parseBoolean(value);
             case "AutoSaveInterval" -> autoSaveIntervalMinutes = Integer.parseInt(value);
             case "IgnoredObjTypes" -> {

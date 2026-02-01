@@ -91,6 +91,11 @@ public class ShortcutManager {
             Options.INSTANCE.getRenderSettings()
                     .setPhotoModeActive(!Options.INSTANCE.getRenderSettings().isPhotoModeActive());
         }
+        if (KeyHandler.isActionKeyJustPressed(Key.TOGGLE_VIEWPORT)) {
+            Options.INSTANCE.getRenderSettings()
+                    .setShowViewportOverlay(!Options.INSTANCE.getRenderSettings().isShowViewportOverlay());
+            Options.INSTANCE.save();
+        }
         if (KeyHandler.isActionKeyJustPressed(Key.TOOL_BRUSH)) {
             org.argentumforge.engine.utils.editor.Surface.getInstance().setMode(1);
             org.argentumforge.engine.utils.editor.Surface.getInstance()

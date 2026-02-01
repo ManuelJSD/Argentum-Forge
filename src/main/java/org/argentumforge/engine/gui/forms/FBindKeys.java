@@ -101,6 +101,7 @@ public class FBindKeys extends Form {
                     renderKeyBindRow(I18n.INSTANCE.get("options.keys.showDebug"), Key.DEBUG_SHOW);
                     renderKeyBindRow(I18n.INSTANCE.get("options.keys.walkMode"), Key.TOGGLE_WALKING_MODE);
                     renderKeyBindRow(I18n.INSTANCE.get("options.keys.toggleGrid"), Key.TOGGLE_GRID);
+                    renderKeyBindRow(I18n.INSTANCE.get("options.keys.toggleViewport"), Key.TOGGLE_VIEWPORT);
                     renderKeyBindRow(I18n.INSTANCE.get("options.keys.photoMode"), Key.TOGGLE_PHOTO_MODE);
                     renderKeyBindRow(I18n.INSTANCE.get("options.keys.mapProperties"), Key.MAP_PROPERTIES);
 
