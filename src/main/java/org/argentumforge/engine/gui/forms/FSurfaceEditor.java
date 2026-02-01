@@ -33,6 +33,7 @@ public class FSurfaceEditor extends Form implements IMapEditor {
     private final ImInt selectedBrushSize = new ImInt(1);
     private final float[] scatterDensityArr = { 0.3f };
     private final ImBoolean useMosaicChecked = new ImBoolean(true);
+    private final ImBoolean libraryVisualMode = new ImBoolean(true);
 
     // Configuración de la rejilla
     private static final int TILE_SIZE = 48;
@@ -44,8 +45,6 @@ public class FSurfaceEditor extends Form implements IMapEditor {
     public FSurfaceEditor() {
         this.surface = Surface.getInstance();
         this.selectedGrhIndex = surface.getSurfaceIndex();
-
-        // Contexto no usado localmente
 
         // Sincronizar capa inicial
         for (int i = 0; i < capas.size(); i++) {
@@ -61,22 +60,13 @@ public class FSurfaceEditor extends Form implements IMapEditor {
 
     @Override
     public void setContext(MapContext context) {
-        // Contexto no usado localmente
-
-        // Opcional: Si Surface dependiera del contexto para su estado interno,
-        // actualizarlo aquí.
-        // Surface es un singleton de *herramienta* (configuración de pincel), por lo
-        // que no cambia por mapa,
-        // pero las acciones que ejecuta sí dependen del contexto.
     }
 
     @Override
     public void render() {
         ImGui.setNextWindowSize(350, 600, ImGuiCond.FirstUseEver);
 
-        // Ventana principal del editor de superficies
         if (ImGui.begin(I18n.INSTANCE.get("editor.surface"), ImGuiWindowFlags.None)) {
-
             drawToolSettings();
             ImGui.separator();
             drawLayerAndModeControls();
@@ -87,7 +77,6 @@ public class FSurfaceEditor extends Form implements IMapEditor {
                     drawSearchAndPagination();
                     ImGui.separator();
 
-                    // Sincronizar selección si cambió externamente (por pick)
                     if (surface.getSurfaceIndex() != selectedGrhIndex && surface.getMode() != 3) {
                         selectedGrhIndex = surface.getSurfaceIndex();
                     }
@@ -106,6 +95,8 @@ public class FSurfaceEditor extends Form implements IMapEditor {
                     if (ImGui.checkbox(I18n.INSTANCE.get("editor.surface.mosaic"), useMosaicChecked)) {
                         surface.setUseMosaic(useMosaicChecked.get());
                     }
+                    ImGui.sameLine();
+                    ImGui.checkbox(I18n.INSTANCE.get("common.visualMode"), libraryVisualMode);
                     ImGui.separator();
 
                     drawLibraryTab();
@@ -123,40 +114,68 @@ public class FSurfaceEditor extends Form implements IMapEditor {
         List<org.argentumforge.engine.utils.editor.models.GrhCategory> categories = lib.getCategories();
 
         if (ImGui.beginChild("LibraryChild")) {
+            float windowWidth = ImGui.getContentRegionAvailX();
+            int columns = Math.max(1, (int) (windowWidth / (TILE_SIZE + 10)));
+
             for (org.argentumforge.engine.utils.editor.models.GrhCategory cat : categories) {
                 if (ImGui.collapsingHeader(cat.getName())) {
-                    for (org.argentumforge.engine.utils.editor.models.GrhIndexRecord rec : cat.getRecords()) {
-                        boolean isSelected = (selectedGrhIndex == rec.getGrhIndex());
+                    if (libraryVisualMode.get()) {
+                        if (ImGui.beginTable("GridCat_" + cat.getName(), columns, ImGuiTableFlags.SizingFixedFit)) {
+                            for (org.argentumforge.engine.utils.editor.models.GrhIndexRecord rec : cat.getRecords()) {
+                                ImGui.tableNextColumn();
+                                ImGui.pushID(rec.getGrhIndex());
 
-                        if (ImGui.selectable(rec.getName() + " (GRH: " + rec.getGrhIndex() + ")", isSelected)) {
-                            selectedGrhIndex = rec.getGrhIndex();
-                            surface.setSurfaceIndex(rec.getGrhIndex());
-                            surface.setLayer(rec.getLayer());
-                            surface.setAutoBlock(rec.isAutoBlock());
-                            surface.setMosaicWidth(rec.getWidth());
-                            surface.setMosaicHeight(rec.getHeight());
-                            surface.setMode(1);
+                                int currentIdx = rec.getGrhIndex();
+                                GrhData data = AssetRegistry.grhData[currentIdx];
 
-                            // Actualizar combo de capa visualmente
-                            for (int i = 0; i < capas.size(); i++) {
-                                if (capas.get(i) == rec.getLayer()) {
-                                    selectedLayer.set(i);
-                                    break;
+                                if (data != null) {
+                                    if (data.getNumFrames() > 1) {
+                                        currentIdx = data.getFrame(1);
+                                        data = AssetRegistry.grhData[currentIdx];
+                                    }
+
+                                    if (data != null && data.getFileNum() > 0) {
+                                        Texture tex = org.argentumforge.engine.renderer.Surface.INSTANCE
+                                                .getTexture(data.getFileNum());
+                                        boolean isSelected = (selectedGrhIndex == rec.getGrhIndex());
+
+                                        if (isSelected)
+                                            ImGui.pushStyleColor(ImGuiCol.Border, Theme.COLOR_ACCENT);
+
+                                        if (tex != null) {
+                                            float u0 = data.getsX() / (float) tex.getTex_width();
+                                            float v0 = (data.getsY() + data.getPixelHeight())
+                                                    / (float) tex.getTex_height();
+                                            float u1 = (data.getsX() + data.getPixelWidth())
+                                                    / (float) tex.getTex_width();
+                                            float v1 = data.getsY() / (float) tex.getTex_height();
+
+                                            if (ImGui.imageButton("##libTile_" + rec.getGrhIndex(), (long) tex.getId(),
+                                                    (float) TILE_SIZE, (float) TILE_SIZE, u0, v1, u1, v0)) {
+                                                selectRecord(rec);
+                                            }
+                                        }
+                                        if (isSelected)
+                                            ImGui.popStyleColor();
+
+                                        if (ImGui.isItemHovered()) {
+                                            showRecordTooltip(rec);
+                                        }
+                                    }
                                 }
+                                ImGui.popID();
                             }
+                            ImGui.endTable();
                         }
-
-                        if (ImGui.isItemHovered()) {
-                            ImGui.beginTooltip();
-                            if (rec.getWidth() > 1 || rec.getHeight() > 1) {
-                                ImGui.text("Mosaic: " + rec.getWidth() + "x" + rec.getHeight());
-                                PreviewUtils.drawGrhMosaic(rec.getGrhIndex(), rec.getWidth(), rec.getHeight(), 128,
-                                        128);
-                            } else {
-                                ImGui.text("GRH: " + rec.getGrhIndex());
-                                PreviewUtils.drawGrh(rec.getGrhIndex(), 1.0f);
+                    } else {
+                        for (org.argentumforge.engine.utils.editor.models.GrhIndexRecord rec : cat.getRecords()) {
+                            boolean isSelected = (selectedGrhIndex == rec.getGrhIndex());
+                            if (ImGui.selectable(rec.getName() + " (GRH: " + rec.getGrhIndex() + ")", isSelected)) {
+                                selectRecord(rec);
                             }
-                            ImGui.endTooltip();
+                            if (ImGui.isItemHovered()) {
+                                showRecordTooltip(rec);
+                            }
                         }
                     }
                 }
@@ -165,8 +184,36 @@ public class FSurfaceEditor extends Form implements IMapEditor {
         ImGui.endChild();
     }
 
+    private void selectRecord(org.argentumforge.engine.utils.editor.models.GrhIndexRecord rec) {
+        selectedGrhIndex = rec.getGrhIndex();
+        surface.setSurfaceIndex(rec.getGrhIndex());
+        surface.setLayer(rec.getLayer());
+        surface.setAutoBlock(rec.isAutoBlock());
+        surface.setMosaicWidth(rec.getWidth());
+        surface.setMosaicHeight(rec.getHeight());
+        surface.setMode(1);
+
+        for (int i = 0; i < capas.size(); i++) {
+            if (capas.get(i) == rec.getLayer()) {
+                selectedLayer.set(i);
+                break;
+            }
+        }
+    }
+
+    private void showRecordTooltip(org.argentumforge.engine.utils.editor.models.GrhIndexRecord rec) {
+        ImGui.beginTooltip();
+        ImGui.text(rec.getName() + " (ID: " + rec.getGrhIndex() + ")");
+        if (rec.getWidth() > 1 || rec.getHeight() > 1) {
+            ImGui.text("Mosaic: " + rec.getWidth() + "x" + rec.getHeight());
+            PreviewUtils.drawGrhMosaic(rec.getGrhIndex(), rec.getWidth(), rec.getHeight(), 128, 128);
+        } else {
+            PreviewUtils.drawGrh(rec.getGrhIndex(), 2.0f);
+        }
+        ImGui.endTooltip();
+    }
+
     private void drawLayerAndModeControls() {
-        // Selector de Capas
         ImGui.text(I18n.INSTANCE.get("editor.surface.layerActive") + ":");
         ImGui.sameLine();
         String[] labels = capas.stream().map(n -> I18n.INSTANCE.get("menu.view.layer") + " " + n)
@@ -178,44 +225,32 @@ public class FSurfaceEditor extends Form implements IMapEditor {
         ImGui.popItemWidth();
 
         ImGui.spacing();
-
-        // Modos de Edición
         int currentMode = surface.getMode();
 
-        // Botón Seleccionar (Vacio)
         if (UIComponents.toggleButton(I18n.INSTANCE.get("common.selection"), currentMode == 0)) {
-            surface.setMode(currentMode == 0 ? 0 : 0); // Always set to 0 when clicked
+            surface.setMode(0);
             selectedGrhIndex = -1;
         }
 
         ImGui.sameLine();
-
-        // Botón Insertar
         if (UIComponents.toggleButton(I18n.INSTANCE.get("common.insert"), currentMode == 1)) {
             if (selectedGrhIndex > 0) {
                 surface.setMode(currentMode == 1 ? 0 : 1);
-                if (surface.getMode() == 1) {
+                if (surface.getMode() == 1)
                     surface.setSurfaceIndex(selectedGrhIndex);
-                }
             }
         }
 
         ImGui.sameLine();
-
-        // Botón Borrar (Destructivo - toggle)
-        if (currentMode == 2) {
+        if (currentMode == 2)
             ImGui.pushStyleColor(ImGuiCol.Button, Theme.COLOR_DANGER);
-        }
         if (ImGui.button(I18n.INSTANCE.get("common.delete"))) {
             surface.setMode(currentMode == 2 ? 0 : 2);
         }
-        if (currentMode == 2) {
+        if (currentMode == 2)
             ImGui.popStyleColor();
-        }
 
         ImGui.sameLine();
-
-        // Botón Capturar (Pick)
         if (UIComponents.toggleButton(I18n.INSTANCE.get("common.pick"), currentMode == 3)) {
             surface.setMode(currentMode == 3 ? 0 : 3);
         }
@@ -223,7 +258,6 @@ public class FSurfaceEditor extends Form implements IMapEditor {
 
     private void drawToolSettings() {
         ImGui.text(I18n.INSTANCE.get("editor.surface.tool") + ":");
-
         if (ImGui.radioButton(I18n.INSTANCE.get("editor.surface.brush"),
                 surface.getToolMode() == Surface.ToolMode.BRUSH)) {
             surface.setToolMode(Surface.ToolMode.BRUSH);
@@ -235,7 +269,6 @@ public class FSurfaceEditor extends Form implements IMapEditor {
         }
 
         ImGui.spacing();
-
         if (surface.getToolMode() == Surface.ToolMode.BRUSH) {
             ImGui.text(I18n.INSTANCE.get("editor.surface.shape") + ":");
             if (ImGui.radioButton(I18n.INSTANCE.get("editor.surface.square"),
@@ -266,14 +299,9 @@ public class FSurfaceEditor extends Form implements IMapEditor {
     }
 
     private void drawSearchAndPagination() {
-        if (AssetRegistry.grhData == null) {
-            ImGui.textColored(1f, 0f, 0f, 1f, "ERROR: grhData no cargado (NULL)");
-            ImGui.text("Init Path: " + org.argentumforge.engine.game.Options.INSTANCE.getInitPath());
-            ImGui.text("Dats Path: " + org.argentumforge.engine.game.Options.INSTANCE.getDatsPath());
+        if (AssetRegistry.grhData == null)
             return;
-        }
 
-        // Buscador
         ImGui.text(I18n.INSTANCE.get("editor.surface.search") + ":");
         ImGui.sameLine();
         ImGui.pushItemWidth(80);
@@ -294,8 +322,6 @@ public class FSurfaceEditor extends Form implements IMapEditor {
         }
 
         ImGui.spacing();
-
-        // Paginación
         int totalGrhs = AssetRegistry.grhData.length;
         int maxPages = (totalGrhs / ITEMS_PER_PAGE);
 
@@ -309,10 +335,8 @@ public class FSurfaceEditor extends Form implements IMapEditor {
     }
 
     private void drawTileGrid() {
-        if (AssetRegistry.grhData == null) {
-            ImGui.textColored(1f, 0f, 0f, 1f, "grhData no cargado");
+        if (AssetRegistry.grhData == null)
             return;
-        }
 
         if (ImGui.beginChild("TileGridChild", 0, 0, true)) {
             float windowWidth = ImGui.getContentRegionAvailX();
@@ -328,33 +352,40 @@ public class FSurfaceEditor extends Form implements IMapEditor {
                 for (int i = start; i < end; i++) {
                     if (i <= 0 || i >= totalGrhs)
                         continue;
+
+                    int currentIdx = i;
                     GrhData data = AssetRegistry.grhData[i];
+                    if (data == null)
+                        continue;
+
+                    if (data.getNumFrames() > 1) {
+                        currentIdx = data.getFrame(1);
+                        data = AssetRegistry.grhData[currentIdx];
+                    }
+
                     if (data == null || data.getFileNum() == 0)
                         continue;
 
                     ImGui.tableNextColumn();
                     ImGui.pushID(i);
 
-                    int currentGrh = data.getNumFrames() > 1 ? data.getFrame(0) : i;
-                    GrhData frameData = AssetRegistry.grhData[currentGrh];
-                    Texture tex = org.argentumforge.engine.renderer.Surface.INSTANCE.getTexture(frameData.getFileNum());
-
+                    Texture tex = org.argentumforge.engine.renderer.Surface.INSTANCE.getTexture(data.getFileNum());
                     boolean isSelected = (selectedGrhIndex == i);
+
                     if (isSelected)
                         ImGui.pushStyleColor(ImGuiCol.Border, Theme.COLOR_ACCENT);
 
                     if (tex != null) {
-                        float u0 = frameData.getsX() / (float) tex.getTex_width();
-                        float v0 = (frameData.getsY() + frameData.getPixelHeight()) / (float) tex.getTex_height();
-                        float u1 = (frameData.getsX() + frameData.getPixelWidth()) / (float) tex.getTex_width();
-                        float v1 = frameData.getsY() / (float) tex.getTex_height();
+                        float u0 = data.getsX() / (float) tex.getTex_width();
+                        float v0 = (data.getsY() + data.getPixelHeight()) / (float) tex.getTex_height();
+                        float u1 = (data.getsX() + data.getPixelWidth()) / (float) tex.getTex_width();
+                        float v1 = data.getsY() / (float) tex.getTex_height();
 
                         if (ImGui.imageButton("##surfaceTile_" + i, (long) tex.getId(), (float) TILE_SIZE,
-                                (float) TILE_SIZE,
-                                u0, v1, u1, v0)) {
+                                (float) TILE_SIZE, u0, v1, u1, v0)) {
                             selectedGrhIndex = i;
                             surface.setSurfaceIndex(i);
-                            surface.setMode(1); // Auto-activar insertar al seleccionar
+                            surface.setMode(1);
                         }
                     } else {
                         if (ImGui.button("?", (float) TILE_SIZE, (float) TILE_SIZE)) {
@@ -373,12 +404,11 @@ public class FSurfaceEditor extends Form implements IMapEditor {
                         PreviewUtils.drawGrh(i, 2.0f);
                         ImGui.endTooltip();
                     }
-
                     ImGui.popID();
                 }
                 ImGui.endTable();
             }
+            ImGui.endChild();
         }
-        ImGui.endChild();
     }
 }
