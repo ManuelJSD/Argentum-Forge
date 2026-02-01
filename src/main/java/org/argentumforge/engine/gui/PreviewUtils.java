@@ -142,6 +142,15 @@ public final class PreviewUtils {
                     continue;
 
                 GrhData data = grhData[currentGrh];
+
+                // Si el tile es una animación (como el agua), resolvemos el frame
+                if (data.getNumFrames() > 1) {
+                    int frame1 = data.getFrame(1);
+                    if (frame1 > 0 && frame1 < grhData.length && grhData[frame1] != null) {
+                        data = grhData[frame1];
+                    }
+                }
+
                 Texture tex = Surface.INSTANCE.getTexture(data.getFileNum());
                 if (tex != null) {
                     float u0 = data.getsX() / (float) tex.getTex_width();
