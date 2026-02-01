@@ -1,14 +1,18 @@
 package org.argentumforge.engine.listeners;
 
 import org.argentumforge.engine.game.Options;
+import org.argentumforge.engine.game.EditorController;
 import org.argentumforge.engine.scenes.Camera;
 import org.argentumforge.engine.utils.editor.commands.CommandManager;
 import org.argentumforge.engine.gui.ImGUISystem;
 import org.argentumforge.engine.gui.forms.FOptions;
 import org.argentumforge.engine.game.models.Key;
 import org.argentumforge.engine.game.User;
+import org.argentumforge.engine.game.console.Console;
+import org.argentumforge.engine.renderer.RGBColor;
 import org.argentumforge.engine.utils.MapFileUtils;
 import imgui.ImGui;
+import static org.argentumforge.engine.game.console.FontStyle.REGULAR;
 import static org.lwjgl.glfw.GLFW.*;
 
 /**
@@ -46,6 +50,14 @@ public class ShortcutManager {
             // Teclas simples (Solo si no hay Ctrl presionado para evitar conflictos)
             handleGlobalShortcuts();
         }
+
+        // ESCAPE (Always checked for canceling modes)
+        if (KeyHandler.isKeyJustPressed(GLFW_KEY_ESCAPE)) {
+            if (EditorController.INSTANCE.isPasteModeActive()) {
+                EditorController.INSTANCE.setPasteModeActive(false);
+                Console.INSTANCE.addMsgToConsole("Modo Pegar cancelado.", REGULAR, new RGBColor(1f, 1f, 1f));
+            }
+        }
     }
 
     private void handleControlShortcuts() {
@@ -60,6 +72,36 @@ public class ShortcutManager {
         // Reset Zoom: Ctrl + 0
         else if (KeyHandler.isKeyJustPressed(GLFW_KEY_0)) {
             Camera.setTileSize(32);
+        }
+        // Copiar: Ctrl + C (Ahora configurable)
+        else if (KeyHandler.isActionKeyJustPressed(Key.COPY)) {
+            EditorController.INSTANCE.copySelection();
+        }
+        // Cortar: Ctrl + X (Ahora configurable)
+        else if (KeyHandler.isActionKeyJustPressed(Key.CUT)) {
+            EditorController.INSTANCE.cutSelection();
+        }
+        // Pegar: Ctrl + V / Ctrl + Shift + V (Ahora configurable)
+        else if (KeyHandler.isActionKeyJustPressed(Key.PASTE)
+                || KeyHandler.isActionKeyJustPressed(Key.PASTE_ADVANCED)) {
+            boolean isShiftPressed = KeyHandler.isKeyPressed(GLFW_KEY_LEFT_SHIFT)
+                    || KeyHandler.isKeyPressed(GLFW_KEY_RIGHT_SHIFT);
+
+            // Si las teclas son diferentes, respetamos el bindeo exacto
+            if (Key.PASTE.getKeyCode() != Key.PASTE_ADVANCED.getKeyCode()) {
+                if (KeyHandler.isActionKeyJustPressed(Key.PASTE_ADVANCED)) {
+                    ImGUISystem.INSTANCE.show(new org.argentumforge.engine.gui.forms.FPasteAdvanced());
+                } else {
+                    EditorController.INSTANCE.pasteSelection();
+                }
+            } else {
+                // Si son la misma tecla (por defecto 'V'), usamos Shift para diferenciar
+                if (isShiftPressed) {
+                    ImGUISystem.INSTANCE.show(new org.argentumforge.engine.gui.forms.FPasteAdvanced());
+                } else {
+                    EditorController.INSTANCE.pasteSelection();
+                }
+            }
         }
         // Guardar: Ctrl + S / Ctrl + Shift + S
         else if (KeyHandler.isKeyJustPressed(GLFW_KEY_S)) {
@@ -76,6 +118,10 @@ public class ShortcutManager {
         // Check each shortcut key independently to allow duplicate bindings
         if (KeyHandler.isActionKeyJustPressed(Key.DEBUG_SHOW)) {
             ImGUISystem.INSTANCE.setShowDebug(!ImGUISystem.INSTANCE.isShowDebug());
+        }
+        // Eliminar selección (Configurable)
+        if (KeyHandler.isActionKeyJustPressed(Key.DELETE)) {
+            EditorController.INSTANCE.deleteSelection();
         }
         if (KeyHandler.isActionKeyJustPressed(Key.SHOW_OPTIONS)) {
             ImGUISystem.INSTANCE.show(new FOptions());

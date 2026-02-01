@@ -50,7 +50,14 @@ public enum Key {
     // Vistas
     TOGGLE_GRID(GLFW_KEY_G),
     TOGGLE_VIEWPORT(GLFW_KEY_F8),
-    TOGGLE_PHOTO_MODE(GLFW_KEY_F12);
+    TOGGLE_PHOTO_MODE(GLFW_KEY_F12),
+
+    // Edición
+    COPY(GLFW_KEY_C),
+    CUT(GLFW_KEY_X),
+    PASTE(GLFW_KEY_V),
+    PASTE_ADVANCED(GLFW_KEY_V), // Se diferencia por el Shift en ShortcutManager
+    DELETE(GLFW_KEY_DELETE);
 
     private static final String KEYS_CONFIG_FILE = "resources/keys.properties";
     private static final Logger LOGGER = Logger.getLogger(Key.class.getName());

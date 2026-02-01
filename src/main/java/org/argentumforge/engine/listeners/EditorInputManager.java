@@ -67,6 +67,13 @@ public class EditorInputManager {
                 return;
             }
 
+            if (EditorController.INSTANCE.isPasteModeActive()) {
+                if (MouseListener.mouseButtonJustPressed(GLFW_MOUSE_BUTTON_LEFT)) {
+                    EditorController.INSTANCE.pasteSelection();
+                }
+                return; // Evitar pintar con otras herramientas mientras pegamos
+            }
+
             if (MouseListener.mouseButtonJustPressed(GLFW_MOUSE_BUTTON_LEFT)) {
                 surface.startBatch();
             }
