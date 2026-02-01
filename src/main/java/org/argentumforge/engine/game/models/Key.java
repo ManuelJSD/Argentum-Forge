@@ -49,6 +49,7 @@ public enum Key {
     // Vistas
     // Vistas
     TOGGLE_GRID(GLFW_KEY_G),
+    TOGGLE_VIEWPORT(GLFW_KEY_F8),
     TOGGLE_PHOTO_MODE(GLFW_KEY_F12);
 
     private static final String KEYS_CONFIG_FILE = "resources/keys.properties";

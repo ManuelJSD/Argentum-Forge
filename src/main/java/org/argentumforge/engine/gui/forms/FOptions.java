@@ -269,6 +269,44 @@ public final class FOptions extends Form {
                     options.save();
                 }
 
+                ImGui.dummy(0, 10);
+                ImGui.textColored(ImGui.getColorU32(0.2f, 0.7f, 1.0f, 1.0f),
+                        org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.viewport") + ":");
+                ImGui.separator();
+
+                if (ImGui.checkbox(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.viewport.enable"),
+                        options.getRenderSettings().isShowViewportOverlay())) {
+                    options.getRenderSettings()
+                            .setShowViewportOverlay(!options.getRenderSettings().isShowViewportOverlay());
+                    options.save();
+                }
+
+                ImInt vWidth = new ImInt(options.getRenderSettings().getViewportWidth());
+                ImGui.setNextItemWidth(100);
+                if (ImGui.inputInt(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.viewport.width"), vWidth)) {
+                    if (vWidth.get() < 1)
+                        vWidth.set(1);
+                    options.getRenderSettings().setViewportWidth(vWidth.get());
+                    options.save();
+                }
+
+                ImInt vHeight = new ImInt(options.getRenderSettings().getViewportHeight());
+                ImGui.setNextItemWidth(100);
+                if (ImGui.inputInt(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.viewport.height"),
+                        vHeight)) {
+                    if (vHeight.get() < 1)
+                        vHeight.set(1);
+                    options.getRenderSettings().setViewportHeight(vHeight.get());
+                    options.save();
+                }
+
+                float[] vColor = options.getRenderSettings().getViewportColor();
+                if (ImGui.colorEdit4(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.viewport.color"),
+                        vColor)) {
+                    options.getRenderSettings().setViewportColor(vColor);
+                    options.save();
+                }
+
                 ImGui.endTabItem();
             }
 

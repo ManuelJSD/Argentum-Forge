@@ -250,6 +250,13 @@ public class MainMenuBar {
                     GameData.options.save();
                 }
 
+                String viewportKey = getKeyName(org.argentumforge.engine.game.models.Key.TOGGLE_VIEWPORT.getKeyCode());
+                if (ImGui.menuItem(I18n.INSTANCE.get("options.viewport"), viewportKey,
+                        renderSettings.isShowViewportOverlay())) {
+                    renderSettings.setShowViewportOverlay(!renderSettings.isShowViewportOverlay());
+                    GameData.options.save();
+                }
+
                 ImGui.separator();
 
                 if (ImGui.beginMenu(I18n.INSTANCE.get("menu.view.minimap"))) {

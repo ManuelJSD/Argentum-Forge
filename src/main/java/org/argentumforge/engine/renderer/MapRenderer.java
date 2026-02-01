@@ -53,6 +53,40 @@ public class MapRenderer {
 
     }
 
+    private void renderViewportOverlay() {
+        RenderSettings renderSettings = Options.INSTANCE.getRenderSettings();
+        if (!renderSettings.isShowViewportOverlay())
+            return;
+
+        int vWidth = renderSettings.getViewportWidth();
+        int vHeight = renderSettings.getViewportHeight();
+        float[] vColor = renderSettings.getViewportColor();
+
+        // Calculate pixel dimensions base on current zoom
+        int widthPx = vWidth * TILE_PIXEL_SIZE;
+        int heightPx = vHeight * TILE_PIXEL_SIZE;
+
+        // Center of the main viewport (Work Area)
+        float centerX = imgui.ImGui.getMainViewport().getWorkPosX()
+                + imgui.ImGui.getMainViewport().getWorkSizeX() / 2.0f;
+        float centerY = imgui.ImGui.getMainViewport().getWorkPosY()
+                + imgui.ImGui.getMainViewport().getWorkSizeY() / 2.0f;
+
+        float x1 = centerX - (widthPx / 2.0f);
+        float y1 = centerY - (heightPx / 2.0f);
+        float x2 = x1 + widthPx;
+        float y2 = y1 + heightPx;
+
+        imgui.ImDrawList drawList = imgui.ImGui.getBackgroundDrawList();
+        int color = imgui.ImGui.getColorU32(vColor[0], vColor[1], vColor[2], vColor[3]);
+
+        // Draw the frame border (3px thick for visibility)
+        drawList.addRect(x1, y1, x2, y2, color, 0, 0, 3.0f);
+
+        // Optional: Draw a slight shadow inside or outside to make it pop?
+        // For now, just the rect is fine.
+    }
+
     private void renderFirstLayer(org.argentumforge.engine.utils.inits.MapData[][] mapData,
             RenderSettings renderSettings, final int pixelOffsetX, final int pixelOffsetY) {
         if (renderSettings.getShowLayer()[0]) {
@@ -351,6 +385,10 @@ public class MapRenderer {
      */
     public void renderImGuiOverlays(int pixelOffsetX, int pixelOffsetY) {
         RenderSettings renderSettings = Options.INSTANCE.getRenderSettings();
+
+        // Viewport overlay needs to be rendered within an ImGui context
+        renderViewportOverlay();
+
         if (renderSettings.isPhotoModeActive())
             return;
 
