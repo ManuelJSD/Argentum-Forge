@@ -28,7 +28,7 @@ public class FProfileSelector extends Form {
         try {
             this.backgroundTexture = Surface.INSTANCE.createTexture("VentanaInicio.jpg", false);
             if (this.backgroundTexture != null) {
-                org.argentumforge.engine.Window.INSTANCE.updateResolution(
+                org.argentumforge.engine.Engine.INSTANCE.getWindow().updateResolution(
                         this.backgroundTexture.getTex_width(),
                         this.backgroundTexture.getTex_height());
             }
@@ -48,8 +48,8 @@ public class FProfileSelector extends Form {
             ImGui.getBackgroundDrawList().addImage(
                     backgroundTexture.getId(),
                     0, 0,
-                    org.argentumforge.engine.Window.INSTANCE.getWidth(),
-                    org.argentumforge.engine.Window.INSTANCE.getHeight());
+                    org.argentumforge.engine.Engine.INSTANCE.getWindow().getWidth(),
+                    org.argentumforge.engine.Engine.INSTANCE.getWindow().getHeight());
         }
 
         int windowWidth = 350;
@@ -57,8 +57,8 @@ public class FProfileSelector extends Form {
 
         ImGui.setNextWindowSize(windowWidth, windowHeight, ImGuiCond.Always);
         ImGui.setNextWindowPos(
-                (org.argentumforge.engine.Window.INSTANCE.getWidth() - windowWidth) / 2f,
-                (org.argentumforge.engine.Window.INSTANCE.getHeight() - windowHeight) * 0.70f,
+                (org.argentumforge.engine.Engine.INSTANCE.getWindow().getWidth() - windowWidth) / 2f,
+                (org.argentumforge.engine.Engine.INSTANCE.getWindow().getHeight() - windowHeight) * 0.70f,
                 ImGuiCond.Always);
 
         int flags = ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove

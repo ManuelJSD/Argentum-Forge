@@ -1,7 +1,5 @@
 package org.argentumforge.engine.audio;
 
-import org.argentumforge.engine.Window;
-
 import java.io.File;
 
 import java.util.HashMap;
@@ -529,7 +527,7 @@ public final class Sound {
             return;
         }
 
-        if (validSound && Window.INSTANCE.isAudioAvailable()) {
+        if (validSound && org.argentumforge.engine.Engine.INSTANCE.getWindow().isAudioAvailable()) {
             try {
                 if (sourceId != -1)
                     alDeleteSources(sourceId);

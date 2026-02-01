@@ -4,7 +4,6 @@ import imgui.ImGui;
 import imgui.flag.ImGuiCond;
 import imgui.flag.ImGuiWindowFlags;
 import org.argentumforge.engine.Engine;
-import org.argentumforge.engine.Window;
 import org.argentumforge.engine.game.User;
 import org.argentumforge.engine.gui.widgets.ImageButton3State;
 import org.argentumforge.engine.i18n.I18n;
@@ -65,7 +64,8 @@ public final class FLauncher extends Form {
 
     @Override
     public void render() {
-        ImGui.setNextWindowSize(Window.INSTANCE.getWidth(), Window.INSTANCE.getHeight(), ImGuiCond.Always);
+        ImGui.setNextWindowSize(org.argentumforge.engine.Engine.INSTANCE.getWindow().getWidth(),
+                org.argentumforge.engine.Engine.INSTANCE.getWindow().getHeight(), ImGuiCond.Always);
         ImGui.setNextWindowPos(0, 0, ImGuiCond.Always);
 
         ImGui.begin(this.getClass().getSimpleName(), ImGuiWindowFlags.NoTitleBar |
@@ -80,8 +80,8 @@ public final class FLauncher extends Form {
         // Dimensiones de la imagen de fondo (diseñado para 1024x1024 o similar)
         int imageWidth = 1024;
         int imageHeight = 1024;
-        int x = (Window.INSTANCE.getWidth() - imageWidth) / 2;
-        int y = (Window.INSTANCE.getHeight() - imageHeight) / 2;
+        int x = (org.argentumforge.engine.Engine.INSTANCE.getWindow().getWidth() - imageWidth) / 2;
+        int y = (org.argentumforge.engine.Engine.INSTANCE.getWindow().getHeight() - imageHeight) / 2;
 
         if (backgroundImage != 0) {
             ImGui.getWindowDrawList().addImage(backgroundImage, x, y, x + imageWidth, y + imageHeight);

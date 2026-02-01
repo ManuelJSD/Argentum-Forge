@@ -108,9 +108,13 @@ public final class GameData {
             if (activeContext.isModified()) {
                 title += " *";
             }
-            org.argentumforge.engine.Window.INSTANCE.updateTitle(title);
+            if (title.length() > 0) {
+                org.argentumforge.engine.Engine.INSTANCE.getWindow().updateTitle(title);
+            } else {
+                org.argentumforge.engine.Engine.INSTANCE.getWindow().updateTitle("");
+            }
         } else {
-            org.argentumforge.engine.Window.INSTANCE.updateTitle("");
+            org.argentumforge.engine.Engine.INSTANCE.getWindow().updateTitle("");
         }
     }
 

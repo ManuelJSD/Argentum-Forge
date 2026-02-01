@@ -1,7 +1,7 @@
 package org.argentumforge.engine.gui.forms;
 
 import imgui.ImGui;
-import imgui.flag.ImGuiWindowFlags;
+
 import org.argentumforge.engine.gui.Theme;
 
 public class FAbout extends Form {
@@ -10,8 +10,8 @@ public class FAbout extends Form {
     public void render() {
         // Center window
         ImGui.setNextWindowPos(
-                (org.argentumforge.engine.Window.INSTANCE.getWidth() - 400) / 2f,
-                (org.argentumforge.engine.Window.INSTANCE.getHeight() - 290) / 2f,
+                (org.argentumforge.engine.Engine.INSTANCE.getWindow().getWidth() - 400) / 2f,
+                (org.argentumforge.engine.Engine.INSTANCE.getWindow().getHeight() - 290) / 2f,
                 imgui.flag.ImGuiCond.Once);
         ImGui.setNextWindowSize(400, 290, imgui.flag.ImGuiCond.Always);
 

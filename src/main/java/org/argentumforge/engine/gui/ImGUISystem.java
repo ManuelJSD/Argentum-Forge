@@ -53,7 +53,7 @@ public enum ImGUISystem {
     // arreglo de ventanas gui
     private final List<Form> frms = new ArrayList<>();
 
-    private final Window window = Window.INSTANCE;
+    private Window window;
 
     private boolean showDebug = false;
 
@@ -66,6 +66,7 @@ public enum ImGUISystem {
     }
 
     public void init() {
+        this.window = org.argentumforge.engine.Engine.INSTANCE.getWindow();
         ImGui.createContext();
 
         /*
