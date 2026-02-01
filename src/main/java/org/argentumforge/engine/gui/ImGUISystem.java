@@ -252,6 +252,7 @@ public enum ImGUISystem {
         }
         renderFrms();
         DialogManager.getInstance().render();
+        org.argentumforge.engine.gui.components.LoadingModal.getInstance().render();
 
         ImGui.render();
 

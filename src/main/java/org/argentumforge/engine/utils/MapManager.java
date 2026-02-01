@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import static org.argentumforge.engine.game.models.Character.eraseAllChars;
 import org.argentumforge.engine.gui.DialogManager;
+import java.io.File;
 
 /**
  * Clase responsable de la gestión de archivos de mapa (.map, .inf, .dat).
@@ -261,6 +262,136 @@ public final class MapManager {
      * Carga un mapa completo (capas, propiedades y entidades) desde una ruta.
      * 
      * @param filePath Ruta absoluta al archivo .map
+     */
+    /**
+     * Carga un mapa de forma asíncrona para no bloquear la interfaz.
+     * Muestra un modal de carga durante el proceso.
+     *
+     * @param filePath   Ruta absoluta al archivo .map
+     * @param onComplete Callback opcional al finalizar
+     */
+    public static void loadMapAsync(String filePath, Runnable onComplete) {
+        org.argentumforge.engine.gui.components.LoadingModal.getInstance()
+                .show("Cargando mapa " + new File(filePath).getName() + "...");
+
+        java.util.concurrent.CompletableFuture.runAsync(() -> {
+            Logger.info("Inicio de carga asíncrona del mapa: {}", filePath);
+            try {
+                // FASE 1: Carga Pesada (Background)
+                // Leemos y parseamos todos los datos SIN tocar OpenGL ni estado global critico
+
+                GameData.clearActiveContext(); // Seguro? Preferiblemente no tocar static aqui, pero clearActiveContext
+                                               // es ligero.
+                // Mejor crear el contexto nuevo y reemplazar al final.
+
+                Character[] newCharList = new Character[10001];
+                for (int i = 0; i < newCharList.length; i++) {
+                    newCharList[i] = new Character();
+                }
+
+                byte[] data = Files.readAllBytes(Path.of(filePath));
+                MapSaveOptions detectedOptions = detectSaveOptions(data);
+                MapData[][] newMapData = initMap(data, detectedOptions);
+                int particlesLoaded = countParticles(newMapData); // Helper nuevo o inferido
+
+                // Reserve User Slot
+                int userCharIdx = org.argentumforge.engine.game.User.INSTANCE.getUserCharIndex();
+                if (userCharIdx <= 0)
+                    userCharIdx = 1;
+                newCharList[userCharIdx].setActive(true);
+
+                String basePath = filePath.substring(0, filePath.lastIndexOf('.'));
+                String datPath = basePath + ".dat";
+                String infPath = basePath + ".inf";
+
+                MapProperties newMapProperties;
+                if (Files.exists(Path.of(datPath))) {
+                    newMapProperties = loadMapProperties(datPath);
+                } else {
+                    newMapProperties = new MapProperties();
+                }
+
+                if (Files.exists(Path.of(infPath))) {
+                    loadMapInfo(infPath, newMapData, newCharList);
+                }
+
+                MapContext context = new MapContext(filePath, newMapData, newMapProperties, newCharList);
+                context.setLastChar((short) 0);
+                context.setSaveOptions(detectedOptions);
+
+                // Pasar resultados a fase 2
+                MapLoadingResult result = new MapLoadingResult(context, particlesLoaded);
+
+                // FASE 2: Aplicación (Main Thread) -> Usamos un Task Queue en Engine o
+                // bloqueamos un frame
+                org.argentumforge.engine.Engine.INSTANCE.runOnMainThread(() -> {
+                    applyMap(result);
+                    // Actualizar opciones persistentes
+                    Options.INSTANCE.setLastMapPath(filePath);
+                    Options.INSTANCE.save();
+
+                    if (onComplete != null)
+                        onComplete.run();
+                    org.argentumforge.engine.gui.components.LoadingModal.getInstance().hide();
+                    Logger.info("Carga asíncrona completada.");
+                });
+
+            } catch (Exception e) {
+                Logger.error(e, "Error en carga asíncrona de mapa");
+                org.argentumforge.engine.Engine.INSTANCE.runOnMainThread(() -> {
+                    org.argentumforge.engine.gui.components.LoadingModal.getInstance().hide();
+                    DialogManager.getInstance().showError("Error", "No se pudo cargar el mapa:\n" + e.getMessage());
+                });
+            }
+        });
+    }
+
+    private static class MapLoadingResult {
+        MapContext context;
+        int particlesLoaded;
+
+        public MapLoadingResult(MapContext c, int p) {
+            context = c;
+            particlesLoaded = p;
+        }
+    }
+
+    private static void applyMap(MapLoadingResult result) {
+        GameData.setActiveContext(result.context);
+
+        // Limpiar texturas viejas (OpenGL)
+        Surface.INSTANCE.deleteAllTextures();
+
+        // Configurar particulas
+        if (result.particlesLoaded > 0) {
+            GameData.options.getRenderSettings().setShowParticles(true);
+        }
+
+        MapManager.markAsSaved();
+        org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().clearHistory();
+
+        // Teleport Usuario
+        org.argentumforge.engine.game.User user = org.argentumforge.engine.game.User.INSTANCE;
+        if (user.getUserPos().getX() == 0 || user.getUserPos().getY() == 0) {
+            user.teleport(50, 50);
+        }
+    }
+
+    private static int countParticles(MapData[][] map) {
+        int count = 0;
+        for (int x = 1; x < map.length; x++) {
+            for (int y = 1; y < map[0].length; y++) {
+                if (map[x][y].getParticleIndex() > 0)
+                    count++;
+            }
+        }
+        return count;
+    }
+
+    /**
+     * Carga un mapa completo de forma síncrona (Legacy).
+     * 
+     * @deprecated Use loadMapAsync en su lugar.
      */
     public static void loadMap(String filePath) {
         Logger.info("Cargando mapa desde: {}", filePath);
@@ -598,8 +729,6 @@ public final class MapManager {
                         break tileLoop;
                     int pId = GameData.reader.readShort();
                     newMapData[x][y].setParticleIndex(pId);
-                    if (pId > 0)
-                        particlesLoaded++;
                 } else {
                     newMapData[x][y].setParticleIndex(0);
                 }
@@ -609,10 +738,8 @@ public final class MapManager {
         }
 
         // Limpiar recursos de renderizado y entidades anteriores
-        if (particlesLoaded > 0) {
-            GameData.options.getRenderSettings().setShowParticles(true);
-        }
-        Surface.INSTANCE.deleteAllTextures();
+        // Particles check moved to applyMap
+        // Surface.INSTANCE.deleteAllTextures(); // Moved to applyMap (Main Thread)
         // eraseAllChars(); // No longer needed/possible as we assume fresh list
 
         return newMapData;

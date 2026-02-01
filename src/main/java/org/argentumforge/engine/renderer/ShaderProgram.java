@@ -1,5 +1,7 @@
 package org.argentumforge.engine.renderer;
 
+import org.tinylog.Logger;
+
 import static org.lwjgl.opengl.GL20.*;
 
 public class ShaderProgram {
@@ -11,6 +13,7 @@ public class ShaderProgram {
     public ShaderProgram() {
         programId = glCreateProgram();
         if (programId == 0) {
+            Logger.error("Could not create Shader Program");
             throw new RuntimeException("Could not create Shader Program");
         }
     }
@@ -26,6 +29,7 @@ public class ShaderProgram {
     protected int createShader(String shaderCode, int shaderType) {
         int shaderId = glCreateShader(shaderType);
         if (shaderId == 0) {
+            Logger.error("Error creating shader. Type: {}", shaderType);
             throw new RuntimeException("Error creating shader. Type: " + shaderType);
         }
 
@@ -33,10 +37,11 @@ public class ShaderProgram {
         glCompileShader(shaderId);
 
         if (glGetShaderi(shaderId, GL_COMPILE_STATUS) == 0) {
-            System.err.println("Shader Error: " + glGetShaderInfoLog(shaderId, 1024));
-            throw new RuntimeException("Error compiling Shader code: " + glGetShaderInfoLog(shaderId, 1024));
+            String errorLog = glGetShaderInfoLog(shaderId, 1024);
+            Logger.error("Shader Error (Type {}): {}", shaderType, errorLog);
+            throw new RuntimeException("Error compiling Shader code: " + errorLog);
         }
-        System.out.println("Shader compiled successfully. Type: " + shaderType);
+        Logger.debug("Shader compiled successfully. Type: {}", shaderType);
 
         glAttachShader(programId, shaderId);
 
@@ -46,10 +51,11 @@ public class ShaderProgram {
     public void link() {
         glLinkProgram(programId);
         if (glGetProgrami(programId, GL_LINK_STATUS) == 0) {
-            System.err.println("Program Link Error: " + glGetProgramInfoLog(programId, 1024));
-            throw new RuntimeException("Error linking Shader Program: " + glGetProgramInfoLog(programId, 1024));
+            String log = glGetProgramInfoLog(programId, 1024);
+            Logger.error("Program Link Error: {}", log);
+            throw new RuntimeException("Error linking Shader Program: " + log);
         }
-        System.out.println("Shader program linked successfully.");
+        Logger.debug("Shader program linked successfully.");
 
         if (vertexShaderId != 0) {
             glDetachShader(programId, vertexShaderId);
@@ -60,7 +66,7 @@ public class ShaderProgram {
 
         glValidateProgram(programId);
         if (glGetProgrami(programId, GL_VALIDATE_STATUS) == 0) {
-            System.err.println("Warning validating Shader Program: " + glGetProgramInfoLog(programId, 1024));
+            Logger.warn("Warning validating Shader Program: {}", glGetProgramInfoLog(programId, 1024));
         }
     }
 

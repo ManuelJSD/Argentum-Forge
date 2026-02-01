@@ -232,6 +232,32 @@ public final class Engine {
 
             MouseListener.resetReleasedButtons();
 
+            MouseListener.resetReleasedButtons();
+
+            // Process Main Thread Tasks
+            synchronized (taskQueue) {
+                while (!taskQueue.isEmpty()) {
+                    try {
+                        taskQueue.poll().run();
+                    } catch (Exception e) {
+                        Logger.error(e, "Error executing main thread task");
+                    }
+                }
+            }
+
+        }
+    }
+
+    private final java.util.Queue<Runnable> taskQueue = new java.util.LinkedList<>();
+
+    /**
+     * Schedules a task to be executed on the main thread (GL Context) at the start
+     * of the next frame.
+     * Safe to call from any thread.
+     */
+    public void runOnMainThread(Runnable action) {
+        synchronized (taskQueue) {
+            taskQueue.add(action);
         }
     }
 

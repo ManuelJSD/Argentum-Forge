@@ -1,5 +1,6 @@
 package org.argentumforge.engine.utils;
 
+import org.tinylog.Logger;
 import org.argentumforge.engine.Engine;
 import org.argentumforge.engine.game.Options;
 import org.argentumforge.engine.game.Weather;
@@ -60,7 +61,7 @@ public class MapExporter {
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
 
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-            System.err.println("Error: Framebuffer incompleto para exportación.");
+            Logger.error("Error: Framebuffer incompleto para exportación.");
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             glDeleteTextures(texture);
             glDeleteFramebuffers(fbo);
@@ -121,7 +122,7 @@ public class MapExporter {
         glDeleteTextures(texture);
         glDeleteFramebuffers(fbo);
 
-        System.out.println("Mapa exportado a: " + filePath);
+        Logger.info("Mapa exportado a: {}", filePath);
     }
 
     private static void renderMapContent(org.argentumforge.engine.utils.inits.MapData[][] mapData, int mapWidth,

@@ -41,7 +41,7 @@ public class MapFileUtils {
             Options.INSTANCE.setLastMapPath(f.getParent());
             Options.INSTANCE.save();
 
-            GameData.loadMap(selectedFile);
+            org.argentumforge.engine.utils.MapManager.loadMapAsync(selectedFile, null);
             org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().clearHistory();
             return true;
         }

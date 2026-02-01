@@ -25,35 +25,37 @@ import org.argentumforge.engine.Engine;
 public final class Drawn {
 
     /**
-     * @param: grh_index  = Numero de indice de grafico del GrhData
-     * @param: x,         y: posicion eje x e y de la pantalla.
-     * @param: src_width, src_height: size de recorte
-     * @param: sX,        sY: posicion de recorte
-     * @param: blend:     efecto blend
-     * @param: alpha:     efecto de transparencia (0 a 1)
-     * @param: color:     objeto que contiene valores RGB como punto flotante (0 a
-     *                    1).
-     *                    Se encargara de guardar la textura en la grafica y
-     *                    prepararla para su dibujado (en pocas palabras).
+     * @param: grhIndex  = Numero de indice de grafico del GrhData
+     * @param: x,        y: posicion eje x e y de la pantalla.
+     * @param: srcWidth, srcHeight: size de recorte
+     * @param: srcX,     srcY: posicion de recorte
+     * @param: blend:    efecto blend
+     * @param: alpha:    efecto de transparencia (0 a 1)
+     * @param: color:    objeto que contiene valores RGB como punto flotante (0 a
+     *                   1).
+     *                   Se encargara de guardar la textura en la grafica y
+     *                   prepararla para su dibujado (en pocas palabras).
      */
-    public static void geometryBoxRender(int grh_index, int x, int y, int src_width, int src_height, float sX, float sY,
+    public static void geometryBoxRender(int grhIndex, int x, int y, int srcWidth, int srcHeight, float srcX,
+            float srcY,
             boolean blend, float alpha, RGBColor color) {
-        geometryBoxRender(grh_index, x, y, src_width, src_height, sX, sY, blend, alpha, color, 1.0f, 1.0f, 0.0f);
+        geometryBoxRender(grhIndex, x, y, srcWidth, srcHeight, srcX, srcY, blend, alpha, color, 1.0f, 1.0f, 0.0f);
     }
 
-    public static void geometryBoxRender(int grh_index, int x, int y, int src_width, int src_height, float sX, float sY,
+    public static void geometryBoxRender(int grhIndex, int x, int y, int srcWidth, int srcHeight, float srcX,
+            float srcY,
             boolean blend, float alpha, RGBColor color, float scaleX, float scaleY, float skewX) {
         if (grhData == null)
             return;
-        final Texture texture = Surface.INSTANCE.getTexture(grhData[grh_index].getFileNum());
+        final Texture texture = Surface.INSTANCE.getTexture(grhData[grhIndex].getFileNum());
         float globalScale = org.argentumforge.engine.scenes.Camera.getZoomScale();
 
-        float drawWidth = src_width * globalScale * scaleX;
-        float drawHeight = src_height * globalScale * scaleY;
+        float drawWidth = srcWidth * globalScale * scaleX;
+        float drawHeight = srcHeight * globalScale * scaleY;
 
-        float heightDiff = drawHeight - (src_height * globalScale);
+        float heightDiff = drawHeight - (srcHeight * globalScale);
 
-        batch.draw(texture, x, y - heightDiff, sX, sY, src_width, src_height, drawWidth, drawHeight, skewX, blend,
+        batch.draw(texture, x, y - heightDiff, srcX, srcY, srcWidth, srcHeight, drawWidth, drawHeight, skewX, blend,
                 alpha,
                 color);
     }
@@ -61,15 +63,15 @@ public final class Drawn {
     /**
      * Lo mismo pero con una textura ya cargada.
      */
-    public static void geometryBoxRender(Texture texture, int x, int y, int src_width, int src_height, float sX,
-            float sY, boolean blend, float alpha, RGBColor color) {
-        geometryBoxRender(texture, x, y, src_width, src_height, sX, sY, 0.0f, blend, alpha, color);
+    public static void geometryBoxRender(Texture texture, int x, int y, int srcWidth, int srcHeight, float srcX,
+            float srcY, boolean blend, float alpha, RGBColor color) {
+        geometryBoxRender(texture, x, y, srcWidth, srcHeight, srcX, srcY, 0.0f, blend, alpha, color);
     }
 
-    public static void geometryBoxRender(Texture texture, int x, int y, int src_width, int src_height, float sX,
-            float sY, float skewX, boolean blend, float alpha, RGBColor color) {
+    public static void geometryBoxRender(Texture texture, int x, int y, int srcWidth, int srcHeight, float srcX,
+            float srcY, float skewX, boolean blend, float alpha, RGBColor color) {
         float scale = org.argentumforge.engine.scenes.Camera.getZoomScale();
-        batch.draw(texture, x, y, sX, sY, src_width, src_height, src_width * scale, src_height * scale, skewX, blend,
+        batch.draw(texture, x, y, srcX, srcY, srcWidth, srcHeight, srcWidth * scale, srcHeight * scale, skewX, blend,
                 alpha, color);
     }
 
@@ -221,10 +223,10 @@ public final class Drawn {
     }
 
     @Deprecated(forRemoval = true)
-    public static void geometryBoxRenderNoBatch(int grh_index, int x, int y, int src_width, int src_height, float sX,
-            float sY, boolean blend, float alpha, RGBColor color) {
+    public static void geometryBoxRenderNoBatch(int grhIndex, int x, int y, int srcWidth, int srcHeight, float srcX,
+            float srcY, boolean blend, float alpha, RGBColor color) {
         // Redirigido a la versión con Batch
-        geometryBoxRender(grh_index, x, y, src_width, src_height, sX, sY, blend, alpha, color);
+        geometryBoxRender(grhIndex, x, y, srcWidth, srcHeight, srcX, srcY, blend, alpha, color);
     }
 
     public static void geometryBoxRenderGUI(Texture texture, int x, int y, float alpha) {

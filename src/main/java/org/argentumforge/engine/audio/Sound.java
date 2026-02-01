@@ -1,5 +1,7 @@
 package org.argentumforge.engine.audio;
 
+import org.tinylog.Logger;
+
 import java.io.File;
 
 import java.util.HashMap;
@@ -66,7 +68,7 @@ public final class Sound {
     public Sound(String filepath, boolean loops) {
         // Verifica si el audio esta disponible antes de cargar el sonido
         if (!AudioSystem.INSTANCE.isAudioAvailable()) {
-            System.out.println("Audio not available, skipping sound loading: " + filepath);
+            Logger.debug("Audio not available, skipping sound loading: {}", filepath);
             this.filepath = filepath;
             return;
         }
@@ -94,7 +96,7 @@ public final class Sound {
                 free(data.pcm);
             }
         } catch (Exception e) {
-            System.err.println("Error loading sound '" + filepath + "': " + e.getMessage());
+            Logger.error(e, "Error loading sound '{}'", filepath);
             validSound = false;
         }
     }
@@ -111,7 +113,7 @@ public final class Sound {
             }
             this.validSound = true;
         } catch (Exception e) {
-            System.err.println("Error loading MIDI '" + filepath + "': " + e.getMessage());
+            Logger.error(e, "Error loading MIDI '{}'", filepath);
             this.validSound = false;
         }
     }
@@ -128,7 +130,7 @@ public final class Sound {
     public Sound(String filepath, DecodedSoundData data) {
         // Verifica si el audio esta disponible antes de cargar el sonido
         if (!AudioSystem.INSTANCE.isAudioAvailable()) {
-            System.out.println("Audio not available, skipping sound loading: " + filepath);
+            Logger.debug("Audio not available, skipping sound loading: {}", filepath);
             this.filepath = filepath;
             return;
         }
@@ -147,7 +149,7 @@ public final class Sound {
 
             validSound = true;
         } catch (Exception e) {
-            System.err.println("Error initializing OpenAL for pre-decoded sound: " + filepath + " - " + e.getMessage());
+            Logger.error(e, "Error initializing OpenAL for pre-decoded sound: {}", filepath);
             validSound = false;
         }
 
@@ -161,7 +163,7 @@ public final class Sound {
         if (sounds.containsKey(file.getAbsolutePath()))
             return sounds.get(file.getAbsolutePath());
         else
-            System.out.println("Sound file not added '" + soundFile + "'");
+            Logger.warn("Sound file not added '{}'", soundFile);
         return null;
     }
 
@@ -212,7 +214,7 @@ public final class Sound {
      */
     public static void playMusic(String musicName) {
         if (!AudioSystem.INSTANCE.isAudioAvailable()) {
-            System.out.println("Audio not available, skipping music playback: " + musicName);
+            Logger.debug("Audio not available, skipping music playback: {}", musicName);
             return;
         }
 
@@ -233,8 +235,7 @@ public final class Sound {
                         try {
                             preloadedMusic = DecodedSoundData.decode(file.getAbsolutePath());
                         } catch (Exception e) {
-                            System.err.println(
-                                    "Error decoding music: " + file.getAbsolutePath() + " - " + e.getMessage());
+                            Logger.error(e, "Error decoding music: {}", file.getAbsolutePath());
                             preloadedMusic = null;
                         }
                     }).start();
@@ -338,7 +339,7 @@ public final class Sound {
                 alSourcePlay(sourceId);
             }
         } catch (Exception e) {
-            System.err.println("Error al reproducir el sonido '" + filepath + "': " + e.getMessage());
+            Logger.error(e, "Error reproducing sound: {}", filepath);
         }
     }
 
@@ -372,7 +373,7 @@ public final class Sound {
             }
             isPlaying = false;
         } catch (Exception e) {
-            System.err.println("Error al detener el sonido '" + filepath + "': " + e.getMessage());
+            Logger.error(e, "Error stopping sound: {}", filepath);
         }
     }
 
@@ -400,8 +401,7 @@ public final class Sound {
         try {
             return alGetSourcei(sourceId, AL_SOURCE_STATE) == AL_PLAYING;
         } catch (Exception e) {
-            System.err.println(
-                    "Error al comprobar si el sonido se esta reproduciendo '" + filepath + "': " + e.getMessage());
+            Logger.error(e, "Error checking if sound is playing: {}", filepath);
             return false;
         }
     }
@@ -534,7 +534,7 @@ public final class Sound {
                 if (bufferId != -1)
                     alDeleteBuffers(bufferId);
             } catch (Exception e) {
-                System.err.println("Error deleting audio resources: " + e.getMessage());
+                Logger.error(e, "Error deleting audio resources");
             }
         }
         sourceId = -1;
