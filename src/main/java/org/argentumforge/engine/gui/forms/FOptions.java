@@ -201,24 +201,6 @@ public final class FOptions extends Form {
             if (ImGui.beginTabItem(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.tab.graphics"))) {
                 ImGui.dummy(0, 10);
 
-                // Fullscreen
-                if (ImGui.checkbox(
-                        org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.graphics") + " (Fullscreen)",
-                        options.isFullscreen())) {
-                    options.setFullscreen(!options.isFullscreen());
-                    org.argentumforge.engine.Engine.INSTANCE.getWindow().toggleWindow();
-                }
-
-                ImGui.sameLine(250);
-
-                // VSync
-                if (ImGui.checkbox("VSync", options.isVsync())) {
-                    options.setVsync(!options.isVsync());
-                    org.argentumforge.engine.Engine.INSTANCE.getWindow().toggleWindow();
-                }
-
-                ImGui.spacing();
-
                 // Resolution
                 String[] resolutions = { "1024x768", "1024x1024", "1280x720", "1366x768", "1920x1080", "2560x1440",
                         "3840x2160" };
@@ -245,19 +227,47 @@ public final class FOptions extends Form {
                     ImGui.endCombo();
                 }
 
+                ImGui.spacing();
                 ImGui.separator();
 
-                // Ghost Opacity
-                ImGui.text(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.ghostOpacity") + ":");
-                float[] ghostAlpha = { options.getRenderSettings().getGhostOpacity() };
-                if (ImGui.sliderFloat("##ghostAlpha", ghostAlpha, 0.0f, 1.0f)) {
-                    options.getRenderSettings().setGhostOpacity(ghostAlpha[0]);
+                // --- SECCIÓN: VISUALES ---
+                ImGui.textColored(ImGui.getColorU32(0.2f, 0.7f, 1.0f, 1.0f),
+                        org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.visual.breathing") + " / "
+                                + org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.grid.guides") + ":");
+                ImGui.dummy(0, 5);
+
+                if (ImGui.button(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.grid.config"), 250, 25)) {
+                    org.argentumforge.engine.gui.ImGUISystem.INSTANCE.show(new FViewGuides());
                 }
 
-                // NPC Breathing
                 if (ImGui.checkbox(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.visual.breathing"),
                         options.getRenderSettings().isShowNpcBreathing())) {
                     options.getRenderSettings().setShowNpcBreathing(!options.getRenderSettings().isShowNpcBreathing());
+                    options.save();
+                }
+
+                ImGui.spacing();
+                ImGui.separator();
+
+                // --- SECCIÓN: MOTOR Y RENDIMIENTO ---
+                ImGui.textColored(ImGui.getColorU32(0.2f, 0.7f, 1.0f, 1.0f),
+                        org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.tab.simulation") + ":");
+                ImGui.dummy(0, 5);
+
+                // Fullscreen
+                if (ImGui.checkbox(
+                        org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.graphics") + " (Fullscreen)",
+                        options.isFullscreen())) {
+                    options.setFullscreen(!options.isFullscreen());
+                    org.argentumforge.engine.Engine.INSTANCE.getWindow().toggleWindow();
+                }
+
+                ImGui.sameLine(250);
+
+                // VSync
+                if (ImGui.checkbox("VSync", options.isVsync())) {
+                    options.setVsync(!options.isVsync());
+                    org.argentumforge.engine.Engine.INSTANCE.getWindow().toggleWindow();
                 }
 
                 // Disable Animations
@@ -266,44 +276,6 @@ public final class FOptions extends Form {
                         options.getRenderSettings().isDisableAnimations())) {
                     options.getRenderSettings()
                             .setDisableAnimations(!options.getRenderSettings().isDisableAnimations());
-                    options.save();
-                }
-
-                ImGui.dummy(0, 10);
-                ImGui.textColored(ImGui.getColorU32(0.2f, 0.7f, 1.0f, 1.0f),
-                        org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.viewport") + ":");
-                ImGui.separator();
-
-                if (ImGui.checkbox(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.viewport.enable"),
-                        options.getRenderSettings().isShowViewportOverlay())) {
-                    options.getRenderSettings()
-                            .setShowViewportOverlay(!options.getRenderSettings().isShowViewportOverlay());
-                    options.save();
-                }
-
-                ImInt vWidth = new ImInt(options.getRenderSettings().getViewportWidth());
-                ImGui.setNextItemWidth(100);
-                if (ImGui.inputInt(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.viewport.width"), vWidth)) {
-                    if (vWidth.get() < 1)
-                        vWidth.set(1);
-                    options.getRenderSettings().setViewportWidth(vWidth.get());
-                    options.save();
-                }
-
-                ImInt vHeight = new ImInt(options.getRenderSettings().getViewportHeight());
-                ImGui.setNextItemWidth(100);
-                if (ImGui.inputInt(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.viewport.height"),
-                        vHeight)) {
-                    if (vHeight.get() < 1)
-                        vHeight.set(1);
-                    options.getRenderSettings().setViewportHeight(vHeight.get());
-                    options.save();
-                }
-
-                float[] vColor = options.getRenderSettings().getViewportColor();
-                if (ImGui.colorEdit4(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.viewport.color"),
-                        vColor)) {
-                    options.getRenderSettings().setViewportColor(vColor);
                     options.save();
                 }
 

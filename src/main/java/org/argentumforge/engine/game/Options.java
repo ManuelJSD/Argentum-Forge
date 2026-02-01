@@ -146,6 +146,19 @@ public enum Options {
             write(writer, "RenderBlockOpacity", renderSettings.getBlockOpacity());
             write(writer, "RenderGhostOpacity", renderSettings.getGhostOpacity());
             write(writer, "RenderShowGrid", renderSettings.isShowGrid());
+            write(writer, "RenderGridColorR", renderSettings.getGridColor()[0]);
+            write(writer, "RenderGridColorG", renderSettings.getGridColor()[1]);
+            write(writer, "RenderGridColorB", renderSettings.getGridColor()[2]);
+            write(writer, "RenderGridColorA", renderSettings.getGridColor()[3]);
+
+            write(writer, "RenderShowMajorGrid", renderSettings.isShowMajorGrid());
+            write(writer, "RenderGridMajorInterval", renderSettings.getGridMajorInterval());
+            write(writer, "RenderGridMajorColorR", renderSettings.getGridMajorColor()[0]);
+            write(writer, "RenderGridMajorColorG", renderSettings.getGridMajorColor()[1]);
+            write(writer, "RenderGridMajorColorB", renderSettings.getGridMajorColor()[2]);
+            write(writer, "RenderGridMajorColorA", renderSettings.getGridMajorColor()[3]);
+            write(writer, "RenderAdaptiveGrid", renderSettings.isAdaptiveGrid());
+
             write(writer, "RenderShowNpcBreathing", renderSettings.isShowNpcBreathing());
             write(writer, "RenderDisableAnimations", renderSettings.isDisableAnimations());
             write(writer, "PhotoVignette", renderSettings.isPhotoVignette());
@@ -426,6 +439,19 @@ public enum Options {
             case "RenderBlockOpacity" -> renderSettings.setBlockOpacity(Float.parseFloat(value));
             case "RenderGhostOpacity" -> renderSettings.setGhostOpacity(Float.parseFloat(value));
             case "RenderShowGrid" -> renderSettings.setShowGrid(Boolean.parseBoolean(value));
+            case "RenderGridColorR" -> renderSettings.getGridColor()[0] = Float.parseFloat(value);
+            case "RenderGridColorG" -> renderSettings.getGridColor()[1] = Float.parseFloat(value);
+            case "RenderGridColorB" -> renderSettings.getGridColor()[2] = Float.parseFloat(value);
+            case "RenderGridColorA" -> renderSettings.getGridColor()[3] = Float.parseFloat(value);
+
+            case "RenderShowMajorGrid" -> renderSettings.setShowMajorGrid(Boolean.parseBoolean(value));
+            case "RenderGridMajorInterval" -> renderSettings.setGridMajorInterval(Integer.parseInt(value));
+            case "RenderGridMajorColorR" -> renderSettings.getGridMajorColor()[0] = Float.parseFloat(value);
+            case "RenderGridMajorColorG" -> renderSettings.getGridMajorColor()[1] = Float.parseFloat(value);
+            case "RenderGridMajorColorB" -> renderSettings.getGridMajorColor()[2] = Float.parseFloat(value);
+            case "RenderGridMajorColorA" -> renderSettings.getGridMajorColor()[3] = Float.parseFloat(value);
+            case "RenderAdaptiveGrid" -> renderSettings.setAdaptiveGrid(Boolean.parseBoolean(value));
+
             case "RenderShowNpcBreathing" -> renderSettings.setShowNpcBreathing(Boolean.parseBoolean(value));
             case "RenderDisableAnimations" -> renderSettings.setDisableAnimations(Boolean.parseBoolean(value));
             case "PhotoVignette" -> renderSettings.setPhotoVignette(Boolean.parseBoolean(value));

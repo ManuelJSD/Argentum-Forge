@@ -20,6 +20,10 @@ public class RenderSettings {
     private float ghostOpacity = 0.5f;
     private boolean showGrid = false;
     private float[] gridColor = { 1.0f, 1.0f, 1.0f, 0.2f }; // Blanco semi-transparente por defecto
+    private boolean showMajorGrid = true;
+    private int gridMajorInterval = 10;
+    private float[] gridMajorColor = { 1.0f, 1.0f, 1.0f, 0.4f }; // Blanco más visible por defecto
+    private boolean adaptiveGrid = true;
     private boolean showNpcBreathing = true;
     private boolean disableAnimations = false;
 
@@ -155,6 +159,38 @@ public class RenderSettings {
 
     public void setGridColor(float[] gridColor) {
         this.gridColor = gridColor;
+    }
+
+    public boolean isShowMajorGrid() {
+        return showMajorGrid;
+    }
+
+    public void setShowMajorGrid(boolean showMajorGrid) {
+        this.showMajorGrid = showMajorGrid;
+    }
+
+    public int getGridMajorInterval() {
+        return gridMajorInterval;
+    }
+
+    public void setGridMajorInterval(int gridMajorInterval) {
+        this.gridMajorInterval = gridMajorInterval;
+    }
+
+    public float[] getGridMajorColor() {
+        return gridMajorColor;
+    }
+
+    public void setGridMajorColor(float[] gridMajorColor) {
+        this.gridMajorColor = gridMajorColor;
+    }
+
+    public boolean isAdaptiveGrid() {
+        return adaptiveGrid;
+    }
+
+    public void setAdaptiveGrid(boolean adaptiveGrid) {
+        this.adaptiveGrid = adaptiveGrid;
     }
 
     public boolean isShowNpcBreathing() {
