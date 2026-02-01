@@ -484,6 +484,13 @@ public final class GameScene extends Scene {
         float[] colorArr = renderSettings.getGridColor();
         RGBColor gridColorObj = new RGBColor(colorArr[0], colorArr[1], colorArr[2]);
         float gridAlpha = colorArr[3];
+
+        boolean showMajor = renderSettings.isShowMajorGrid();
+        int majorInterval = renderSettings.getGridMajorInterval();
+        float[] majorColorArr = renderSettings.getGridMajorColor();
+        RGBColor majorColorObj = new RGBColor(majorColorArr[0], majorColorArr[1], majorColorArr[2]);
+        float majorAlpha = majorColorArr[3];
+
         int tileSize = Camera.TILE_PIXEL_SIZE;
 
         // Calcular los límites de la pantalla en píxeles relativos al mapa
@@ -493,23 +500,91 @@ public final class GameScene extends Scene {
         int endX = startX + (camera.getMaxX() - camera.getMinX() + 1 + TILE_BUFFER_SIZE * 2) * tileSize;
         int endY = startY + (camera.getMaxY() - camera.getMinY() + 1 + TILE_BUFFER_SIZE * 2) * tileSize;
 
-        // Limitar al área de renderizado
-        int minX = Math.max(POS_SCREEN_X, startX);
+        // Limitar al área de renderizado de la ventana
         int minY = Math.max(POS_SCREEN_Y, startY);
-        int maxX = Math.min(POS_SCREEN_X + Window.SCREEN_WIDTH, endX);
         int maxY = Math.min(POS_SCREEN_Y + Window.SCREEN_HEIGHT, endY);
+        int minX = Math.max(POS_SCREEN_X, startX);
+        int maxX = Math.min(POS_SCREEN_X + Window.SCREEN_WIDTH, endX);
 
-        // Dibujar líneas verticales
-        for (int x = startX; x <= endX; x += tileSize) {
-            if (x >= POS_SCREEN_X && x <= POS_SCREEN_X + Window.SCREEN_WIDTH) {
-                Drawn.geometryBoxRender(whiteTexture, x, minY, 1, maxY - minY, 0f, 0f, true, gridAlpha, gridColorObj);
+        // Límites efectivos del mapa en pantalla (píxeles reales donde hay tiles)
+        int mapPixelMinX = POS_SCREEN_X
+                + (Camera.XMinMapSize - camera.getMinX() + camera.getMinXOffset() - TILE_BUFFER_SIZE) * tileSize
+                + pixelOffsetX;
+        int mapPixelMaxX = mapPixelMinX + (Camera.XMaxMapSize - Camera.XMinMapSize + 1) * tileSize;
+        int mapPixelMinY = POS_SCREEN_Y
+                + (Camera.YMinMapSize - camera.getMinY() + camera.getMinYOffset() - TILE_BUFFER_SIZE) * tileSize
+                + pixelOffsetY;
+        int mapPixelMaxY = mapPixelMinY + (Camera.YMaxMapSize - Camera.YMinMapSize + 1) * tileSize;
+
+        // Área de recorte final: Donde la pantalla y el mapa se intersectan
+        int clipMinX = Math.max(minX, mapPixelMinX);
+        int clipMaxX = Math.min(maxX, mapPixelMaxX);
+        int clipMinY = Math.max(minY, mapPixelMinY);
+        int clipMaxY = Math.min(maxY, mapPixelMaxY);
+
+        float currentGridAlpha = gridAlpha;
+        if (renderSettings.isAdaptiveGrid()) {
+            if (tileSize <= 12) {
+                currentGridAlpha = 0;
+            } else if (tileSize < 32) {
+                // Fade out linearly from 32px down to 12px
+                currentGridAlpha *= (tileSize - 12) / 20.0f;
             }
         }
 
-        // Dibujar líneas horizontales
-        for (int y = startY; y <= endY; y += tileSize) {
-            if (y >= POS_SCREEN_Y && y <= POS_SCREEN_Y + Window.SCREEN_HEIGHT) {
-                Drawn.geometryBoxRender(whiteTexture, minX, y, maxX - minX, 1, 0f, 0f, true, gridAlpha, gridColorObj);
+        // Draw minor grid only if alpha > 0
+        if (currentGridAlpha > 0) {
+            // Dibujar líneas verticales
+            int tileX = camera.getMinX() - TILE_BUFFER_SIZE;
+            for (int x = startX; x <= endX; x += tileSize) {
+                if (x >= clipMinX && x <= clipMaxX) {
+                    boolean isMajor = showMajor && (tileX % majorInterval == 0);
+                    if (!isMajor) {
+                        Drawn.drawColoredRect(x, clipMinY, 1, clipMaxY - clipMinY, gridColorObj, currentGridAlpha);
+                    }
+                }
+                tileX++;
+            }
+
+            // Dibujar líneas horizontales
+            int tileY = camera.getMinY() - TILE_BUFFER_SIZE;
+            for (int y = startY; y <= endY; y += tileSize) {
+                if (y >= clipMinY && y <= clipMaxY) {
+                    boolean isMajor = showMajor && (tileY % majorInterval == 0);
+                    if (!isMajor) {
+                        Drawn.drawColoredRect(clipMinX, y, clipMaxX - clipMinX, 1, gridColorObj, currentGridAlpha);
+                    }
+                }
+                tileY++;
+            }
+        }
+
+        // Always draw major grid if enabled
+        if (showMajor) {
+            float currentMajorAlpha = majorAlpha;
+            if (renderSettings.isAdaptiveGrid() && tileSize < 12) {
+                // Subtle fade for major grid when zooming out extremely far
+                currentMajorAlpha *= Math.max(0.3f, tileSize / 12.0f);
+            }
+
+            int tileX = camera.getMinX() - TILE_BUFFER_SIZE;
+            for (int x = startX; x <= endX; x += tileSize) {
+                if (x >= clipMinX && x <= clipMaxX) {
+                    if (tileX % majorInterval == 0) {
+                        Drawn.drawColoredRect(x, clipMinY, 2, clipMaxY - clipMinY, majorColorObj, currentMajorAlpha);
+                    }
+                }
+                tileX++;
+            }
+
+            int tileY = camera.getMinY() - TILE_BUFFER_SIZE;
+            for (int y = startY; y <= endY; y += tileSize) {
+                if (y >= clipMinY && y <= clipMaxY) {
+                    if (tileY % majorInterval == 0) {
+                        Drawn.drawColoredRect(clipMinX, y, clipMaxX - clipMinX, 2, majorColorObj, currentMajorAlpha);
+                    }
+                }
+                tileY++;
             }
         }
     }

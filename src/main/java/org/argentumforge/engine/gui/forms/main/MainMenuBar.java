@@ -197,6 +197,12 @@ public class MainMenuBar {
                     Camera.setTileSize(32);
                 }
 
+                if (ImGui.menuItem(I18n.INSTANCE.get("menu.view.guidesConfig"))) {
+                    ImGUISystem.INSTANCE.show(new FViewGuides());
+                }
+
+                ImGui.separator();
+
                 if (ImGui.beginMenu(I18n.INSTANCE.get("menu.view.layers"))) {
                     if (ImGui.menuItem(I18n.INSTANCE.get("menu.view.layer1"), "", renderSettings.getShowLayer()[0])) {
                         renderSettings.getShowLayer()[0] = !renderSettings.getShowLayer()[0];
