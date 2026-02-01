@@ -5,7 +5,6 @@ import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import org.lwjgl.BufferUtils;
-import org.argentumforge.engine.Window;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.*;
@@ -326,12 +325,10 @@ public class BatchRenderer {
     }
 
     private void updateProjectionMatrix() {
-        float width = Window.SCREEN_WIDTH;
-        float height = Window.SCREEN_HEIGHT;
-
-        if (Window.INSTANCE != null) {
-            width = Window.INSTANCE.getWidth();
-            height = Window.INSTANCE.getHeight();
+        int width = 0, height = 0;
+        if (org.argentumforge.engine.Engine.INSTANCE.getWindow() != null) {
+            width = org.argentumforge.engine.Engine.INSTANCE.getWindow().getWidth();
+            height = org.argentumforge.engine.Engine.INSTANCE.getWindow().getHeight();
         }
 
         orthoMatrixBuffer.clear();

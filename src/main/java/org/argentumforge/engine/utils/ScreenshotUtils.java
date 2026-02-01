@@ -1,6 +1,5 @@
 package org.argentumforge.engine.utils;
 
-import org.argentumforge.engine.Window;
 import org.argentumforge.engine.game.console.Console;
 import org.argentumforge.engine.renderer.RGBColor;
 import org.lwjgl.BufferUtils;
@@ -25,8 +24,8 @@ public class ScreenshotUtils {
      */
     public static void takeScreenshot() {
         // Obtenemos dimensiones de la ventana actual
-        int width = Window.INSTANCE.getWidth();
-        int height = Window.INSTANCE.getHeight();
+        int width = org.argentumforge.engine.Engine.INSTANCE.getWindow().getWidth();
+        int height = org.argentumforge.engine.Engine.INSTANCE.getWindow().getHeight();
 
         // Creamos un buffer para almacenar los píxeles (RGBA = 4 bytes por píxel)
         ByteBuffer buffer = BufferUtils.createByteBuffer(width * height * 4);

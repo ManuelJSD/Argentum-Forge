@@ -102,8 +102,8 @@ public final class IntroScene extends Scene {
         int imageHeight = ArgentumForgeLogo.getTex_height();
 
         // Centrar en la pantalla
-        int x = (org.argentumforge.engine.Window.INSTANCE.getWidth() - imageWidth) / 2;
-        int y = (org.argentumforge.engine.Window.INSTANCE.getHeight() - imageHeight) / 2;
+        int x = (org.argentumforge.engine.Engine.INSTANCE.getWindow().getWidth() - imageWidth) / 2;
+        int y = (org.argentumforge.engine.Engine.INSTANCE.getWindow().getHeight() - imageHeight) / 2;
 
         geometryBoxRenderGUI(ArgentumForgeLogo, x, y, imageWidth, imageHeight, alphaInterface);
     }

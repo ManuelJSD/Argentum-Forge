@@ -44,9 +44,7 @@ import static org.lwjgl.system.MemoryUtil.NULL;
  * usuario.
  */
 
-public enum Window {
-
-    INSTANCE;
+public class Window {
 
     public static int SCREEN_WIDTH = 1024;
     public static int SCREEN_HEIGHT = 1024;
@@ -57,7 +55,7 @@ public enum Window {
 
     private boolean cursorCrosshair;
 
-    Window() {
+    public Window() {
         this.title = "Argentum Forge";
         this.width = options.getScreenWidth();
         this.height = options.getScreenHeight();

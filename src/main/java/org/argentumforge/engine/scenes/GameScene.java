@@ -131,23 +131,36 @@ public final class GameScene extends Scene {
         }
 
         if (user.isUserMoving()) {
+            // Movement logic refactored to use Percentage (0.0 to 1.0) instead of raw
+            // pixels
+            // This ensures stability when TILE_PIXEL_SIZE changes (Zoom)
+
+            float zoomScale = Camera.getZoomScale();
+            float speedPixels = (charList[user.getUserCharIndex()].getWalkingSpeed() * zoomScale) * timerTicksPerFrame;
+            // Calculate progress increment based on current tile size
+            float progressParams = speedPixels / TILE_PIXEL_SIZE;
+
             if (user.getAddToUserPos().getX() != 0) {
-                offSetCounterX -= charList[user.getUserCharIndex()].getWalkingSpeed() * user.getAddToUserPos().getX()
-                        * timerTicksPerFrame;
-                if (Math.abs(offSetCounterX) >= Math.abs(TILE_PIXEL_SIZE * user.getAddToUserPos().getX())) {
+                offSetCounterX += progressParams; // offSetCounterX now acts as Progress (0..1)
+
+                if (offSetCounterX >= 1.0f) {
                     offSetCounterX = 0;
                     user.getAddToUserPos().setX(0);
-                    user.setUserMoving(false);
+                    // Only stop if Y is also done (or 0)
+                    if (user.getAddToUserPos().getY() == 0)
+                        user.setUserMoving(false);
                 }
             }
 
             if (user.getAddToUserPos().getY() != 0) {
-                offSetCounterY -= charList[user.getUserCharIndex()].getWalkingSpeed() * user.getAddToUserPos().getY()
-                        * timerTicksPerFrame;
-                if (Math.abs(offSetCounterY) >= Math.abs(TILE_PIXEL_SIZE * user.getAddToUserPos().getY())) {
+                offSetCounterY += progressParams; // offSetCounterY now acts as Progress (0..1)
+
+                if (offSetCounterY >= 1.0f) {
                     offSetCounterY = 0;
                     user.getAddToUserPos().setY(0);
-                    user.setUserMoving(false);
+                    // Only stop if X is also done (or 0)
+                    if (user.getAddToUserPos().getX() == 0)
+                        user.setUserMoving(false);
                 }
             }
         } else {
@@ -155,9 +168,22 @@ public final class GameScene extends Scene {
             offSetCounterY = 0;
         }
 
+        // Calculate Pixel Offset for Renderer: -1 * Direction * (Progress * TileSize)
+        // Since we render based on OLD position (UserPos - Add), we shift towards New
+        // Position.
+        int pixelOffsetX = 0;
+        int pixelOffsetY = 0;
+
+        if (user.getAddToUserPos().getX() != 0) {
+            pixelOffsetX = (int) (-1 * user.getAddToUserPos().getX() * (offSetCounterX * TILE_PIXEL_SIZE));
+        }
+        if (user.getAddToUserPos().getY() != 0) {
+            pixelOffsetY = (int) (-1 * user.getAddToUserPos().getY() * (offSetCounterY * TILE_PIXEL_SIZE));
+        }
+
         renderScreen(user.getUserPos().getX() - user.getAddToUserPos().getX(),
                 user.getUserPos().getY() - user.getAddToUserPos().getY(),
-                (int) (offSetCounterX), (int) (offSetCounterY));
+                pixelOffsetX, pixelOffsetY);
 
         // Update Auto-save
         org.argentumforge.engine.utils.editor.AutoSaveManager.getInstance().update();
@@ -183,7 +209,17 @@ public final class GameScene extends Scene {
      * Renderiza los overlays de ImGui delegando al MapRenderer.
      */
     public void renderImGuiOverlays() {
-        mapRenderer.renderImGuiOverlays((int) offSetCounterX, (int) offSetCounterY);
+        int pixelOffsetX = 0;
+        int pixelOffsetY = 0;
+
+        if (user.getAddToUserPos().getX() != 0) {
+            pixelOffsetX = (int) (-1 * user.getAddToUserPos().getX() * (offSetCounterX * TILE_PIXEL_SIZE));
+        }
+        if (user.getAddToUserPos().getY() != 0) {
+            pixelOffsetY = (int) (-1 * user.getAddToUserPos().getY() * (offSetCounterY * TILE_PIXEL_SIZE));
+        }
+
+        mapRenderer.renderImGuiOverlays(pixelOffsetX, pixelOffsetY);
     }
 
     /**

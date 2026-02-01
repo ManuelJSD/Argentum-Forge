@@ -253,7 +253,8 @@ public final class Character {
             if (charList[charIndex].getScrollDirectionX() != 0) {
 
                 charList[charIndex].setMoveOffsetX(charList[charIndex].getMoveOffsetX() +
-                        charList[charIndex].getWalkingSpeed() * sgn(charList[charIndex].getScrollDirectionX())
+                        (charList[charIndex].getWalkingSpeed() / 32.0f)
+                                * sgn(charList[charIndex].getScrollDirectionX())
                                 * timerTicksPerFrame);
 
                 if (charList[charIndex].getBody().getWalk(charList[charIndex].getHeading().getId()).getSpeed() > 0.0f) {
@@ -279,7 +280,8 @@ public final class Character {
 
             if (charList[charIndex].getScrollDirectionY() != 0) {
                 charList[charIndex].setMoveOffsetY(charList[charIndex].getMoveOffsetY()
-                        + charList[charIndex].getWalkingSpeed() * sgn(charList[charIndex].getScrollDirectionY())
+                        + (charList[charIndex].getWalkingSpeed() / 32.0f)
+                                * sgn(charList[charIndex].getScrollDirectionY())
                                 * timerTicksPerFrame);
 
                 if (charList[charIndex].getBody().getWalk(charList[charIndex].getHeading().getId()).getSpeed() > 0.0f) {
@@ -315,8 +317,10 @@ public final class Character {
             charList[charIndex].setMoving(false);
         }
 
-        PixelOffsetX += (int) charList[charIndex].getMoveOffsetX();
-        PixelOffsetY += (int) charList[charIndex].getMoveOffsetY();
+        PixelOffsetX += (int) (charList[charIndex].getMoveOffsetX()
+                * org.argentumforge.engine.scenes.Camera.TILE_PIXEL_SIZE);
+        PixelOffsetY += (int) (charList[charIndex].getMoveOffsetY()
+                * org.argentumforge.engine.scenes.Camera.TILE_PIXEL_SIZE);
 
         if (charList[charIndex].getHead().getHead(charList[charIndex].getHeading().getId()).getGrhIndex() != 0) {
 

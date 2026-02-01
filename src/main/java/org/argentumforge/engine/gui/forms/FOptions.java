@@ -4,8 +4,7 @@ import imgui.ImGui;
 import imgui.flag.ImGuiCond;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImInt;
-import org.argentumforge.engine.Window;
-import org.argentumforge.engine.audio.Sound;
+
 import static org.argentumforge.engine.utils.GameData.options;
 
 /**
@@ -209,7 +208,7 @@ public final class FOptions extends Form {
                         org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.graphics") + " (Fullscreen)",
                         options.isFullscreen())) {
                     options.setFullscreen(!options.isFullscreen());
-                    org.argentumforge.engine.Window.INSTANCE.toggleWindow();
+                    org.argentumforge.engine.Engine.INSTANCE.getWindow().toggleWindow();
                 }
 
                 ImGui.sameLine(250);
@@ -217,7 +216,7 @@ public final class FOptions extends Form {
                 // VSync
                 if (ImGui.checkbox("VSync", options.isVsync())) {
                     options.setVsync(!options.isVsync());
-                    org.argentumforge.engine.Window.INSTANCE.toggleWindow();
+                    org.argentumforge.engine.Engine.INSTANCE.getWindow().toggleWindow();
                 }
 
                 ImGui.spacing();
@@ -237,7 +236,8 @@ public final class FOptions extends Form {
                             String[] parts = res.split("x");
                             options.setScreenWidth(Integer.parseInt(parts[0]));
                             options.setScreenHeight(Integer.parseInt(parts[1]));
-                            org.argentumforge.engine.Window.INSTANCE.updateResolution(options.getScreenWidth(),
+                            org.argentumforge.engine.Engine.INSTANCE.getWindow().updateResolution(
+                                    options.getScreenWidth(),
                                     options.getScreenHeight());
                             options.save();
                         }

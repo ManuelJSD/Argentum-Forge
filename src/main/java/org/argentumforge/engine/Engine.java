@@ -3,11 +3,13 @@ package org.argentumforge.engine;
 import imgui.ImGui;
 import org.argentumforge.engine.audio.Sound;
 import org.argentumforge.engine.gui.ImGUISystem;
-import org.argentumforge.engine.listeners.KeyHandler;
 import org.argentumforge.engine.listeners.MouseListener;
+import org.argentumforge.engine.managers.RenderManager;
+import org.argentumforge.engine.managers.SceneManager;
 import org.argentumforge.engine.renderer.BatchRenderer;
 import org.argentumforge.engine.renderer.Surface;
-import org.argentumforge.engine.scenes.*;
+import org.argentumforge.engine.scenes.Scene;
+import org.argentumforge.engine.scenes.SceneType;
 import org.argentumforge.engine.utils.GameData;
 import org.argentumforge.engine.utils.Time;
 import org.lwjgl.Version;
@@ -33,22 +35,31 @@ public final class Engine {
     /** Versión del programa. */
     public static final String VERSION = "1.0.0-beta4";
     /** Ventana principal del motor grafico. */
-    private final Window window = Window.INSTANCE;
+    private final Window window = new Window();
+
+    public Window getWindow() {
+        return window;
+    }
+
     /** Sistema de interfaz grafica de usuario. */
     private final ImGUISystem guiSystem = ImGUISystem.INSTANCE;
-    /** Escena actual que esta siendo renderizada y actualizada en el motor. */
-    private static Scene currentScene;
-    /** Renderizador por lotes para el dibujado eficiente de graficos. */
+
+    // Delegated to Managers
     public static BatchRenderer batch;
+
+    // Kept for legacy compatibility locally, but managed by RenderManager
+    // Ideally we should remove this static field and force usage of
+    // RenderManager.INSTANCE.getBatch()
+    // but to avoid massive compilation errors right now, we can link it.
+
     /** Flag que indica si el motor está esperando la configuración inicial. */
-    private static boolean isWaitingForSetup = false;
 
     public static boolean isPrgRun() {
         return prgRun;
     }
 
     public static Scene getCurrentScene() {
-        return currentScene;
+        return SceneManager.INSTANCE.getCurrentScene();
     }
 
     /**
@@ -82,6 +93,10 @@ public final class Engine {
         guiSystem.init();
         guiSystem.setViewportsEnabled(false); // Desactivar viewports en el arranque
 
+        // Inicializar RenderManager
+        RenderManager.INSTANCE.init();
+        Engine.batch = RenderManager.INSTANCE.getBatch(); // Link legacy static field
+
         // Inicializar idioma por defecto (Español) para que la UI tenga texto
         // Posteriormente, al cargar el perfil, se recargará el idioma configurado si es
         // distinto
@@ -99,7 +114,6 @@ public final class Engine {
             guiSystem.show(selector);
         }
 
-        isWaitingForSetup = true;
     }
 
     /**
@@ -112,11 +126,11 @@ public final class Engine {
         GameData.init();
 
         // Aplicar configuraciones de pantalla cargadas del perfil
-        Window.INSTANCE.setVSync(options.isVsync());
-        Window.INSTANCE.updateResolution(options.getScreenWidth(), options.getScreenHeight());
+        window.setVSync(options.isVsync());
+        window.updateResolution(options.getScreenWidth(), options.getScreenHeight());
 
         Surface.INSTANCE.init();
-        batch = new BatchRenderer();
+        // batch already initialized via RenderManager
 
         // Verificar recursos cargados
         if (!GameData.checkResources()) {
@@ -128,10 +142,10 @@ public final class Engine {
             org.argentumforge.engine.utils.MapManager.createEmptyMap(100, 100);
         }
 
-        if (currentScene != null)
+        if (getCurrentScene() != null)
             return;
-        changeScene(org.argentumforge.engine.scenes.SceneType.GAME_SCENE);
-        isWaitingForSetup = false;
+
+        changeScene(SceneType.GAME_SCENE);
 
         // Habilitar Viewports y Docking tras el setup
         guiSystem.setViewportsEnabled(true);
@@ -162,8 +176,8 @@ public final class Engine {
     }
 
     private void performProfileChange() {
-        currentScene = null;
-        isWaitingForSetup = true;
+        SceneManager.INSTANCE.reset();
+
         guiSystem.closeAllFrms();
         guiSystem.setViewportsEnabled(false);
         org.argentumforge.engine.gui.forms.FProfileSelector selector = new org.argentumforge.engine.gui.forms.FProfileSelector(
@@ -198,6 +212,7 @@ public final class Engine {
             glfwPollEvents();
 
             if (!window.isMinimized()) {
+                Scene currentScene = getCurrentScene();
                 // Solo procesar escena si existe (puede ser null mientras se muestra el wizard)
                 if (currentScene != null) {
                     glClearColor(currentScene.getBackground().getRed(), currentScene.getBackground().getGreen(),
@@ -209,7 +224,7 @@ public final class Engine {
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
                 if (deltaTime >= 0)
-                    render();
+                    RenderManager.INSTANCE.render(window);
 
                 glfwSwapBuffers(window.getWindow());
                 Time.updateTime();
@@ -229,95 +244,6 @@ public final class Engine {
      * @param scene tipo de escena
      */
     private void changeScene(SceneType scene) {
-        switch (scene) {
-
-            case GAME_SCENE -> currentScene = new GameScene();
-
-        }
-        currentScene.init();
-
-        // Ajustar la resolución de la ventana según las preferencias de la escena
-        int preferredWidth = currentScene.getPreferredWidth();
-        int preferredHeight = currentScene.getPreferredHeight();
-
-        // Solo actualizar si la resolución es diferente a la actual
-        if (preferredWidth != Window.INSTANCE.getWidth() || preferredHeight != Window.INSTANCE.getHeight()) {
-            Window.INSTANCE.updateResolution(preferredWidth, preferredHeight);
-        }
-
-        // Aplicar política de redimensionamiento de la escena
-        Window.INSTANCE.setResizable(currentScene.isResizable());
+        SceneManager.INSTANCE.changeScene(scene);
     }
-
-    private org.argentumforge.engine.renderer.PostProcessor postProcessor;
-
-    /**
-     * Gestiona el renderizado del frame actual.
-     * Verifica si es necesario cambiar de escena (si la actual no es visible)
-     * y delega el dibujado a la escena activa y al sistema ImGui.
-     */
-    private void render() {
-        // Si no hay escena (ej: esperando el wizard), solo renderizar GUI
-        if (currentScene == null) {
-            guiSystem.renderGUI();
-            return;
-        }
-
-        Window.INSTANCE.setupGameProjection();
-
-        if (!currentScene.isVisible())
-            changeScene(currentScene.getChangeScene());
-
-        // Configurar PostProcessor si es necesario (Photo Mode)
-        org.argentumforge.engine.renderer.RenderSettings settings = org.argentumforge.engine.utils.GameData.options
-                .getRenderSettings();
-        boolean usePostProcessing = settings.isPhotoModeActive();
-
-        if (usePostProcessing) {
-            int winWidth = Window.INSTANCE.getWidth();
-            int winHeight = Window.INSTANCE.getHeight();
-
-            if (postProcessor == null) {
-                postProcessor = new org.argentumforge.engine.renderer.PostProcessor(winWidth, winHeight);
-            } else if (postProcessor.getWidth() != winWidth || postProcessor.getHeight() != winHeight) {
-                postProcessor.resize(winWidth, winHeight);
-            }
-
-            // Iniciar captura al FBO
-            postProcessor.beginCapture();
-        }
-
-        batch.begin();
-        currentScene.mouseEvents();
-        currentScene.keyEvents();
-        currentScene.render();
-        batch.end();
-
-        if (usePostProcessing) {
-            // Finalizar captura y renderizar efecto
-            postProcessor.endCapture();
-            postProcessor.apply(settings, org.argentumforge.engine.utils.Time.getRunningTime());
-
-            // Renderizar Vignette (Overlay)
-            if (settings.isPhotoVignette()) {
-                // Reiniciar batch para dibujar UI/Vignette sobre el post-procesado
-                batch.begin();
-                float intensity = settings.getVignetteIntensity();
-                if (org.argentumforge.engine.game.User.INSTANCE.isUnderCeiling())
-                    intensity = Math.min(0.95f, intensity + 0.15f);
-
-                org.argentumforge.engine.renderer.Drawn.drawVignette(
-                        Window.INSTANCE.getWidth(),
-                        Window.INSTANCE.getHeight(),
-                        intensity);
-                batch.end();
-            }
-        }
-
-        guiSystem.renderGUI();
-
-        Sound.renderMusic();
-        KeyHandler.update();
-    }
-
 }

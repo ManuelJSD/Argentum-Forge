@@ -216,8 +216,8 @@ public enum User {
                 }
 
                 // Smooth Movement Setup
-                chr.setMoveOffsetX(-1 * (32 * x));
-                chr.setMoveOffsetY(-1 * (32 * y));
+                chr.setMoveOffsetX(-1.0f * x);
+                chr.setMoveOffsetY(-1.0f * y);
                 chr.setMoving(true);
                 chr.setHeading(nDirection);
                 chr.setScrollDirectionX(x);
@@ -292,8 +292,8 @@ public enum User {
         charList[charIndex].getPos().setX(nX);
         charList[charIndex].getPos().setY(nY);
 
-        charList[charIndex].setMoveOffsetX(-1 * (TILE_PIXEL_SIZE * addX));
-        charList[charIndex].setMoveOffsetY(-1 * (TILE_PIXEL_SIZE * addY));
+        charList[charIndex].setMoveOffsetX(-1.0f * addX);
+        charList[charIndex].setMoveOffsetY(-1.0f * addY);
 
         charList[charIndex].setMoving(true);
         charList[charIndex].setHeading(nDirection);
@@ -361,8 +361,8 @@ public enum User {
         charList[charIndex].getPos().setX(nX);
         charList[charIndex].getPos().setY(nY);
 
-        charList[charIndex].setMoveOffsetX(-1 * (TILE_PIXEL_SIZE * addX));
-        charList[charIndex].setMoveOffsetY(-1 * (TILE_PIXEL_SIZE * addY));
+        charList[charIndex].setMoveOffsetX(-1.0f * addX);
+        charList[charIndex].setMoveOffsetY(-1.0f * addY);
 
         charList[charIndex].setMoving(true);
 
