@@ -60,9 +60,14 @@ public class FBindKeys extends Form {
         return keyName;
     }
 
+    private boolean firstRun = true;
+
     @Override
     public void render() {
-        ImGui.setNextWindowFocus();
+        if (firstRun) {
+            ImGui.setNextWindowFocus();
+            firstRun = false;
+        }
         ImGui.setNextWindowSize(500, 600, ImGuiCond.FirstUseEver);
 
         if (ImGui.begin(I18n.INSTANCE.get("options.keys.title"),
@@ -116,6 +121,11 @@ public class FBindKeys extends Form {
                     ImGui.setColumnWidth(0, ImGui.getWindowWidth() - 160);
 
                     renderKeyBindRow(I18n.INSTANCE.get("options.keys.multiSelect"), Key.MULTI_SELECT);
+                    renderKeyBindRow(I18n.INSTANCE.get("options.keys.copy"), Key.COPY);
+                    renderKeyBindRow(I18n.INSTANCE.get("options.keys.cut"), Key.CUT);
+                    renderKeyBindRow(I18n.INSTANCE.get("options.keys.paste"), Key.PASTE);
+                    renderKeyBindRow(I18n.INSTANCE.get("options.keys.pasteAdvanced"), Key.PASTE_ADVANCED);
+                    renderKeyBindRow(I18n.INSTANCE.get("options.keys.delete"), Key.DELETE);
 
                     ImGui.columns(1);
                     ImGui.dummy(0, 5);

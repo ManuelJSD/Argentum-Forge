@@ -8,11 +8,38 @@ import java.util.List;
  */
 public class Clipboard {
 
+    public static class PasteSettings {
+        public boolean[] layers = { true, true, true, true };
+        public boolean blocked = true;
+        public boolean npc = true;
+        public boolean objects = true;
+        public boolean triggers = true;
+        public boolean transitions = true;
+        public boolean particles = true;
+
+        public void reset() {
+            for (int i = 0; i < layers.length; i++)
+                layers[i] = true;
+            blocked = npc = objects = triggers = transitions = particles = true;
+        }
+    }
+
+    private final PasteSettings settings = new PasteSettings();
+
+    public PasteSettings getSettings() {
+        return settings;
+    }
+
     public static class ClipboardItem {
         public Selection.EntityType type;
         public int id;
         public int offsetX, offsetY; // Desplazamiento relativo al punto de referencia
         public int[] layers; // Para capturar las 4 capas de un tile
+        public boolean blocked;
+        public int trigger;
+        public int exitMap, exitX, exitY;
+        public int objIndex, objAmount;
+        public int particleIndex;
 
         public ClipboardItem(Selection.EntityType type, int id, int offsetX, int offsetY) {
             this(type, id, offsetX, offsetY, null);
@@ -54,14 +81,24 @@ public class Clipboard {
 
         items.clear();
         for (Selection.SelectedEntity se : selectedEntities) {
-            int[] layers = null;
+            ClipboardItem item = new ClipboardItem(se.type, se.id, se.x - refX, se.y - refY);
+
             if (se.type == Selection.EntityType.TILE) {
-                layers = new int[5]; // Usamos 1-4 para coincidir con MapData
+                var data = mapData[se.x][se.y];
+                item.layers = new int[5];
                 for (int i = 1; i <= 4; i++) {
-                    layers[i] = mapData[se.x][se.y].getLayer(i).getGrhIndex();
+                    item.layers[i] = data.getLayer(i).getGrhIndex();
                 }
+                item.blocked = data.getBlocked();
+                item.trigger = data.getTrigger();
+                item.exitMap = data.getExitMap();
+                item.exitX = data.getExitX();
+                item.exitY = data.getExitY();
+                item.objIndex = data.getObjIndex();
+                item.objAmount = data.getObjAmount();
+                item.particleIndex = data.getParticleIndex();
             }
-            items.add(new ClipboardItem(se.type, se.id, se.x - refX, se.y - refY, layers));
+            items.add(item);
         }
     }
 

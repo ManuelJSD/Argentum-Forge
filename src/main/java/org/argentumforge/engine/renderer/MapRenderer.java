@@ -1,8 +1,12 @@
 package org.argentumforge.engine.renderer;
 
+import org.argentumforge.engine.game.EditorController;
 import org.argentumforge.engine.game.Options;
 import org.argentumforge.engine.game.Weather;
+import org.argentumforge.engine.listeners.EditorInputManager;
+import org.argentumforge.engine.listeners.MouseListener;
 import org.argentumforge.engine.scenes.Camera;
+import org.argentumforge.engine.utils.editor.Clipboard;
 import org.argentumforge.engine.utils.editor.Selection;
 import org.argentumforge.engine.utils.editor.Selection.SelectedEntity;
 import org.argentumforge.engine.game.User;
@@ -50,6 +54,8 @@ public class MapRenderer {
             renderBlockOverlays(mapData, renderSettings, pixelOffsetX, pixelOffsetY);
             renderTranslationOverlays(mapData, renderSettings, pixelOffsetX, pixelOffsetY);
         }
+
+        renderClipboardGhost(pixelOffsetX, pixelOffsetY);
 
     }
 
@@ -441,4 +447,50 @@ public class MapRenderer {
         }
     }
 
+    private void renderClipboardGhost(int pixelOffsetX, int pixelOffsetY) {
+        if (!EditorController.INSTANCE.isPasteModeActive())
+            return;
+
+        Clipboard clip = Clipboard.getInstance();
+        if (clip.isEmpty())
+            return;
+
+        int mx = (int) MouseListener.getX() - POS_SCREEN_X;
+        int my = (int) MouseListener.getY() - POS_SCREEN_Y;
+        int tx = EditorInputManager.getTileMouseX(mx);
+        int ty = EditorInputManager.getTileMouseY(my);
+
+        // Convertir tile mouse a coordenadas de pantalla (basado en la cámara)
+        // tx, ty es la posición del mouse en tiles.
+        // Pero necesitamos saber dónde se dibujaría con respecto a la cámara actual.
+
+        var context = org.argentumforge.engine.utils.GameData.getActiveContext();
+        if (context == null)
+            return;
+
+        Clipboard.PasteSettings settings = clip.getSettings();
+
+        for (Clipboard.ClipboardItem item : clip.getItems()) {
+            int targetX = tx + item.offsetX;
+            int targetY = ty + item.offsetY;
+
+            // Calcular posición en pantalla relativa a la cámara
+            int screenX = POS_SCREEN_X + (targetX - camera.getMinX() + camera.getMinXOffset() - TILE_BUFFER_SIZE)
+                    * TILE_PIXEL_SIZE + pixelOffsetX;
+            int screenY = POS_SCREEN_Y + (targetY - camera.getMinY() + camera.getMinYOffset() - TILE_BUFFER_SIZE)
+                    * TILE_PIXEL_SIZE + pixelOffsetY;
+
+            if (item.type == Selection.EntityType.TILE && item.layers != null) {
+                for (int i = 1; i <= 4; i++) {
+                    if (settings.layers[i - 1] && item.layers[i] > 0) {
+                        drawGrhIndex(item.layers[i], screenX, screenY, 0.5f, weather.getWeatherColor());
+                    }
+                }
+            } else if (item.type == Selection.EntityType.NPC && settings.npc) {
+                drawCharacter(item.id, screenX, screenY, 0.5f, weather.getWeatherColor());
+            } else if (item.type == Selection.EntityType.OBJECT && settings.objects) {
+                drawGrhIndex(item.id, screenX, screenY, 0.5f, weather.getWeatherColor());
+            }
+        }
+    }
 }

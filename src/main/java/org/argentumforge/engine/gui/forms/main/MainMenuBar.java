@@ -155,6 +155,11 @@ public class MainMenuBar {
                     org.argentumforge.engine.game.EditorController.INSTANCE.pasteSelection();
                 }
 
+                if (ImGui.menuItem(I18n.INSTANCE.get("menu.edit.pasteAdvanced"), "Ctrl+Shift+V", false,
+                        !Clipboard.getInstance().isEmpty())) {
+                    ImGUISystem.INSTANCE.show(new org.argentumforge.engine.gui.forms.FPasteAdvanced());
+                }
+
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.edit.delete"), "Supr", false,
                         !Selection.getInstance().getSelectedEntities().isEmpty())) {
                     org.argentumforge.engine.game.EditorController.INSTANCE.deleteSelection();
