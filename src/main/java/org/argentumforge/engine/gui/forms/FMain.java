@@ -13,8 +13,7 @@ import org.argentumforge.engine.i18n.I18n;
 
 import static org.argentumforge.engine.utils.GameData.options;
 import org.argentumforge.engine.utils.GithubReleaseChecker;
-import java.awt.Desktop;
-import java.net.URI;
+// Removed java.awt.Desktop and java.net.URI
 import org.argentumforge.engine.game.models.Key;
 import org.argentumforge.engine.listeners.KeyHandler;
 import org.argentumforge.engine.scenes.GameScene;
@@ -82,6 +81,9 @@ public final class FMain extends Form {
         this.menuBar = new MainMenuBar(this);
         this.toolbar = new MainToolbar(this);
         this.statusBar = new MainStatusBar();
+
+        // Initialize Theme
+        org.argentumforge.engine.gui.ThemeManager.getInstance().init();
 
     }
 
@@ -210,7 +212,7 @@ public final class FMain extends Form {
             if (ImGui.button(I18n.INSTANCE.get("update.download"), 200, 30)) {
                 if (release != null) {
                     try {
-                        Desktop.getDesktop().browse(new URI(release.htmlUrl));
+                        Form.openURL(release.htmlUrl);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }

@@ -151,15 +151,16 @@ public class EditorInputManager {
             java.io.File mapFile = new java.io.File(mapPath);
 
             if (mapFile.exists()) {
-                org.argentumforge.engine.utils.MapManager.loadMap(mapPath);
-                user.getUserPos().setX(destX);
-                user.getUserPos().setY(destY);
-                camera.update(destX, destY);
+                org.argentumforge.engine.utils.MapManager.loadMapAsync(mapPath, () -> {
+                    user.getUserPos().setX(destX);
+                    user.getUserPos().setY(destY);
+                    camera.update(destX, destY);
 
-                Console.INSTANCE.addMsgToConsole(
-                        "Navegado a Mapa " + destMap + " (" + destX + ", " + destY + ")",
-                        REGULAR,
-                        new RGBColor(0f, 1f, 1f));
+                    Console.INSTANCE.addMsgToConsole(
+                            "Navegado a Mapa " + destMap + " (" + destX + ", " + destY + ")",
+                            REGULAR,
+                            new RGBColor(0f, 1f, 1f));
+                });
             } else {
                 Console.INSTANCE.addMsgToConsole(
                         "Error: No se encontró el mapa " + destMap + " en " + mapPath,
@@ -311,7 +312,23 @@ public class EditorInputManager {
 
                                                     if (mapPath != null) {
                                                         user.removeInstanceFromMap();
-                                                        org.argentumforge.engine.utils.MapManager.loadMap(mapPath);
+                                                        org.argentumforge.engine.utils.MapManager.loadMapAsync(mapPath,
+                                                                () -> {
+                                                                    // Update User Pos
+                                                                    user.getUserPos().setX(destX);
+                                                                    user.getUserPos().setY(destY);
+
+                                                                    // Update Camera
+                                                                    camera.update(destX, destY);
+
+                                                                    // Refresh Character (places at new pos)
+                                                                    user.refreshUserCharacter();
+
+                                                                    // Ensure movement state is clean
+                                                                    user.resetMovement();
+                                                                    org.argentumforge.engine.listeners.KeyHandler
+                                                                            .resetInputs();
+                                                                });
                                                     } else {
                                                         org.argentumforge.engine.game.console.Console.INSTANCE
                                                                 .addMsgToConsole(
@@ -323,20 +340,6 @@ public class EditorInputManager {
                                                                                 0f, 0f));
                                                         return;
                                                     }
-
-                                                    // Update User Pos
-                                                    user.getUserPos().setX(destX);
-                                                    user.getUserPos().setY(destY);
-
-                                                    // Update Camera
-                                                    camera.update(destX, destY);
-
-                                                    // Refresh Character (places at new pos)
-                                                    user.refreshUserCharacter();
-
-                                                    // Ensure movement state is clean
-                                                    user.resetMovement();
-                                                    org.argentumforge.engine.listeners.KeyHandler.resetInputs();
                                                 },
                                                 () -> {
                                                     isTransferDialogActive = false;

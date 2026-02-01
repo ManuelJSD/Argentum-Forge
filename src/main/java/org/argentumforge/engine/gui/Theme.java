@@ -86,7 +86,10 @@ public class Theme {
         CLASSIC,
         DARK,
         LIGHT,
-        MODERN
+        MODERN,
+        MATRIX,
+        DRACULA,
+        CHERRY
     }
 
     /**
@@ -98,6 +101,9 @@ public class Theme {
             case DARK -> ImGui.styleColorsDark();
             case LIGHT -> ImGui.styleColorsLight();
             case MODERN -> applyModernStyle();
+            case MATRIX -> applyMatrixStyle();
+            case DRACULA -> applyDraculaStyle();
+            case CHERRY -> applyCherryStyle();
         }
     }
 
@@ -175,6 +181,139 @@ public class Theme {
         style.setPopupBorderSize(1.0f);
         style.setFrameBorderSize(0.0f);
         style.setTabBorderSize(0.0f);
+    }
+
+    public static void applyMatrixStyle() {
+        ImGuiStyle style = ImGui.getStyle();
+        ImGui.styleColorsDark();
+
+        int black = rgba(0, 0, 0, 255);
+        int darkGreen = rgba(0, 50, 0, 255);
+        int green = rgba(0, 255, 0, 255);
+        int brightGreen = rgba(50, 255, 50, 255);
+        int text = rgba(200, 255, 200, 255);
+
+        style.setColor(ImGuiCol.Text, text);
+        style.setColor(ImGuiCol.WindowBg, rgba(0, 10, 0, 240));
+        style.setColor(ImGuiCol.ChildBg, rgba(0, 0, 0, 0));
+        style.setColor(ImGuiCol.PopupBg, rgba(0, 20, 0, 250));
+        style.setColor(ImGuiCol.Border, green);
+        style.setColor(ImGuiCol.FrameBg, darkGreen);
+        style.setColor(ImGuiCol.FrameBgHovered, rgba(0, 80, 0, 255));
+        style.setColor(ImGuiCol.FrameBgActive, rgba(0, 100, 0, 255));
+        style.setColor(ImGuiCol.TitleBg, black);
+        style.setColor(ImGuiCol.TitleBgActive, darkGreen);
+        style.setColor(ImGuiCol.TitleBgCollapsed, black);
+        style.setColor(ImGuiCol.MenuBarBg, black);
+        style.setColor(ImGuiCol.ScrollbarBg, black);
+        style.setColor(ImGuiCol.ScrollbarGrab, darkGreen);
+        style.setColor(ImGuiCol.ScrollbarGrabHovered, green);
+        style.setColor(ImGuiCol.ScrollbarGrabActive, brightGreen);
+        style.setColor(ImGuiCol.CheckMark, green);
+        style.setColor(ImGuiCol.SliderGrab, green);
+        style.setColor(ImGuiCol.SliderGrabActive, brightGreen);
+        style.setColor(ImGuiCol.Button, darkGreen);
+        style.setColor(ImGuiCol.ButtonHovered, rgba(0, 120, 0, 255));
+        style.setColor(ImGuiCol.ButtonActive, rgba(0, 150, 0, 255));
+        style.setColor(ImGuiCol.Header, darkGreen);
+        style.setColor(ImGuiCol.HeaderHovered, rgba(0, 100, 0, 255));
+        style.setColor(ImGuiCol.HeaderActive, green);
+        style.setColor(ImGuiCol.Separator, darkGreen);
+        style.setColor(ImGuiCol.SeparatorHovered, green);
+        style.setColor(ImGuiCol.SeparatorActive, brightGreen);
+        style.setColor(ImGuiCol.ResizeGrip, darkGreen);
+        style.setColor(ImGuiCol.ResizeGripHovered, green);
+        style.setColor(ImGuiCol.ResizeGripActive, brightGreen);
+        style.setColor(ImGuiCol.Tab, darkGreen);
+        style.setColor(ImGuiCol.TabHovered, green);
+        style.setColor(ImGuiCol.TabActive, rgba(0, 100, 0, 255));
+        style.setColor(ImGuiCol.TabUnfocused, rgba(0, 30, 0, 255));
+        style.setColor(ImGuiCol.TabUnfocusedActive, rgba(0, 60, 0, 255));
+        style.setColor(ImGuiCol.PlotLines, green);
+        style.setColor(ImGuiCol.PlotLinesHovered, brightGreen);
+        style.setColor(ImGuiCol.PlotHistogram, green);
+        style.setColor(ImGuiCol.PlotHistogramHovered, brightGreen);
+        style.setColor(ImGuiCol.TextSelectedBg, rgba(0, 255, 0, 100));
+
+        style.setWindowBorderSize(1.0f);
+        style.setFrameBorderSize(1.0f);
+        style.setPopupBorderSize(1.0f);
+    }
+
+    public static void applyDraculaStyle() {
+        ImGuiStyle style = ImGui.getStyle();
+        ImGui.styleColorsDark();
+
+        int bg = rgba(40, 42, 54, 255);
+        int currentLine = rgba(68, 71, 90, 255);
+        int fg = rgba(248, 248, 242, 255);
+        int comment = rgba(98, 114, 164, 255);
+        int green = rgba(80, 250, 123, 255);
+        int pink = rgba(255, 121, 198, 255);
+        int purple = rgba(189, 147, 249, 255);
+
+        style.setColor(ImGuiCol.WindowBg, bg);
+        style.setColor(ImGuiCol.Text, fg);
+        style.setColor(ImGuiCol.Border, currentLine);
+        style.setColor(ImGuiCol.FrameBg, currentLine);
+        style.setColor(ImGuiCol.FrameBgHovered, comment);
+        style.setColor(ImGuiCol.FrameBgActive, comment);
+        style.setColor(ImGuiCol.TitleBg, rgba(30, 30, 40, 255));
+        style.setColor(ImGuiCol.TitleBgActive, currentLine);
+        style.setColor(ImGuiCol.MenuBarBg, bg);
+        style.setColor(ImGuiCol.CheckMark, green);
+        style.setColor(ImGuiCol.SliderGrab, purple);
+        style.setColor(ImGuiCol.SliderGrabActive, pink);
+        style.setColor(ImGuiCol.Button, currentLine);
+        style.setColor(ImGuiCol.ButtonHovered, comment);
+        style.setColor(ImGuiCol.ButtonActive, purple);
+        style.setColor(ImGuiCol.Header, currentLine);
+        style.setColor(ImGuiCol.HeaderHovered, comment);
+        style.setColor(ImGuiCol.HeaderActive, purple);
+        style.setColor(ImGuiCol.Separator, currentLine);
+        style.setColor(ImGuiCol.ResizeGrip, currentLine);
+        style.setColor(ImGuiCol.ResizeGripHovered, pink);
+        style.setColor(ImGuiCol.ResizeGripActive, pink);
+        style.setColor(ImGuiCol.Tab, currentLine);
+        style.setColor(ImGuiCol.TabHovered, comment);
+        style.setColor(ImGuiCol.TabActive, purple);
+        style.setColor(ImGuiCol.TabUnfocused, bg);
+        style.setColor(ImGuiCol.TabUnfocusedActive, currentLine);
+    }
+
+    public static void applyCherryStyle() {
+        ImGuiStyle style = ImGui.getStyle();
+        ImGui.styleColorsDark();
+
+        int bg = rgba(15, 0, 5, 245); // Dark cherry background
+        int text = rgba(255, 200, 200, 255); // Pale pink text
+        int frame = rgba(60, 0, 20, 255); // Dark red frame
+        int active = rgba(180, 0, 60, 255); // Bright cherry red
+        int hover = rgba(120, 0, 40, 255);
+
+        style.setColor(ImGuiCol.WindowBg, bg);
+        style.setColor(ImGuiCol.Text, text);
+        style.setColor(ImGuiCol.Border, active);
+        style.setColor(ImGuiCol.FrameBg, frame);
+        style.setColor(ImGuiCol.FrameBgHovered, hover);
+        style.setColor(ImGuiCol.FrameBgActive, active);
+        style.setColor(ImGuiCol.TitleBg, frame);
+        style.setColor(ImGuiCol.TitleBgActive, active);
+        style.setColor(ImGuiCol.CheckMark, active);
+        style.setColor(ImGuiCol.SliderGrab, active);
+        style.setColor(ImGuiCol.SliderGrabActive, rgba(255, 50, 100, 255));
+        style.setColor(ImGuiCol.Button, frame);
+        style.setColor(ImGuiCol.ButtonHovered, hover);
+        style.setColor(ImGuiCol.ButtonActive, active);
+        style.setColor(ImGuiCol.Header, frame);
+        style.setColor(ImGuiCol.HeaderHovered, hover);
+        style.setColor(ImGuiCol.HeaderActive, active);
+        style.setColor(ImGuiCol.Separator, active);
+        style.setColor(ImGuiCol.Tab, frame);
+        style.setColor(ImGuiCol.TabHovered, hover);
+        style.setColor(ImGuiCol.TabActive, active);
+        style.setColor(ImGuiCol.TabUnfocused, rgba(40, 0, 10, 255));
+        style.setColor(ImGuiCol.TabUnfocusedActive, frame);
     }
 
     /**

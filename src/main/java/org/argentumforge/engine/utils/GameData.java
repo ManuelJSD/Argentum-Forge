@@ -1115,7 +1115,7 @@ public final class GameData {
      * @param filePath Ruta absoluta al archivo .map
      */
     public static void loadMap(String filePath) {
-        MapManager.loadMap(filePath);
+        MapManager.loadMapAsync(filePath, null);
     }
 
     /**

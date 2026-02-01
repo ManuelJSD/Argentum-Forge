@@ -176,20 +176,18 @@ public final class FOptions extends Form {
                 ImGui.text("Interfaz de Usuario:");
                 ImGui.separator();
 
-                String[] styles = { "Clásico", "Oscuro", "Claro", "Moderno (Premium)" };
-                org.argentumforge.engine.gui.Theme.StyleType[] styleTypes = org.argentumforge.engine.gui.Theme.StyleType
-                        .values();
-
-                // Determinamos el índice actual (podríamos guardarlo en options, por ahora
-                // moderno por defecto)
-                // Para simplificar, usaremos un estado estático o simplemente el selector
-                if (ImGui.beginCombo("Tema Visual", options.getVisualTheme())) {
-                    for (int i = 0; i < styles.length; i++) {
-                        boolean isSelected = styleTypes[i].name().equals(options.getVisualTheme());
-                        if (ImGui.selectable(styles[i], isSelected)) {
-                            options.setVisualTheme(styleTypes[i].name());
-                            org.argentumforge.engine.gui.Theme.applyStyle(styleTypes[i]);
-                            options.save();
+                // Theme Selector using ThemeManager
+                org.argentumforge.engine.gui.Theme.StyleType currentTheme = org.argentumforge.engine.gui.ThemeManager
+                        .getInstance().getCurrentTheme();
+                if (ImGui.beginCombo("Tema Visual", currentTheme.name())) {
+                    for (org.argentumforge.engine.gui.Theme.StyleType type : org.argentumforge.engine.gui.Theme.StyleType
+                            .values()) {
+                        boolean isSelected = (type == currentTheme);
+                        if (ImGui.selectable(type.name(), isSelected)) {
+                            org.argentumforge.engine.gui.ThemeManager.getInstance().setTheme(type);
+                        }
+                        if (isSelected) {
+                            ImGui.setItemDefaultFocus();
                         }
                     }
                     ImGui.endCombo();

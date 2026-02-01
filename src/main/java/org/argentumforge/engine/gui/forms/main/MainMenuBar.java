@@ -82,7 +82,7 @@ public class MainMenuBar {
                         // uses this list
                         for (String mapPath : new java.util.ArrayList<>(recentMaps)) {
                             if (ImGui.menuItem(mapPath)) {
-                                MapManager.loadMap(mapPath);
+                                MapManager.loadMapAsync(mapPath, null);
                             }
                         }
                     }

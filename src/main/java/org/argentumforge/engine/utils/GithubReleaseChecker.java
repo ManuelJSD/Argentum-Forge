@@ -56,7 +56,7 @@ public class GithubReleaseChecker {
             targetUrl = BASE_URL + "/releases/latest";
         }
 
-        System.out.println("[UpdateChecker] Starting check... (Pre-releases: " + checkPre + ")");
+        Logger.info("Starting update check... (Pre-releases: {})", checkPre);
         Console.INSTANCE.addMsgToConsole("[Update] " + I18n.INSTANCE.get("update.checking"), FontStyle.ITALIC,
                 new RGBColor(1f, 1f, 0f));
 
@@ -73,11 +73,11 @@ public class GithubReleaseChecker {
                 .GET()
                 .build();
 
-        Logger.info("Checking for updates from: " + targetUrl);
+        Logger.info("Checking for updates from: {}", targetUrl);
 
         client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                 .thenApply(response -> {
-                    System.out.println("[UpdateChecker] Response status: " + response.statusCode());
+                    Logger.debug("Response status: {}", response.statusCode());
 
                     if (response.statusCode() == 404) {
                         Console.INSTANCE.addMsgToConsole("[Update] " + I18n.INSTANCE.get("update.repo_404"),
@@ -98,14 +98,13 @@ public class GithubReleaseChecker {
                 .thenApply(GithubReleaseChecker::parseRelease)
                 .thenAccept(release -> {
                     if (release != null) {
-                        System.out.println("[UpdateChecker] Remote tag: " + release.tagName);
+                        Logger.debug("Remote tag: {}", release.tagName);
                         boolean newer = isNewerVersion(release.tagName);
-                        System.out
-                                .println("[UpdateChecker] Local version: " + Engine.VERSION + " | Is newer? " + newer);
+                        Logger.debug("Local version: {} | Is newer? {}", Engine.VERSION, newer);
 
                         if (newer) {
                             latestRelease = release;
-                            Logger.info("New version found: " + release.tagName);
+                            Logger.info("New version found: {}", release.tagName);
                             Console.INSTANCE.addMsgToConsole(
                                     "[Update] " + I18n.INSTANCE.get("update.new_version", release.tagName),
                                     FontStyle.BOLD,
@@ -117,16 +116,14 @@ public class GithubReleaseChecker {
                                     new RGBColor(0.5f, 1f, 0.5f));
                         }
                     } else {
-                        System.out.println("[UpdateChecker] Release object is null after parsing.");
+                        Logger.warn("Release object is null after parsing.");
                     }
                 })
                 .exceptionally(e -> {
-                    System.err.println("[UpdateChecker] Exception: " + e.getMessage());
+                    Logger.error(e, "Exception during update check");
                     Console.INSTANCE.addMsgToConsole(
                             "[Update] " + I18n.INSTANCE.get("update.error_generic", e.getMessage()), FontStyle.BOLD,
                             new RGBColor(1f, 0f, 0f));
-                    e.printStackTrace();
-                    Logger.error(e, "Failed to check for updates");
                     return null;
                 });
     }
@@ -167,8 +164,7 @@ public class GithubReleaseChecker {
                         new RGBColor(1f, 1f, 0f));
             }
         } catch (Exception e) {
-            System.err.println("[UpdateChecker] JSON Parse Error: " + e.getMessage());
-            Logger.error(e, "Error parsing release JSON");
+            Logger.error(e, "JSON Parse Error during release check");
         }
         return null;
     }
