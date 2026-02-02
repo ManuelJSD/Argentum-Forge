@@ -39,6 +39,7 @@ public class FSurfaceEditor extends Form implements IMapEditor {
     private static final int TILE_SIZE = 48;
     private static final int ITEMS_PER_PAGE = 100;
     private int currentPage = 0;
+    private final ImInt pageInput = new ImInt(1);
 
     private Surface surface;
 
@@ -325,7 +326,22 @@ public class FSurfaceEditor extends Form implements IMapEditor {
         int totalGrhs = AssetRegistry.grhData.length;
         int maxPages = (totalGrhs / ITEMS_PER_PAGE);
 
-        ImGui.text(I18n.INSTANCE.get("editor.surface.page") + ": " + (currentPage + 1) + "/" + (maxPages + 1));
+        ImGui.text(I18n.INSTANCE.get("editor.surface.page") + ":");
+        ImGui.sameLine();
+        ImGui.pushItemWidth(40);
+        pageInput.set(currentPage + 1);
+        if (ImGui.inputInt("##pageInput", pageInput, 0, 0)) {
+            int newPage = pageInput.get() - 1;
+            if (newPage < 0)
+                newPage = 0;
+            if (newPage > maxPages)
+                newPage = maxPages;
+            currentPage = newPage;
+        }
+        ImGui.popItemWidth();
+        ImGui.sameLine();
+        ImGui.text("/ " + (maxPages + 1));
+
         ImGui.sameLine();
         if (ImGui.button("<") && currentPage > 0)
             currentPage--;
