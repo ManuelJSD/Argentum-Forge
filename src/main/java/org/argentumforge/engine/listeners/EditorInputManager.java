@@ -110,6 +110,9 @@ public class EditorInputManager {
         if (MouseListener.mouseButtonDown(GLFW_MOUSE_BUTTON_LEFT)) {
             if (!selection.isDragging() && !selection.isAreaSelecting()) {
                 selection.tryGrab(x, y, multiSelectPressed);
+                if (!ImGUISystem.INSTANCE.isFormVisible("FTileInspector")) {
+                    ImGUISystem.INSTANCE.show(new org.argentumforge.engine.gui.forms.FTileInspector());
+                }
             } else if (selection.isAreaSelecting()) {
                 selection.updateAreaSelect(x, y);
             }

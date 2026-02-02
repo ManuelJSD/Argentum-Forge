@@ -43,6 +43,9 @@ public class Selection {
     private int marqueeStartX, marqueeStartY;
     private int marqueeEndX, marqueeEndY;
 
+    private int inspectedTileX = -1;
+    private int inspectedTileY = -1;
+
     private final List<SelectedEntity> selectedEntities = new ArrayList<>();
 
     private Selection() {
@@ -68,6 +71,8 @@ public class Selection {
         if (!active) {
             cancelDrag();
             selectedEntities.clear();
+            inspectedTileX = -1;
+            inspectedTileY = -1;
         }
     }
 
@@ -99,6 +104,14 @@ public class Selection {
         return marqueeEndY;
     }
 
+    public int getInspectedTileX() {
+        return inspectedTileX;
+    }
+
+    public int getInspectedTileY() {
+        return inspectedTileY;
+    }
+
     /**
      * Intenta agarrar una entidad o iniciar selección de área.
      * 
@@ -114,6 +127,9 @@ public class Selection {
 
         if (x < 0 || x >= mapData.length || y < 0 || y >= mapData[0].length)
             return;
+
+        inspectedTileX = x;
+        inspectedTileY = y;
 
         // ¿Hemos pinchado en algo ya seleccionado?
         SelectedEntity target = findSelectedAt(x, y);
