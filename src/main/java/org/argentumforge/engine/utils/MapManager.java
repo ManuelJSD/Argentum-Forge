@@ -22,6 +22,12 @@ import java.io.File;
  */
 public final class MapManager {
 
+    private static boolean mapLoading = false;
+
+    public static boolean isMapLoading() {
+        return mapLoading;
+    }
+
     private MapManager() {
         // Clase de utilidad
     }
@@ -271,8 +277,39 @@ public final class MapManager {
      * @param onComplete Callback opcional al finalizar
      */
     public static void loadMapAsync(String filePath, Runnable onComplete) {
+        if (mapLoading)
+            return;
+
+        // NEW: Check if already open to avoid duplicate contexts and ImGui crashes
+        String normalizedTarget = filePath;
+        try {
+            normalizedTarget = java.nio.file.Paths.get(filePath).toAbsolutePath().normalize().toString();
+        } catch (Exception e) {
+            /* ignore */ }
+
+        for (org.argentumforge.engine.utils.MapContext context : org.argentumforge.engine.utils.GameData
+                .getOpenMaps()) {
+            if (context.getFilePath().equalsIgnoreCase(normalizedTarget)) {
+                org.tinylog.Logger.info("MapManager: Map already open (normalized), switching context. Path={}",
+                        normalizedTarget);
+                org.argentumforge.engine.Engine.INSTANCE.runOnMainThread(() -> {
+                    org.argentumforge.engine.utils.GameData.setActiveContext(context);
+                    if (onComplete != null)
+                        onComplete.run();
+                });
+                return;
+            }
+        }
+
+        mapLoading = true;
+
         org.argentumforge.engine.gui.components.LoadingModal.getInstance()
                 .show("Cargando mapa " + new File(filePath).getName() + "...");
+
+        // Ensure movement and state is cleared to avoid camera lock
+        org.argentumforge.engine.game.User.INSTANCE.resetMovement();
+
+        // (WindowTitle/GLFW)
 
         java.util.concurrent.CompletableFuture.runAsync(() -> {
             Logger.info("Inicio de carga asíncrona del mapa: {}", filePath);
@@ -280,8 +317,6 @@ public final class MapManager {
                 // FASE 1: Carga Pesada (Background)
                 // Leemos y parseamos todos los datos SIN tocar OpenGL ni estado global critico
 
-                GameData.clearActiveContext(); // Seguro? Preferiblemente no tocar static aqui, pero clearActiveContext
-                                               // es ligero.
                 // Mejor crear el contexto nuevo y reemplazar al final.
 
                 Character[] newCharList = new Character[10001];
@@ -333,6 +368,7 @@ public final class MapManager {
                     if (onComplete != null)
                         onComplete.run();
                     org.argentumforge.engine.gui.components.LoadingModal.getInstance().hide();
+                    mapLoading = false;
                     Logger.info("Carga asíncrona completada.");
                 });
 
@@ -340,6 +376,7 @@ public final class MapManager {
                 Logger.error(e, "Error en carga asíncrona de mapa");
                 org.argentumforge.engine.Engine.INSTANCE.runOnMainThread(() -> {
                     org.argentumforge.engine.gui.components.LoadingModal.getInstance().hide();
+                    mapLoading = false;
                     DialogManager.getInstance().showError("Error", "No se pudo cargar el mapa:\n" + e.getMessage());
                 });
             }
@@ -357,10 +394,10 @@ public final class MapManager {
     }
 
     private static void applyMap(MapLoadingResult result) {
-        GameData.setActiveContext(result.context);
+        // Limpiar texturas en el hilo principal justo antes de cambiar contexto
+        org.argentumforge.engine.renderer.Surface.INSTANCE.deleteAllTextures();
 
-        // Limpiar texturas viejas (OpenGL)
-        Surface.INSTANCE.deleteAllTextures();
+        GameData.setActiveContext(result.context);
 
         // Configurar particulas
         if (result.particlesLoaded > 0) {
@@ -374,6 +411,10 @@ public final class MapManager {
         org.argentumforge.engine.game.User user = org.argentumforge.engine.game.User.INSTANCE;
         if (user.getUserPos().getX() == 0 || user.getUserPos().getY() == 0) {
             user.teleport(50, 50);
+        } else {
+            // Mandatorio: Refrescar el personaje para que aparezca en el charList del nuevo
+            // mapa
+            user.refreshUserCharacter();
         }
     }
 
@@ -588,20 +629,23 @@ public final class MapManager {
         MapContext context = new MapContext("", newMapData, newMapProperties, newCharList);
         context.setLastChar((short) 0);
         context.setSaveOptions(MapSaveOptions.extended());
-        GameData.setActiveContext(context);
 
-        // Limpiar recursos de renderizado anteriores
-        Surface.INSTANCE.deleteAllTextures();
-        org.argentumforge.engine.game.models.Character.eraseAllChars();
+        org.argentumforge.engine.Engine.INSTANCE.runOnMainThread(() -> {
+            GameData.setActiveContext(context);
 
-        // Reiniciar estado de modificaciones
-        markAsSaved();
-        org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().clearHistory();
+            // Limpiar recursos de renderizado anteriores
+            Surface.INSTANCE.deleteAllTextures();
+            org.argentumforge.engine.game.models.Character.eraseAllChars();
 
-        Logger.info("Mapa vacío creado ({}x{})", width, height);
+            // Reiniciar estado de modificaciones
+            markAsSaved();
+            org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().clearHistory();
 
-        // Teletransportar al usuario al centro (o 50,50)
-        org.argentumforge.engine.game.User.INSTANCE.teleport(50, 50);
+            Logger.info("Mapa vacío creado ({}x{})", width, height);
+
+            // Teletransportar al usuario al centro (o 50,50)
+            org.argentumforge.engine.game.User.INSTANCE.teleport(50, 50);
+        });
     }
 
     /**

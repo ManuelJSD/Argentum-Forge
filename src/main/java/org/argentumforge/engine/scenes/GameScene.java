@@ -7,6 +7,7 @@ import org.argentumforge.engine.gui.ImGUISystem;
 import org.argentumforge.engine.gui.forms.FMain;
 
 import org.argentumforge.engine.listeners.MouseListener;
+import org.tinylog.Logger;
 import org.argentumforge.engine.listeners.EditorInputManager;
 import org.argentumforge.engine.renderer.RenderSettings;
 import org.argentumforge.engine.utils.editor.Surface;
@@ -115,7 +116,7 @@ public final class GameScene extends Scene {
     @Override
     public void render() {
 
-        if (!visible)
+        if (!visible || charList == null || mapData == null)
             return;
 
         weather.update();
@@ -123,7 +124,7 @@ public final class GameScene extends Scene {
 
         // Update user walking speed based on options
         int charIndex = user.getUserCharIndex();
-        if (charIndex >= 0 && charIndex < charList.length) {
+        if (charIndex >= 0 && charIndex < charList.length && charList[charIndex] != null) {
             int targetSpeed = user.isWalkingmode()
                     ? options.getMoveSpeedWalk()
                     : options.getMoveSpeedNormal();
@@ -131,37 +132,46 @@ public final class GameScene extends Scene {
         }
 
         if (user.isUserMoving()) {
-            // Movement logic refactored to use Percentage (0.0 to 1.0) instead of raw
-            // pixels
-            // This ensures stability when TILE_PIXEL_SIZE changes (Zoom)
+            try {
+                // Movement logic refactored to use Percentage (0.0 to 1.0) instead of raw
+                // pixels
+                // This ensures stability when TILE_PIXEL_SIZE changes (Zoom)
 
-            float zoomScale = Camera.getZoomScale();
-            float speedPixels = (charList[user.getUserCharIndex()].getWalkingSpeed() * zoomScale) * timerTicksPerFrame;
-            // Calculate progress increment based on current tile size
-            float progressParams = speedPixels / TILE_PIXEL_SIZE;
+                float zoomScale = Camera.getZoomScale();
+                int userIdx = user.getUserCharIndex();
 
-            if (user.getAddToUserPos().getX() != 0) {
-                offSetCounterX += progressParams; // offSetCounterX now acts as Progress (0..1)
+                // Safety check for valid character in move loop
+                if (userIdx < 0 || userIdx >= charList.length || charList[userIdx] == null) {
+                    user.setUserMoving(false);
+                    return;
+                }
 
-                if (offSetCounterX >= 1.0f) {
-                    offSetCounterX = 0;
+                float speedPixels = (charList[userIdx].getWalkingSpeed() * zoomScale) * timerTicksPerFrame;
+                float progressParams = speedPixels / TILE_PIXEL_SIZE;
+
+                // Calculate completion threshold based on distance (multiplier)
+                float totalDistance = Math.max(Math.abs(user.getAddToUserPos().getX()),
+                        Math.abs(user.getAddToUserPos().getY()));
+                if (totalDistance == 0)
+                    totalDistance = 1.0f; // Safety
+
+                if (user.getAddToUserPos().getX() != 0) {
+                    offSetCounterX += progressParams;
+                }
+                if (user.getAddToUserPos().getY() != 0) {
+                    offSetCounterY += progressParams;
+                }
+
+                if (offSetCounterX >= totalDistance || offSetCounterY >= totalDistance) {
                     user.getAddToUserPos().setX(0);
-                    // Only stop if Y is also done (or 0)
-                    if (user.getAddToUserPos().getY() == 0)
-                        user.setUserMoving(false);
-                }
-            }
-
-            if (user.getAddToUserPos().getY() != 0) {
-                offSetCounterY += progressParams; // offSetCounterY now acts as Progress (0..1)
-
-                if (offSetCounterY >= 1.0f) {
-                    offSetCounterY = 0;
                     user.getAddToUserPos().setY(0);
-                    // Only stop if X is also done (or 0)
-                    if (user.getAddToUserPos().getX() == 0)
-                        user.setUserMoving(false);
+                    offSetCounterX = 0;
+                    offSetCounterY = 0;
+                    user.setUserMoving(false);
                 }
+            } catch (Exception e) {
+                Logger.error(e, "Error in GameScene movement logic");
+                user.setUserMoving(false);
             }
         } else {
             offSetCounterX = 0;
@@ -169,18 +179,19 @@ public final class GameScene extends Scene {
         }
 
         // Calculate Pixel Offset for Renderer: -1 * Direction * (Progress * TileSize)
-        // Since we render based on OLD position (UserPos - Add), we shift towards New
-        // Position.
+        // Note: Progress is now offSetCounter (0 to totalDistance)
         int pixelOffsetX = 0;
         int pixelOffsetY = 0;
 
         if (user.getAddToUserPos().getX() != 0) {
-            pixelOffsetX = (int) (-1 * user.getAddToUserPos().getX() * (offSetCounterX * TILE_PIXEL_SIZE));
+            pixelOffsetX = (int) (-1 * Math.signum(user.getAddToUserPos().getX()) * (offSetCounterX * TILE_PIXEL_SIZE));
         }
         if (user.getAddToUserPos().getY() != 0) {
-            pixelOffsetY = (int) (-1 * user.getAddToUserPos().getY() * (offSetCounterY * TILE_PIXEL_SIZE));
+            pixelOffsetY = (int) (-1 * Math.signum(user.getAddToUserPos().getY()) * (offSetCounterY * TILE_PIXEL_SIZE));
         }
 
+        // Correct formula: (UserPos - AddToUserPos) gives the starting tile.
+        // We render from Start towards End using pixelOffset.
         renderScreen(user.getUserPos().getX() - user.getAddToUserPos().getX(),
                 user.getUserPos().getY() - user.getAddToUserPos().getY(),
                 pixelOffsetX, pixelOffsetY);

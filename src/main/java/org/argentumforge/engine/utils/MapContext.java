@@ -27,10 +27,20 @@ public class MapContext {
     private int savedUserY = 50;
 
     public MapContext(String filePath, MapData[][] mapData, MapProperties mapProperties, Character[] charList) {
-        this.filePath = filePath;
+        this.filePath = normalizePath(filePath);
         this.mapData = mapData;
         this.mapProperties = mapProperties;
         this.charList = charList;
+    }
+
+    private String normalizePath(String path) {
+        if (path == null)
+            return null;
+        try {
+            return java.nio.file.Paths.get(path).toAbsolutePath().normalize().toString();
+        } catch (Exception e) {
+            return path;
+        }
     }
 
     public int getSavedUserX() {
@@ -62,7 +72,7 @@ public class MapContext {
     }
 
     public void setFilePath(String filePath) {
-        this.filePath = filePath;
+        this.filePath = normalizePath(filePath);
     }
 
     public MapData[][] getMapData() {

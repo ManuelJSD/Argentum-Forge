@@ -33,6 +33,7 @@ public class LoadingModal {
 
     public void hide() {
         this.visible = false;
+        ImGui.closeCurrentPopup();
     }
 
     public void render() {

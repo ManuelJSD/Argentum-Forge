@@ -16,7 +16,6 @@ import org.lwjgl.Version;
 import org.tinylog.Logger;
 
 import static org.argentumforge.engine.utils.GameData.options;
-import static org.argentumforge.engine.utils.Time.deltaTime;
 import static org.lwjgl.glfw.GLFW.glfwPollEvents;
 import static org.lwjgl.glfw.GLFW.glfwSwapBuffers;
 import static org.lwjgl.opengl.GL11.*;
@@ -102,6 +101,10 @@ public final class Engine {
         // distinto
         org.argentumforge.engine.i18n.I18n.INSTANCE.loadLanguage("es_ES");
 
+        // Inicializar Surface aquí para evitar NPE en el loop principal si este arranca
+        // antes de completeInitialization
+        Surface.INSTANCE.init();
+
         if (!hasProfiles) {
             // Primera ejecución global: Wizard de creación
             org.argentumforge.engine.gui.forms.FSetupWizard wizard = new org.argentumforge.engine.gui.forms.FSetupWizard(
@@ -129,7 +132,7 @@ public final class Engine {
         window.setVSync(options.isVsync());
         window.updateResolution(options.getScreenWidth(), options.getScreenHeight());
 
-        Surface.INSTANCE.init();
+        // Surface ya inicializado en init()
         // batch already initialized via RenderManager
 
         // Verificar recursos cargados
@@ -192,6 +195,7 @@ public final class Engine {
         Sound.clearSounds();
         Sound.clearMusics();
         guiSystem.destroy();
+        Surface.INSTANCE.shutdown();
         window.close();
     }
 
@@ -223,8 +227,17 @@ public final class Engine {
                 }
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-                if (deltaTime >= 0)
-                    RenderManager.INSTANCE.render(window);
+                if (Time.deltaTime >= 0) {
+                    // ImGui rendering is now handled by Engine loop (startFrame/endFrame)
+                    org.argentumforge.engine.gui.ImGUISystem.INSTANCE.startFrame();
+
+                    if (currentScene != null) {
+                        Surface.INSTANCE.dispatchUploads();
+                        RenderManager.INSTANCE.render(window);
+                    }
+
+                    org.argentumforge.engine.gui.ImGUISystem.INSTANCE.endFrame();
+                }
 
                 glfwSwapBuffers(window.getWindow());
                 Time.updateTime();

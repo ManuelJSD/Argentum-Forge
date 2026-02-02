@@ -136,6 +136,9 @@ public class EditorInputManager {
     }
 
     private void handleDoubleClick(int x, int y) {
+        if (org.argentumforge.engine.utils.MapManager.isMapLoading())
+            return;
+
         var context = GameData.getActiveContext();
         if (context == null)
             return;
@@ -146,33 +149,34 @@ public class EditorInputManager {
             int destX = mapData[x][y].getExitX();
             int destY = mapData[x][y].getExitY();
 
-            String lastPath = org.argentumforge.engine.game.Options.INSTANCE.getLastMapPath();
-            java.io.File currentFile = new java.io.File(lastPath);
-            String mapDir = currentFile.getParent();
+            String mapPath = org.argentumforge.engine.utils.MapManager.resolveMapPath(destMap);
 
-            if (mapDir == null) {
-                mapDir = org.argentumforge.engine.game.Options.INSTANCE.getMapsPath();
-            }
+            if (mapPath != null) {
+                java.io.File mapFile = new java.io.File(mapPath);
+                if (mapFile.exists()) {
+                    user.removeInstanceFromMap();
+                    user.setUserMap((short) destMap);
+                    org.argentumforge.engine.utils.MapManager.loadMapAsync(mapPath, () -> {
+                        user.getUserPos().setX(destX);
+                        user.getUserPos().setY(destY);
+                        camera.update(destX, destY);
 
-            String mapPath = mapDir + java.io.File.separator + "Mapa" + destMap + ".map";
-            java.io.File mapFile = new java.io.File(mapPath);
+                        // Align with walk-mode safety steps:
+                        user.refreshUserCharacter();
+                        user.resetMovement();
+                        org.argentumforge.engine.listeners.KeyHandler.resetInputs();
 
-            if (mapFile.exists()) {
-                org.argentumforge.engine.utils.MapManager.loadMapAsync(mapPath, () -> {
-                    user.getUserPos().setX(destX);
-                    user.getUserPos().setY(destY);
-                    camera.update(destX, destY);
-
+                        Console.INSTANCE.addMsgToConsole(
+                                "Navegado a Mapa " + destMap + " (" + destX + ", " + destY + ")",
+                                REGULAR,
+                                new RGBColor(0f, 1f, 1f));
+                    });
+                } else {
                     Console.INSTANCE.addMsgToConsole(
-                            "Navegado a Mapa " + destMap + " (" + destX + ", " + destY + ")",
+                            "Error: No se encontró el mapa " + destMap + " en " + mapPath,
                             REGULAR,
-                            new RGBColor(0f, 1f, 1f));
-                });
-            } else {
-                Console.INSTANCE.addMsgToConsole(
-                        "Error: No se encontró el mapa " + destMap + " en " + mapPath,
-                        REGULAR,
-                        new RGBColor(1f, 0f, 0f));
+                            new RGBColor(1f, 0f, 0f));
+                }
             }
         }
     }

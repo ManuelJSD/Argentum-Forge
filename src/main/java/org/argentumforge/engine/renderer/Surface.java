@@ -1,7 +1,9 @@
 package org.argentumforge.engine.renderer;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.*;
+import org.tinylog.Logger;
 
 /**
  * Gestiona un conjunto de texturas (instancias de la clase {@code Texture})
@@ -20,36 +22,109 @@ public enum Surface {
     private Map<Integer, Texture> textures;
     private Texture whiteTexture;
 
+    // Async Loading
+    private ExecutorService loaderExecutor;
+    private ConcurrentLinkedQueue<Texture.TextureData> readyToUpload;
+    private Set<Integer> pendingIds;
+    private Set<Integer> failedIds;
+    private Map<Integer, Texture> placeholderTextures;
+
     /**
-     * Inicializa el contenedor de texturas.
-     * <p>
-     * Este metodo establece un nuevo mapa de texturas vacio, preparando la
-     * instancia para gestionar texturas asociadas en el
-     * ciclo de vida del objeto.
+     * Inicializa el contenedor de texturas y el sistema de carga asíncrona.
      */
     public void init() {
-        textures = new HashMap<>();
-        whiteTexture = new Texture();
-        whiteTexture.createWhitePixel();
+        if (textures == null)
+            textures = new ConcurrentHashMap<>();
+
+        if (whiteTexture == null) {
+            whiteTexture = new Texture();
+            whiteTexture.createWhitePixel();
+        }
+
+        if (loaderExecutor == null || loaderExecutor.isShutdown()) {
+            loaderExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), r -> {
+                Thread t = new Thread(r, "TextureLoader");
+                t.setDaemon(true);
+                return t;
+            });
+        }
+
+        if (readyToUpload == null)
+            readyToUpload = new ConcurrentLinkedQueue<>();
+        if (pendingIds == null)
+            pendingIds = ConcurrentHashMap.newKeySet();
+        if (failedIds == null)
+            failedIds = ConcurrentHashMap.newKeySet();
+        if (placeholderTextures == null)
+            placeholderTextures = new ConcurrentHashMap<>();
     }
 
     /**
-     * Elimina todas las texturas gestionadas en el mapa de texturas.
-     * <p>
-     * Este metodo limpia completamente el contenedor que almacena las texturas,
-     * liberando todas las referencias a dichas
-     * instancias. Es util para liberar recursos o reinicializar el estado del
-     * sistema de gestion de texturas.
+     * Procesa las texturas que han terminado de cargarse en segundo plano.
+     * DEBE llamarse desde el hilo principal de OpenGL (Engine loop).
+     */
+    public void dispatchUploads() {
+        if (readyToUpload == null)
+            return;
+        Texture.TextureData data;
+        int count = 0;
+        int limit = 50; // Aumentado para mayor velocidad de carga inicial
+        while ((data = readyToUpload.poll()) != null && count < limit) {
+            try {
+                int id = Integer.parseInt(data.fileName);
+                Texture tex = placeholderTextures.remove(id);
+                if (tex != null) {
+                    tex.upload(data);
+                }
+                pendingIds.remove(id);
+            } catch (Exception e) {
+                Logger.error(e, "Error subiendo textura a GPU");
+            } finally {
+                data.cleanup();
+            }
+            count++;
+        }
+    }
+
+    /**
+     * Elimina todas las texturas gestionadas y apaga el hilo de carga.
      */
     public void deleteAllTextures() {
+        // Optimization: Only clear if we have a lot of textures (> 3000)
+        // This avoids the 1s lag during map transitions for small/medium maps
+        if (textures.size() < 3000) {
+            org.tinylog.Logger.info("Surface: Skipping texture cleanup (cache size: " + textures.size() + ")");
+            return;
+        }
+
+        org.tinylog.Logger.info("Surface: Cleaning up " + textures.size() + " textures...");
+
+        // No apagar el loaderExecutor aquí, ya que se necesita para seguir cargando
+        // texturas después de una limpieza de recursos o cambio de mapa.
         for (Texture texture : textures.values()) {
-            texture.cleanup();
+            if (texture != whiteTexture) {
+                texture.cleanup();
+            }
         }
         textures.clear();
+        placeholderTextures.clear();
+        pendingIds.clear();
 
-        if (whiteTexture != null) {
-            whiteTexture.cleanup();
-            whiteTexture = null;
+        if (readyToUpload != null) {
+            readyToUpload.clear();
+        }
+        // CRITICAL: We NO LONGER delete whiteTexture here because many renderers
+        // (including GUI and selection ghosts) depend on it being valid
+        // even during map transitions.
+    }
+
+    /**
+     * Apaga definitivamente el sistema de carga asíncrona.
+     * Debe llamarse al cerrar la aplicación.
+     */
+    public void shutdown() {
+        if (loaderExecutor != null) {
+            loaderExecutor.shutdownNow();
         }
     }
 
@@ -79,14 +154,38 @@ public enum Surface {
      * @return la nueva textura creada asociada al identificador proporcionado
      */
     private Texture createTexture(int fileNum) {
+        if (failedIds != null && failedIds.contains(fileNum)) {
+            // Retornar un objeto Texture vacío (ID=0) para que sea ignorado en el
+            // renderizado
+            return new Texture();
+        }
+
         Texture texture = new Texture();
-        texture.loadTexture(texture, "graphics.ao", String.valueOf(fileNum), false);
         textures.put(fileNum, texture);
+
+        if (pendingIds.add(fileNum)) {
+            placeholderTextures.put(fileNum, texture);
+            loaderExecutor.submit(() -> {
+                // Pasamos null como primer argumento ya que no usamos archivos .ao
+                Texture.TextureData data = Texture.prepareData(null, String.valueOf(fileNum), false);
+                if (data != null) {
+                    readyToUpload.add(data);
+                } else {
+                    pendingIds.remove(fileNum);
+                    placeholderTextures.remove(fileNum);
+                    if (failedIds != null)
+                        failedIds.add(fileNum);
+                    Logger.warn("Grafico {} no encontrado en {}", fileNum,
+                            org.argentumforge.engine.game.Options.INSTANCE.getGraphicsPath());
+                }
+            });
+        }
+
         return texture;
     }
 
     public Texture createTexture(String file, boolean isGUI) {
-        return createTexture("gui.ao", file, isGUI);
+        return createTexture(null, file, isGUI);
     }
 
     /**
@@ -104,11 +203,12 @@ public enum Surface {
      * @return la textura creada, o {@code null} si el nombre del archivo
      *         especificado esta vacio
      */
-    public Texture createTexture(String fileCompressed, String file, boolean isGUI) {
+    public Texture createTexture(String ignoredSource, String file, boolean isGUI) {
         if (file.isEmpty())
             return null;
         Texture texture = new Texture();
-        texture.loadTexture(texture, fileCompressed, file, isGUI);
+        // Cargamos directamente, el argumento de archivo comprimido se ignora
+        texture.loadTexture(texture, null, file, isGUI);
         return texture;
     }
 

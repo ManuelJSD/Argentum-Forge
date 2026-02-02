@@ -36,10 +36,8 @@ public enum RenderManager {
         // Sin embargo, Engine.java tenía lógica específica para wizard.
         // Vamos a asumir que render() se llama cuando se QUIERE renderizar juego.
 
-        if (currentScene == null) {
-            org.argentumforge.engine.gui.ImGUISystem.INSTANCE.renderGUI();
+        if (currentScene == null)
             return;
-        }
 
         window.setupGameProjection();
 
@@ -97,8 +95,7 @@ public enum RenderManager {
             }
         }
 
-        org.argentumforge.engine.gui.ImGUISystem.INSTANCE.renderGUI();
-
+        // ImGui frame management has been moved to Engine.java loop
         Sound.renderMusic();
         KeyHandler.update();
     }
