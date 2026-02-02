@@ -34,7 +34,7 @@ public enum Options {
     private float ambientR = 1.0f;
     private float ambientG = 1.0f;
     private float ambientB = 1.0f;
-    private int moveSpeedNormal = 8;
+    private int moveSpeedNormal = 32;
     private int moveSpeedWalk = 8;
     private java.util.List<String> recentMaps = new java.util.ArrayList<>();
     private static final int MAX_RECENT_MAPS = 10;
@@ -357,7 +357,7 @@ public enum Options {
         if (org.argentumforge.engine.game.User.INSTANCE.isWalkingmode()) {
             moveSpeedWalk = Math.min(moveSpeedWalk + 1, 32);
         } else {
-            moveSpeedNormal = Math.min(moveSpeedNormal + 1, 32);
+            moveSpeedNormal = Math.min(moveSpeedNormal + 1, 128);
         }
     }
 

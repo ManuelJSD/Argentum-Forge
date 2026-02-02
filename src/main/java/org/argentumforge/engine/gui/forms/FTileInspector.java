@@ -4,21 +4,41 @@ import imgui.ImGui;
 import imgui.flag.ImGuiCond;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.flag.ImGuiCol;
+import imgui.flag.ImGuiTreeNodeFlags;
 import imgui.type.ImInt;
-import imgui.type.ImString;
 import org.argentumforge.engine.gui.PreviewUtils;
 import org.argentumforge.engine.i18n.I18n;
 import org.argentumforge.engine.utils.GameData;
+import org.argentumforge.engine.utils.MapContext;
 import org.argentumforge.engine.utils.editor.Selection;
 import org.argentumforge.engine.utils.inits.MapData;
+import org.argentumforge.engine.utils.AssetRegistry;
+import org.argentumforge.engine.utils.editor.commands.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * Inspector de Tiles mejorado y localizado.
- * Enfocado estrictamente en las propiedades de Argentum Forge.
+ * Inspector de Tiles mejorado y localizado con capacidad de EDICIÓN.
+ * Permite modificar propiedades del mapa directamente con soporte de
+ * Deshacer/Rehacer.
  */
 public final class FTileInspector extends Form {
 
     private final Selection selection = Selection.getInstance();
+    private final CommandManager commandManager = CommandManager.getInstance();
+
+    // Estados temporales para edición (para evitar disparar comandos en cada
+    // pulsación intermedia si fuera necesario,
+    // aunque en ImGui solemos disparar al confirmar o al detectar cambio final).
+    private final ImInt tempPart = new ImInt();
+    private final ImInt tempTrig = new ImInt();
+    private final ImInt tempNpc = new ImInt();
+    private final ImInt tempObj = new ImInt();
+    private final ImInt tempAmt = new ImInt();
+    private final ImInt tempExtMap = new ImInt();
+    private final ImInt tempExtX = new ImInt();
+    private final ImInt tempExtY = new ImInt();
 
     @Override
     public void render() {
@@ -29,13 +49,13 @@ public final class FTileInspector extends Form {
         int x = selection.getInspectedTileX();
         int y = selection.getInspectedTileY();
 
-        var context = GameData.getActiveContext();
+        MapContext context = GameData.getActiveContext();
         if (context == null || context.getMapData() == null)
             return;
 
         MapData tile = context.getMapData()[x][y];
 
-        ImGui.setNextWindowSize(420, 480, ImGuiCond.FirstUseEver);
+        ImGui.setNextWindowSize(420, 550, ImGuiCond.FirstUseEver);
         String title = I18n.INSTANCE.get("tile.inspector.title") + " (" + x + "," + y + ")###FTileInspector";
 
         if (ImGui.begin(title, ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.AlwaysAutoResize)) {
@@ -52,7 +72,6 @@ public final class FTileInspector extends Form {
             for (int i = 1; i <= 4; i++) {
                 ImGui.beginGroup();
 
-                // Etiqueta de la capa
                 String label = I18n.INSTANCE.get("tile.inspector.layer" + i);
                 float textWidth = ImGui.calcTextSize(label).x;
                 ImGui.setCursorPosX(ImGui.getCursorPosX() + (boxSize - textWidth) / 2);
@@ -67,7 +86,7 @@ public final class FTileInspector extends Form {
                     if (grh > 0) {
                         PreviewUtils.drawGrhFit(grh, boxSize - 12, boxSize - 12);
                         if (ImGui.isItemHovered()) {
-                            ImGui.setTooltip("Grh: " + grh);
+                            ImGui.setTooltip("Grh: " + grh + "\n(Click to edit ID)");
                         }
                     } else {
                         float emptyW = ImGui.calcTextSize(I18n.INSTANCE.get("tile.inspector.empty")).x;
@@ -78,6 +97,22 @@ public final class FTileInspector extends Form {
                 }
                 ImGui.endChild();
                 ImGui.popStyleColor(2);
+
+                // Editor de ID de Capa
+                ImGui.pushItemWidth(boxSize);
+                ImInt lGrh = new ImInt(grh);
+                if (!ImGui.isItemActive()) {
+                    lGrh.set(grh);
+                }
+                if (ImGui.inputInt("##LGrh" + i, lGrh, 0, 0)) {
+                    if (lGrh.get() != grh) {
+                        int maxGrh = (AssetRegistry.grhData != null) ? AssetRegistry.grhData.length - 1 : 32000;
+                        short val = (short) Math.max(0, Math.min(maxGrh, lGrh.get()));
+                        commandManager.executeCommand(
+                                new TileChangeCommand(context, x, y, i, (short) grh, val));
+                    }
+                }
+                ImGui.popItemWidth();
 
                 ImGui.endGroup();
                 if (i < 4)
@@ -98,11 +133,15 @@ public final class FTileInspector extends Form {
             boolean blocked = tile.getBlocked();
             if (blocked) {
                 ImGui.pushStyleColor(ImGuiCol.Button, 0.7f, 0.1f, 0.1f, 1.0f);
-                ImGui.button(I18n.INSTANCE.get("tile.inspector.blocked"), 120, 25);
+                if (ImGui.button(I18n.INSTANCE.get("tile.inspector.blocked") + "##Toggle", 120, 25)) {
+                    toggleBlock(context, x, y, blocked);
+                }
                 ImGui.popStyleColor();
             } else {
                 ImGui.pushStyleColor(ImGuiCol.Button, 0.1f, 0.5f, 0.1f, 1.0f);
-                ImGui.button(I18n.INSTANCE.get("tile.inspector.passable"), 120, 25);
+                if (ImGui.button(I18n.INSTANCE.get("tile.inspector.passable") + "##Toggle", 120, 25)) {
+                    toggleBlock(context, x, y, blocked);
+                }
                 ImGui.popStyleColor();
             }
 
@@ -115,7 +154,20 @@ public final class FTileInspector extends Form {
             ImGui.text(I18n.INSTANCE.get("tile.inspector.trigger"));
             ImGui.sameLine();
             ImGui.setNextItemWidth(80);
-            ImGui.inputInt("##TrigID", new ImInt(tile.getTrigger()), 0, 0, imgui.flag.ImGuiInputTextFlags.ReadOnly);
+            if (!ImGui.isItemActive()) {
+                tempTrig.set(tile.getTrigger());
+            }
+            if (ImGui.inputInt("##TrigID", tempTrig, 1, 5)) {
+                if (tempTrig.get() != tile.getTrigger()) {
+                    // Triggers typical range 0-6
+                    short val = (short) Math.max(0, Math.min(6, tempTrig.get()));
+                    Map<TriggerChangeCommand.TilePos, Short> oldS = new HashMap<>();
+                    Map<TriggerChangeCommand.TilePos, Short> newS = new HashMap<>();
+                    oldS.put(new TriggerChangeCommand.TilePos(x, y), (short) tile.getTrigger());
+                    newS.put(new TriggerChangeCommand.TilePos(x, y), val);
+                    commandManager.executeCommand(new TriggerChangeCommand(context, oldS, newS));
+                }
+            }
 
             ImGui.nextColumn();
 
@@ -123,58 +175,124 @@ public final class FTileInspector extends Form {
             ImGui.text(I18n.INSTANCE.get("tile.inspector.particle"));
             ImGui.sameLine();
             ImGui.setNextItemWidth(80);
-            ImGui.inputInt("##PartID", new ImInt(tile.getParticleIndex()), 0, 0,
-                    imgui.flag.ImGuiInputTextFlags.ReadOnly);
+            if (!ImGui.isItemActive()) {
+                tempPart.set(tile.getParticleIndex());
+            }
+            if (ImGui.inputInt("##PartID", tempPart, 1, 5)) {
+                if (tempPart.get() != tile.getParticleIndex()) {
+                    int maxFx = (AssetRegistry.fxData != null) ? AssetRegistry.fxData.length - 1 : 1000;
+                    int val = Math.max(0, Math.min(maxFx, tempPart.get()));
+                    Map<ParticleChangeCommand.TilePos, Integer> oldS = new HashMap<>();
+                    Map<ParticleChangeCommand.TilePos, Integer> newS = new HashMap<>();
+                    oldS.put(new ParticleChangeCommand.TilePos(x, y), tile.getParticleIndex());
+                    newS.put(new ParticleChangeCommand.TilePos(x, y), val);
+                    commandManager.executeCommand(new ParticleChangeCommand(context, oldS, newS));
+                }
+            }
 
             ImGui.nextColumn();
 
-            // NPC y Char
+            // NPC
             ImGui.text(I18n.INSTANCE.get("tile.inspector.npc"));
             ImGui.sameLine();
             ImGui.setNextItemWidth(80);
-            String npcTxt = tile.getNpcIndex() > 0 ? String.valueOf(tile.getNpcIndex()) : "-";
-            ImGui.inputText("##NPCID", new ImString(npcTxt), imgui.flag.ImGuiInputTextFlags.ReadOnly);
+            if (!ImGui.isItemActive()) {
+                tempNpc.set(tile.getNpcIndex());
+            }
+            if (ImGui.inputInt("##NPCID", tempNpc, 1, 10)) {
+                if (tempNpc.get() != tile.getNpcIndex()) {
+                    int val = Math.max(0, tempNpc.get());
+                    commandManager
+                            .executeCommand(new NpcChangeCommand(context, x, y, tile.getNpcIndex(), val));
+                }
+            }
 
             ImGui.nextColumn();
 
+            // Char (Solo lectura, se deriva del NPC o usuario)
             ImGui.text(I18n.INSTANCE.get("tile.inspector.char"));
             ImGui.sameLine();
             ImGui.setNextItemWidth(80);
-            ImGui.inputInt("##CharID", new ImInt(tile.getCharIndex()), 0, 0, imgui.flag.ImGuiInputTextFlags.ReadOnly);
+            ImGui.textDisabled(String.valueOf(tile.getCharIndex()));
 
             ImGui.nextColumn();
 
-            // Objeto y Cantidad
+            // Objeto
             ImGui.text(I18n.INSTANCE.get("tile.inspector.obj"));
             ImGui.sameLine();
             ImGui.setNextItemWidth(80);
-            int objGrh = tile.getObjGrh().getGrhIndex();
-            String objTxt = objGrh > 0 ? String.valueOf(objGrh) : "-";
-            ImGui.inputText("##ObjID", new ImString(objTxt), imgui.flag.ImGuiInputTextFlags.ReadOnly);
+            int currentObjGrh = tile.getObjGrh().getGrhIndex();
+            tempObj.set(currentObjGrh);
+            if (ImGui.inputInt("##ObjID", tempObj, 1, 10)) {
+                if (tempObj.get() != currentObjGrh) {
+                    int val = Math.max(0, tempObj.get());
+                    commandManager.executeCommand(new ObjChangeCommand(context, x, y, currentObjGrh, val));
+                }
+            }
 
             ImGui.nextColumn();
 
+            // Cantidad Objeto
             ImGui.text(I18n.INSTANCE.get("tile.inspector.amount"));
             ImGui.sameLine();
             ImGui.setNextItemWidth(80);
-            ImGui.inputInt("##ObjAmount", new ImInt(tile.getObjAmount()), 0, 0,
-                    imgui.flag.ImGuiInputTextFlags.ReadOnly);
+            if (!ImGui.isItemActive()) {
+                tempAmt.set(tile.getObjAmount());
+            }
+            if (ImGui.inputInt("##ObjAmount", tempAmt, 1, 10)) {
+                if (tempAmt.get() != tile.getObjAmount()) {
+                    int val = Math.max(1, tempAmt.get());
+                    commandManager.executeCommand(
+                            new ObjAmountChangeCommand(context, x, y, tile.getObjAmount(), val));
+                }
+            }
 
             ImGui.columns(1);
 
             // --- SECCIÓN TRASLADO (TRANSFER) ---
-            if (tile.getExitMap() > 0) {
-                ImGui.spacing();
-                ImGui.pushStyleColor(ImGuiCol.Header, 0.1f, 0.3f, 0.5f, 1.0f);
-                if (ImGui.collapsingHeader(I18n.INSTANCE.get("tile.inspector.transfer"), ImGuiWindowFlags.NoCollapse)) {
-                    ImGui.indent();
-                    ImGui.textColored(0.4f, 0.8f, 1.0f, 1.0f,
-                            String.format(I18n.INSTANCE.get("tile.inspector.target"),
-                                    tile.getExitMap(), tile.getExitX(), tile.getExitY()));
-                    ImGui.unindent();
+            ImGui.spacing();
+            ImGui.pushStyleColor(ImGuiCol.Header, 0.1f, 0.3f, 0.5f, 1.0f);
+            if (ImGui.collapsingHeader(I18n.INSTANCE.get("tile.inspector.transfer"), ImGuiTreeNodeFlags.DefaultOpen)) {
+                ImGui.indent();
+
+                ImGui.text(I18n.INSTANCE.get("tile.inspector.map"));
+                ImGui.sameLine();
+                ImGui.setNextItemWidth(60);
+                if (!ImGui.isItemActive()) {
+                    tempExtMap.set(tile.getExitMap());
                 }
-                ImGui.popStyleColor();
+                boolean mChanged = ImGui.inputInt("##ExitMap", tempExtMap, 0, 0);
+
+                ImGui.sameLine();
+                ImGui.text(I18n.INSTANCE.get("tile.inspector.x"));
+                ImGui.sameLine();
+                ImGui.setNextItemWidth(50);
+                if (!ImGui.isItemActive()) { // Added safety check
+                    tempExtX.set(tile.getExitX());
+                }
+                boolean xChanged = ImGui.inputInt("##ExitX", tempExtX, 0, 0);
+
+                ImGui.sameLine();
+                ImGui.text(I18n.INSTANCE.get("tile.inspector.y"));
+                ImGui.sameLine();
+                ImGui.setNextItemWidth(50);
+                if (!ImGui.isItemActive()) {
+                    tempExtY.set(tile.getExitY());
+                }
+                boolean yChanged = ImGui.inputInt("##ExitY", tempExtY, 0, 0);
+
+                if (mChanged || xChanged || yChanged) {
+                    short mMap = (short) Math.max(0, tempExtMap.get());
+                    short mX = (short) Math.max(0, Math.min(100, tempExtX.get()));
+                    short mY = (short) Math.max(0, Math.min(100, tempExtY.get()));
+                    commandManager.executeCommand(new TransferChangeCommand(context, x, y,
+                            tile.getExitMap(), tile.getExitX(), tile.getExitY(),
+                            mMap, mX, mY));
+                }
+
+                ImGui.unindent();
             }
+            ImGui.popStyleColor();
 
             ImGui.dummy(0, 10);
             ImGui.separator();
@@ -184,5 +302,13 @@ public final class FTileInspector extends Form {
 
             ImGui.end();
         }
+    }
+
+    private void toggleBlock(MapContext context, int x, int y, boolean current) {
+        Map<BlockChangeCommand.TilePos, Boolean> oldS = new HashMap<>();
+        Map<BlockChangeCommand.TilePos, Boolean> newS = new HashMap<>();
+        oldS.put(new BlockChangeCommand.TilePos(x, y), current);
+        newS.put(new BlockChangeCommand.TilePos(x, y), !current);
+        commandManager.executeCommand(new BlockChangeCommand(context, oldS, newS));
     }
 }

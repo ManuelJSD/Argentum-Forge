@@ -53,12 +53,15 @@ public class EditorInputManager {
 
     public void updateMouse() {
         if (imgui.ImGui.getIO().getWantCaptureMouse() || ImGUISystem.INSTANCE.isFormVisible("FBindKeys")) {
-            if (!ImGUISystem.INSTANCE.isMainLast()) {
+            // Block map interaction if we are over a widget (button, menu, etc)
+            // or if a window other than the main editor has focus.
+            if (imgui.ImGui.isAnyItemHovered() || imgui.ImGui.isAnyItemActive() || !ImGUISystem.INSTANCE.isMainLast()) {
                 return;
             }
         }
 
         if (inGameArea()) {
+            handleZoom();
             int x = getTileMouseX((int) MouseListener.getX() - POS_SCREEN_X);
             int y = getTileMouseY((int) MouseListener.getY() - POS_SCREEN_Y);
 
@@ -100,8 +103,6 @@ public class EditorInputManager {
                 handleDoubleClick(x, y);
             }
         }
-
-        handleZoom();
     }
 
     private void handleSelection(int x, int y) {
