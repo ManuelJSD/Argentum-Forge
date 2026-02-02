@@ -50,7 +50,7 @@ public final class FSetupWizard extends Form {
     private final ImInt clientHeight = new ImInt(11);
 
     private final ImInt styleIndex = new ImInt(0);
-    private final String[] styles = { "MODERN", "DARK", "CLASSIC", "LIGHT" };
+    private final String[] styles;
 
     private final ImBoolean generateMinimap = new ImBoolean(true);
 
@@ -79,6 +79,11 @@ public final class FSetupWizard extends Form {
 
         this.languages = langList.toArray(new String[0]);
         this.languageNames = langNameList.toArray(new String[0]);
+
+        // Cargar temas dinámicamente desde Theme.StyleType
+        this.styles = java.util.Arrays.stream(org.argentumforge.engine.gui.Theme.StyleType.values())
+                .map(Enum::name)
+                .toArray(String[]::new);
 
         // Cargar valores actuales de Options si existen
         Options opts = Options.INSTANCE;

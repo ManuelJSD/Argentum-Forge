@@ -85,6 +85,10 @@ public class Theme {
     public enum StyleType {
         CLASSIC,
         DARK,
+        BASIC_DARK,
+        AMBER,
+        SPAIN,
+        ARGENTINA,
         LIGHT,
         MODERN,
         MATRIX,
@@ -98,7 +102,11 @@ public class Theme {
     public static void applyStyle(StyleType type) {
         switch (type) {
             case CLASSIC -> ImGui.styleColorsClassic();
-            case DARK -> ImGui.styleColorsDark();
+            case DARK -> applyPremiumDarkStyle();
+            case BASIC_DARK -> ImGui.styleColorsDark();
+            case AMBER -> applyAmberStyle();
+            case SPAIN -> applySpainStyle();
+            case ARGENTINA -> applyArgentinaStyle();
             case LIGHT -> ImGui.styleColorsLight();
             case MODERN -> applyModernStyle();
             case MATRIX -> applyMatrixStyle();
@@ -183,6 +191,72 @@ public class Theme {
         style.setTabBorderSize(0.0f);
     }
 
+    /**
+     * Aplica un estilo oscuro premium (Obsidian) con contrastes suaves.
+     */
+    public static void applyPremiumDarkStyle() {
+        ImGuiStyle style = ImGui.getStyle();
+        ImGui.styleColorsDark();
+
+        // --- Paleta Obsidian ---
+        int bgDeep = rgba(15, 15, 17, 255);
+        int bgPanel = rgba(26, 26, 29, 255);
+        int bgActive = rgba(35, 35, 40, 255);
+        int border = rgba(50, 50, 55, 255);
+        int accent = rgba(70, 100, 140, 255); // Azul acero elegante
+        int accentBright = rgba(100, 150, 200, 255);
+
+        // Window & Background
+        style.setColor(ImGuiCol.WindowBg, bgDeep);
+        style.setColor(ImGuiCol.ChildBg, TRANSPARENT);
+        style.setColor(ImGuiCol.PopupBg, rgba(20, 20, 22, 250));
+        style.setColor(ImGuiCol.Border, border);
+
+        // Frames
+        style.setColor(ImGuiCol.FrameBg, bgPanel);
+        style.setColor(ImGuiCol.FrameBgHovered, bgActive);
+        style.setColor(ImGuiCol.FrameBgActive, accent);
+
+        // Titles
+        style.setColor(ImGuiCol.TitleBg, bgDeep);
+        style.setColor(ImGuiCol.TitleBgActive, bgPanel);
+        style.setColor(ImGuiCol.TitleBgCollapsed, bgDeep);
+
+        // Tabs
+        style.setColor(ImGuiCol.Tab, bgDeep);
+        style.setColor(ImGuiCol.TabHovered, accent);
+        style.setColor(ImGuiCol.TabActive, bgPanel);
+        style.setColor(ImGuiCol.TabUnfocused, bgDeep);
+        style.setColor(ImGuiCol.TabUnfocusedActive, bgPanel);
+
+        // Buttons
+        style.setColor(ImGuiCol.Button, bgPanel);
+        style.setColor(ImGuiCol.ButtonHovered, accent);
+        style.setColor(ImGuiCol.ButtonActive, accentBright);
+
+        // Headers
+        style.setColor(ImGuiCol.Header, bgPanel);
+        style.setColor(ImGuiCol.HeaderHovered, accent);
+        style.setColor(ImGuiCol.HeaderActive, accentBright);
+
+        // Misc
+        style.setColor(ImGuiCol.CheckMark, accentBright);
+        style.setColor(ImGuiCol.SliderGrab, accent);
+        style.setColor(ImGuiCol.SliderGrabActive, accentBright);
+
+        // Bordes y Redondeado
+        style.setWindowRounding(8.0f);
+        style.setFrameRounding(4.0f);
+        style.setGrabRounding(4.0f);
+        style.setPopupRounding(4.0f);
+        style.setTabRounding(4.0f);
+        style.setWindowBorderSize(1.0f);
+        style.setFrameBorderSize(1.0f);
+
+        style.setFramePadding(6.0f, 6.0f);
+        style.setItemSpacing(10.0f, 8.0f);
+    }
+
     public static void applyMatrixStyle() {
         ImGuiStyle style = ImGui.getStyle();
         ImGui.styleColorsDark();
@@ -235,9 +309,201 @@ public class Theme {
         style.setColor(ImGuiCol.PlotHistogramHovered, brightGreen);
         style.setColor(ImGuiCol.TextSelectedBg, rgba(0, 255, 0, 100));
 
+        style.setWindowRounding(8.0f);
+        style.setFrameRounding(4.0f);
+        style.setGrabRounding(4.0f);
+        style.setPopupRounding(4.0f);
+        style.setTabRounding(4.0f);
         style.setWindowBorderSize(1.0f);
         style.setFrameBorderSize(1.0f);
-        style.setPopupBorderSize(1.0f);
+
+        style.setFramePadding(6.0f, 6.0f);
+        style.setItemSpacing(10.0f, 8.0f);
+    }
+
+    public static void applyAmberStyle() {
+        ImGuiStyle style = ImGui.getStyle();
+        ImGui.styleColorsDark();
+
+        int black = rgba(10, 5, 0, 255);
+        int darkOrange = rgba(50, 25, 0, 255);
+        int orange = rgba(255, 140, 0, 255);
+        int brightOrange = rgba(255, 180, 50, 255);
+        int text = rgba(255, 230, 200, 255);
+
+        style.setColor(ImGuiCol.Text, text);
+        style.setColor(ImGuiCol.WindowBg, rgba(15, 8, 0, 240));
+        style.setColor(ImGuiCol.ChildBg, rgba(0, 0, 0, 0));
+        style.setColor(ImGuiCol.PopupBg, rgba(20, 10, 0, 250));
+        style.setColor(ImGuiCol.Border, orange);
+        style.setColor(ImGuiCol.FrameBg, darkOrange);
+        style.setColor(ImGuiCol.FrameBgHovered, rgba(80, 40, 0, 255));
+        style.setColor(ImGuiCol.FrameBgActive, rgba(100, 50, 0, 255));
+        style.setColor(ImGuiCol.TitleBg, black);
+        style.setColor(ImGuiCol.TitleBgActive, darkOrange);
+        style.setColor(ImGuiCol.TitleBgCollapsed, black);
+        style.setColor(ImGuiCol.MenuBarBg, black);
+        style.setColor(ImGuiCol.ScrollbarBg, black);
+        style.setColor(ImGuiCol.ScrollbarGrab, darkOrange);
+        style.setColor(ImGuiCol.ScrollbarGrabHovered, orange);
+        style.setColor(ImGuiCol.ScrollbarGrabActive, brightOrange);
+        style.setColor(ImGuiCol.CheckMark, orange);
+        style.setColor(ImGuiCol.SliderGrab, orange);
+        style.setColor(ImGuiCol.SliderGrabActive, brightOrange);
+        style.setColor(ImGuiCol.Button, darkOrange);
+        style.setColor(ImGuiCol.ButtonHovered, rgba(120, 60, 0, 255));
+        style.setColor(ImGuiCol.ButtonActive, rgba(150, 75, 0, 255));
+        style.setColor(ImGuiCol.Header, darkOrange);
+        style.setColor(ImGuiCol.HeaderHovered, rgba(100, 50, 0, 255));
+        style.setColor(ImGuiCol.HeaderActive, orange);
+        style.setColor(ImGuiCol.Separator, darkOrange);
+        style.setColor(ImGuiCol.SeparatorHovered, orange);
+        style.setColor(ImGuiCol.SeparatorActive, brightOrange);
+        style.setColor(ImGuiCol.ResizeGrip, darkOrange);
+        style.setColor(ImGuiCol.ResizeGripHovered, orange);
+        style.setColor(ImGuiCol.ResizeGripActive, brightOrange);
+        style.setColor(ImGuiCol.Tab, darkOrange);
+        style.setColor(ImGuiCol.TabHovered, orange);
+        style.setColor(ImGuiCol.TabActive, rgba(100, 50, 0, 255));
+        style.setColor(ImGuiCol.TabUnfocused, rgba(30, 15, 0, 255));
+        style.setColor(ImGuiCol.TabUnfocusedActive, rgba(60, 30, 0, 255));
+        style.setColor(ImGuiCol.PlotLines, orange);
+        style.setColor(ImGuiCol.PlotLinesHovered, brightOrange);
+        style.setColor(ImGuiCol.PlotHistogram, orange);
+        style.setColor(ImGuiCol.PlotHistogramHovered, brightOrange);
+        style.setColor(ImGuiCol.TextSelectedBg, rgba(255, 140, 0, 100));
+
+        style.setWindowRounding(8.0f);
+        style.setFrameRounding(4.0f);
+        style.setGrabRounding(4.0f);
+        style.setPopupRounding(4.0f);
+        style.setTabRounding(4.0f);
+        style.setWindowBorderSize(1.0f);
+        style.setFrameBorderSize(1.0f);
+
+        style.setFramePadding(6.0f, 6.0f);
+        style.setItemSpacing(10.0f, 8.0f);
+    }
+
+    public static void applySpainStyle() {
+        ImGuiStyle style = ImGui.getStyle();
+        ImGui.styleColorsDark();
+
+        int bgDeep = rgba(25, 10, 10, 255);
+        int bgPanel = rgba(45, 15, 15, 255);
+        int red = rgba(170, 21, 27, 255);
+        int yellow = rgba(241, 191, 0, 255);
+        int brightYellow = rgba(255, 230, 100, 255);
+        int white = rgba(255, 255, 255, 255);
+
+        // Window & Background
+        style.setColor(ImGuiCol.WindowBg, bgDeep);
+        style.setColor(ImGuiCol.PopupBg, rgba(30, 12, 12, 250));
+        style.setColor(ImGuiCol.Border, yellow);
+
+        // Frames
+        style.setColor(ImGuiCol.FrameBg, bgPanel);
+        style.setColor(ImGuiCol.FrameBgHovered, red);
+        style.setColor(ImGuiCol.FrameBgActive, yellow);
+
+        // Titles
+        style.setColor(ImGuiCol.TitleBg, bgDeep);
+        style.setColor(ImGuiCol.TitleBgActive, red);
+        style.setColor(ImGuiCol.TitleBgCollapsed, bgDeep);
+
+        // Tabs
+        style.setColor(ImGuiCol.Tab, bgDeep);
+        style.setColor(ImGuiCol.TabHovered, red);
+        style.setColor(ImGuiCol.TabActive, red);
+        style.setColor(ImGuiCol.TabUnfocused, bgDeep);
+        style.setColor(ImGuiCol.TabUnfocusedActive, bgPanel);
+
+        // Buttons
+        style.setColor(ImGuiCol.Button, red);
+        style.setColor(ImGuiCol.ButtonHovered, rgba(200, 40, 40, 255));
+        style.setColor(ImGuiCol.ButtonActive, brightYellow);
+
+        // Headers
+        style.setColor(ImGuiCol.Header, red);
+        style.setColor(ImGuiCol.HeaderHovered, rgba(200, 40, 40, 255));
+        style.setColor(ImGuiCol.HeaderActive, brightYellow);
+
+        style.setColor(ImGuiCol.Text, white);
+        style.setColor(ImGuiCol.CheckMark, yellow);
+        style.setColor(ImGuiCol.SliderGrab, yellow);
+        style.setColor(ImGuiCol.SliderGrabActive, brightYellow);
+
+        // Bordes y Redondeado
+        style.setWindowRounding(8.0f);
+        style.setFrameRounding(4.0f);
+        style.setGrabRounding(4.0f);
+        style.setPopupRounding(4.0f);
+        style.setTabRounding(4.0f);
+        style.setWindowBorderSize(1.0f);
+        style.setFrameBorderSize(1.0f);
+
+        style.setFramePadding(6.0f, 6.0f);
+        style.setItemSpacing(10.0f, 8.0f);
+    }
+
+    public static void applyArgentinaStyle() {
+        ImGuiStyle style = ImGui.getStyle();
+        ImGui.styleColorsDark();
+
+        int bgDeep = rgba(10, 15, 25, 255);
+        int bgPanel = rgba(25, 40, 60, 255);
+        int skyBlue = rgba(116, 172, 223, 255);
+        int sunYellow = rgba(246, 180, 14, 255);
+        int white = rgba(255, 255, 255, 255);
+
+        // Window & Background
+        style.setColor(ImGuiCol.WindowBg, bgDeep);
+        style.setColor(ImGuiCol.PopupBg, rgba(15, 20, 30, 250));
+        style.setColor(ImGuiCol.Border, white);
+
+        // Frames
+        style.setColor(ImGuiCol.FrameBg, bgPanel);
+        style.setColor(ImGuiCol.FrameBgHovered, skyBlue);
+        style.setColor(ImGuiCol.FrameBgActive, white);
+
+        // Titles
+        style.setColor(ImGuiCol.TitleBg, bgDeep);
+        style.setColor(ImGuiCol.TitleBgActive, skyBlue);
+        style.setColor(ImGuiCol.TitleBgCollapsed, bgDeep);
+
+        // Tabs
+        style.setColor(ImGuiCol.Tab, bgDeep);
+        style.setColor(ImGuiCol.TabHovered, skyBlue);
+        style.setColor(ImGuiCol.TabActive, skyBlue);
+        style.setColor(ImGuiCol.TabUnfocused, bgDeep);
+        style.setColor(ImGuiCol.TabUnfocusedActive, bgPanel);
+
+        // Buttons
+        style.setColor(ImGuiCol.Button, skyBlue);
+        style.setColor(ImGuiCol.ButtonHovered, rgba(80, 140, 200, 255));
+        style.setColor(ImGuiCol.ButtonActive, sunYellow);
+
+        // Headers
+        style.setColor(ImGuiCol.Header, skyBlue);
+        style.setColor(ImGuiCol.HeaderHovered, rgba(80, 140, 200, 255));
+        style.setColor(ImGuiCol.HeaderActive, sunYellow);
+
+        style.setColor(ImGuiCol.Text, white);
+        style.setColor(ImGuiCol.CheckMark, sunYellow);
+        style.setColor(ImGuiCol.SliderGrab, sunYellow);
+        style.setColor(ImGuiCol.SliderGrabActive, white);
+
+        // Bordes y Redondeado
+        style.setWindowRounding(8.0f);
+        style.setFrameRounding(4.0f);
+        style.setGrabRounding(4.0f);
+        style.setPopupRounding(4.0f);
+        style.setTabRounding(4.0f);
+        style.setWindowBorderSize(1.0f);
+        style.setFrameBorderSize(1.0f);
+
+        style.setFramePadding(6.0f, 6.0f);
+        style.setItemSpacing(10.0f, 8.0f);
     }
 
     public static void applyDraculaStyle() {
