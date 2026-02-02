@@ -207,7 +207,7 @@ public final class Drawn {
                 grhData[grhIndex].getPixelWidth(),
                 grhData[grhIndex].getPixelHeight(),
                 grhData[grhIndex].getsX(),
-                grhData[grhIndex].getsY(), false, alpha, color);
+                grhData[grhIndex].getsY(), true, alpha, color);
     }
 
     /**

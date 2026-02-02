@@ -116,7 +116,9 @@ public final class GameScene extends Scene {
     @Override
     public void render() {
 
-        if (!visible || charList == null || mapData == null)
+        if (!visible || org.argentumforge.engine.utils.GameData.getActiveContext() == null
+                || org.argentumforge.engine.utils.GameData.getActiveContext().getCharList() == null
+                || org.argentumforge.engine.utils.GameData.getActiveContext().getMapData() == null)
             return;
 
         weather.update();

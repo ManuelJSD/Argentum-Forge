@@ -28,8 +28,8 @@ public class FSpeedControl extends Form {
             String label = walking ? I18n.INSTANCE.get("options.moveSpeed.walk")
                     : I18n.INSTANCE.get("options.moveSpeed.normal");
             int minRequest = walking ? 1 : 4;
-            int maxRequest = walking ? 16 : 32;
-            int defaultSpeed = 8;
+            int maxRequest = walking ? 16 : 128;
+            int defaultSpeed = walking ? 8 : 32;
 
             // Centered Label
             float windowWidth = ImGui.getWindowWidth();

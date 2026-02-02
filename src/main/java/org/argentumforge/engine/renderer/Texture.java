@@ -112,7 +112,7 @@ public class Texture {
             int g = data.pixels.get(offset + 1) & 0xFF;
             int b = data.pixels.get(offset + 2) & 0xFF;
 
-            if (r < 3 && g < 3 && b < 3) {
+            if (r < 12 && g < 12 && b < 12) {
                 data.pixels.put(offset, (byte) 0);
                 data.pixels.put(offset + 1, (byte) 0);
                 data.pixels.put(offset + 2, (byte) 0);

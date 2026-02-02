@@ -49,10 +49,10 @@ public class MapRenderer {
         renderThirdLayer(mapData, renderSettings, pixelOffsetX, pixelOffsetY);
         renderFourthLayer(mapData, renderSettings, pixelOffsetX, pixelOffsetY);
 
-        // Ocultar overlays técnicos en modo foto
         if (!renderSettings.isPhotoModeActive()) {
             renderBlockOverlays(mapData, renderSettings, pixelOffsetX, pixelOffsetY);
             renderTranslationOverlays(mapData, renderSettings, pixelOffsetX, pixelOffsetY);
+            renderSelectionHighlight(pixelOffsetX, pixelOffsetY);
         }
 
         renderClipboardGhost(pixelOffsetX, pixelOffsetY);
@@ -492,5 +492,23 @@ public class MapRenderer {
                 drawGrhIndex(item.id, screenX, screenY, 0.5f, weather.getWeatherColor());
             }
         }
+    }
+
+    private void renderSelectionHighlight(int pixelOffsetX, int pixelOffsetY) {
+        if (!selection.isActive())
+            return;
+
+        int mx = (int) MouseListener.getX() - POS_SCREEN_X;
+        int my = (int) MouseListener.getY() - POS_SCREEN_Y;
+        int tx = EditorInputManager.getTileMouseX(mx);
+        int ty = EditorInputManager.getTileMouseY(my);
+
+        int screenX = POS_SCREEN_X + (tx - camera.getMinX() + camera.getMinXOffset() - TILE_BUFFER_SIZE)
+                * TILE_PIXEL_SIZE + pixelOffsetX;
+        int screenY = POS_SCREEN_Y + (ty - camera.getMinY() + camera.getMinYOffset() - TILE_BUFFER_SIZE)
+                * TILE_PIXEL_SIZE + pixelOffsetY;
+
+        Drawn.geometryBoxRender(Surface.INSTANCE.getWhiteTexture(),
+                screenX, screenY, TILE_PIXEL_SIZE, TILE_PIXEL_SIZE, 0, 0, true, 0.3f, new RGBColor(0.3f, 0.6f, 1.0f));
     }
 }
