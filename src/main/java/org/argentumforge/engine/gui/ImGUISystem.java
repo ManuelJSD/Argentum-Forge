@@ -1,5 +1,7 @@
 package org.argentumforge.engine.gui;
 
+import org.tinylog.Logger;
+
 import imgui.*;
 import imgui.callback.ImStrConsumer;
 import imgui.callback.ImStrSupplier;
@@ -218,17 +220,10 @@ public enum ImGUISystem {
         ImGui.destroyContext();
     }
 
-    public void renderGUI() {
-        if (deltaTime < 0)
-            return;
-
+    public void startFrame() {
         final ImGuiIO io = ImGui.getIO();
         io.setDeltaTime(deltaTime);
 
-        // Window size and framebuffer scale are now handled by imGuiGlfw.newFrame()
-        // NOTA: No llamamos a glfwSetCursor aquí, dejamos que ImGui lo gestione
-        // globalmente
-        // si no estamos en modo "Crosshair" del juego.
         if (window.isCursorCrosshair()) {
             glfwSetCursor(window.getWindow(), glfwCreateStandardCursor(GLFW_CROSSHAIR_CURSOR));
         }
@@ -238,26 +233,20 @@ public enum ImGUISystem {
         imGuiGlfw.newFrame();
         imGuiGl3.newFrame();
         ImGui.newFrame();
+    }
 
-        if (showDebug) {
-            ImGui.setNextWindowPos(5, 25, ImGuiCond.Always);
-            ImGui.begin("InputDebug", ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize |
-                    ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav | ImGuiWindowFlags.NoInputs);
-            ImGui.text("dt=" + deltaTime);
-            ImGui.text("io.WantCaptureMouse=" + io.getWantCaptureMouse());
-            ImGui.text("ImGui.isMouseDown(0)=" + ImGui.isMouseDown(0) + " clicked=" + ImGui.isMouseClicked(0));
-            ImGui.text("glfw L=" + (glfwGetMouseButton(window.getWindow(), GLFW_MOUSE_BUTTON_1) == GLFW_PRESS));
-            ImGui.text(String.format("mousePos=%.1f, %.1f", io.getMousePosX(), io.getMousePosY()));
-            ImGui.end();
+    public void endFrame() {
+        try {
+            renderFrms();
+            DialogManager.getInstance().render();
+            org.argentumforge.engine.gui.components.LoadingModal.getInstance().render();
+        } catch (Exception e) {
+            Logger.error(e, "Error rendering ImGui components. Continuing to prevent native crash.");
         }
-        renderFrms();
-        DialogManager.getInstance().render();
-        org.argentumforge.engine.gui.components.LoadingModal.getInstance().render();
 
         ImGui.render();
 
         // After ImGui#render call we provide draw data into LWJGL3 renderer.
-        // At that moment ImGui will be rendered to the current OpenGL context.
         imGuiGl3.renderDrawData(ImGui.getDrawData());
 
         if (ImGui.getIO().hasConfigFlags(ImGuiConfigFlags.ViewportsEnable)) {
@@ -268,6 +257,28 @@ public enum ImGUISystem {
         }
 
         MouseListener.endFrame();
+    }
+
+    /**
+     * @deprecated Use startFrame() and endFrame() for better lifecycle control.
+     */
+    public void renderGUI() {
+        startFrame();
+
+        if (showDebug) {
+            ImGui.setNextWindowPos(5, 25, ImGuiCond.Always);
+            ImGui.begin("InputDebug", ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize |
+                    ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav | ImGuiWindowFlags.NoInputs);
+            ImGui.text("dt=" + deltaTime);
+            ImGui.text("io.WantCaptureMouse=" + ImGui.getIO().getWantCaptureMouse());
+            ImGui.text("ImGui.isMouseDown(0)=" + ImGui.isMouseDown(0) + " clicked=" + ImGui.isMouseClicked(0));
+            ImGui.text("glfw L=" + (glfwGetMouseButton(window.getWindow(), GLFW_MOUSE_BUTTON_1) == GLFW_PRESS));
+            ImGui.text(
+                    String.format("mousePos=%.1f, %.1f", ImGui.getIO().getMousePosX(), ImGui.getIO().getMousePosY()));
+            ImGui.end();
+        }
+
+        endFrame();
     }
 
     private void renderFrms() {

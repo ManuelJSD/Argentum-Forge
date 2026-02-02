@@ -53,7 +53,7 @@ public final class GameData {
      * compatibilidad heredada.
      */
     public static void setActiveContext(MapContext context) {
-        if (context == null)
+        if (context == null || activeContext == context)
             return;
 
         // Guardar estado del contexto anterior si existe (y si es diferente al nuevo)
@@ -99,6 +99,9 @@ public final class GameData {
             activeContext.setLastChar(org.argentumforge.engine.game.models.Character.lastChar);
         }
         activeContext = null;
+        mapData = null;
+        mapProperties = null;
+        charList = null;
         updateWindowTitle();
     }
 

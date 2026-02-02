@@ -48,6 +48,8 @@ public final class Drawn {
         if (grhData == null)
             return;
         final Texture texture = Surface.INSTANCE.getTexture(grhData[grhIndex].getFileNum());
+        if (texture.getId() == 0)
+            return; // Skip if still loading asynchronously
         float globalScale = org.argentumforge.engine.scenes.Camera.getZoomScale();
 
         float drawWidth = srcWidth * globalScale * scaleX;
@@ -70,6 +72,8 @@ public final class Drawn {
 
     public static void geometryBoxRender(Texture texture, int x, int y, int srcWidth, int srcHeight, float srcX,
             float srcY, float skewX, boolean blend, float alpha, RGBColor color) {
+        if (texture == null || texture.getId() == 0)
+            return;
         float scale = org.argentumforge.engine.scenes.Camera.getZoomScale();
         batch.draw(texture, x, y, srcX, srcY, srcWidth, srcHeight, srcWidth * scale, srcHeight * scale, skewX, blend,
                 alpha, color);
@@ -237,6 +241,8 @@ public final class Drawn {
      * Versión GUI optimizada con BatchRenderer
      */
     public static void geometryBoxRenderGUI(Texture texture, int x, int y, int width, int height, float alpha) {
+        if (texture == null || texture.getId() == 0)
+            return;
         // En GUI no usamos escala de cámara, dibujamos directo en coords de pantalla
         batch.draw(texture, x, y, 0, 0, texture.getTex_width(), texture.getTex_height(),
                 width, height, 0.0f, true, alpha, new RGBColor(1, 1, 1));

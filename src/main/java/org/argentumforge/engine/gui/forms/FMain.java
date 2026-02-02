@@ -51,6 +51,8 @@ public final class FMain extends Form {
     private final MainStatusBar statusBar;
 
     private final java.util.List<IMapEditor> mapEditors = new java.util.ArrayList<>();
+    private org.argentumforge.engine.utils.MapContext lastContextSeen = null;
+    private boolean syncRequested = false;
 
     public FMain() {
         ambientColorArr = new float[] {
@@ -259,43 +261,60 @@ public final class FMain extends Form {
         ImGui.setNextWindowSize(viewport.getWorkSizeX(), tabsHeight);
         ImGui.setNextWindowViewport(viewport.getID());
 
-        // Las pestañas ahora se dibujan de forma más limpia
+        // Detectar si el contexto cambió fuera de este loop (ej: teletransporte)
+        org.argentumforge.engine.utils.MapContext currentActive = org.argentumforge.engine.utils.GameData
+                .getActiveContext();
+
+        // Si el contexto actual no es el último que vimos en el rendering, forzamos un
+        // sync único
+        if (currentActive != lastContextSeen) {
+            syncRequested = true;
+        }
+
         if (ImGui.begin("WorkspaceTabsWindow", ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoBackground
                 | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoSavedSettings)) {
-            // Reducir padding interno para las pestañas
             ImGui.pushStyleVar(ImGuiStyleVar.FramePadding, 10.0f, 2.0f);
-            if (ImGui.beginTabBar("##WorkspaceTabs", ImGuiTabBarFlags.AutoSelectNewTabs)) {
+            if (ImGui.beginTabBar("##WorkspaceTabs", ImGuiTabBarFlags.None)) {
                 org.argentumforge.engine.utils.MapContext contextToClose = null;
 
                 for (org.argentumforge.engine.utils.MapContext context : openMaps) {
                     ImBoolean open = new ImBoolean(true);
-                    int flags = (context == org.argentumforge.engine.utils.GameData.getActiveContext())
-                            ? ImGuiTabItemFlags.None
-                            : ImGuiTabItemFlags.None;
-                    // Cheat: ImGui maneja la selección automáticamente si el nombre es único.
-                    // Usamos el hash para unicidad en el ID del tab.
-                    if (ImGui.beginTabItem(context.getMapName() + "###Tab" + context.hashCode(), open, flags)) {
-                        if (context != org.argentumforge.engine.utils.GameData.getActiveContext()) {
-                            // Save current camera position to the PREVIOUS context
-                            org.argentumforge.engine.utils.MapContext prevContext = org.argentumforge.engine.utils.GameData
-                                    .getActiveContext();
-                            if (prevContext != null) {
-                                prevContext
+                    int flags = ImGuiTabItemFlags.None;
+
+                    // Sync único: una vez que ImGui procese este SetSelected, syncRequested bajará
+                    if (syncRequested && context == currentActive) {
+                        flags |= imgui.flag.ImGuiTabItemFlags.SetSelected;
+                    }
+
+                    if (ImGui.beginTabItem(context.getMapName() + "###Tab" + context.getFilePath(), open, flags)) {
+                        // Si estamos en medio de un sync, esperamos a que ImGui active el tab
+                        if (syncRequested && context == currentActive) {
+                            syncRequested = false;
+                        }
+
+                        // Si ImGui dice que este tab está activo pero nuestro GameData tiene otro,
+                        // el usuario hizo clic en el tab.
+                        if (context != currentActive && !syncRequested) {
+                            // Salvar posición anterior
+                            if (currentActive != null) {
+                                currentActive
                                         .setSavedUserX(org.argentumforge.engine.game.User.INSTANCE.getUserPos().getX());
-                                prevContext
+                                currentActive
                                         .setSavedUserY(org.argentumforge.engine.game.User.INSTANCE.getUserPos().getY());
                             }
 
-                            org.argentumforge.engine.utils.GameData.setActiveContext(context);
-                            updateEditorsContext(context);
+                            // Defer switch to end of frame to prevent ImGui corruption
+                            org.argentumforge.engine.Engine.INSTANCE.runOnMainThread(() -> {
+                                org.argentumforge.engine.utils.GameData.setActiveContext(context);
+                                updateEditorsContext(context);
 
-                            // Restore camera position from the NEW context
-                            org.argentumforge.engine.game.User.INSTANCE.getUserPos().setX(context.getSavedUserX());
-                            org.argentumforge.engine.game.User.INSTANCE.getUserPos().setY(context.getSavedUserY());
-                            org.argentumforge.engine.game.User.INSTANCE.getAddToUserPos().setX(0); // Reset smooth
-                                                                                                   // scroll offset
-                            org.argentumforge.engine.game.User.INSTANCE.getAddToUserPos().setY(0);
-                            org.argentumforge.engine.game.User.INSTANCE.setUserMoving(false);
+                                // Restaurar posición
+                                org.argentumforge.engine.game.User.INSTANCE.getUserPos().setX(context.getSavedUserX());
+                                org.argentumforge.engine.game.User.INSTANCE.getUserPos().setY(context.getSavedUserY());
+                                org.argentumforge.engine.game.User.INSTANCE.getAddToUserPos().setX(0);
+                                org.argentumforge.engine.game.User.INSTANCE.getAddToUserPos().setY(0);
+                                org.argentumforge.engine.game.User.INSTANCE.setUserMoving(false);
+                            });
                         }
                         ImGui.endTabItem();
                     }
@@ -303,11 +322,14 @@ public final class FMain extends Form {
                     if (!open.get()) {
                         if (context.isModified()) {
                             // Cambiar temporalmente al contexto para guardar si es necesario
-                            org.argentumforge.engine.utils.GameData.setActiveContext(context);
+                            // Defer switch and modal check
+                            org.argentumforge.engine.Engine.INSTANCE.runOnMainThread(() -> {
+                                org.argentumforge.engine.utils.GameData.setActiveContext(context);
+                                org.argentumforge.engine.utils.MapManager.checkUnsavedChangesAsync(
+                                        () -> org.argentumforge.engine.utils.GameData.closeMap(context),
+                                        null);
+                            });
                             open.set(true); // Cancelar cierre inmediato mientras preguntamos
-                            org.argentumforge.engine.utils.MapManager.checkUnsavedChangesAsync(
-                                    () -> org.argentumforge.engine.utils.GameData.closeMap(context),
-                                    null);
                         } else {
                             contextToClose = context;
                         }
@@ -315,7 +337,10 @@ public final class FMain extends Form {
                 }
 
                 if (contextToClose != null) {
-                    org.argentumforge.engine.utils.GameData.closeMap(contextToClose);
+                    final org.argentumforge.engine.utils.MapContext finalToClose = contextToClose;
+                    org.argentumforge.engine.Engine.INSTANCE.runOnMainThread(() -> {
+                        org.argentumforge.engine.utils.GameData.closeMap(finalToClose);
+                    });
                 }
 
                 ImGui.endTabBar();
@@ -323,6 +348,9 @@ public final class FMain extends Form {
             ImGui.popStyleVar();
         }
         ImGui.end();
+
+        // Actualizar último contexto visto para el siguiente frame
+        lastContextSeen = org.argentumforge.engine.utils.GameData.getActiveContext();
     }
 
     // Getters for MainToolbar and MainMenuBar

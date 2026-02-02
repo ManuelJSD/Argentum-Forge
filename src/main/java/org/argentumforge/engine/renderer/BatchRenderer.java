@@ -46,7 +46,9 @@ public class BatchRenderer {
             "\n" +
             "void main()\n" +
             "{\n" +
-            "    color = fColor * texture(uTexture, fTexCoords);\n" +
+            "    vec4 texColor = fColor * texture(uTexture, fTexCoords);\n" +
+            "    if (texColor.a < 0.05) discard;\n" +
+            "    color = texColor;\n" +
             "}\n";
 
     private static class Quad {

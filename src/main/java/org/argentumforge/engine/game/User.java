@@ -149,6 +149,9 @@ public enum User {
         var mapData = context.getMapData();
         var charList = context.getCharList();
 
+        if (userMoving)
+            return;
+
         int x = 0, y = 0;
         switch (nDirection) {
             case UP:
@@ -165,7 +168,7 @@ public enum User {
                 break;
         }
 
-        // En modo cámara libre, mover 2 tiles a la vez (50% más rápido)
+        // Restore original multipliers: 1 for walking, 2 for camera mode
         int multiplier = walkingmode ? 1 : 2;
         x *= multiplier;
         y *= multiplier;
@@ -500,6 +503,7 @@ public enum User {
     }
 
     public void setWalkingmode(boolean walkingmode) {
+        resetMovement();
         this.walkingmode = walkingmode;
         if (walkingmode) {
             // AUTO-SYNC: Update position to match Camera center when enabling Walk Mode

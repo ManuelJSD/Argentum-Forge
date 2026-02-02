@@ -1,6 +1,9 @@
 package org.argentumforge.engine.renderer;
 
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL15.*;
+import static org.lwjgl.opengl.GL20.*;
+import static org.lwjgl.opengl.GL30.*;
 
 public class PostProcessor {
     private ShaderProgram shader;
@@ -8,30 +11,18 @@ public class PostProcessor {
 
     private int width, height;
 
-    private static final String VERTEX_SHADER = "#version 120\n" +
-            "varying vec2 vTexCoord;\n" +
+    private static final String VERTEX_SHADER = "#version 330 core\n" +
+            "layout (location = 0) in vec2 aPos;\n" +
+            "layout (location = 1) in vec2 aTexCoords;\n" +
+            "out vec2 vTexCoord;\n" +
             "void main() {\n" +
-            "    vTexCoord = gl_MultiTexCoord0.xy;\n" +
-            "    gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;\n" +
+            "    vTexCoord = aTexCoords;\n" +
+            "    gl_Position = vec4(aPos, 0.0, 1.0);\n" + // Direct NDC
             "}\n";
 
-    private static final String FRAGMENT_SHADER = "#version 120\n" +
-            "uniform sampler2D uTexture;\n" +
-            "uniform int uFilterType;\n" +
-            "uniform float uExposure;\n" +
-            "uniform float uContrast;\n" +
-            "uniform float uSaturation;\n" +
-            "uniform int uBloomActive;\n" +
-            "uniform float uBloomIntensity;\n" +
-            "uniform float uBloomThreshold;\n" +
-            "uniform int uDoFActive;\n" +
-            "uniform float uDoFFocus;\n" +
-            "uniform float uDoFRange;\n" +
-            "uniform int uGrainActive;\n" +
-            "uniform float uGrainIntensity;\n" +
-            "uniform float uTime;\n" +
-            "uniform float uZoom;\n" +
-            "varying vec2 vTexCoord;\n" +
+    private static final String FRAGMENT_SHADER = "#version 330 core\n" +
+            "in vec2 vTexCoord;\n" +
+            "out vec4 FragColor;\n" +
 
             "float rand(vec2 co) {\n" +
             "    return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);\n" +
@@ -40,7 +31,7 @@ public class PostProcessor {
             "void main() {\n" +
             "    // 0. Apply Zoom\n" +
             "    vec2 uv = (vTexCoord - 0.5) / max(0.001, uZoom) + 0.5;\n" +
-            "    vec4 texColor = texture2D(uTexture, uv);\n" +
+            "    vec4 texColor = texture(uTexture, uv);\n" +
             "    vec3 color = texColor.rgb;\n" +
 
             "    // 1. Color Grading (Exposure, Contrast, Saturation)\n" +
@@ -71,7 +62,7 @@ public class PostProcessor {
             "        float step = 0.003;\n" +
             "        for(int x = -3; x <= 3; x++) {\n" +
             "            for(int y = -3; y <= 3; y++) {\n" +
-            "                vec3 smp = texture2D(uTexture, uv + vec2(float(x)*step, float(y)*step)).rgb;\n" +
+            "                vec3 smp = texture(uTexture, uv + vec2(float(x)*step, float(y)*step)).rgb;\n" +
             "                float br = dot(smp, vec3(0.299, 0.587, 0.114));\n" +
             "                if (br > uBloomThreshold) {\n" +
             "                    glow += (smp - uBloomThreshold) / max(0.01, 1.0 - uBloomThreshold);\n" +
@@ -90,7 +81,7 @@ public class PostProcessor {
             "            for(int i = 0; i < 8; i++) {\n" +
             "                float angle = float(i) * 0.785;\n" +
             "                vec2 off = vec2(cos(angle), sin(angle)) * blurAmount * 0.015;\n" +
-            "                blurColor += texture2D(uTexture, uv + off).rgb;\n" +
+            "                blurColor += texture(uTexture, uv + off).rgb;\n" +
             "            }\n" +
             "            color = mix(color, blurColor / 8.0, blurAmount);\n" +
             "        }\n" +
@@ -102,10 +93,11 @@ public class PostProcessor {
             "        color += (noise - 0.5) * uGrainIntensity;\n" +
             "    }\n" +
 
-            "    gl_FragColor = vec4(color, texColor.a);\n" +
+            "    FragColor = vec4(color, texColor.a);\n" +
             "}\n";
 
     private FrameBuffer fbo;
+    private int vaoId, vboId;
 
     public PostProcessor(int width, int height) {
         this.width = width;
@@ -119,8 +111,36 @@ public class PostProcessor {
         shader.createFragmentShader(FRAGMENT_SHADER);
         shader.link();
 
-        // Inicializar FrameBuffer en lugar de texture vacía
+        // Inicializar FrameBuffer
         fbo = new FrameBuffer(width, height);
+
+        // Setup VAO/VBO for Fullscreen Quad
+        float[] quadVertices = {
+                // Pos(x, y) Tex(u, v)
+                -1.0f, 1.0f, 0.0f, 1.0f,
+                -1.0f, -1.0f, 0.0f, 0.0f,
+                1.0f, -1.0f, 1.0f, 0.0f,
+
+                -1.0f, 1.0f, 0.0f, 1.0f,
+                1.0f, -1.0f, 1.0f, 0.0f,
+                1.0f, 1.0f, 1.0f, 1.0f
+        };
+
+        vaoId = glGenVertexArrays();
+        glBindVertexArray(vaoId);
+
+        vboId = glGenBuffers();
+        glBindBuffer(GL_ARRAY_BUFFER, vboId);
+        java.nio.FloatBuffer buffer = org.lwjgl.BufferUtils.createFloatBuffer(quadVertices.length);
+        buffer.put(quadVertices).flip();
+        glBufferData(GL_ARRAY_BUFFER, buffer, GL_STATIC_DRAW);
+
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 2, GL_FLOAT, false, 4 * Float.BYTES, 0);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, false, 4 * Float.BYTES, 2 * Float.BYTES);
+
+        glBindVertexArray(0);
     }
 
     public void resize(int newWidth, int newHeight) {
@@ -189,18 +209,10 @@ public class PostProcessor {
 
         // Reset state for post-process quad
         glDisable(GL_BLEND);
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
-        glBegin(GL_QUADS);
-        glTexCoord2f(0, 1);
-        glVertex2f(0, 0);
-        glTexCoord2f(1, 1);
-        glVertex2f(width, 0);
-        glTexCoord2f(1, 0);
-        glVertex2f(width, height);
-        glTexCoord2f(0, 0);
-        glVertex2f(0, height);
-        glEnd();
+        org.lwjgl.opengl.GL30.glBindVertexArray(vaoId);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        org.lwjgl.opengl.GL30.glBindVertexArray(0);
 
         glEnable(GL_BLEND); // Restore blend for things like vignette or UI
         shader.unbind();
@@ -211,5 +223,9 @@ public class PostProcessor {
             shader.cleanup();
         if (fbo != null)
             fbo.cleanup();
+        if (vaoId != 0)
+            org.lwjgl.opengl.GL30.glDeleteVertexArrays(vaoId);
+        if (vboId != 0)
+            glDeleteBuffers(vboId);
     }
 }

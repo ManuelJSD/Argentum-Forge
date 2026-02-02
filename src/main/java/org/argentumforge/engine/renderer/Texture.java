@@ -32,107 +32,125 @@ public class Texture {
 
     }
 
-    public void loadTexture(Texture refTexture, String compressedFile, String file, boolean isGUI) {
-        ByteBuffer imageBuffer = null;
+    /**
+     * Contenedor para los datos de una textura cargada en memoria RAM
+     * pero aún no subida a la GPU.
+     */
+    public static class TextureData {
+        public ByteBuffer pixels;
+        public int width;
+        public int height;
+        public boolean isGUI;
+        public String fileName;
+
+        public void cleanup() {
+            if (pixels != null) {
+                STBImage.stbi_image_free(pixels);
+                pixels = null;
+            }
+        }
+    }
+
+    /**
+     * Realiza la carga pesada (Disco + Decodificación) de forma síncrona.
+     * Diseñado para ser llamado desde hilos secundarios.
+     */
+    public static TextureData prepareData(String ignoredSource, String file, boolean isGUI) {
         ByteBuffer rawDataBuffer = null;
-
         try {
-            // Lee los datos del recurso a un buffer de bytes
-            byte[] resourceData;
-            if (compressedFile.equals("graphics.ao")) {
-                resourceData = loadLocalGraphic(file);
-            } else {
-                // Remove .ao extension if present to look for local file
-                String localFolder = compressedFile.replace(".ao", "");
-                Path localPath = findLocalFile("resources", localFolder, file);
-                if (localPath != null && Files.exists(localPath)) {
-                    resourceData = Files.readAllBytes(localPath);
-                } else {
-                    resourceData = null;
-                }
-            }
+            byte[] resourceData = loadLocalGraphicSync(file);
+            if (resourceData == null)
+                return null;
 
-            if (resourceData == null) {
-                Logger.error("No se pudieron cargar los datos de: " + file
-                        + " (probado con .jpg, .png, .bmp en folder local)");
-                return;
-            }
-
-            // Convertir byte[] a DirectByteBuffer para STB
             rawDataBuffer = BufferUtils.createByteBuffer(resourceData.length);
             rawDataBuffer.put(resourceData);
             rawDataBuffer.flip();
 
-            // Cargar imagen usando STBImage
             try (MemoryStack stack = MemoryStack.stackPush()) {
                 IntBuffer w = stack.mallocInt(1);
                 IntBuffer h = stack.mallocInt(1);
                 IntBuffer comp = stack.mallocInt(1);
 
-                // Flip verticalmente al cargar (Convención usada en Engines OpenGL)
-                // UPDATE: Desactivado porque BatchRenderer asume UV origin Top-Left (V=0 -> Top
-                // of Image)
-                // Al cargar sin flip (Top-Down), el byte 0 es el Top de la imagen.
-                // OpenGL interpreta byte 0 como Bottom. Por tanto V=0 apunta al byte 0 (Top
-                // Image).
                 STBImage.stbi_set_flip_vertically_on_load(false);
-
-                // Cargar decodificando
-                imageBuffer = STBImage.stbi_load_from_memory(rawDataBuffer, w, h, comp, 4); // Forzar 4 canales (RGBA)
+                ByteBuffer imageBuffer = STBImage.stbi_load_from_memory(rawDataBuffer, w, h, comp, 4);
 
                 if (imageBuffer == null) {
-                    Logger.error("Error al decodificar textura " + file + ": " + STBImage.stbi_failure_reason());
-                    return;
+                    Logger.error("STBI failed to load {}: {}", file, STBImage.stbi_failure_reason());
+                    return null;
                 }
 
-                refTexture.tex_width = w.get(0);
-                refTexture.tex_height = h.get(0);
-            }
+                TextureData data = new TextureData();
+                data.pixels = imageBuffer;
+                data.width = w.get(0);
+                data.height = h.get(0);
+                data.isGUI = isGUI;
+                data.fileName = file;
 
-            // Procesar Transparencia (Magic Black Key) si NO es GUI
-            if (!isGUI) {
-                // STB devuelve los datos como RGBA directos
-                // Iterar sobre los pixeles para aplicar colorkey (0,0,0 -> transparente)
-                int pixelCount = refTexture.tex_width * refTexture.tex_height;
-                for (int i = 0; i < pixelCount; i++) {
-                    int offset = i * 4;
-                    byte r = imageBuffer.get(offset);
-                    byte g = imageBuffer.get(offset + 1);
-                    byte b = imageBuffer.get(offset + 2);
-
-                    // Chequear si es negro absoluto (0,0,0)
-                    if (r == 0 && g == 0 && b == 0) {
-                        // Hacer transparente
-                        imageBuffer.put(offset, (byte) 0); // R
-                        imageBuffer.put(offset + 1, (byte) 0); // G
-                        imageBuffer.put(offset + 2, (byte) 0); // B
-                        imageBuffer.put(offset + 3, (byte) 0); // A (Alpha 0)
-                    } else {
-                        // Si no es negro, usar alpha actual (que viene del PNG o es 255 si BMP/JPG)
-                    }
+                // Procesar Transparencia (Magic Black Key)
+                // Se aplica siempre si es un gráfico del juego (números) para asegurar el fondo
+                // transparente
+                boolean isLegacyGraphic = file.matches("\\d+.*");
+                if (!isGUI || isLegacyGraphic) {
+                    applyColorKey(data);
                 }
+
+                return data;
             }
-
-            // Generar textura en la GPU
-            this.id = glGenTextures();
-            glBindTexture(GL_TEXTURE_2D, id);
-
-            // Subir datos a VRAM
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
-                    refTexture.tex_width, refTexture.tex_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageBuffer);
-
-            // Establecer parámetros de la textura
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
         } catch (Exception ex) {
-            ex.printStackTrace();
-        } finally {
-            if (imageBuffer != null) {
-                STBImage.stbi_image_free(imageBuffer);
+            Logger.error(ex, "Error preparando datos para textura: " + file);
+            return null;
+        }
+    }
+
+    private static void applyColorKey(TextureData data) {
+        int pixelCount = data.width * data.height;
+        for (int i = 0; i < pixelCount; i++) {
+            int offset = i * 4;
+            // Robust check: near black pixels (0-3 range) handled as transparent
+            // Use & 0xFF to treat bytes as unsigned
+            int r = data.pixels.get(offset) & 0xFF;
+            int g = data.pixels.get(offset + 1) & 0xFF;
+            int b = data.pixels.get(offset + 2) & 0xFF;
+
+            if (r < 3 && g < 3 && b < 3) {
+                data.pixels.put(offset, (byte) 0);
+                data.pixels.put(offset + 1, (byte) 0);
+                data.pixels.put(offset + 2, (byte) 0);
+                data.pixels.put(offset + 3, (byte) 0);
             }
+        }
+    }
+
+    /**
+     * Sube los datos preparados a la GPU. DEBE llamarse desde el hilo principal
+     * (OpenGL).
+     */
+    public void upload(TextureData data) {
+        if (data == null || data.pixels == null)
+            return;
+        this.tex_width = data.width;
+        this.tex_height = data.height;
+
+        this.id = glGenTextures();
+        glBindTexture(GL_TEXTURE_2D, id);
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
+                tex_width, tex_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data.pixels);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    }
+
+    /**
+     * Método original (Síncrono) para compatibilidad o carga inmediata.
+     */
+    public void loadTexture(Texture refTexture, String compressedFile, String file, boolean isGUI) {
+        TextureData data = prepareData(compressedFile, file, isGUI);
+        if (data != null) {
+            upload(data);
+            data.cleanup();
         }
     }
 
@@ -156,54 +174,102 @@ public class Texture {
         return tex_height;
     }
 
-    private byte[] loadLocalGraphic(String fileNum) {
+    private static byte[] loadLocalGraphicSync(String fileName) {
         String graphicsPath = Options.INSTANCE.getGraphicsPath();
+        String[] extensions = { ".png", ".bmp", ".jpg", ".PNG", ".BMP", ".JPG" };
 
-        // 1. Intentar con PNG en disco
-        Path pngPath = Path.of(graphicsPath, fileNum + ".png");
-        if (Files.exists(pngPath)) {
-            try {
-                return Files.readAllBytes(pngPath);
-            } catch (IOException ignored) {
+        // 1. Si ya tiene extensión, intentar carga directa o en carpetas de recursos
+        // comunes
+        if (fileName.contains(".")) {
+            // A. Disco (Path configurado)
+            if (!graphicsPath.isEmpty()) {
+                Path directPath = Path.of(graphicsPath, fileName);
+                byte[] data = tryReadFile(directPath);
+                if (data != null)
+                    return data;
+            }
+
+            // B. Carpetas de recursos estandar
+            String[] resourceDirs = { "resources/gui/", "resources/graphics/", "resources/" };
+            for (String dir : resourceDirs) {
+                Path p = Path.of(dir, fileName);
+                byte[] data = tryReadFile(p);
+                if (data != null)
+                    return data;
+            }
+
+            // C. Fallback JAR
+            String[] jarPaths = { "/graphics/", "/gui/", "/" };
+            for (String jarPath : jarPaths) {
+                // Try original
+                try (java.io.InputStream is = Texture.class.getResourceAsStream(jarPath + fileName)) {
+                    if (is != null)
+                        return is.readAllBytes();
+                } catch (IOException ignored) {
+                }
+
+                // Try case variations of common extensions if they match
+                String base = fileName.substring(0, fileName.lastIndexOf('.'));
+                String ext = fileName.substring(fileName.lastIndexOf('.')).toLowerCase();
+                String reversedExt = ext.equals(".png") ? ".PNG"
+                        : (ext.equals(".bmp") ? ".BMP" : (ext.equals(".jpg") ? ".JPG" : null));
+
+                if (reversedExt != null) {
+                    try (java.io.InputStream is = Texture.class.getResourceAsStream(jarPath + base + reversedExt)) {
+                        if (is != null)
+                            return is.readAllBytes();
+                    } catch (IOException ignored) {
+                    }
+                }
             }
         }
 
-        // 2. Intentar con BMP en disco
-        Path bmpPath = Path.of(graphicsPath, fileNum + ".bmp");
-        if (Files.exists(bmpPath)) {
-            try {
-                return Files.readAllBytes(bmpPath);
-            } catch (IOException ignored) {
+        // 2. Intentar buscar por nombre base + extensiones
+        // A. Disco (Path configurado)
+        if (!graphicsPath.isEmpty()) {
+            for (String ext : extensions) {
+                Path p = Path.of(graphicsPath, fileName + ext);
+                byte[] data = tryReadFile(p);
+                if (data != null)
+                    return data;
             }
         }
 
-        // 3. Fallback: Intentar cargar como recurso embebido (dentro del JAR)
-        try (java.io.InputStream is = Texture.class.getResourceAsStream("/graphics/" + fileNum + ".png")) {
-            if (is != null)
-                return is.readAllBytes();
-        } catch (IOException ignored) {
+        // B. Carpetas de recursos estandar
+        String[] resourceDirs = { "resources/graphics/", "resources/gui/", "resources/" };
+        for (String dir : resourceDirs) {
+            for (String ext : extensions) {
+                Path p = Path.of(dir, fileName + ext);
+                byte[] data = tryReadFile(p);
+                if (data != null)
+                    return data;
+            }
         }
 
-        try (java.io.InputStream is = Texture.class.getResourceAsStream("/graphics/" + fileNum + ".bmp")) {
-            if (is != null)
-                return is.readAllBytes();
-        } catch (IOException ignored) {
+        // C. Fallback JAR
+        String[] jarPaths = { "/graphics/", "/gui/", "/" };
+        for (String jarPath : jarPaths) {
+            for (String ext : extensions) {
+                try (java.io.InputStream is = Texture.class.getResourceAsStream(jarPath + fileName + ext)) {
+                    if (is != null)
+                        return is.readAllBytes();
+                } catch (IOException ignored) {
+                }
+            }
         }
 
+        Logger.warn("Grafico no encontrado: {} (ID:{}) en {}. Buscado en carpetas de recursos y JAR.", fileName,
+                fileName,
+                graphicsPath);
         return null;
     }
 
-    private Path findLocalFile(String base, String folder, String filename) {
-        Path directPath = Path.of(base, folder, filename);
-        if (Files.exists(directPath))
-            return directPath;
-
-        // Probar extensiones comunes
-        String[] extensions = { ".jpg", ".png", ".bmp" };
-        for (String ext : extensions) {
-            Path p = Path.of(base, folder, filename + ext);
-            if (Files.exists(p))
-                return p;
+    private static byte[] tryReadFile(Path path) {
+        if (Files.exists(path)) {
+            try {
+                return Files.readAllBytes(path);
+            } catch (IOException ignored) {
+            }
         }
         return null;
     }
