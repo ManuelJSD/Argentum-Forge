@@ -156,6 +156,13 @@ public final class Engine {
 
         // Check for updates
         org.argentumforge.engine.utils.GithubReleaseChecker.checkForUpdates();
+
+        // Initialize Discord RPC if enabled
+        if (options.isDiscordEnabled()) {
+            org.argentumforge.engine.social.DiscordIntegration.getInstance().init();
+            // Initial update
+            org.argentumforge.engine.social.DiscordIntegration.getInstance().updateDetails("In Main Menu");
+        }
     }
 
     /**
@@ -196,6 +203,7 @@ public final class Engine {
         Sound.clearMusics();
         guiSystem.destroy();
         Surface.INSTANCE.shutdown();
+        org.argentumforge.engine.social.DiscordIntegration.getInstance().shutdown();
         window.close();
     }
 

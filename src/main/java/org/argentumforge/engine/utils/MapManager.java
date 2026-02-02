@@ -365,6 +365,18 @@ public final class MapManager {
                     Options.INSTANCE.setLastMapPath(filePath);
                     Options.INSTANCE.save();
 
+                    if (Options.INSTANCE.isDiscordEnabled()) {
+                        String mapName = "Untitled";
+                        if (Options.INSTANCE.isDiscordShowMap()) {
+                            mapName = new File(filePath).getName();
+                        } else {
+                            mapName = "Private Map";
+                        }
+                        org.argentumforge.engine.social.DiscordIntegration.getInstance()
+                                .updateDetails("Editing: " + mapName);
+                        org.argentumforge.engine.social.DiscordIntegration.getInstance().updateState("Map Editor");
+                    }
+
                     if (onComplete != null)
                         onComplete.run();
                     org.argentumforge.engine.gui.components.LoadingModal.getInstance().hide();

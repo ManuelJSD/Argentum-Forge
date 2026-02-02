@@ -59,6 +59,8 @@ switch (OperatingSystem.current()) {
 
 repositories {
     mavenCentral()
+    maven { url 'https://jitpack.io' }
+    jcenter()
 }
 
 dependencies {
@@ -104,6 +106,9 @@ dependencies {
     implementation 'javazoom:jlayer:1.0.1'
     implementation 'com.googlecode.soundlibs:mp3spi:1.9.5.4'
     if (lwjglNatives == "natives-macos" || lwjglNatives == "natives-macos-arm64") runtimeOnly "org.lwjgl:lwjgl-vulkan::$lwjglNatives"
+
+    // Discord Game SDK (JnCrMx via JitPack)
+    implementation 'com.github.JnCrMx:discord-game-sdk4j:v0.5.5'
 
     // Testing
     testImplementation platform('org.junit:junit-bom:5.10.0')

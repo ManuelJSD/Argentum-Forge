@@ -196,6 +196,9 @@ public enum Options {
 
             write(writer, "CheckPreReleases", checkPreReleases);
             write(writer, "IgnoredUpdateTag", ignoredUpdateTag);
+
+            write(writer, "DiscordEnabled", discordEnabled);
+            write(writer, "DiscordShowMap", discordShowMap);
         } catch (IOException e) {
             Logger.error("¡No se pudo escribir en el archivo de opciones: {}!", configPath);
         }
@@ -484,6 +487,8 @@ public enum Options {
             case "UserWaterBody" -> userWaterBody = Integer.parseInt(value);
             case "CheckPreReleases" -> checkPreReleases = Boolean.parseBoolean(value);
             case "IgnoredUpdateTag" -> ignoredUpdateTag = value;
+            case "DiscordEnabled" -> discordEnabled = Boolean.parseBoolean(value);
+            case "DiscordShowMap" -> discordShowMap = Boolean.parseBoolean(value);
             default -> {
                 if (option.startsWith("Recent")) {
                     if (!recentMaps.contains(value) && new java.io.File(value).exists()) {
@@ -586,5 +591,25 @@ public enum Options {
 
     public void setIgnoredUpdateTag(String ignoredUpdateTag) {
         this.ignoredUpdateTag = ignoredUpdateTag;
+    }
+
+    // Discord RPC
+    private boolean discordEnabled = true;
+    private boolean discordShowMap = true;
+
+    public boolean isDiscordEnabled() {
+        return discordEnabled;
+    }
+
+    public void setDiscordEnabled(boolean discordEnabled) {
+        this.discordEnabled = discordEnabled;
+    }
+
+    public boolean isDiscordShowMap() {
+        return discordShowMap;
+    }
+
+    public void setDiscordShowMap(boolean discordShowMap) {
+        this.discordShowMap = discordShowMap;
     }
 }

@@ -282,6 +282,52 @@ public final class FOptions extends Form {
                 ImGui.endTabItem();
             }
 
+            // --- TAB: DISCORD ---
+            if (ImGui.beginTabItem("Discord")) {
+                ImGui.dummy(0, 10);
+
+                ImGui.textColored(ImGui.getColorU32(0.3f, 0.4f, 0.9f, 1.0f), "Discord Rich Presence");
+                ImGui.separator();
+                ImGui.dummy(0, 5);
+
+                if (ImGui.checkbox(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.discord.enabled",
+                        "Habilitar Rich Presence"), options.isDiscordEnabled())) {
+                    options.setDiscordEnabled(!options.isDiscordEnabled());
+                    if (options.isDiscordEnabled()) {
+                        org.argentumforge.engine.social.DiscordIntegration.getInstance().init();
+                    } else {
+                        org.argentumforge.engine.social.DiscordIntegration.getInstance().shutdown();
+                    }
+                    options.save();
+                }
+
+                if (options.isDiscordEnabled()) {
+                    ImGui.dummy(0, 5);
+                    ImGui.text("Opciones de privacidad:");
+
+                    if (ImGui.checkbox(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.discord.showmap",
+                            "Mostrar nombre del mapa"), options.isDiscordShowMap())) {
+                        options.setDiscordShowMap(!options.isDiscordShowMap());
+                        options.save();
+                        // Refresh presence
+                        if (org.argentumforge.engine.utils.GameData.getActiveContext() != null) {
+                            String mapName = options.isDiscordShowMap()
+                                    ? new java.io.File(
+                                            org.argentumforge.engine.utils.GameData.getActiveContext().getFilePath())
+                                            .getName()
+                                    : "Private Map";
+                            org.argentumforge.engine.social.DiscordIntegration.getInstance()
+                                    .updateDetails("Editing: " + mapName);
+                        }
+                    }
+                } else {
+                    ImGui.dummy(0, 10);
+                    ImGui.textDisabled("Activa la integración para ver más opciones.");
+                }
+
+                ImGui.endTabItem();
+            }
+
             ImGui.endTabBar();
         }
 
