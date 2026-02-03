@@ -65,6 +65,15 @@ public class EditorInputManager {
             int x = getTileMouseX((int) MouseListener.getX() - POS_SCREEN_X);
             int y = getTileMouseY((int) MouseListener.getY() - POS_SCREEN_Y);
 
+            // Lógica de Selección siempre activa por defecto (Si no hay herramientas de
+            // edición activas)
+            // Y si no estamos en modo pegar
+            if (!hasActiveInsertOrDeleteTool() && !EditorController.INSTANCE.isPasteModeActive()) {
+                selection.setActive(true);
+            } else {
+                selection.setActive(false);
+            }
+
             if (selection.isActive()) {
                 handleSelection(x, y);
                 return;
@@ -106,16 +115,30 @@ public class EditorInputManager {
     }
 
     private void handleSelection(int x, int y) {
-        boolean multiSelectPressed = KeyHandler.isActionKeyPressed(Key.MULTI_SELECT);
+        boolean multiSelectPressed = KeyHandler
+                .isActionKeyPressed(org.argentumforge.engine.game.models.Key.MULTI_SELECT);
+        boolean inspectorMode = org.argentumforge.engine.game.EditorController.INSTANCE.isInspectorMode();
+
+        // En modo inspector, forzamos selección simple (no multi)
+        if (inspectorMode) {
+            multiSelectPressed = false;
+        }
 
         if (MouseListener.mouseButtonDown(GLFW_MOUSE_BUTTON_LEFT)) {
             if (!selection.isDragging() && !selection.isAreaSelecting()) {
                 selection.tryGrab(x, y, multiSelectPressed);
-                if (!ImGUISystem.INSTANCE.isFormVisible("FTileInspector")) {
-                    ImGUISystem.INSTANCE.show(new org.argentumforge.engine.gui.forms.FTileInspector());
+
+                // Solo abrir inspector si el modo Inspector está activo
+                if (inspectorMode) {
+                    selection.cancelDrag(); // En modo inspector nunca arrastramos, solo seleccionamos
+                    if (!ImGUISystem.INSTANCE.isFormVisible("FTileInspector")) {
+                        ImGUISystem.INSTANCE.show(new org.argentumforge.engine.gui.forms.FTileInspector());
+                    }
                 }
             } else if (selection.isAreaSelecting()) {
-                selection.updateAreaSelect(x, y);
+                if (!inspectorMode) {
+                    selection.updateAreaSelect(x, y);
+                }
             }
         } else if (MouseListener.mouseButtonReleased(GLFW_MOUSE_BUTTON_LEFT)) {
             if (selection.isDragging()) {
@@ -400,5 +423,22 @@ public class EditorInputManager {
             return x >= 1 && x < mapData.length && y >= 1 && y < mapData[0].length;
         }
         return false;
+    }
+
+    /**
+     * Verifica si alguna herramienta tiene un modo activo de insertar (1) o
+     * eliminar (2).
+     * Cuando hay herramientas activas, Shift+clic NO debe activar la selección.
+     */
+    private boolean hasActiveInsertOrDeleteTool() {
+        // Incluimos mode 3 (Pick/Capturar) para que la selección no interfiera al
+        // capturar entidades
+        return surface.getMode() != 0 ||
+                npc.getMode() != 0 ||
+                obj.getMode() != 0 ||
+                block.getMode() != 0 ||
+                trigger.getMode() != 0 ||
+                transfer.getMode() != 0 ||
+                particle.getMode() != 0;
     }
 }

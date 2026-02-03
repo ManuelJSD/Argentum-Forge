@@ -22,6 +22,29 @@ public enum EditorController {
     INSTANCE;
 
     private boolean pasteModeActive = false;
+    private boolean inspectorMode = false;
+
+    public void setInspectorMode(boolean inspectorMode) {
+        this.inspectorMode = inspectorMode;
+        if (inspectorMode) {
+            Console.INSTANCE.addMsgToConsole("Modo Inspector activado. Clic en tile para ver info.", REGULAR,
+                    new RGBColor(0, 1, 0));
+        } else {
+            Console.INSTANCE.addMsgToConsole("Modo Inspector desactivado.", REGULAR,
+                    new RGBColor(1f, 1f, 0f));
+
+            // Cerrar la ventana del inspector si está abierta
+            org.argentumforge.engine.gui.forms.Form inspector = org.argentumforge.engine.gui.ImGUISystem.INSTANCE
+                    .getForm(org.argentumforge.engine.gui.forms.FTileInspector.class);
+            if (inspector != null) {
+                org.argentumforge.engine.gui.ImGUISystem.INSTANCE.deleteFrmArray(inspector);
+            }
+        }
+    }
+
+    public boolean isInspectorMode() {
+        return inspectorMode;
+    }
 
     public void setPasteModeActive(boolean pasteModeActive) {
         this.pasteModeActive = pasteModeActive;

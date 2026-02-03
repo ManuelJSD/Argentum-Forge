@@ -5,17 +5,13 @@ import imgui.ImGuiViewport;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiWindowFlags;
-import org.argentumforge.engine.game.console.Console;
-import org.argentumforge.engine.game.console.FontStyle;
 import org.argentumforge.engine.gui.ImGUISystem;
 import org.argentumforge.engine.gui.Theme;
 import org.argentumforge.engine.gui.forms.FMain;
 import org.argentumforge.engine.gui.forms.Form;
 import org.argentumforge.engine.i18n.I18n;
-import org.argentumforge.engine.renderer.RGBColor;
 
 import org.argentumforge.engine.renderer.Texture;
-import org.argentumforge.engine.utils.editor.*;
 
 /**
  * Componente para renderizar la barra de herramientas superior con botones de
@@ -118,37 +114,39 @@ public class MainToolbar {
 
         ImGui.sameLine();
 
-        // Botón Selección (Fila 2, Col 2)
-        boolean selectionActive = Selection.getInstance().isActive();
-        if (selectionActive) {
+        // Botón Inspector (Anteriormente Selección)
+        boolean inspectorActive = org.argentumforge.engine.game.EditorController.INSTANCE.isInspectorMode();
+        if (inspectorActive) {
             ImGui.pushStyleColor(ImGuiCol.Button, Theme.COLOR_ACCENT);
         }
 
-        ImGui.pushID("btnSelect");
+        ImGui.pushID("btnInspector");
         if (toolbarIcons.getId() > 0) {
             ImGui.pushStyleVar(ImGuiStyleVar.FramePadding, 0, 0);
             if (!mapOpen)
                 ImGui.beginDisabled();
-            if (ImGui.imageButton("##selectButton", (long) toolbarIcons.getId(), btnSize, btnSize, 2 * uvStep + zoom,
+            // Reutilizamos el mismo icono de selección por ahora (o placeholder)
+            // Coordenadas UV: 2, 2
+            if (ImGui.imageButton("##inspectorButton", (long) toolbarIcons.getId(), btnSize, btnSize, 2 * uvStep + zoom,
                     2 * uvStep + zoom,
                     3 * uvStep - zoom,
                     3 * uvStep - zoom)) {
-                toggleSelection();
+                toggleInspector();
             }
             if (!mapOpen)
                 ImGui.endDisabled();
             ImGui.popStyleVar();
         } else {
-            if (ImGui.button("Sel", btnSize, btnSize)) {
-                toggleSelection();
+            if (ImGui.button("Insp", btnSize, btnSize)) {
+                toggleInspector();
             }
         }
         ImGui.popID();
 
         if (ImGui.isItemHovered()) {
-            ImGui.setTooltip(I18n.INSTANCE.get("common.selection"));
+            ImGui.setTooltip(I18n.INSTANCE.get("common.inspector", "Inspector")); // Fallback text if key missing
         }
-        if (selectionActive) {
+        if (inspectorActive) {
             ImGui.popStyleColor();
         }
 
@@ -172,24 +170,9 @@ public class MainToolbar {
         ImGui.sameLine(0, 10);
     }
 
-    private void toggleSelection() {
-        Selection sel = Selection.getInstance();
-        sel.setActive(!sel.isActive());
-
-        if (sel.isActive()) {
-            Console.INSTANCE.addMsgToConsole(I18n.INSTANCE.get("msg.selectionModeOn"), FontStyle.REGULAR,
-                    new RGBColor(0f, 1f, 0f));
-            // Desactivar otros modos
-            Surface.getInstance().setMode(0);
-            Npc.getInstance().setMode(0);
-            Obj.getInstance().setMode(0);
-            Block.getInstance().setMode(0);
-            Trigger.getInstance().setMode(0);
-            Transfer.getInstance().setMode(0);
-        } else {
-            Console.INSTANCE.addMsgToConsole(I18n.INSTANCE.get("msg.selectionModeOff"), FontStyle.REGULAR,
-                    new RGBColor(1f, 1f, 0f));
-        }
+    private void toggleInspector() {
+        org.argentumforge.engine.game.EditorController controller = org.argentumforge.engine.game.EditorController.INSTANCE;
+        controller.setInspectorMode(!controller.isInspectorMode());
     }
 
     private void drawIconButton(String fallbackLabel, String tooltip, String formName, Form formInstance,
