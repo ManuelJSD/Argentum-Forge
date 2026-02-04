@@ -153,16 +153,16 @@ public final class GameData {
         options.load();
         org.argentumforge.engine.i18n.I18n.INSTANCE.loadLanguage(options.getLanguage());
 
-        loadNpcs();
-        loadObjs();
-        loadMiniMapColors();
         loadGrhData();
+        loadMiniMapColors();
         loadHeads();
         loadHelmets();
         loadBodys();
         loadWeapons();
         loadShields();
         loadFxs();
+        loadObjs();
+        loadNpcs();
 
         // loadMessages(options.getLanguage()); -> Eliminado ya que el sistema de
         // mensajes fue borrado
