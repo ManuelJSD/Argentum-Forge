@@ -81,16 +81,20 @@ public class FProfileSelector extends Form {
 
             ImGui.pushStyleColor(imgui.flag.ImGuiCol.FrameBg, org.argentumforge.engine.gui.Theme.BG_PANEL);
             if (ImGui.beginChild("ProfileList", 0, 150, true)) {
-                for (Profile p : profiles) {
+                for (int i = 0; i < profiles.size(); i++) {
+                    Profile p = profiles.get(i);
                     boolean isSelected = (selectedProfile == p);
                     if (isSelected) {
                         ImGui.pushStyleColor(imgui.flag.ImGuiCol.Header,
                                 org.argentumforge.engine.gui.Theme.COLOR_PRIMARY);
                     }
 
+                    // Use pushID to ensure unique IDs even if names are identical
+                    ImGui.pushID(i);
                     if (ImGui.selectable(p.getName(), isSelected)) {
                         selectedProfile = p;
                     }
+                    ImGui.popID();
 
                     if (isSelected) {
                         ImGui.popStyleColor();
@@ -163,6 +167,12 @@ public class FProfileSelector extends Form {
             ImGui.openPopup("Crear Nuevo Perfil");
         }
 
+        // Center the popup
+        ImGui.setNextWindowPos(
+                (org.argentumforge.engine.Engine.INSTANCE.getWindow().getWidth() - 300) / 2f,
+                (org.argentumforge.engine.Engine.INSTANCE.getWindow().getHeight() - 150) / 2f,
+                ImGuiCond.Appearing);
+
         if (ImGui.beginPopupModal("Crear Nuevo Perfil", ImGuiWindowFlags.AlwaysAutoResize)) {
             ImGui.text("Nombre del Perfil:");
             ImGui.inputText("##proname", newProfileName);
@@ -190,11 +200,17 @@ public class FProfileSelector extends Form {
                     ImGui.closeCurrentPopup();
 
                     // Lanzar FRoutes obligatoriamente para este nuevo perfil
-                    // Pasamos el callback para continuar la carga al guardar
-                    FRoutes routesForm = new FRoutes(onProfileSelected);
+                    // Pasamos el callback para continuar la carga al guardar, y onCancel para
+                    // revertir
+                    FRoutes routesForm = new FRoutes(onProfileSelected, () -> {
+                        // Revertir creación si cancela
+                        ProfileManager.INSTANCE.deleteProfile(p);
+                        // Reabrir selector
+                        org.argentumforge.engine.gui.ImGUISystem.INSTANCE.show(new FProfileSelector(onProfileSelected));
+                    });
                     org.argentumforge.engine.gui.ImGUISystem.INSTANCE.show(routesForm);
 
-                    // Cerrar el selector de perfiles ya que el control pasa al wizard -> juego
+                    // Cerrar el selector de perfiles ya que el control pasa al wizard
                     this.close();
                 }
             }

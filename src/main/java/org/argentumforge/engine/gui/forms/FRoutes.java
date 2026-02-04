@@ -18,19 +18,31 @@ public class FRoutes extends Form {
     private final ImString musicPath = new ImString(options.getMusicPath(), 256);
 
     private Runnable onComplete;
+    private Runnable onCancel;
 
     public FRoutes() {
-        this(null);
+        this(null, null);
     }
 
     public FRoutes(Runnable onComplete) {
+        this(onComplete, null);
+    }
+
+    public FRoutes(Runnable onComplete, Runnable onCancel) {
         this.onComplete = onComplete;
+        this.onCancel = onCancel;
     }
 
     @Override
     public void render() {
         ImGui.setNextWindowFocus();
-        ImGui.setNextWindowSize(400, 220, ImGuiCond.Always);
+        int windowWidth = 400;
+        int windowHeight = 220;
+        ImGui.setNextWindowPos(
+                (org.argentumforge.engine.Engine.INSTANCE.getWindow().getWidth() - windowWidth) / 2f,
+                (org.argentumforge.engine.Engine.INSTANCE.getWindow().getHeight() - windowHeight) / 2f,
+                ImGuiCond.Always);
+        ImGui.setNextWindowSize(windowWidth, windowHeight, ImGuiCond.Always);
 
         if (ImGui.begin(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.paths.title"),
                 ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize)) {
@@ -58,6 +70,9 @@ public class FRoutes extends Form {
             }
             ImGui.sameLine();
             if (ImGui.button(org.argentumforge.engine.i18n.I18n.INSTANCE.get("common.cancel"))) {
+                if (onCancel != null) {
+                    onCancel.run();
+                }
                 this.close();
             }
 

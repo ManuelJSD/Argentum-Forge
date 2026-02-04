@@ -56,16 +56,23 @@ public class DialogManager {
         }
 
         if (currentDialog != null) {
-            boolean open = true;
-            // Center the modal
-            ImGuiViewport viewport = ImGui.getMainViewport();
-            float centerX = viewport.getPosX() + viewport.getSizeX() * 0.5f;
-            float centerY = viewport.getPosY() + viewport.getSizeY() * 0.5f;
-            ImGui.setNextWindowPos(centerX, centerY, imgui.flag.ImGuiCond.Appearing, 0.5f, 0.5f);
-            ImGui.setNextWindowSizeConstraints(400, 0, Float.MAX_VALUE, Float.MAX_VALUE); // Minimum width 400
+            int flags = ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings;
 
-            int flags = ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoSavedSettings;
+            ImGui.setNextWindowSizeConstraints(400, 0, Float.MAX_VALUE, Float.MAX_VALUE);
+
             if (ImGui.beginPopupModal(currentDialog.title, flags)) {
+
+                // Center the window using actual size AFTER rendering
+                // Use ImGui's main viewport work area (correct coordinate system)
+                imgui.ImGuiViewport viewport = ImGui.getMainViewport();
+                float windowWidth = ImGui.getWindowWidth();
+                float windowHeight = ImGui.getWindowHeight();
+
+                // Calculate center position including work area offset
+                float centeredX = viewport.getWorkPosX() + (viewport.getWorkSizeX() - windowWidth) / 2.0f;
+                float centeredY = viewport.getWorkPosY() + (viewport.getWorkSizeY() - windowHeight) / 2.0f;
+
+                ImGui.setWindowPos(centeredX, centeredY);
 
                 ImGui.textWrapped(currentDialog.message);
                 ImGui.spacing();
