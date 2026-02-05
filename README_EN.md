@@ -131,7 +131,7 @@ git push origin v1.0.0
 
 ## 📸 Screenshots
 
-<img width="1920" height="1081" alt="image" src="https://github.com/user-attachments/assets/234a6cf7-983a-4f12-a780-ac4429c9d746" />
+<img width="1366" height="768" alt="image" src="https://github.com/user-attachments/assets/2ce765b4-1437-454f-a14a-7667f4293668" />
 
 ## 🤝 How to Contribute
 
