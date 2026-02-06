@@ -463,4 +463,37 @@ public class RenderSettings {
     public void setViewportColor(float[] viewportColor) {
         this.viewportColor = viewportColor;
     }
+
+    public void resetToDefaults() {
+        showLayer = new boolean[] { true, true, true, false };
+        showNPCs = true;
+        showOJBs = true;
+        showTriggers = false;
+        showMapTransfer = true;
+        showParticles = false;
+        showBlock = true;
+        blockOpacity = 0.5f;
+        ghostOpacity = 0.5f;
+        showGrid = false;
+        gridColor = new float[] { 1.0f, 1.0f, 1.0f, 0.2f };
+        showMajorGrid = true;
+        gridMajorInterval = 10;
+        gridMajorColor = new float[] { 1.0f, 1.0f, 1.0f, 0.4f };
+        adaptiveGrid = true;
+        showNpcBreathing = true;
+        disableAnimations = false;
+
+        resetPhotoMode();
+
+        showViewportOverlay = false;
+        viewportWidth = 17;
+        viewportHeight = 15;
+        viewportColor = new float[] { 1.0f, 1.0f, 1.0f, 0.5f };
+
+        minimapLayers = new boolean[] { true, false, false, false };
+        showMinimapNPCs = true;
+        showMinimapExits = true;
+        showMinimapTriggers = true;
+        showMinimapBlocks = false;
+    }
 }
