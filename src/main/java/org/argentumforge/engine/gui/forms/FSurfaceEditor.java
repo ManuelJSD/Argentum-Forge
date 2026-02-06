@@ -309,8 +309,8 @@ public class FSurfaceEditor extends Form implements IMapEditor {
         if (ImGui.inputInt("##search", searchGrh)) {
             if (searchGrh.get() < 0)
                 searchGrh.set(0);
-            if (searchGrh.get() >= AssetRegistry.grhData.length)
-                searchGrh.set(AssetRegistry.grhData.length - 1);
+            if (searchGrh.get() > AssetRegistry.maxGrhCount)
+                searchGrh.set(AssetRegistry.maxGrhCount);
             if (searchGrh.get() > 0)
                 currentPage = 0;
         }
@@ -323,8 +323,8 @@ public class FSurfaceEditor extends Form implements IMapEditor {
         }
 
         ImGui.spacing();
-        int totalGrhs = AssetRegistry.grhData.length;
-        int maxPages = (totalGrhs / ITEMS_PER_PAGE);
+        int totalGrhs = AssetRegistry.maxGrhCount;
+        int maxPages = Math.max(0, (totalGrhs - 1) / ITEMS_PER_PAGE);
 
         ImGui.text(I18n.INSTANCE.get("editor.surface.page") + ":");
         ImGui.sameLine();
@@ -358,7 +358,7 @@ public class FSurfaceEditor extends Form implements IMapEditor {
             float windowWidth = ImGui.getContentRegionAvailX();
             int columns = Math.max(1, (int) (windowWidth / (TILE_SIZE + 10)));
 
-            int totalGrhs = AssetRegistry.grhData.length;
+            int totalGrhs = AssetRegistry.maxGrhCount;
             int start = searchGrh.get() > 0 ? searchGrh.get() : (currentPage * ITEMS_PER_PAGE);
             if (start <= 0)
                 start = 1;

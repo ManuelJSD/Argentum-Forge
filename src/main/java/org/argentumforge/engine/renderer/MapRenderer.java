@@ -68,11 +68,11 @@ public class MapRenderer {
         int vHeight = renderSettings.getViewportHeight();
         float[] vColor = renderSettings.getViewportColor();
 
-        // Calculate pixel dimensions base on current zoom
+        // Calcular dimensiones en píxeles basado en el zoom actual
         int widthPx = vWidth * TILE_PIXEL_SIZE;
         int heightPx = vHeight * TILE_PIXEL_SIZE;
 
-        // Center of the main viewport (Work Area)
+        // Centro del viewport principal (Área de Trabajo)
         float centerX = imgui.ImGui.getMainViewport().getWorkPosX()
                 + imgui.ImGui.getMainViewport().getWorkSizeX() / 2.0f;
         float centerY = imgui.ImGui.getMainViewport().getWorkPosY()
@@ -86,11 +86,11 @@ public class MapRenderer {
         imgui.ImDrawList drawList = imgui.ImGui.getBackgroundDrawList();
         int color = imgui.ImGui.getColorU32(vColor[0], vColor[1], vColor[2], vColor[3]);
 
-        // Draw the frame border (3px thick for visibility)
+        // Dibujar borde del marco (3px grosor para visibilidad)
         drawList.addRect(x1, y1, x2, y2, color, 0, 0, 3.0f);
 
-        // Optional: Draw a slight shadow inside or outside to make it pop?
-        // For now, just the rect is fine.
+        // Opcional: Dibujar una ligera sombra dentro o fuera para resaltar?
+        // Por ahora, solo el rectángulo está bien.
     }
 
     private void renderFirstLayer(org.argentumforge.engine.utils.inits.MapData[][] mapData,
@@ -392,7 +392,7 @@ public class MapRenderer {
     public void renderImGuiOverlays(int pixelOffsetX, int pixelOffsetY) {
         RenderSettings renderSettings = Options.INSTANCE.getRenderSettings();
 
-        // Viewport overlay needs to be rendered within an ImGui context
+        // El overlay del viewport necesita renderizarse dentro de un contexto ImGui
         renderViewportOverlay();
 
         if (renderSettings.isPhotoModeActive())

@@ -34,8 +34,6 @@ public class ShortcutManager {
      * activa.
      */
     public void update() {
-        // Si ImGui está capturando texto (ej. en buscadores), no procesamos atajos
-        // globales
         // Si ImGui está capturando texto (ej. en buscadores) o estamos configurando
         // teclas, no procesamos atajos
         if (ImGui.getIO().getWantTextInput() || Key.checkIsBinding()
@@ -51,7 +49,7 @@ public class ShortcutManager {
             handleGlobalShortcuts();
         }
 
-        // ESCAPE (Always checked for canceling modes)
+        // ESCAPE (Siempre verificado para cancelar modos)
         if (KeyHandler.isKeyJustPressed(GLFW_KEY_ESCAPE)) {
             if (EditorController.INSTANCE.isPasteModeActive()) {
                 EditorController.INSTANCE.setPasteModeActive(false);
@@ -115,7 +113,8 @@ public class ShortcutManager {
 
     private void handleGlobalShortcuts() {
         // Usando el sistema de bindeos para teclas de acción (Debug, etc)
-        // Check each shortcut key independently to allow duplicate bindings
+        // Verificar cada tecla de atajo independientemente para permitir bindeos
+        // duplicados
         if (KeyHandler.isActionKeyJustPressed(Key.DEBUG_SHOW)) {
             ImGUISystem.INSTANCE.setShowDebug(!ImGUISystem.INSTANCE.isShowDebug());
         }

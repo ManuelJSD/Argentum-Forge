@@ -60,14 +60,16 @@ public final class Camera {
         HALF_WINDOW_TILE_WIDTH = tilesW / 2;
         HALF_WINDOW_TILE_HEIGHT = tilesH / 2;
 
-        // Centering logic:
-        // 1. Remainder centering: centers the grid in the window if resolution is not
-        // multiple of 32
+        // Lógica de centrado:
+        // 1. Centrado de resto: centra la grilla en la ventana si la resolución no es
+        // múltiplo de 32
         int remainderX = (Window.SCREEN_WIDTH % TILE_PIXEL_SIZE) / 2;
         int remainderY = (Window.SCREEN_HEIGHT % TILE_PIXEL_SIZE) / 2;
 
-        // 2. Even tile count offset: If we have even tiles, center falls between tiles.
-        // Shift left by half tile (-16px) to center the character tile.
+        // 2. Offset de conteo de tiles par: Si tenemos tiles pares, el centro cae entre
+        // tiles.
+        // Desplazar a la izquierda medio tile (-16px) para centrar el tile del
+        // personaje.
         int evenOffsetX = (tilesW % 2 == 0) ? -(TILE_PIXEL_SIZE / 2) : 0;
         int evenOffsetY = (tilesH % 2 == 0) ? -(TILE_PIXEL_SIZE / 2) : 0;
 
@@ -147,7 +149,7 @@ public final class Camera {
         if (maxX > XMaxMapSize)
             maxX = XMaxMapSize;
 
-        // Removed legacy decrement logic that caused off-center rendering
+        // Eliminada lógica de decremento heredada que causaba renderizado descentrado
         // if (screenminY > YMinMapSize) screenminY--; ...
         // if (screenminX > XMinMapSize) screenminX--; ...
     }

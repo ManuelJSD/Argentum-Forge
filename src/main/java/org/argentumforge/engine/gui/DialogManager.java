@@ -41,8 +41,8 @@ public class DialogManager {
     }
 
     public void showInput(String title, String message, Consumer<String> onInput, Runnable onCancel) {
-        // Not implemented yet, needed for some advanced flows, but simple confirm is
-        // priority
+        // Aún no implementado, necesario para algunos flujos avanzados, pero la
+        // confirmación simple es prioridad
     }
 
     public void showYesNoCancel(String title, String message, Runnable onYes, Runnable onNo, Runnable onCancel) {
@@ -62,13 +62,14 @@ public class DialogManager {
 
             if (ImGui.beginPopupModal(currentDialog.title, flags)) {
 
-                // Center the window using actual size AFTER rendering
-                // Use ImGui's main viewport work area (correct coordinate system)
+                // Centrar la ventana usando el tamaño real DESPUÉS de renderizar
+                // Usar el área de trabajo del viewport principal de ImGui (sistema de
+                // coordenadas correcto)
                 imgui.ImGuiViewport viewport = ImGui.getMainViewport();
                 float windowWidth = ImGui.getWindowWidth();
                 float windowHeight = ImGui.getWindowHeight();
 
-                // Calculate center position including work area offset
+                // Calcular la posición central incluyendo el desplazamiento del área de trabajo
                 float centeredX = viewport.getWorkPosX() + (viewport.getWorkSizeX() - windowWidth) / 2.0f;
                 float centeredY = viewport.getWorkPosY() + (viewport.getWorkSizeY() - windowHeight) / 2.0f;
 
@@ -144,8 +145,8 @@ public class DialogManager {
         Type type;
         String title;
         String message;
-        Runnable onYes; // Used for Confirm (Yes) or simple callback
-        Runnable onNo; // Used for Confirm (No)
+        Runnable onYes; // Usado para Confirmar (Sí) o callback simple
+        Runnable onNo; // Usado para Confirmar (No)
         Runnable onCancel;
 
         public DialogRequest(Type type, String title, String message, Runnable onYes, Runnable onNo) {

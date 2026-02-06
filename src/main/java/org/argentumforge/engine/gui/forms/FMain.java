@@ -13,7 +13,7 @@ import org.argentumforge.engine.i18n.I18n;
 
 import static org.argentumforge.engine.utils.GameData.options;
 import org.argentumforge.engine.utils.GithubReleaseChecker;
-// Removed java.awt.Desktop and java.net.URI
+// Se eliminaron java.awt.Desktop y java.net.URI
 import org.argentumforge.engine.game.models.Key;
 import org.argentumforge.engine.listeners.KeyHandler;
 import org.argentumforge.engine.scenes.GameScene;
@@ -45,7 +45,7 @@ public final class FMain extends Form {
 
     private float[] ambientColorArr;
 
-    // Components
+    // Componentes
     private final MainMenuBar menuBar;
     private final MainToolbar toolbar;
     private final MainStatusBar statusBar;
@@ -79,12 +79,12 @@ public final class FMain extends Form {
         mapEditors.add(transferEditor);
         mapEditors.add(particleEditor);
 
-        // Initialize reusable components
+        // Inicializar componentes reutilizables
         this.menuBar = new MainMenuBar(this);
         this.toolbar = new MainToolbar(this);
         this.statusBar = new MainStatusBar();
 
-        // Initialize Theme
+        // Inicializar Tema
         org.argentumforge.engine.gui.ThemeManager.getInstance().init();
 
     }
@@ -157,12 +157,12 @@ public final class FMain extends Form {
             ((GameScene) org.argentumforge.engine.Engine.getCurrentScene()).renderImGuiOverlays();
         }
 
-        // Global Progress Modal for Minimap Generation
+        // Modal de Progreso Global para Generación del Minimapa
         if (org.argentumforge.engine.utils.editor.MinimapColorGenerator.generating) {
             ImGui.openPopup(I18n.INSTANCE.get("msg.processingColors"));
         }
 
-        // Render Context Menu (always available to pop up)
+        // Renderizar Menú Contextual (siempre disponible para aparecer)
         ContextMenu.render();
 
         if (ImGui.beginPopupModal(I18n.INSTANCE.get("msg.processingColors"),
@@ -182,7 +182,7 @@ public final class FMain extends Form {
             ImGui.endPopup();
         }
 
-        // Update Notification Logic (Moved from FLauncher)
+        // Lógica de Notificación de Actualizaciones (Movido desde FLauncher)
         if (GithubReleaseChecker.isUpdateAvailable() && !updatePopupShown) {
             GithubReleaseChecker.ReleaseInfo r = GithubReleaseChecker.getLatestRelease();
             String ignored = org.argentumforge.engine.game.Options.INSTANCE.getIgnoredUpdateTag();
@@ -228,7 +228,7 @@ public final class FMain extends Form {
                 ImGui.closeCurrentPopup();
             }
 
-            // "Don't show again" button
+            // Botón "No mostrar de nuevo"
             ImGui.spacing();
             if (ImGui.button(I18n.INSTANCE.get("update.skip"), 308, 20)) {
                 if (release != null) {
@@ -303,7 +303,7 @@ public final class FMain extends Form {
                                         .setSavedUserY(org.argentumforge.engine.game.User.INSTANCE.getUserPos().getY());
                             }
 
-                            // Defer switch to end of frame to prevent ImGui corruption
+                            // Diferir cambio al final del frame para prevenir corrupción de ImGui
                             org.argentumforge.engine.Engine.INSTANCE.runOnMainThread(() -> {
                                 org.argentumforge.engine.utils.GameData.setActiveContext(context);
                                 updateEditorsContext(context);
@@ -322,7 +322,7 @@ public final class FMain extends Form {
                     if (!open.get()) {
                         if (context.isModified()) {
                             // Cambiar temporalmente al contexto para guardar si es necesario
-                            // Defer switch and modal check
+                            // Diferir cambio y chequeo modal
                             org.argentumforge.engine.Engine.INSTANCE.runOnMainThread(() -> {
                                 org.argentumforge.engine.utils.GameData.setActiveContext(context);
                                 org.argentumforge.engine.utils.MapManager.checkUnsavedChangesAsync(
@@ -353,7 +353,7 @@ public final class FMain extends Form {
         lastContextSeen = org.argentumforge.engine.utils.GameData.getActiveContext();
     }
 
-    // Getters for MainToolbar and MainMenuBar
+    // Getters para MainToolbar y MainMenuBar
     public FSurfaceEditor getSurfaceEditor() {
         return surfaceEditor;
     }

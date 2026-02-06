@@ -4,26 +4,26 @@ import org.argentumforge.engine.utils.GameData;
 import org.argentumforge.engine.scenes.Camera;
 
 /**
- * Utility class for automatic tile transitions (auto-coasting).
- * Uses bitmasking to determine correct edge tiles between different terrain
- * types.
+ * Clase de utilidad para transiciones de tile automáticas (auto-costas).
+ * Usa máscaras de bits para determinar los tiles de borde correctos entre diferentes
+ * tipos de terreno.
  */
 import org.argentumforge.engine.utils.MapContext;
 
 /**
- * Utility class for automatic tile transitions (auto-coasting).
- * Uses bitmasking to determine correct edge tiles between different terrain
- * types.
+ * Clase de utilidad para transiciones de tile automáticas (auto-costas).
+ * Usa máscaras de bits para determinar los tiles de borde correctos entre
+ * diferentes tipos de terreno.
  */
 public class AutoTiler {
 
     /**
-     * Applies auto-coasting between two terrain types.
+     * Aplica auto-costas entre dos tipos de terreno.
      * 
-     * @param layer         Layer to apply coasting on
-     * @param waterGrh      GRH index for water tiles
-     * @param landGrh       GRH index for land tiles
-     * @param coastGrhStart Starting GRH index for coast tiles (assumes 16-tile set)
+     * @param layer         Capa donde aplicar las costas
+     * @param waterGrh      Índice GRH para tiles de agua
+     * @param landGrh       Índice GRH para tiles de tierra
+     * @param coastGrhStart Índice GRH inicial para tiles de costa (asume set de 16)
      */
     public static void applyCoasting(MapContext context, int layer, int waterGrh, int landGrh, int coastGrhStart) {
         if (context == null)
@@ -39,12 +39,12 @@ public class AutoTiler {
             for (int y = Camera.YMinMapSize; y <= Camera.YMaxMapSize; y++) {
                 int currentGrh = mapData[x][y].getLayer(layer).getGrhIndex();
 
-                // Only process land tiles that border water
+                // Solo procesar tiles de tierra que limitan con agua
                 if (currentGrh == landGrh) {
                     int bitmask = calculateBitmask(context, x, y, layer, waterGrh);
 
                     if (bitmask > 0) {
-                        // This land tile borders water, apply coast tile
+                        // Este tile de tierra limita con agua, aplicar tile de costa
                         int coastTile = getCoastTile(coastGrhStart, bitmask);
                         oldTiles.put(
                                 new org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos(x, y),
@@ -66,29 +66,29 @@ public class AutoTiler {
     }
 
     /**
-     * Calculates 4-directional bitmask for a tile.
-     * Bit 0 (1) = North has water
-     * Bit 1 (2) = East has water
-     * Bit 2 (4) = South has water
-     * Bit 3 (8) = West has water
+     * Calcula máscara de bits de 4 direcciones para un tile.
+     * Bit 0 (1) = Norte tiene agua
+     * Bit 1 (2) = Este tiene agua
+     * Bit 2 (4) = Sur tiene agua
+     * Bit 3 (8) = Oeste tiene agua
      */
     private static int calculateBitmask(MapContext context, int x, int y, int layer, int waterGrh) {
         int mask = 0;
         var mapData = context.getMapData();
 
-        // North
+        // Norte
         if (y > Camera.YMinMapSize && mapData[x][y - 1].getLayer(layer).getGrhIndex() == waterGrh) {
             mask |= 1;
         }
-        // East
+        // Este
         if (x < Camera.XMaxMapSize && mapData[x + 1][y].getLayer(layer).getGrhIndex() == waterGrh) {
             mask |= 2;
         }
-        // South
+        // Sur
         if (y < Camera.YMaxMapSize && mapData[x][y + 1].getLayer(layer).getGrhIndex() == waterGrh) {
             mask |= 4;
         }
-        // West
+        // Oeste
         if (x > Camera.XMinMapSize && mapData[x - 1][y].getLayer(layer).getGrhIndex() == waterGrh) {
             mask |= 8;
         }
@@ -97,14 +97,14 @@ public class AutoTiler {
     }
 
     /**
-     * Maps bitmask to coast tile index.
-     * Assumes a 16-tile coast set arranged as:
-     * 0-3: Single edges (N, E, S, W)
-     * 4-7: Corners (NE, SE, SW, NW)
-     * 8-15: Complex transitions
+     * Mapea máscara de bits a índice de tile de costa.
+     * Asume un set de costas de 16 tiles organizado como:
+     * 0-3: Bordes simples (N, E, S, O)
+     * 4-7: Esquinas (NE, SE, SO, NO)
+     * 8-15: Transiciones complejas
      */
     private static int getCoastTile(int baseGrh, int bitmask) {
-        // Simplified mapping - you may need to adjust based on your tileset
+        // Mapeo simplificado - puede necesitar ajustes según tu tileset
         switch (bitmask) {
             case 1:
                 return (baseGrh + 0); // North edge
@@ -142,12 +142,12 @@ public class AutoTiler {
     }
 
     /**
-     * Applies random mosaic variation to tiles of a specific type.
+     * Aplica variación de mosaico aleatoria a tiles de un tipo específico.
      * 
-     * @param layer        Layer to apply mosaic on
-     * @param baseGrh      Base GRH index
-     * @param mosaicWidth  Width of mosaic pattern
-     * @param mosaicHeight Height of mosaic pattern
+     * @param layer        Capa donde aplicar mosaico
+     * @param baseGrh      Índice GRH base
+     * @param mosaicWidth  Ancho del patrón de mosaico
+     * @param mosaicHeight Alto del patrón de mosaico
      */
     public static void applyMosaic(MapContext context, int layer, int baseGrh, int mosaicWidth, int mosaicHeight) {
         if (context == null)
@@ -164,7 +164,7 @@ public class AutoTiler {
                 int currentGrh = mapData[x][y].getLayer(layer).getGrhIndex();
 
                 if (currentGrh == baseGrh) {
-                    // Apply tiling pattern
+                    // Aplicar patrón de mosaico
                     int relX = x % mosaicWidth;
                     int relY = y % mosaicHeight;
                     int mosaicGrh = (baseGrh + (relY * mosaicWidth) + relX);
