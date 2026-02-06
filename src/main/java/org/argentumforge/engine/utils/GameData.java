@@ -734,8 +734,15 @@ public final class GameData {
             myHeads = new IndexHeads[numHeads + 1];
 
             AssetRegistry.helmetsData[0] = new HeadData();
-            AssetRegistry.helmetsData[0] = new HeadData();
             for (int i = 1; i <= numHeads; i++) {
+                // Seguridad para archivos con contador incorrecto (más grande que el archivo
+                // físico)
+                if (!reader.hasRemaining(useLongs ? 16 : 8)) {
+                    Logger.warn("Cascos: Se alcanzó el fin del archivo físico en el registro {}. Se detiene la carga.",
+                            i - 1);
+                    break;
+                }
+
                 myHeads[i] = new IndexHeads();
                 if (useLongs) {
                     myHeads[i].setHead(1, (short) reader.readInt());
