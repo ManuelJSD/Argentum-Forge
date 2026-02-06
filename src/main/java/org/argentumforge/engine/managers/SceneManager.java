@@ -17,7 +17,7 @@ public enum SceneManager {
     public void changeScene(SceneType scene) {
         switch (scene) {
             case GAME_SCENE -> currentScene = new GameScene();
-            // Add other cases as needed
+            // Agregar otros casos según sea necesario
         }
 
         if (currentScene != null) {
@@ -40,7 +40,7 @@ public enum SceneManager {
         }
     }
 
-    // For resetting during profile change or similar
+    // Para reiniciar durante cambio de perfil o similar
     public void reset() {
         currentScene = null;
     }

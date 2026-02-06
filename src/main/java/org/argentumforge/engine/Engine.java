@@ -43,13 +43,13 @@ public final class Engine {
     /** Sistema de interfaz grafica de usuario. */
     private final ImGUISystem guiSystem = ImGUISystem.INSTANCE;
 
-    // Delegated to Managers
+    // Delegado a Managers
     public static BatchRenderer batch;
 
-    // Kept for legacy compatibility locally, but managed by RenderManager
-    // Ideally we should remove this static field and force usage of
+    // Mantenido por compatibilidad legacy, pero gestionado por RenderManager
+    // Idealmente deberíamos eliminar este campo estático y forzar el uso de
     // RenderManager.INSTANCE.getBatch()
-    // but to avoid massive compilation errors right now, we can link it.
+    // pero para evitar errores masivos de compilación por ahora, lo enlazamos.
 
     /** Flag que indica si el motor está esperando la configuración inicial. */
 
@@ -94,7 +94,7 @@ public final class Engine {
 
         // Inicializar RenderManager
         RenderManager.INSTANCE.init();
-        Engine.batch = RenderManager.INSTANCE.getBatch(); // Link legacy static field
+        Engine.batch = RenderManager.INSTANCE.getBatch(); // Enlazar campo estático legacy
 
         // Inicializar idioma por defecto (Español) para que la UI tenga texto
         // Posteriormente, al cargar el perfil, se recargará el idioma configurado si es
@@ -133,7 +133,7 @@ public final class Engine {
         window.updateResolution(options.getScreenWidth(), options.getScreenHeight());
 
         // Surface ya inicializado en init()
-        // batch already initialized via RenderManager
+        // batch ya inicializado vía RenderManager
 
         // Verificar recursos cargados
         if (!GameData.checkResources()) {
@@ -154,7 +154,7 @@ public final class Engine {
         guiSystem.setViewportsEnabled(true);
         ImGui.getIO().addConfigFlags(imgui.flag.ImGuiConfigFlags.DockingEnable);
 
-        // Check for updates
+        // Verificar actualizaciones
         org.argentumforge.engine.utils.GithubReleaseChecker.checkForUpdates();
     }
 
@@ -228,7 +228,8 @@ public final class Engine {
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
                 if (Time.deltaTime >= 0) {
-                    // ImGui rendering is now handled by Engine loop (startFrame/endFrame)
+                    // El renderizado de ImGui ahora es manejado por el bucle del Engine
+                    // (startFrame/endFrame)
                     org.argentumforge.engine.gui.ImGUISystem.INSTANCE.startFrame();
 
                     if (currentScene != null) {
@@ -247,7 +248,7 @@ public final class Engine {
 
             MouseListener.resetReleasedButtons();
 
-            // Process Main Thread Tasks
+            // Procesar tareas del hilo principal
             synchronized (taskQueue) {
                 while (!taskQueue.isEmpty()) {
                     try {
@@ -264,9 +265,10 @@ public final class Engine {
     private final java.util.Queue<Runnable> taskQueue = new java.util.LinkedList<>();
 
     /**
-     * Schedules a task to be executed on the main thread (GL Context) at the start
-     * of the next frame.
-     * Safe to call from any thread.
+     * Programa una tarea para ejecutarse en el hilo principal (contexto GL) al
+     * inicio
+     * del siguiente frame.
+     * Seguro para llamar desde cualquier hilo.
      */
     public void runOnMainThread(Runnable action) {
         synchronized (taskQueue) {

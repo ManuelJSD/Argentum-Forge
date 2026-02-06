@@ -110,6 +110,11 @@ public class BinaryDataReader {
         buffer.position(buffer.position() + count);
     }
 
+    // Establece la posición absoluta del buffer
+    public void setPosition(int position) {
+        buffer.position(position);
+    }
+
     // Verifica si hay una cantidad específica de datos para leer
     public boolean hasRemaining(int bytes) {
         return buffer.remaining() >= bytes;

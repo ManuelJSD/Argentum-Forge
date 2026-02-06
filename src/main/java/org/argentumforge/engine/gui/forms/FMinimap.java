@@ -18,7 +18,7 @@ import org.argentumforge.engine.i18n.I18n;
  */
 public final class FMinimap extends Form {
 
-    private static final int MINIMAP_SIZE = 200; // 2 pixels per tile (100x100)
+    private static final int MINIMAP_SIZE = 200; // 2 píxeles por tile (100x100)
     private static final int TILE_SIZE = 2;
 
     public FMinimap() {
@@ -42,7 +42,7 @@ public final class FMinimap extends Form {
             drawList.addRectFilled(contentX, contentY, contentX + MINIMAP_SIZE, contentY + MINIMAP_SIZE,
                     ImGui.getColorU32(0.1f, 0.1f, 0.1f, 1.0f));
 
-            // Warning si no hay colores generados (o minimap.bin no existe en root)
+            // Advertencia si no hay colores generados (o minimap.bin no existe en la raíz)
             String fileName = org.argentumforge.engine.utils.ProfileManager.INSTANCE.getProfilesDir() + "/minimap.bin";
             if (org.argentumforge.engine.utils.ProfileManager.INSTANCE.getCurrentProfile() != null) {
                 fileName = org.argentumforge.engine.utils.ProfileManager.INSTANCE.getProfilesDir() + "/minimap_"

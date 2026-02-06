@@ -25,7 +25,7 @@ public enum RenderManager {
     }
 
     public void render(Window window) {
-        // Access SceneManager via Singleton
+        // Acceder a SceneManager a través del Singleton
         Scene currentScene = SceneManager.INSTANCE.getCurrentScene();
 
         // Si no hay escena (ej: esperando el wizard), solo renderizar GUI desde Engine
@@ -43,12 +43,12 @@ public enum RenderManager {
 
         if (!currentScene.isVisible()) {
             SceneManager.INSTANCE.changeScene(currentScene.getChangeScene());
-            // Update reference after change
+            // Actualizar referencia después del cambio
             currentScene = SceneManager.INSTANCE.getCurrentScene();
         }
 
         if (currentScene == null)
-            return; // Safety check
+            return; // Verificación de seguridad
 
         // Configurar PostProcessor si es necesario (Photo Mode)
         RenderSettings settings = GameData.options.getRenderSettings();
@@ -95,7 +95,7 @@ public enum RenderManager {
             }
         }
 
-        // ImGui frame management has been moved to Engine.java loop
+        // El manejo de frames de ImGui se ha movido al bucle de Engine.java
         Sound.renderMusic();
         KeyHandler.update();
     }

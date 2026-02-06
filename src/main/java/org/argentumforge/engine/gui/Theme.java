@@ -22,7 +22,7 @@ import imgui.flag.ImGuiCol;
  */
 public class Theme {
 
-    // ========== Functional Colors ==========
+    // ========== Colores Funcionales ==========
 
     /** Color primario para acciones principales (Azul Material: #2196F3) */
     public static final int COLOR_PRIMARY = 0xFFF39621;
@@ -36,7 +36,7 @@ public class Theme {
     /** Color para advertencias (Amarillo Material: #FFC107) */
     public static final int COLOR_WARNING = 0xFF07C1FF;
 
-    // ========== Text Colors ==========
+    // ========== Colores de Texto ==========
 
     /** Texto estándar (Blanco) */
     public static final int COLOR_TEXT = 0xFFFFFFFF;
@@ -47,7 +47,7 @@ public class Theme {
     /** Texto muy tenue para hints (Gris Oscuro: #808080) */
     public static final int COLOR_TEXT_HINT = 0xFF808080;
 
-    // ========== Background Colors ==========
+    // ========== Colores de Fondo ==========
 
     /** Fondo transparente */
     public static final int TRANSPARENT = 0x00000000;
@@ -55,7 +55,7 @@ public class Theme {
     /** Fondo de panel oscuro (#2D2D2D) */
     public static final int BG_PANEL = 0xFF2D2D2D;
 
-    // ========== Utility Methods ==========
+    // ========== Métodos de Utilidad ==========
 
     /**
      * Convierte un color RGBA (0-255) a formato ABGR para ImGui.
@@ -126,41 +126,41 @@ public class Theme {
         ImGui.styleColorsDark();
 
         // --- Configuración de Colores (Formato ABGR) ---
-        // Window & Background
+        // Ventana y Fondo
         style.setColor(ImGuiCol.WindowBg, rgba(30, 30, 30, 240));
         style.setColor(ImGuiCol.ChildBg, rgba(35, 35, 35, 0));
         style.setColor(ImGuiCol.PopupBg, rgba(40, 40, 40, 245));
         style.setColor(ImGuiCol.Border, rgba(60, 60, 60, 120));
         style.setColor(ImGuiCol.BorderShadow, rgba(0, 0, 0, 0));
 
-        // Frame
+        // Marco
         style.setColor(ImGuiCol.FrameBg, rgba(45, 45, 45, 255));
         style.setColor(ImGuiCol.FrameBgHovered, rgba(60, 60, 60, 255));
         style.setColor(ImGuiCol.FrameBgActive, rgba(70, 70, 70, 255));
 
-        // Titles
+        // Títulos
         style.setColor(ImGuiCol.TitleBg, rgba(25, 25, 25, 255));
         style.setColor(ImGuiCol.TitleBgActive, rgba(35, 35, 35, 255));
         style.setColor(ImGuiCol.TitleBgCollapsed, rgba(20, 20, 20, 150));
 
-        // Tabs
+        // Pestañas
         style.setColor(ImGuiCol.Tab, rgba(35, 35, 35, 255));
         style.setColor(ImGuiCol.TabHovered, rgba(60, 60, 60, 255));
         style.setColor(ImGuiCol.TabActive, rgba(50, 50, 50, 255));
         style.setColor(ImGuiCol.TabUnfocused, rgba(30, 30, 30, 255));
         style.setColor(ImGuiCol.TabUnfocusedActive, rgba(35, 35, 35, 255));
 
-        // Buttons
+        // Botones
         style.setColor(ImGuiCol.Button, rgba(55, 55, 55, 255));
         style.setColor(ImGuiCol.ButtonHovered, rgba(75, 75, 75, 255));
         style.setColor(ImGuiCol.ButtonActive, rgba(90, 90, 90, 255));
 
-        // Headers
+        // Encabezados
         style.setColor(ImGuiCol.Header, rgba(45, 45, 45, 255));
         style.setColor(ImGuiCol.HeaderHovered, rgba(60, 60, 60, 255));
         style.setColor(ImGuiCol.HeaderActive, rgba(70, 70, 70, 255));
 
-        // Accent Colors (Using primary/accent definitions)
+        // Colores de Acento (Usando definiciones primario/acento)
         style.setColor(ImGuiCol.CheckMark, COLOR_ACCENT);
         style.setColor(ImGuiCol.SliderGrab, rgba(100, 100, 100, 255));
         style.setColor(ImGuiCol.SliderGrabActive, COLOR_PRIMARY);
@@ -206,40 +206,40 @@ public class Theme {
         int accent = rgba(70, 100, 140, 255); // Azul acero elegante
         int accentBright = rgba(100, 150, 200, 255);
 
-        // Window & Background
+        // Ventana y Fondo
         style.setColor(ImGuiCol.WindowBg, bgDeep);
         style.setColor(ImGuiCol.ChildBg, TRANSPARENT);
         style.setColor(ImGuiCol.PopupBg, rgba(20, 20, 22, 250));
         style.setColor(ImGuiCol.Border, border);
 
-        // Frames
+        // Marcos
         style.setColor(ImGuiCol.FrameBg, bgPanel);
         style.setColor(ImGuiCol.FrameBgHovered, bgActive);
         style.setColor(ImGuiCol.FrameBgActive, accent);
 
-        // Titles
+        // Títulos
         style.setColor(ImGuiCol.TitleBg, bgDeep);
         style.setColor(ImGuiCol.TitleBgActive, bgPanel);
         style.setColor(ImGuiCol.TitleBgCollapsed, bgDeep);
 
-        // Tabs
+        // Pestañas
         style.setColor(ImGuiCol.Tab, bgDeep);
         style.setColor(ImGuiCol.TabHovered, accent);
         style.setColor(ImGuiCol.TabActive, bgPanel);
         style.setColor(ImGuiCol.TabUnfocused, bgDeep);
         style.setColor(ImGuiCol.TabUnfocusedActive, bgPanel);
 
-        // Buttons
+        // Botones
         style.setColor(ImGuiCol.Button, bgPanel);
         style.setColor(ImGuiCol.ButtonHovered, accent);
         style.setColor(ImGuiCol.ButtonActive, accentBright);
 
-        // Headers
+        // Encabezados
         style.setColor(ImGuiCol.Header, bgPanel);
         style.setColor(ImGuiCol.HeaderHovered, accent);
         style.setColor(ImGuiCol.HeaderActive, accentBright);
 
-        // Misc
+        // Varios
         style.setColor(ImGuiCol.CheckMark, accentBright);
         style.setColor(ImGuiCol.SliderGrab, accent);
         style.setColor(ImGuiCol.SliderGrabActive, accentBright);
@@ -396,34 +396,34 @@ public class Theme {
         int brightYellow = rgba(255, 230, 100, 255);
         int white = rgba(255, 255, 255, 255);
 
-        // Window & Background
+        // Ventana y Fondo
         style.setColor(ImGuiCol.WindowBg, bgDeep);
         style.setColor(ImGuiCol.PopupBg, rgba(30, 12, 12, 250));
         style.setColor(ImGuiCol.Border, yellow);
 
-        // Frames
+        // Marcos
         style.setColor(ImGuiCol.FrameBg, bgPanel);
         style.setColor(ImGuiCol.FrameBgHovered, red);
         style.setColor(ImGuiCol.FrameBgActive, yellow);
 
-        // Titles
+        // Títulos
         style.setColor(ImGuiCol.TitleBg, bgDeep);
         style.setColor(ImGuiCol.TitleBgActive, red);
         style.setColor(ImGuiCol.TitleBgCollapsed, bgDeep);
 
-        // Tabs
+        // Pestañas
         style.setColor(ImGuiCol.Tab, bgDeep);
         style.setColor(ImGuiCol.TabHovered, red);
         style.setColor(ImGuiCol.TabActive, red);
         style.setColor(ImGuiCol.TabUnfocused, bgDeep);
         style.setColor(ImGuiCol.TabUnfocusedActive, bgPanel);
 
-        // Buttons
+        // Botones
         style.setColor(ImGuiCol.Button, red);
         style.setColor(ImGuiCol.ButtonHovered, rgba(200, 40, 40, 255));
         style.setColor(ImGuiCol.ButtonActive, brightYellow);
 
-        // Headers
+        // Encabezados
         style.setColor(ImGuiCol.Header, red);
         style.setColor(ImGuiCol.HeaderHovered, rgba(200, 40, 40, 255));
         style.setColor(ImGuiCol.HeaderActive, brightYellow);
@@ -456,34 +456,34 @@ public class Theme {
         int sunYellow = rgba(246, 180, 14, 255);
         int white = rgba(255, 255, 255, 255);
 
-        // Window & Background
+        // Ventana y Fondo
         style.setColor(ImGuiCol.WindowBg, bgDeep);
         style.setColor(ImGuiCol.PopupBg, rgba(15, 20, 30, 250));
         style.setColor(ImGuiCol.Border, white);
 
-        // Frames
+        // Marcos
         style.setColor(ImGuiCol.FrameBg, bgPanel);
         style.setColor(ImGuiCol.FrameBgHovered, skyBlue);
         style.setColor(ImGuiCol.FrameBgActive, white);
 
-        // Titles
+        // Títulos
         style.setColor(ImGuiCol.TitleBg, bgDeep);
         style.setColor(ImGuiCol.TitleBgActive, skyBlue);
         style.setColor(ImGuiCol.TitleBgCollapsed, bgDeep);
 
-        // Tabs
+        // Pestañas
         style.setColor(ImGuiCol.Tab, bgDeep);
         style.setColor(ImGuiCol.TabHovered, skyBlue);
         style.setColor(ImGuiCol.TabActive, skyBlue);
         style.setColor(ImGuiCol.TabUnfocused, bgDeep);
         style.setColor(ImGuiCol.TabUnfocusedActive, bgPanel);
 
-        // Buttons
+        // Botones
         style.setColor(ImGuiCol.Button, skyBlue);
         style.setColor(ImGuiCol.ButtonHovered, rgba(80, 140, 200, 255));
         style.setColor(ImGuiCol.ButtonActive, sunYellow);
 
-        // Headers
+        // Encabezados
         style.setColor(ImGuiCol.Header, skyBlue);
         style.setColor(ImGuiCol.HeaderHovered, rgba(80, 140, 200, 255));
         style.setColor(ImGuiCol.HeaderActive, sunYellow);
@@ -551,10 +551,10 @@ public class Theme {
         ImGuiStyle style = ImGui.getStyle();
         ImGui.styleColorsDark();
 
-        int bg = rgba(15, 0, 5, 245); // Dark cherry background
-        int text = rgba(255, 200, 200, 255); // Pale pink text
-        int frame = rgba(60, 0, 20, 255); // Dark red frame
-        int active = rgba(180, 0, 60, 255); // Bright cherry red
+        int bg = rgba(15, 0, 5, 245); // Fondo cereza oscuro
+        int text = rgba(255, 200, 200, 255); // Texto rosa pálido
+        int frame = rgba(60, 0, 20, 255); // Marco rojo oscuro
+        int active = rgba(180, 0, 60, 255); // Rojo cereza brillante
         int hover = rgba(120, 0, 40, 255);
 
         style.setColor(ImGuiCol.WindowBg, bg);

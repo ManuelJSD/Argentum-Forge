@@ -45,7 +45,7 @@ public enum ImGUISystem {
 
     INSTANCE;
 
-    // LWJGL3 rendered itself (SHOULD be initialized)
+    // LWJGL3 se renderiza a sí mismo (DEBE estar inicializado)
     private final ImGuiImplGl3 imGuiGl3 = new ImGuiImplGl3();
     private final ImGuiImplGlfw imGuiGlfw = new ImGuiImplGlfw();
 
@@ -228,8 +228,8 @@ public enum ImGUISystem {
             glfwSetCursor(window.getWindow(), glfwCreateStandardCursor(GLFW_CROSSHAIR_CURSOR));
         }
 
-        // IMPORTANT!!
-        // Any Dear ImGui code SHOULD go between NewFrame()/Render() methods
+        // ¡IMPORTANTE!!
+        // Cualquier código de Dear ImGui DEBE ir entre los métodos NewFrame()/Render()
         imGuiGlfw.newFrame();
         imGuiGl3.newFrame();
         ImGui.newFrame();
@@ -246,7 +246,8 @@ public enum ImGUISystem {
 
         ImGui.render();
 
-        // After ImGui#render call we provide draw data into LWJGL3 renderer.
+        // Después de la llamada a ImGui#render proporcionamos datos de dibujo al
+        // renderizador LWJGL3.
         imGuiGl3.renderDrawData(ImGui.getDrawData());
 
         if (ImGui.getIO().hasConfigFlags(ImGuiConfigFlags.ViewportsEnable)) {
@@ -315,7 +316,7 @@ public enum ImGUISystem {
     }
 
     /**
-     * Checkea si el frm solicitiado es el ultimo de nuestro array de frms.
+     * Comprueba si el frm solicitado es el último de nuestro array de frms.
      */
     public boolean isMainLast() {
         if (frms.size() <= 0)

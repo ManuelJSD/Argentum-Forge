@@ -66,22 +66,17 @@ public final class GameData {
         mapProperties = context.getMapProperties();
         charList = context.getCharList();
 
-        // Log char list status for debugging
-        if (org.argentumforge.engine.game.User.INSTANCE.getUserCharIndex() > 0 &&
-                charList.length > org.argentumforge.engine.game.User.INSTANCE.getUserCharIndex()) {
-            org.tinylog.Logger.info("setActiveContext: User Char Index=" +
-                    org.argentumforge.engine.game.User.INSTANCE.getUserCharIndex() +
-                    " Active=" + charList[org.argentumforge.engine.game.User.INSTANCE.getUserCharIndex()].isActive());
-        }
+        // Registrar estado de lista de chars para depuración
 
         // Restaurar lastChar del nuevo contexto
         org.argentumforge.engine.game.models.Character.lastChar = context.getLastChar();
 
-        // Enforce Walking Mode Persistence
-        // If walking mode is active, the user character MUST exist in the current
-        // context's charList.
+        // Forzar persistencia del modo caminar
+        // Si el modo caminar está activo, el personaje del usuario DEBE existir en el
+        // charList del contexto actual.
         if (org.argentumforge.engine.game.User.INSTANCE.isWalkingmode()) {
-            // CLEANUP: Remove any old user instances from this map context to prevent
+            // LIMPIEZA: Eliminar cualquier instancia antigua del usuario de este contexto
+            // de mapa para prevenir
             // clones
             org.argentumforge.engine.game.User.INSTANCE.removeInstanceFromMap();
 
@@ -142,6 +137,18 @@ public final class GameData {
 
     /** Lector de datos binarios persistente para la carga de recursos. */
     static BinaryDataReader reader = new BinaryDataReader();
+
+    static {
+        try {
+            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            System.out.println("!!! GAMEDATA LOADED - STATIC BLOCK - NEW CODE V2 !!!");
+            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            java.nio.file.Files.writeString(java.nio.file.Path.of("static_check.txt"),
+                    "New Code Running: " + java.time.Instant.now());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     /**
      * Inicializamos todos los datos almacenados en archivos.
@@ -242,12 +249,13 @@ public final class GameData {
                 for (int i = 0; i < count; i++) {
                     int color = buffer.getInt();
                     if (color != 0) {
-                        // VB6 RGB Format: 0x00BBGGRR
+                        // Formato VB6 RGB: 0x00BBGGRR
                         int r = color & 0xFF;
                         int g = (color >> 8) & 0xFF;
                         int b = (color >> 16) & 0xFF;
 
-                        // Pack manually to avoid ImGui crash. Revert to ABGR (Standard ImGui)
+                        // Empaquetar manualmente para evitar crash de ImGui. Convertir a ABGR (Estándar
+                        // ImGui)
                         // Pack: (A << 24) | (B << 16) | (G << 8) | R
                         int packed = (0xFF << 24) | (b << 16) | (g << 8) | r;
                         AssetRegistry.minimapColors.put(i + 1, packed);
@@ -340,14 +348,16 @@ public final class GameData {
      * Reconstruye la jerarquía de animaciones y frames de GRH.
      */
     private static void loadGrhData() {
+        AssetRegistry.clear(); // Limpiar datos de sesiones previas
         byte[] data = loadLocalInitFile("Graficos.ind", "Gráficos", true);
         if (data == null)
             return;
 
         try {
             // Validar existencia de cabecera custom (263 bytes)
-            // Usamos un tamaño de entrada promedio de 16 bytes para la heurística
-            boolean hasHeader = detectHeader(data, 16);
+            // Usamos 0 como entrySize para evitar comprobaciones de tamaño estricto en
+            // archivos variables
+            boolean hasHeader = detectHeader(data, 0);
 
             reader.init(data);
             if (hasHeader) {
@@ -356,53 +366,101 @@ public final class GameData {
 
             final int fileVersion = reader.readInt();
             final int grhCount = reader.readInt();
-            Logger.info("Cargando Graficos.ind: Versión={}, Registros={}", fileVersion, grhCount);
 
-            // Sanity check: grhCount shouldn't be negative or impossibly huge relative to
-            // file size
+            Logger.info("Cargando Graficos.ind: Versión={}, Cuenta leída={}", fileVersion, grhCount);
+
+            // Si la cuenta es <= 0, es probable que sea un formato Legacy (VB6 Integer
+            // style)
+            // que no tiene Versión/Cuenta al inicio, sino 5 enteros de padding y luego los
+            // datos.
+            if (grhCount <= 0) {
+                Logger.warn("Formato estándar no detectado (Cuenta <= 0). Intentando carga Legacy (VB6 Integer)...");
+                loadGrhDataLegacy(hasHeader);
+                return;
+            }
+
+            // Comprobación de integridad: grhCount no debería ser negativo o imposiblemente
+            // enorme en relación al
+            // tamaño del archivo
+            if (grhCount > 2000000) { // Inusualmente grande para un recuento, podría ser una mala lectura
+                Logger.warn("Cuenta sospechosa ({}). Intentando carga Legacy...", grhCount);
+                loadGrhDataLegacy(hasHeader);
+                return;
+            }
+
+            // Comprobación laxa: Mínimo 1 byte por GRH (imposible pero límite seguro)
+            if (grhCount > data.length) {
+                Logger.warn("Cuenta mayor que tamaño de archivo. Intentando carga Legacy...");
+                loadGrhDataLegacy(hasHeader);
+                return;
+            }
+
+            // LÓGICA DE SONDEO para el tamaño de grhCount (Integer vs Long)
+            // El GrhIndex de AO comienza en 1. Si los siguientes 4 bytes son 0, es
+            // altamente probable
+            // que grhCount fuera realmente un Long (8 bytes) y estos son los bytes altos en
+            // cero.
+            // Verificamos esto antes de sondear los índices para asegurar la alineación.
+            boolean countWasLong = false;
+            int posAfterCount = reader.getPosition();
+            if (reader.hasRemaining(4)) {
+                int potentialPadding = reader.readInt();
+                if (potentialPadding == 0) {
+                    countWasLong = true;
+                    // Consumimos el padding/ceros, así que el stream ahora está alineado para
+                    // formato Long-Count
+                } else {
+                    // Los siguientes bytes NO son cero, así que probablemente es inicio de datos.
+                    // Reiniciar pos.
+                    reader.setPosition(posAfterCount);
+                }
+            }
+
+            Logger.info("Cargando Graficos.ind: Versión={}, Registros={} (CountFormat: {})",
+                    fileVersion, grhCount, countWasLong ? "Long" : "Integer");
+
+            // Comprobación de integridad: grhCount no debería ser negativo o imposiblemente
+            // enorme en relación al
+            // tamaño del archivo
             if (grhCount < 0) {
                 throw new IOException("El conteo de GRHs es negativo: " + grhCount);
             }
-            // Loose check: Minimum 1 byte per GRH (impossible but safe bound)
+            // Comprobación laxa: Mínimo 1 byte por GRH (imposible pero límite seguro)
             if (grhCount > data.length) {
                 throw new IOException("El conteo de GRHs (" + grhCount + ") es mayor que el tamaño del archivo.");
             }
+
+            // LÓGICA DE SONDEO para índices Integer (4 bytes) vs Long (8 bytes)
+            // VB6 Long = 4 bytes (Java int). Java Long = 8 bytes.
+            // La versión "Long" de AO usa 4 bytes.
+
+            // Nota: Si el usuario tiene un formato custom real de 64 bits, esto fallará,
+            // pero el estándar AO (0.12/0.13) usa VB6 Long (32-bit).
+
+            Logger.info("Cargando versión moderna (0.12+). Índices de 32 bits (VB6 Long).");
 
             // Inicializamos con grhCount+1, pero permitiremos expandir si los IDs son
             // mayores
             AssetRegistry.grhData = new GrhData[grhCount + 1001]; // Margen inicial
 
-            int grh = 0;
+            int grh;
             AssetRegistry.grhData[0] = new GrhData();
 
             int loadedCount = 0;
 
             while (loadedCount < grhCount && reader.hasRemaining()) {
-                // Try-catch interno por registro para intentar recuperar en caso de error
-                // parcial?
-                // No, si el stream se desincroniza, todo lo demás será basura.
-                // Mejor verificar bounds.
-
                 if (!reader.hasRemaining())
                     break;
 
+                // Read GRH Index (Always 4 bytes for modern version)
                 grh = reader.readInt();
 
-                if (grh <= 0 || grh > grhCount) {
-                    // Si el índice es inválido (posible desincronización o versión legacy usando
-                    // short),
-                    // intentamos leer como short si parece que estamos en formato antiguo?
-                    // Por ahora, asumimos formato standard (int index).
-                    // Si grh es basura, abortamos.
-                    if (grh > 200000 || grh < 0) { // Límite razonable AO
-                        throw new IOException("Índice GRH corrupto o fuera de rango: " + grh);
-                    }
-                    // Si es válido pero desordenado, continuamos (expandiendo si fuera necesario
-                    // fuera del array)
+                if (grh <= 0) {
+                    // Fin de datos o basura
+                    break;
                 }
 
                 if (grh >= AssetRegistry.grhData.length) {
-                    // Si el índice supera el count del header, redimensionamos dinámicamente
                     int newSize = Math.max(grh + 1000, AssetRegistry.grhData.length * 2);
                     if (newSize > 1000000)
                         newSize = 1000000; // Hard limit 1M GRHs
@@ -413,19 +471,20 @@ public final class GameData {
                 AssetRegistry.grhData[grh] = new GrhData();
                 AssetRegistry.grhData[grh].setNumFrames(reader.readShort());
 
-                if (AssetRegistry.grhData[grh].getNumFrames() <= 0)
-                    throw new IOException("NumFrames <= 0 en GRH " + grh);
+                if (AssetRegistry.grhData[grh].getNumFrames() <= 0) {
+                    // Skip or Error?
+                    continue;
+                }
 
                 AssetRegistry.grhData[grh].setFrames(new int[AssetRegistry.grhData[grh].getNumFrames() + 1]);
 
                 if (AssetRegistry.grhData[grh].getNumFrames() > 1) {
                     for (int i = 1; i <= AssetRegistry.grhData[grh].getNumFrames(); i++) {
+                        // Frames() as Long (4 bytes)
                         AssetRegistry.grhData[grh].setFrame(i, reader.readInt());
-                        if (AssetRegistry.grhData[grh].getFrame(i) <= 0) {
-                            // frame invalido
-                        }
                     }
 
+                    // Speed as Single (4 bytes)
                     AssetRegistry.grhData[grh].setSpeed(reader.readFloat());
 
                     // Copiar dimensiones del primer frame
@@ -436,14 +495,11 @@ public final class GameData {
                         AssetRegistry.grhData[grh].setPixelWidth(AssetRegistry.grhData[firstFrame].getPixelWidth());
                         AssetRegistry.grhData[grh].setTileWidth(AssetRegistry.grhData[firstFrame].getTileWidth());
                         AssetRegistry.grhData[grh].setTileHeight(AssetRegistry.grhData[firstFrame].getTileHeight());
-                    } else {
-                        // Si el frame 1 no existe aún (referencia forward), ponemos 0 y esperamos que
-                        // no explote
-                        // Ojo: Esto pasa si el GRH de animación está definido ANTES que sus frames.
                     }
-
                 } else {
+                    // FileNum as Long (4 bytes)
                     AssetRegistry.grhData[grh].setFileNum(reader.readInt());
+
                     AssetRegistry.grhData[grh].setsX(reader.readShort());
                     AssetRegistry.grhData[grh].setsY(reader.readShort());
                     AssetRegistry.grhData[grh].setPixelWidth(reader.readShort());
@@ -455,6 +511,7 @@ public final class GameData {
                 }
 
                 loadedCount++;
+                AssetRegistry.maxGrhCount = Math.max(AssetRegistry.maxGrhCount, grh);
             }
 
         } catch (java.nio.BufferUnderflowException e) {
@@ -464,7 +521,7 @@ public final class GameData {
                             "El archivo terminó inesperadamente (BufferUnderflow).\n" +
                             "Probablemente esté corrupto o cortado.\n\n" +
                             "Por favor, verifique el archivo en la carpeta INIT.");
-            // Safety init
+            // Inicialización de seguridad
             if (AssetRegistry.grhData == null)
                 AssetRegistry.grhData = new GrhData[1];
         } catch (Exception e) {
@@ -479,13 +536,14 @@ public final class GameData {
     }
 
     /**
-     * Helper to detect if a file has a 263-byte custom header based on file size
-     * and entry count.
-     * Uses heuristics to handle padding or junk at end of file.
+     * Ayudante para detectar si un archivo tiene una cabecera personalizada de 263
+     * bytes basada en el tamaño del archivo
+     * y conteo de entradas.
+     * Utiliza heurísticas para manejar relleno o basura al final del archivo.
      * 
-     * @param data      Raw file data
-     * @param entrySize Size in bytes of a single entry in the array
-     * @return true if header is detected, false otherwise
+     * @param data      Datos crudos del archivo
+     * @param entrySize Tamaño en bytes de una sola entrada en el array
+     * @return true si se detecta cabecera, false en caso contrario
      */
     private static boolean detectHeader(byte[] data, int entrySize) {
         if (data.length < 2)
@@ -493,18 +551,21 @@ public final class GameData {
 
         ByteBuffer buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN);
 
-        // Strategy 1: Check if "No Header" structure matches valid size
+        // Estrategia 1: Verificar si estructura "Sin Cabecera" coincide con tamaño
+        // válido
         boolean validNoHeader = false;
         short countNoHeader = buffer.getShort(0);
         if (countNoHeader > 0) {
             long expectedSize = 2 + (long) countNoHeader * entrySize;
-            // File must be at least this big. Allow up to 1KB junk/padding at end.
+            // El archivo debe ser al menos de este tamaño. Permitir hasta 1KB de
+            // basura/relleno al final.
             if (data.length >= expectedSize && (data.length - expectedSize) < 1024) {
                 validNoHeader = true;
             }
         }
 
-        // Strategy 2: Check if "Header" structure matches valid size
+        // Estrategia 2: Verificar si estructura "Con Cabecera" coincide con tamaño
+        // válido
         boolean validHeader = false;
         if (data.length >= 263 + 2) {
             short countWithHeader = buffer.getShort(263);
@@ -516,17 +577,19 @@ public final class GameData {
             }
         }
 
-        // Decision logic
+        // Lógica de decisión
         if (validHeader && !validNoHeader)
             return true;
         if (!validHeader && validNoHeader)
             return false;
 
-        // Ambiguous or neither valid by size. Fallback to Content Heuristic.
-        // Headers usually start with text (ASCII strings like "Cabezas...",
+        // Ambiguo o ninguno válido por tamaño. Recaer en Heurística de Contenido.
+        // Las cabeceras usualmente comienzan con texto (ASCII strings como
+        // "Cabezas...",
         // "Argentum...").
-        // Binary counts (short) usually have a 0 high-byte for counts < 256.
-        // Or just check if first few bytes look like text.
+        // Los conteos binarios (short) usualmente tienen un byte alto en 0 para conteos
+        // < 256.
+        // O simplemente verificar si los primeros bytes parecen texto.
 
         int printableAsciiCount = 0;
         for (int i = 0; i < Math.min(10, data.length); i++) {
@@ -534,19 +597,21 @@ public final class GameData {
                 printableAsciiCount++;
         }
 
-        // If start is mostly text, it's likely a header
+        // Si el inicio es mayormente texto, es probable que sea una cabecera
         if (printableAsciiCount > 8)
             return true;
 
-        // Default to false (No header) if unsure, but for Cabezas/etc in Mods, Header
-        // is common.
-        // However, if we return false incorrectly, we crash.
-        // If we return *true* incorrectly, we skip 263 bytes.
+        // Por defecto false (Sin cabecera) si no estamos seguros, pero para Cabezas/etc
+        // en Mods, Header
+        // es común.
+        // Sin embargo, si retornamos false incorrectamente, crasheamos.
+        // Si retornamos *true* incorrectamente, saltamos 263 bytes.
 
-        // If we are here, strict size checks failed.
-        // If header candidate looked plausible (count > 0) but size mismatch was large?
+        // Si estamos aquí, las comprobaciones estrictas de tamaño fallaron.
+        // ¿Si el candidato a cabecera parecía plausible (count > 0) pero el desajuste
+        // de tamaño era grande?
 
-        return validHeader; // Prefer validHeader if it passed size check, otherwise false.
+        return validHeader; // Preferir validHeader si pasó la comprobación de tamaño, sino false.
     }
 
     /**
@@ -566,21 +631,11 @@ public final class GameData {
 
             final IndexHeads[] myHeads;
             final short numHeads = reader.readShort();
-            Logger.info("DEBUG: Cargando Cabezas.ind. Tamaño Archivo: {}, Header Detectado: {}, NumCabezas leídas: {}",
-                    data.length, hasHeader, numHeads);
 
-            // Check record size drift
-            int expectedHeadSize = 8;
-            long estimatedDataSize = (long) numHeads * expectedHeadSize;
-            long headerOffset = hasHeader ? 263 + 2 : 2;
-            long actualDataAvailable = data.length - headerOffset;
-
-            Logger.info("DEBUG: Validacion Cabezas: Esperado={} bytes, Disponible={} bytes. Diferencia={}",
-                    estimatedDataSize, actualDataAvailable, actualDataAvailable - estimatedDataSize);
-
-            // Heuristic detection: 8 bytes (Standard) vs 16 bytes (AOLibre/Long)
-            // Header is 263 bytes + 2 bytes (short count) = 265 bytes (or just 2 bytes for
-            // no header)
+            // Detección heurística: 8 bytes (Estándar) vs 16 bytes (AOLibre/Long)
+            // Cabecera es 263 bytes + 2 bytes (short count) = 265 bytes (o solo 2 bytes
+            // para
+            // sin cabecera)
             long dataSize = data.length - (hasHeader ? 263 : 0) - 2;
             boolean useLongs = false;
             if (numHeads > 0) {
@@ -641,13 +696,30 @@ public final class GameData {
 
         try {
             reader.init(data);
-            if (hasHeader)
+            if (hasHeader) {
                 reader.skipBytes(263);
+            } else {
+                // Fallback for Helmets legacy padding
+                int pos = reader.getPosition();
+                // Check if file starts with 0 (legacy padding simulating header)
+                if (reader.hasRemaining(4)) {
+                    int check = reader.readInt();
+                    if (check == 0) {
+                        reader.setPosition(pos);
+                        // Skip 263 (header only, NO padding as per VB6 code)
+                        reader.skipBytes(263);
+                        Logger.warn("Cascos: Forzando salto de cabecera (263 bytes).");
+                    } else {
+                        reader.setPosition(pos);
+                    }
+                }
+            }
 
             final IndexHeads[] myHeads;
             final short numHeads = reader.readShort();
+            Logger.info("Cascos: numHeads = {}", numHeads);
 
-            // Heuristic detection: 8 bytes vs 16 bytes
+            // Detección heurística: 8 bytes vs 16 bytes
             long dataSize = data.length - (hasHeader ? 263 : 0) - 2;
             boolean useLongs = false;
             if (numHeads > 0) {
@@ -662,12 +734,21 @@ public final class GameData {
             myHeads = new IndexHeads[numHeads + 1];
 
             AssetRegistry.helmetsData[0] = new HeadData();
+            AssetRegistry.helmetsData[0] = new HeadData();
             for (int i = 1; i <= numHeads; i++) {
                 myHeads[i] = new IndexHeads();
-                myHeads[i].setHead(1, (short) readDynamic(reader, useLongs));
-                myHeads[i].setHead(2, (short) readDynamic(reader, useLongs));
-                myHeads[i].setHead(3, (short) readDynamic(reader, useLongs));
-                myHeads[i].setHead(4, (short) readDynamic(reader, useLongs));
+                if (useLongs) {
+                    myHeads[i].setHead(1, (short) reader.readInt());
+                    myHeads[i].setHead(2, (short) reader.readInt());
+                    myHeads[i].setHead(3, (short) reader.readInt());
+                    myHeads[i].setHead(4, (short) reader.readInt());
+                } else {
+                    // Legacy: Read strict Shorts (2 bytes)
+                    myHeads[i].setHead(1, reader.readShort());
+                    myHeads[i].setHead(2, reader.readShort());
+                    myHeads[i].setHead(3, reader.readShort());
+                    myHeads[i].setHead(4, reader.readShort());
+                }
 
                 AssetRegistry.helmetsData[i] = new HeadData();
                 if (myHeads[i].getHead(1) != 0) {
@@ -715,26 +796,15 @@ public final class GameData {
 
             final IndexBodys[] myBodys;
             final short numBodys = reader.readShort();
-            Logger.info("DEBUG: Cargando Cuerpos.ind. Tamaño Archivo: {}, Header Detectado: {}, NumCuerpos leídos: {}",
-                    data.length, hasHeader, numBodys);
 
-            // Check record size drift
-            int expectedBodySize = 12;
-            long estimatedDataSize = (long) numBodys * expectedBodySize;
-            long headerOffset = hasHeader ? 263 + 2 : 2;
-            long actualDataAvailable = data.length - headerOffset;
-
-            Logger.info("DEBUG: Validacion Cuerpos: Esperado={} bytes, Disponible={} bytes. Diferencia={}",
-                    estimatedDataSize, actualDataAvailable, actualDataAvailable - estimatedDataSize);
-
-            // Heuristic detection: 12 bytes vs 20+ bytes
+            // Detección heurística: 12 bytes vs 20+ bytes
             long dataSize = data.length - (hasHeader ? 263 : 0) - 2;
             boolean useLongs = false;
             if (numBodys > 0) {
                 long avgRecordSize = dataSize / numBodys;
-                // Standard: 4*2 + 2*2 = 12 bytes
-                // AOLibre: 4*4 + 2*2 = 20 bytes (Assuming offsets are shorts)
-                // AOLibre: 4*4 + 2*4 = 24 bytes (Assuming offsets are ints)
+                // Estándar: 4*2 + 2*2 = 12 bytes
+                // AOLibre: 4*4 + 2*2 = 20 bytes (Asumiendo offsets son shorts)
+                // AOLibre: 4*4 + 2*4 = 24 bytes (Asumiendo offsets son ints)
                 if (avgRecordSize >= 20) {
                     useLongs = true;
                     Logger.info("Detectado formato AOLibre (Longs) para Cuerpos.ind");
@@ -1390,25 +1460,110 @@ public final class GameData {
         final Path filePath = Path.of(options.getInitPath(), fileName);
 
         if (!Files.exists(filePath)) {
-            Logger.error("DEBUG: Failed to find file at: " + filePath.toAbsolutePath());
-            Logger.error("DEBUG: Configured InitPath is: " + options.getInitPath());
-            if (showError) {
-                Logger.error("{} no encontrado en la ruta: {}", fileName, filePath.toAbsolutePath());
-                DialogManager.getInstance().showError("Error al cargar " + friendlyName,
-                        "No se encontró el archivo " + fileName + " en:\n" + filePath.toAbsolutePath() +
-                                "\n\nPor favor, configure la ruta de Inits correctamente.");
-            }
             return null;
-        } else {
-            Logger.info("DEBUG: Found file at: " + filePath.toAbsolutePath());
         }
 
         try {
             return Files.readAllBytes(filePath);
         } catch (IOException e) {
-            Logger.error(e, "Error al leer {}", fileName);
+            Logger.error(e, "Error al leer desde: " + filePath.toAbsolutePath());
             return null;
         }
     }
 
+    private static void loadGrhDataLegacy(boolean hasHeader) throws IOException {
+        Logger.info("Cargando Graficos.ind (Formato 0.11.5 Legacy)...");
+
+        // El reader ya fue inicializado por loadGrhData().
+        reader.setPosition(0);
+
+        // Salto de Cabecera (263 bytes) + Padding VB6 (10 bytes)
+        if (hasHeader) {
+            reader.skipBytes(263);
+            reader.skipBytes(10);
+        } else {
+            // FALLBACK: Detección manual de padding si detectHeader falló
+            int pos = reader.getPosition();
+            if (reader.hasRemaining(4)) {
+                int check = reader.readInt();
+                if (check == 0) {
+                    reader.setPosition(pos);
+                    reader.skipBytes(273); // 263 + 10
+                } else {
+                    reader.setPosition(pos);
+                }
+            }
+        }
+
+        // Initialize Array a tamaño seguro para Legacy/0.11.5
+        AssetRegistry.grhData = new GrhData[32768];
+
+        AssetRegistry.grhData[0] = new GrhData();
+
+        int loaded = 0;
+        int grhIndex = reader.readShort() & 0xFFFF;
+
+        while (grhIndex > 0) {
+            // Expandir array si es necesario
+            if (grhIndex >= AssetRegistry.grhData.length) {
+                int newSize = Math.max(grhIndex + 5000, AssetRegistry.grhData.length * 2);
+                AssetRegistry.grhData = java.util.Arrays.copyOf(AssetRegistry.grhData, newSize);
+            }
+
+            AssetRegistry.grhData[grhIndex] = new GrhData();
+            GrhData current = AssetRegistry.grhData[grhIndex];
+
+            int numFrames = reader.readShort();
+            current.setNumFrames((short) numFrames);
+
+            if (numFrames > 1) {
+                // ANIMACIONES
+                int[] frames = new int[numFrames + 1];
+                for (int i = 1; i <= numFrames; i++) {
+                    frames[i] = reader.readShort() & 0xFFFF;
+                }
+                current.setFrames(frames);
+                current.setSpeed(reader.readShort());
+
+                // Herencia de dimensiones del primer frame (imprescindible para renderizado)
+                int firstFrame = frames[1];
+                if (firstFrame > 0 && firstFrame < AssetRegistry.grhData.length
+                        && AssetRegistry.grhData[firstFrame] != null) {
+                    current.setPixelWidth(AssetRegistry.grhData[firstFrame].getPixelWidth());
+                    current.setPixelHeight(AssetRegistry.grhData[firstFrame].getPixelHeight());
+                    current.setTileWidth(AssetRegistry.grhData[firstFrame].getTileWidth());
+                    current.setTileHeight(AssetRegistry.grhData[firstFrame].getTileHeight());
+                }
+            } else {
+                // GRÁFICOS SIMPLES
+                current.setFileNum(reader.readShort() & 0xFFFF);
+                current.setsX(reader.readShort());
+                current.setsY(reader.readShort());
+
+                short w = reader.readShort();
+                short h = reader.readShort();
+                current.setPixelWidth(w);
+                current.setPixelHeight(h);
+
+                // Conversión a tiles lógicos (32x32)
+                current.setTileWidth(w / 32.0f);
+                current.setTileHeight(h / 32.0f);
+
+                current.setFrames(new int[] { 0, grhIndex });
+            }
+
+            loaded++;
+            AssetRegistry.maxGrhCount = Math.max(AssetRegistry.maxGrhCount, grhIndex);
+            if (!reader.hasRemaining())
+                break;
+            grhIndex = reader.readShort() & 0xFFFF;
+        }
+
+        Logger.info("Carga Legacy completada: {} registros físicos, último ID={}", loaded, grhIndex);
+
+        // El último ID cargado fisicamente puede no ser el máximo si el archivo no está
+        // ordenado,
+        // pero en AO lo normal es que lo esté. Por seguridad, AssetRegistry.maxGrhCount
+        // ya se actualiza dentro del bucle.
+    }
 }

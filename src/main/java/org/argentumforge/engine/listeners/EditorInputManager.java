@@ -39,12 +39,12 @@ public class EditorInputManager {
     private final Particle particle = Particle.getInstance();
     private final Camera camera;
 
-    // Transfer Ignore Logic
+    // Lógica de Ignorar Traslados
     private boolean transferIgnored = false;
     private int ignoredX = -1;
     private int ignoredY = -1;
 
-    // Prevent multiple dialogs
+    // Prevenir diálogos múltiples
     private boolean isTransferDialogActive = false;
 
     public EditorInputManager(Camera camera) {
@@ -53,8 +53,9 @@ public class EditorInputManager {
 
     public void updateMouse() {
         if (imgui.ImGui.getIO().getWantCaptureMouse() || ImGUISystem.INSTANCE.isFormVisible("FBindKeys")) {
-            // Block map interaction if we are over a widget (button, menu, etc)
-            // or if a window other than the main editor has focus.
+            // Bloquear interacción con el mapa si estamos sobre un widget (botón, menú,
+            // etc.)
+            // o si una ventana que no sea el editor principal tiene el foco.
             if (imgui.ImGui.isAnyItemHovered() || imgui.ImGui.isAnyItemActive() || !ImGUISystem.INSTANCE.isMainLast()) {
                 return;
             }
@@ -156,10 +157,9 @@ public class EditorInputManager {
             ContextMenu.open(x, y);
         }
 
-        // Old Logic (Optional: Keep it if user wants immediate feedback when NO menu is
-        // desired?)
-        // Giving priority to menu as per request "Menu Contextual [...] al hacer clic
-        // derecho"
+        // Lógica antigua (Opcional: ¿Mantener si el usuario quiere feedback inmediato
+        // cuando NO se desea menú?)
+        // Priorizando el menú contextual según solicitud
     }
 
     private void handleDoubleClick(int x, int y) {
@@ -188,7 +188,7 @@ public class EditorInputManager {
                         user.getUserPos().setY(destY);
                         camera.update(destX, destY);
 
-                        // Align with walk-mode safety steps:
+                        // Alinear con pasos de seguridad del modo caminar:
                         user.refreshUserCharacter();
                         user.resetMovement();
                         org.argentumforge.engine.listeners.KeyHandler.resetInputs();
@@ -260,13 +260,13 @@ public class EditorInputManager {
             }
         }
 
-        // Speed shortcuts
+        // Atajos de velocidad
         if (!imgui.ImGui.getIO().getWantCaptureKeyboard()) {
-            // Keypad + or Numpad Add to increase speed
+            // Teclado numérico + para aumentar velocidad
             if (KeyHandler.isKeyPressed(GLFW_KEY_KP_ADD)) {
                 org.argentumforge.engine.game.Options.INSTANCE.increaseSpeed();
             }
-            // Keypad - or Numpad Subtract to decrease speed
+            // Teclado numérico - para disminuir velocidad
             if (KeyHandler.isKeyPressed(GLFW_KEY_KP_SUBTRACT)) {
                 org.argentumforge.engine.game.Options.INSTANCE.decreaseSpeed();
             }
@@ -288,8 +288,7 @@ public class EditorInputManager {
                 else if (keyCode == Key.RIGHT.getKeyCode())
                     user.moveTo(Direction.RIGHT);
 
-                // Check for Map Transfer (Trigger 1) after move
-                // Check for Map Transfer (Trigger 1) after move
+                // Comprobar Traslado de Mapa (Trigger 1) después de mover
                 if (user.isWalkingmode()) {
                     var context = GameData.getActiveContext();
                     if (context == null)
@@ -301,22 +300,22 @@ public class EditorInputManager {
                     if (userIdx > 0 && userIdx < charList.length) {
                         org.argentumforge.engine.game.models.Character userChar = charList[userIdx];
 
-                        // Ensure userChar is valid before accessing
+                        // Asegurar que userChar sea válido antes de acceder
                         if (userChar != null) {
                             int x = userChar.getPos().getX();
                             int y = userChar.getPos().getY();
-                            // Access mapData from GameData, ensure bounds
+                            // Acceder a mapData desde GameData, asegurar límites
                             var mapData = context.getMapData();
 
                             if (mapData != null && x >= 1 && x <= 100 && y >= 1 && y <= 100) {
                                 int trig = mapData[x][y].getTrigger();
-                                // Debug logging if trigger found
+                                // Registro de depuración si se encuentra trigger
                                 if (trig != 0) {
                                     org.tinylog.Logger.info("Debug: Pos=(" + x + "," + y + ") Trigger=" + trig);
                                 }
 
-                                // CHECK TRANSFER
-                                // 1. Reset Ignore if we moved off the ignored tile
+                                // COMPROBAR TRASLADO
+                                // 1. Restablecer Ignorar si nos movimos de la casilla ignorada
                                 if (transferIgnored && (x != ignoredX || y != ignoredY)) {
                                     transferIgnored = false;
                                     ignoredX = -1;
@@ -327,10 +326,10 @@ public class EditorInputManager {
                                 if (destMap > 0) {
                                     org.tinylog.Logger.info("Transfer Found! DestMap=" + destMap);
 
-                                    // 2. Show Dialog ONLY if not ignored
+                                    // 2. Mostrar Diálogo SOLO si no está ignorado
                                     if (!transferIgnored && !isTransferDialogActive) {
                                         isTransferDialogActive = true;
-                                        org.argentumforge.engine.listeners.KeyHandler.resetInputs(); // Stop walking
+                                        org.argentumforge.engine.listeners.KeyHandler.resetInputs(); // Detener caminata
 
                                         DialogManager.getInstance().showConfirm(
                                                 "Traslado de Mapa",
@@ -341,10 +340,10 @@ public class EditorInputManager {
                                                     int destX = mapData[x][y].getExitX();
                                                     int destY = mapData[x][y].getExitY();
 
-                                                    // Update User Map ID
+                                                    // Actualizar ID de Mapa del Usuario
                                                     user.setUserMap((short) destMap);
 
-                                                    // Resolve Path & Load
+                                                    // Resolver Ruta y Cargar
                                                     String mapPath = org.argentumforge.engine.utils.MapManager
                                                             .resolveMapPath(destMap);
 
@@ -352,17 +351,17 @@ public class EditorInputManager {
                                                         user.removeInstanceFromMap();
                                                         org.argentumforge.engine.utils.MapManager.loadMapAsync(mapPath,
                                                                 () -> {
-                                                                    // Update User Pos
+                                                                    // Actualizar Posición del Usuario
                                                                     user.getUserPos().setX(destX);
                                                                     user.getUserPos().setY(destY);
 
-                                                                    // Update Camera
+                                                                    // Actualizar Cámara
                                                                     camera.update(destX, destY);
 
-                                                                    // Refresh Character (places at new pos)
+                                                                    // Refrescar Personaje (coloca en nueva posición)
                                                                     user.refreshUserCharacter();
 
-                                                                    // Ensure movement state is clean
+                                                                    // Asegurar que el estado de movimiento esté limpio
                                                                     user.resetMovement();
                                                                     org.argentumforge.engine.listeners.KeyHandler
                                                                             .resetInputs();
@@ -381,7 +380,7 @@ public class EditorInputManager {
                                                 },
                                                 () -> {
                                                     isTransferDialogActive = false;
-                                                    // User said NO - IGNORE this tile until we move away
+                                                    // Usuario dijo NO - IGNORAR esta casilla hasta que nos movamos
                                                     transferIgnored = true;
                                                     ignoredX = x;
                                                     ignoredY = y;

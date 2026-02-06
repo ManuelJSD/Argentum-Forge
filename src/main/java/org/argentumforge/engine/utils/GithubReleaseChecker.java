@@ -19,7 +19,7 @@ public class GithubReleaseChecker {
 
     private static final String REPO_OWNER = "ManuelJSD";
     private static final String REPO_NAME = "Argentum-Forge";
-    // Base URL
+    // URL Base
     private static final String BASE_URL = "https://api.github.com/repos/" + REPO_OWNER + "/" + REPO_NAME;
 
     private static ReleaseInfo latestRelease = null;
@@ -48,7 +48,7 @@ public class GithubReleaseChecker {
 
         boolean checkPre = org.argentumforge.engine.game.Options.INSTANCE.isCheckPreReleases();
 
-        // Decide URL based on options
+        // Decidir URL basado en opciones
         String targetUrl;
         if (checkPre) {
             targetUrl = BASE_URL + "/releases?per_page=1";
@@ -135,7 +135,7 @@ public class GithubReleaseChecker {
             Gson gson = new Gson();
             JsonObject jsonObject = null;
 
-            // Check if it starts with [ (Array) or { (Object)
+            // Comprobar si comienza con [ (Array) o { (Objeto)
             String trimmed = json.trim();
             if (trimmed.startsWith("[")) {
                 com.google.gson.JsonArray jsonArray = gson.fromJson(json, com.google.gson.JsonArray.class);
@@ -171,7 +171,7 @@ public class GithubReleaseChecker {
 
     private static boolean isNewerVersion(String tagName) {
         String currentVersion = Engine.VERSION;
-        // Strip 'v' prefix if present
+        // Eliminar el prefijo 'v' si está presente
         String vRemote = tagName.startsWith("v") ? tagName.substring(1) : tagName;
         String vLocal = currentVersion.startsWith("v") ? currentVersion.substring(1) : currentVersion;
 
@@ -179,11 +179,11 @@ public class GithubReleaseChecker {
     }
 
     /**
-     * Compare two version strings.
-     * Returns > 0 if v1 > v2, < 0 if v1 < v2, and 0 if equal.
+     * Comparar dos strings de versión.
+     * Devuelve > 0 si v1 > v2, < 0 si v1 < v2, y 0 si son iguales.
      */
     public static int compareVersions(String v1, String v2) {
-        // Remove suffixes like -beta3 for numeric comparison
+        // Eliminar sufijos como -beta3 para comparación numérica
         String[] v1Parts = v1.split("-");
         String[] v2Parts = v2.split("-");
 
@@ -202,8 +202,8 @@ public class GithubReleaseChecker {
                 return -1;
         }
 
-        // If main parts are equal, check pre-release (simple check: version with
-        // pre-release is OLDER than version without)
+        // Si las partes principales son iguales, verificar pre-release (simple check:
+        // version con pre-release es MÁS ANTIGUA que la versión sin)
         // e.g. 1.0.0-beta < 1.0.0
         boolean v1HasPre = v1Parts.length > 1;
         boolean v2HasPre = v2Parts.length > 1;
@@ -213,8 +213,8 @@ public class GithubReleaseChecker {
         if (!v1HasPre && v2HasPre)
             return 1;
 
-        // If both have pre-release code, compare them lexicographically (e.g. alpha <
-        // beta)
+        // Si ambas tienen código pre-release, compararlas lexicográficamente (e.g.
+        // alpha < beta)
         if (v1HasPre && v2HasPre) {
             return v1Parts[1].compareTo(v2Parts[1]);
         }

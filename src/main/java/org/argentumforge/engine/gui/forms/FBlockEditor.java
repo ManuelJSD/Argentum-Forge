@@ -22,7 +22,8 @@ public class FBlockEditor extends Form implements IMapEditor {
 
     private MapContext context;
     private Block block;
-    // private int activeMode = 0; // Removed local state to avoid desync
+    // private int activeMode = 0; // Estado local eliminado para evitar
+    // desincronización
 
     public FBlockEditor() {
         block = Block.getInstance();

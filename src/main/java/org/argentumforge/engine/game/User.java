@@ -70,7 +70,8 @@ public enum User {
         if (charList[userCharIndex].getHeading() == null) {
             charList[userCharIndex].setHeading(Direction.DOWN);
         }
-        // else: keep current heading to avoid "jumping" animations during refresh
+        // else: mantener dirección actual para evitar animaciones de "salto" durante el
+        // refresco
 
         // Aplicar apariencia persistente
         charList[userCharIndex].setiBody((short) userBody);
@@ -95,7 +96,7 @@ public enum User {
         charList[userCharIndex].setWeapon(new WeaponData());
         charList[userCharIndex].setShield(new ShieldData());
 
-        // Update lastChar just in case
+        // Actualizar lastChar por si acaso
         if (userCharIndex > org.argentumforge.engine.game.models.Character.lastChar) {
             org.argentumforge.engine.game.models.Character.lastChar = userCharIndex;
         }
@@ -104,7 +105,7 @@ public enum User {
         if (mapData != null) {
             int x = userPos.getX();
             int y = userPos.getY();
-            // Check bounds directly using mapData length
+            // Verificar límites directamente usando longitud de mapData
             if (x >= 1 && x < mapData.length && y >= 1 && y < mapData[0].length) {
                 mapData[x][y].setCharIndex(userCharIndex);
             }
@@ -168,7 +169,7 @@ public enum User {
                 break;
         }
 
-        // Restore original multipliers: 1 for walking, 2 for camera mode
+        // Restaurar multiplicadores originales: 1 para caminar, 2 para modo cámara
         int multiplier = walkingmode ? 1 : 2;
         x *= multiplier;
         y *= multiplier;
@@ -178,17 +179,19 @@ public enum User {
 
         if (!(tX < XMinMapSize || tX > XMaxMapSize || tY < YMinMapSize || tY > YMaxMapSize)) {
 
-            // 1. Clean Old Position (Safe Clear)
+            // 1. Limpiar Posición Antigua (Limpieza Segura)
             if (mapData != null) {
-                // GLOBAL Clone Sweep (Entire Map)
-                // The user reported clones 11+ tiles away. A small range is insufficient.
-                // We scan the entire 100x100 map to guarantee the user exists NOWHERE else.
-                // 10,000 iterations is negligible for modern CPUs.
+                // Barrido Global de Clones (Mapa Completo)
+                // El usuario reportó clones a más de 11 casillas. Un rango pequeño es
+                // insuficiente.
+                // Escaneamos todo el mapa 100x100 para garantizar que el usuario NO existe en
+                // NINGÚN otro lugar.
+                // 10,000 iteraciones es insignificante para CPUs modernas.
                 for (int xScan = XMinMapSize; xScan <= XMaxMapSize; xScan++) {
                     for (int yScan = YMinMapSize; yScan <= YMaxMapSize; yScan++) {
                         if (mapData[xScan][yScan].getCharIndex() == userCharIndex) {
                             mapData[xScan][yScan].setCharIndex(0);
-                            // Optional debug
+                            // Depuración opcional
                             // org.tinylog.Logger.info("GlobalSweeper: Cleared user at (" + xScan + "," +
                             // yScan + ")");
                         }
@@ -204,21 +207,21 @@ public enum User {
             userMoving = true;
             underCeiling = checkUnderCeiling();
 
-            // 3. Update CharList Entry
+            // 3. Actualizar Entrada CharList
             if (userCharIndex > 0 && userCharIndex < charList.length) {
                 org.argentumforge.engine.game.models.Character chr = charList[userCharIndex];
 
-                // Sync Position
+                // Sincronizar Posición
                 chr.getPos().setX(tX);
                 chr.getPos().setY(tY);
 
-                // Update Map
+                // Actualizar Mapa
                 if (mapData != null) {
                     mapData[tX][tY].setCharIndex(userCharIndex);
                     org.tinylog.Logger.info("  -> SET New Position (" + tX + "," + tY + ")");
                 }
 
-                // Smooth Movement Setup
+                // Configuración de Movimiento Suave
                 chr.setMoveOffsetX(-1.0f * x);
                 chr.setMoveOffsetY(-1.0f * y);
                 chr.setMoving(true);
@@ -226,7 +229,7 @@ public enum User {
                 chr.setScrollDirectionX(x);
                 chr.setScrollDirectionY(y);
 
-                // 4. Handle Walking Mode Appearance
+                // 4. Manejar Apariencia en Modo Caminata
                 if (walkingmode) {
                     checkAppearance();
                 }
@@ -397,7 +400,8 @@ public enum User {
             // Solo mover al personaje si el modo caminata está activo
             if (walkingmode) {
 
-                // Duplicate Trigger 1 check removed. Handled by EditorInputManager.
+                // Verificación duplicada de Trigger 1 eliminada. Manejada por
+                // EditorInputManager.
             }
         } else if (walkingmode && userCharIndex > 0 && charList[userCharIndex].getHeading() != direction) {
             // Solo cambiar el rumbo en modo caminata
@@ -456,12 +460,12 @@ public enum User {
         var mapData = context.getMapData();
         var charList = context.getCharList();
 
-        // 1. Remove from old position in Map logic
+        // 1. Eliminar de posición anterior en lógica de Mapa
         if (userCharIndex > 0 && mapData != null) {
-            // We use the current (old) userPos
+            // Usamos la userPos actual (antigua)
             int oldX = userPos.getX();
             int oldY = userPos.getY();
-            // Check bounds just in case, though userPos should be valid
+            // Verificar límites por si acaso, aunque userPos debería ser válida
             if (oldX >= XMinMapSize && oldX <= XMaxMapSize && oldY >= YMinMapSize && oldY <= YMaxMapSize) {
                 if (mapData[oldX][oldY].getCharIndex() == userCharIndex) {
                     mapData[oldX][oldY].setCharIndex(0);
@@ -469,29 +473,29 @@ public enum User {
             }
         }
 
-        // 2. Update User logical position
+        // 2. Actualizar posición lógica del Usuario
         userPos.setX(x);
         userPos.setY(y);
-        addToUserPos.setX(0); // Reset smooth movement offset
+        addToUserPos.setX(0); // Reiniciar offset de movimiento suave
         addToUserPos.setY(0);
         underCeiling = checkUnderCeiling();
 
-        // 3. Update Character Entity & New Map Position
+        // 3. Actualizar Entidad de Personaje y Nueva Posición en Mapa
         if (userCharIndex > 0 && userCharIndex < charList.length) {
             org.argentumforge.engine.game.models.Character chr = charList[userCharIndex];
 
-            // Sync Position
+            // Sincronizar Posición
             chr.getPos().setX(x);
             chr.getPos().setY(y);
 
-            // Reset Movement Interpolation (Prevent "Jumping")
+            // Reiniciar Interpolación de Movimiento (Prevenir "Saltos")
             chr.setMoveOffsetX(0);
             chr.setMoveOffsetY(0);
             chr.setMoving(false);
             chr.setScrollDirectionX(0);
             chr.setScrollDirectionY(0);
 
-            // Update Map with new position
+            // Actualizar Mapa con nueva posición
             if (mapData != null) {
                 mapData[x][y].setCharIndex(userCharIndex);
             }
@@ -506,7 +510,8 @@ public enum User {
         resetMovement();
         this.walkingmode = walkingmode;
         if (walkingmode) {
-            // AUTO-SYNC: Update position to match Camera center when enabling Walk Mode
+            // AUTO-SYNC: Actualizar posición para coincidir con el centro de la Cámara al
+            // habilitar Modo Caminata
             if (Engine.getCurrentScene() instanceof GameScene) {
                 Camera cam = ((GameScene) Engine.getCurrentScene()).getCamera();
                 if (cam != null) {
@@ -514,8 +519,8 @@ public enum User {
                     if (context != null) {
                         var mapData = context.getMapData();
 
-                        // Prevent Clones: Brute-force clear user from ENTIRE map
-                        // This ensures no ghost at 50,50 or anywhere else
+                        // Prevenir Clones: Limpieza por fuerza bruta del usuario de TODO el mapa
+                        // Esto asegura que no haya fantasmas en 50,50 o en cualquier otro lugar
                         if (userCharIndex > 0 && mapData != null) {
                             for (int x = XMinMapSize; x <= XMaxMapSize; x++) {
                                 for (int y = YMinMapSize; y <= YMaxMapSize; y++) {
@@ -527,7 +532,7 @@ public enum User {
                         }
                     }
 
-                    // Teleport to Camera Center
+                    // Teletransportar al Centro de la Cámara
                     teleport(cam.getCenterX(), cam.getCenterY());
                 }
             }
@@ -541,14 +546,14 @@ public enum User {
                 org.tinylog.Logger.warn("WalkingMode enabled with invalid UserCharIdx. Forcing refresh.");
                 refreshUserCharacter();
             } else if (charList != null && userCharIndex < charList.length) {
-                // Check if char slot is active/valid
+                // Verificar si el slot de personaje está activo/válido
                 if (!charList[userCharIndex].isActive()
                         || charList[userCharIndex].getBody() == null) {
                     org.tinylog.Logger.warn("WalkingMode enabled but CharInx " + userCharIndex
                             + " is inactive/empty. Forcing refresh.");
                     refreshUserCharacter();
                 } else {
-                    // Always refresh to sync visual position with new UserPos
+                    // Siempre refrescar para sincronizar posición visual con nueva UserPos
                     refreshUserCharacter();
                 }
             } else {
@@ -596,9 +601,9 @@ public enum User {
     }
 
     /**
-     * Checks if the user needs to update appearance based on terrain (e.g.
-     * swimming)
-     * and refreshes the character.
+     * Comprueba si el usuario necesita actualizar la apariencia según el terreno
+     * (ej. nadando)
+     * y refresca el personaje.
      */
     public void checkAppearance() {
         var context = GameData.getActiveContext();
@@ -610,23 +615,22 @@ public enum User {
             org.argentumforge.engine.game.models.Character chr = charList[userCharIndex];
             boolean onWater = hayAgua(userPos.getX(), userPos.getY());
 
-            // Logic for appearance change
+            // Lógica para cambio de apariencia
             if (onWater) {
-                // Swimming Appearance: User Configured Water Body
-                // Optimization: Check if already set
+                // Apariencia Nadando: Cuerpo de Agua Configurado por Usuario
+                // Optimización: Verificar si ya está configurado
                 if (AssetRegistry.bodyData != null && userWaterBody < AssetRegistry.bodyData.length
                         && AssetRegistry.bodyData[userWaterBody] != null) {
                     if (chr.getBody().getWalk(3).getGrhIndex() != AssetRegistry.bodyData[userWaterBody].getWalk(3)
                             .getGrhIndex()) {
                         chr.setBody(new BodyData(AssetRegistry.bodyData[userWaterBody]));
-                        chr.setHead(new HeadData()); // Empty
-                                                     // head
+                        chr.setHead(new HeadData()); // Cabeza vacía
                                                      // (invisible)
                     }
                 }
             } else {
-                // Restore Normal Appearance
-                // Optimization: Check if reset needed
+                // Restaurar Apariencia Normal
+                // Optimización: Verificar si se necesita reinicio
                 if (AssetRegistry.bodyData != null && userBody < AssetRegistry.bodyData.length
                         && AssetRegistry.bodyData[userBody] != null) {
                     if (chr.getBody().getWalk(3).getGrhIndex() != AssetRegistry.bodyData[userBody].getWalk(3)

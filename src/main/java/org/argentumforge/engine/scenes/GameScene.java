@@ -124,7 +124,7 @@ public final class GameScene extends Scene {
         weather.update();
         intervalToUpdatePos.update();
 
-        // Update user walking speed based on options
+        // Actualizar velocidad de caminata del usuario según opciones
         int charIndex = user.getUserCharIndex();
         if (charIndex >= 0 && charIndex < charList.length && charList[charIndex] != null) {
             int targetSpeed = user.isWalkingmode()
@@ -135,14 +135,14 @@ public final class GameScene extends Scene {
 
         if (user.isUserMoving()) {
             try {
-                // Movement logic refactored to use Percentage (0.0 to 1.0) instead of raw
-                // pixels
-                // This ensures stability when TILE_PIXEL_SIZE changes (Zoom)
+                // Lógica de movimiento refactorizada para usar Porcentaje (0.0 a 1.0) en lugar
+                // de píxeles crudos
+                // Esto asegura estabilidad cuando cambia TILE_PIXEL_SIZE (Zoom)
 
                 float zoomScale = Camera.getZoomScale();
                 int userIdx = user.getUserCharIndex();
 
-                // Safety check for valid character in move loop
+                // Verificación de seguridad para personaje válido en bucle de movimiento
                 if (userIdx < 0 || userIdx >= charList.length || charList[userIdx] == null) {
                     user.setUserMoving(false);
                     return;
@@ -151,11 +151,11 @@ public final class GameScene extends Scene {
                 float speedPixels = (charList[userIdx].getWalkingSpeed() * zoomScale) * timerTicksPerFrame;
                 float progressParams = speedPixels / TILE_PIXEL_SIZE;
 
-                // Calculate completion threshold based on distance (multiplier)
+                // Calcular umbral de finalización basado en distancia (multiplicador)
                 float totalDistance = Math.max(Math.abs(user.getAddToUserPos().getX()),
                         Math.abs(user.getAddToUserPos().getY()));
                 if (totalDistance == 0)
-                    totalDistance = 1.0f; // Safety
+                    totalDistance = 1.0f; // Seguridad
 
                 if (user.getAddToUserPos().getX() != 0) {
                     offSetCounterX += progressParams;
@@ -180,8 +180,9 @@ public final class GameScene extends Scene {
             offSetCounterY = 0;
         }
 
-        // Calculate Pixel Offset for Renderer: -1 * Direction * (Progress * TileSize)
-        // Note: Progress is now offSetCounter (0 to totalDistance)
+        // Calcular Offset de Píxeles para Renderizado: -1 * Dirección * (Progreso *
+        // TileSize)
+        // Nota: Progreso es ahora offSetCounter (0 a totalDistance)
         int pixelOffsetX = 0;
         int pixelOffsetY = 0;
 
@@ -192,13 +193,13 @@ public final class GameScene extends Scene {
             pixelOffsetY = (int) (-1 * Math.signum(user.getAddToUserPos().getY()) * (offSetCounterY * TILE_PIXEL_SIZE));
         }
 
-        // Correct formula: (UserPos - AddToUserPos) gives the starting tile.
-        // We render from Start towards End using pixelOffset.
+        // Fórmula correcta: (UserPos - AddToUserPos) da el tile de inicio.
+        // Renderizamos desde Inicio hacia Fin usando pixelOffset.
         renderScreen(user.getUserPos().getX() - user.getAddToUserPos().getX(),
                 user.getUserPos().getY() - user.getAddToUserPos().getY(),
                 pixelOffsetX, pixelOffsetY);
 
-        // Update Auto-save
+        // Actualizar Auto-guardado
         org.argentumforge.engine.utils.editor.AutoSaveManager.getInstance().update();
     }
 

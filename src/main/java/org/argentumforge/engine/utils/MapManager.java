@@ -108,13 +108,13 @@ public final class MapManager {
      * Busca en la carpeta del ultimo mapa abierto, config, o recursos por defecto.
      */
     public static String resolveMapPath(int numMap) {
-        // 1. Check folder of last loaded map
+        // 1. Verificar carpeta del último mapa cargado
         String lastPath = Options.INSTANCE.getLastMapPath();
         if (lastPath != null && !lastPath.isEmpty()) {
             File currentFile = new File(lastPath);
             String mapDir = currentFile.getParent();
             if (mapDir != null) {
-                // Try "MapaX.map" and "mapaX.map"
+                // Probar "MapaX.map" y "mapaX.map"
                 File try1 = new File(mapDir, "Mapa" + numMap + ".map");
                 if (try1.exists())
                     return try1.getAbsolutePath();
@@ -125,7 +125,7 @@ public final class MapManager {
             }
         }
 
-        // 2. Check configured maps path
+        // 2. Verificar ruta de mapas configurada
         String configuredPath = Options.INSTANCE.getMapsPath();
         if (configuredPath != null && !configuredPath.isEmpty()) {
             File try1 = new File(configuredPath, "Mapa" + numMap + ".map");
@@ -137,21 +137,21 @@ public final class MapManager {
                 return try2.getAbsolutePath();
         }
 
-        // 3. Check default resources
+        // 3. Verificar recursos por defecto
         File def1 = new File("resources/maps/mapa" + numMap + ".map");
         if (def1.exists())
             return def1.getAbsolutePath();
 
-        File def2 = new File("resources/maps/Mapa" + numMap + ".map"); // Just in case
+        File def2 = new File("resources/maps/Mapa" + numMap + ".map"); // Por si acaso
         if (def2.exists())
             return def2.getAbsolutePath();
 
-        // 4. Try CWD fallback
+        // 4. Intentar fallback en directorio actual (CWD)
         File local = new File("mapa" + numMap + ".map");
         if (local.exists())
             return local.getAbsolutePath();
 
-        return null; // Not found
+        return null; // No encontrado
     }
 
     /**
@@ -229,24 +229,24 @@ public final class MapManager {
                 "Cambios sin guardar",
                 "Hay cambios sin guardar en el mapa actual.\n¿Desea guardarlos antes de continuar?",
                 () -> {
-                    // YES -> Save then Continue
+                    // SI -> Guardar y luego Continuar
                     MapFileUtils.quickSaveMap(
-                            () -> { // On Success
+                            () -> { // Exito
                                 if (onContinue != null)
                                     onContinue.run();
                             },
-                            () -> { // On Failure
+                            () -> { // Fallo
                                 if (onCancel != null)
                                     onCancel.run();
                             });
                 },
                 () -> {
-                    // NO -> Discard changes (just continue)
+                    // NO -> Descartar cambios (simplemente continuar)
                     if (onContinue != null)
                         onContinue.run();
                 },
                 () -> {
-                    // CANCEL
+                    // CANCELAR
                     if (onCancel != null)
                         onCancel.run();
                 });
@@ -280,7 +280,8 @@ public final class MapManager {
         if (mapLoading)
             return;
 
-        // NEW: Check if already open to avoid duplicate contexts and ImGui crashes
+        // NUEVO: Verificar si ya está abierto para evitar contextos duplicados y
+        // crashes de ImGui
         String normalizedTarget = filePath;
         try {
             normalizedTarget = java.nio.file.Paths.get(filePath).toAbsolutePath().normalize().toString();
@@ -306,7 +307,7 @@ public final class MapManager {
         org.argentumforge.engine.gui.components.LoadingModal.getInstance()
                 .show("Cargando mapa " + new File(filePath).getName() + "...");
 
-        // Ensure movement and state is cleared to avoid camera lock
+        // Asegurar que movimiento y estado se limpien para evitar bloqueo de cámara
         org.argentumforge.engine.game.User.INSTANCE.resetMovement();
 
         // (WindowTitle/GLFW)
@@ -327,9 +328,9 @@ public final class MapManager {
                 byte[] data = Files.readAllBytes(Path.of(filePath));
                 MapSaveOptions detectedOptions = detectSaveOptions(data);
                 MapData[][] newMapData = initMap(data, detectedOptions);
-                int particlesLoaded = countParticles(newMapData); // Helper nuevo o inferido
+                int particlesLoaded = countParticles(newMapData); // Nuevo ayudante o inferido
 
-                // Reserve User Slot
+                // Reservar Slot de Usuario
                 int userCharIdx = org.argentumforge.engine.game.User.INSTANCE.getUserCharIndex();
                 if (userCharIdx <= 0)
                     userCharIdx = 1;
@@ -412,7 +413,8 @@ public final class MapManager {
         if (user.getUserPos().getX() == 0 || user.getUserPos().getY() == 0) {
             user.teleport(50, 50);
         } else {
-            // Mandatorio: Refrescar el personaje para que aparezca en el charList del nuevo
+            // Obligatorio: Refrescar el personaje para que aparezca en el charList del
+            // nuevo
             // mapa
             user.refreshUserCharacter();
         }
@@ -445,8 +447,8 @@ public final class MapManager {
             GameData.clearActiveContext();
 
             // Reiniciar estado para el nuevo mapa (sin borrar el anterior array)
-            // org.argentumforge.engine.game.models.Character.lastChar = 0; // Handled in
-            // context or locally
+            // org.argentumforge.engine.game.models.Character.lastChar = 0; // Manejado en
+            // contexto o localmente
 
             Character[] newCharList = new Character[10001];
             for (int i = 0; i < newCharList.length; i++) {
@@ -461,10 +463,11 @@ public final class MapManager {
             MapSaveOptions detectedOptions = detectSaveOptions(data);
             MapData[][] newMapData = initMap(data, detectedOptions);
 
-            // Reserve User Slot (Index 1 usually) AFTER initMap (which wipes chars) but
-            // BEFORE loading entities
-            // We only mark it active to prevent NPCs from taking it. We do NOT fetch
-            // position or write to map yet.
+            // Reservar Slot de Usuario (Índice 1 usualmente) DESPUÉS de initMap (que limpia
+            // chars) pero
+            // ANTES de cargar entidades
+            // Solo lo marcamos activo para prevenir que los NPCs lo tomen. NO obtenemos
+            // posición ni escribimos al mapa todavía.
             int userCharIdx = org.argentumforge.engine.game.User.INSTANCE.getUserCharIndex();
             if (userCharIdx <= 0)
                 userCharIdx = 1;
@@ -478,13 +481,15 @@ public final class MapManager {
             // Intentar cargar propiedades del mapa (.dat)
             // Intentar cargar propiedades del mapa (.dat)
             if (Files.exists(Path.of(datPath))) {
-                // Warning: loadMapProperties currently modifies GameData.mapProperties static.
-                // We should refactor it or copy values?
-                // For now, let's update loadMapProperties later or assume it sets the static
-                // one which we might still use temporarily,
-                // BUT we want to pass 'newMapProperties' to context.
-                // Let's manually parse or update loadMapProperties?
-                // Better: Update loadMapProperties to return MapProperties.
+                // Advertencia: loadMapProperties modifica actualmente GameData.mapProperties
+                // estático.
+                // ¿Deberíamos refactorizarlo o copiar valores?
+                // Por ahora, actualicemos loadMapProperties más tarde o asumamos que establece
+                // el estático
+                // que aún podríamos usar temporalmente,
+                // PERO queremos pasar 'newMapProperties' al contexto.
+                // ¿Parsear manualmente o actualizar loadMapProperties?
+                // Mejor: Actualizar loadMapProperties para devolver MapProperties.
                 newMapProperties = loadMapProperties(datPath);
             } else {
                 newMapProperties = new MapProperties();
@@ -493,10 +498,10 @@ public final class MapManager {
 
             // Intentar cargar información de entidades (.inf)
             // Intentar cargar información de entidades (.inf)
-            // loadMapInfo needs mapData and charList. It currently uses static.
-            // We need to pass them. Refactor loadMapInfo signature.
-            // For now, we will defer loadMapInfo call or pass arguments?
-            // Refactoring loadMapInfo to accept (infPath, mapData, charList).
+            // loadMapInfo necesita mapData y charList. Actualmente usa estáticos.
+            // Necesitamos pasarlos. Refactorizar firma de loadMapInfo.
+            // Por ahora, diferiremos llamada a loadMapInfo o pasaremos argumentos?
+            // Refactorizando loadMapInfo para aceptar (infPath, mapData, charList).
             if (Files.exists(Path.of(infPath))) {
                 loadMapInfo(infPath, newMapData, newCharList);
             } else {
@@ -506,7 +511,7 @@ public final class MapManager {
             // Crear el contexto y registrarlo
             // Crear el contexto y registrarlo
             MapContext context = new MapContext(filePath, newMapData, newMapProperties, newCharList);
-            context.setLastChar((short) 0); // Reset lastChar locally
+            context.setLastChar((short) 0); // Resetear lastChar localmente
             context.setSaveOptions(detectedOptions);
             GameData.setActiveContext(context);
 
@@ -782,9 +787,9 @@ public final class MapManager {
         }
 
         // Limpiar recursos de renderizado y entidades anteriores
-        // Particles check moved to applyMap
-        // Surface.INSTANCE.deleteAllTextures(); // Moved to applyMap (Main Thread)
-        // eraseAllChars(); // No longer needed/possible as we assume fresh list
+        // Chequeo de partículas movido a applyMap
+        // Surface.INSTANCE.deleteAllTextures(); // Movido a applyMap (Hilo Principal)
+        // eraseAllChars(); // Ya no es necesario/posible ya que asumimos lista fresca
 
         return newMapData;
     }
@@ -845,8 +850,8 @@ public final class MapManager {
             Logger.error(e, "Error leyendo el archivo .dat del mapa: {}", filePath);
         }
 
-        GameData.mapProperties = props; // Keep redundant static update for safety? Or remove?
-        // Let's keep it for now but return the object.
+        GameData.mapProperties = props; // ¿Mantener actualización estática redundante por seguridad? ¿O eliminar?
+        // Mantengámoslo por ahora pero devolvamos el objeto.
         Logger.info("Propiedades cargadas: Nombre='{}', Música={}, Zona='{}'", props.getName(), props.getMusicIndex(),
                 props.getZona());
         return props;
@@ -893,7 +898,7 @@ public final class MapManager {
                             mapData[x][y].setNpcIndex(npcIndex);
                             NpcData npc = AssetRegistry.npcs.get(npcIndex);
                             if (npc != null) {
-                                // Find next open char manually in the local list
+                                // Buscar manualmente el siguiente personaje libre en la lista local
                                 int openCharIndex = 0;
                                 for (int i = 1; i < charList.length; i++) {
                                     if (!charList[i].isActive()) {
@@ -921,7 +926,7 @@ public final class MapManager {
                                         chr.setHead(new HeadData(AssetRegistry.headData[headIdx]));
                                     }
 
-                                    // Update map
+                                    // Actualizar mapa
                                     mapData[x][y].setCharIndex((short) openCharIndex);
                                 }
                             }

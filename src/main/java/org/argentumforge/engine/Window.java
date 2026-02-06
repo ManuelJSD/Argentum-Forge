@@ -77,14 +77,14 @@ public class Window {
         SCREEN_HEIGHT = this.height;
         org.argentumforge.engine.scenes.Camera.updateConstants();
 
-        // Setup an error callback
+        // Configurar un callback de error
         GLFWErrorCallback.createPrint(System.err).set();
 
-        // Initialize GLFW
+        // Inicializar GLFW
         if (!glfwInit())
             throw new IllegalStateException("Unable to initialize GLFW.");
 
-        // Configure GLFW
+        // Configurar GLFW
         glfwDefaultWindowHints();
 
         // Sacamos esto por ahora, sino no va a ser compatible con linux. Habria que
@@ -99,7 +99,7 @@ public class Window {
         glfwWindowHint(GLFW_MAXIMIZED, GLFW_FALSE);
         glfwWindowHint(GLFW_DECORATED, GLFW_TRUE);
 
-        // Create the window
+        // Crear la ventana
         window = glfwCreateWindow(this.width, this.height, this.title,
                 options.isFullscreen() ? glfwGetPrimaryMonitor() : NULL, NULL);
 
@@ -126,23 +126,23 @@ public class Window {
             setupGameProjection();
         });
 
-        // Get the thread stack and push a new frame
+        // Obtener el stack del hilo y agregar un nuevo frame
         try (MemoryStack stack = stackPush()) {
             IntBuffer pWidth = stack.mallocInt(1); // int*
             IntBuffer pHeight = stack.mallocInt(1); // int*
 
-            // Get the window size passed to glfwCreateWindow
+            // Obtener el tamaño de ventana pasado a glfwCreateWindow
             glfwGetWindowSize(window, pWidth, pHeight);
 
-            // Get the resolution of the primary monitor
+            // Obtener la resolución del monitor principal
             GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 
-            // Center the window
+            // Centrar la ventana
             glfwSetWindowPos(
                     window,
                     (vidmode.width() - pWidth.get(0)) / 2,
                     (vidmode.height() - pHeight.get(0)) / 2);
-        } // the stack frame is popped automatically
+        } // el frame del stack se libera automáticamente
 
         // ========================================================================
         // Inicializacion de audio (OpenAL)
@@ -153,12 +153,12 @@ public class Window {
         // Inicializacion de OpenGL
         // ========================================================================
 
-        // Make the OpenGL context current
+        // Hacer el contexto OpenGL actual
         glfwMakeContextCurrent(window);
 
         setVSync(options.isVsync());
 
-        // Make the window visible
+        // Hacer la ventana visible
         glfwShowWindow(window);
 
         // Inicializa OpenGL
@@ -189,14 +189,14 @@ public class Window {
      * Destruye el contexto de LWJGL3 para el cierre del programa.
      */
     public void close() {
-        // Destroy the audio context solo si se inicializó
+        // Destruir el contexto de audio solo si se inicializó
         org.argentumforge.engine.audio.AudioSystem.INSTANCE.destroy();
 
-        // Free the window callbacks and destroy the window
+        // Liberar los callbacks de la ventana y destruir la ventana
         glfwFreeCallbacks(window);
         glfwDestroyWindow(window);
 
-        // Terminate GLFW and free the error callback
+        // Terminar GLFW y liberar el callback de error
         glfwTerminate();
         glfwSetErrorCallback(null).free();
     }
@@ -272,22 +272,22 @@ public class Window {
                     0,
                     width, height, GLFW_DONT_CARE);
 
-            // Get the thread stack and push a new frame
+            // Obtener el stack del hilo y agregar un nuevo frame
             try (MemoryStack stack = stackPush()) {
                 IntBuffer pWidth = stack.mallocInt(1); // int*
                 IntBuffer pHeight = stack.mallocInt(1); // int*
 
-                // Get the window size passed to glfwCreateWindow
+                // Obtener el tamaño de ventana pasado a glfwCreateWindow
                 glfwGetWindowSize(window, pWidth, pHeight);
 
                 GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 
-                // Center the window
+                // Centrar la ventana
                 glfwSetWindowPos(
                         window,
                         (vidmode.width() - pWidth.get(0)) / 2,
                         (vidmode.height() - pHeight.get(0)) / 2);
-            } // the stack frame is popped automatically
+            } // el frame del stack se libera automáticamente
         }
 
         setVSync(options.isVsync());

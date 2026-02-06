@@ -34,6 +34,8 @@ public final class AssetRegistry {
     public static FxData[] fxData;
     /** Datos de definiciones de gráficos (GRH). */
     public static GrhData[] grhData;
+    /** Índice máximo de GRH cargado (para optimización de UI/Paginación). */
+    public static int maxGrhCount;
     /** Mapa de colores asignados a GRHs para el minimapa. */
     public static Map<Integer, Integer> minimapColors = new HashMap<>();
 
@@ -54,6 +56,7 @@ public final class AssetRegistry {
         shieldData = null;
         fxData = null;
         grhData = null;
+        maxGrhCount = 0;
         minimapColors.clear();
         npcs.clear();
         objs.clear();

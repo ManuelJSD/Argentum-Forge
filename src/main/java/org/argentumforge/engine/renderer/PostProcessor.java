@@ -17,7 +17,7 @@ public class PostProcessor {
             "out vec2 vTexCoord;\n" +
             "void main() {\n" +
             "    vTexCoord = aTexCoords;\n" +
-            "    gl_Position = vec4(aPos, 0.0, 1.0);\n" + // Direct NDC
+            "    gl_Position = vec4(aPos, 0.0, 1.0);\n" + // NDC Directo
             "}\n";
 
     private static final String FRAGMENT_SHADER = "#version 330 core\n" +
@@ -29,18 +29,18 @@ public class PostProcessor {
             "}\n" +
 
             "void main() {\n" +
-            "    // 0. Apply Zoom\n" +
+            "    // 0. Aplicar Zoom\n" +
             "    vec2 uv = (vTexCoord - 0.5) / max(0.001, uZoom) + 0.5;\n" +
             "    vec4 texColor = texture(uTexture, uv);\n" +
             "    vec3 color = texColor.rgb;\n" +
 
-            "    // 1. Color Grading (Exposure, Contrast, Saturation)\n" +
+            "    // 1. Corrección de Color (Exposición, Contraste, Saturación)\n" +
             "    color *= uExposure;\n" +
             "    color = ((color - 0.5) * uContrast) + 0.5;\n" +
             "    float luminance = dot(color, vec3(0.299, 0.587, 0.114));\n" +
             "    color = mix(vec3(luminance), color, uSaturation);\n" +
 
-            "    // 2. Filters (Grayscale, Sepia, etc.)\n" +
+            "    // 2. Filtros (Escala de grises, Sepia, etc.)\n" +
             "    if (uFilterType == 1) {\n" + // Grayscale
             "        color = vec3(luminance);\n" +
             "    } else if (uFilterType == 2) {\n" + // Sepia
@@ -56,7 +56,7 @@ public class PostProcessor {
             "        color *= vec3(0.9, 1.05, 1.2);\n" +
             "    }\n" +
 
-            "    // 3. Bloom (Improved 7x7)\n" +
+            "    // 3. Bloom (Mejorado 7x7)\n" +
             "    if (uBloomActive != 0) {\n" +
             "        vec3 glow = vec3(0.0);\n" +
             "        float step = 0.003;\n" +
@@ -72,7 +72,7 @@ public class PostProcessor {
             "        color += (glow / 49.0) * uBloomIntensity;\n" +
             "    }\n" +
 
-            "    // 4. Depth of Field (Radial Blur)\n" +
+            "    // 4. Profundidad de Campo (Desenfoque Radial)\n" +
             "    if (uDoFActive != 0) {\n" +
             "        float dist = distance(uv, vec2(0.5, 0.5));\n" +
             "        float blurAmount = smoothstep(uDoFFocus - uDoFRange, uDoFFocus + uDoFRange, dist);\n" +
@@ -87,7 +87,7 @@ public class PostProcessor {
             "        }\n" +
             "    }\n" +
 
-            "    // 5. Film Grain\n" +
+            "    // 5. Grano de Película\n" +
             "    if (uGrainActive != 0) {\n" +
             "        float noise = rand(uv + vec2(uTime * 0.01, uTime * 0.02));\n" +
             "        color += (noise - 0.5) * uGrainIntensity;\n" +
@@ -114,7 +114,7 @@ public class PostProcessor {
         // Inicializar FrameBuffer
         fbo = new FrameBuffer(width, height);
 
-        // Setup VAO/VBO for Fullscreen Quad
+        // Configurar VAO/VBO para Quad de pantalla completa
         float[] quadVertices = {
                 // Pos(x, y) Tex(u, v)
                 -1.0f, 1.0f, 0.0f, 1.0f,
@@ -181,12 +181,12 @@ public class PostProcessor {
     public void apply(RenderSettings settings, float time) {
         // YA NO HACEMOS glCopyTexImage2D. El contenido ya está en fbo.getTextureId()
 
-        // 2. Prepare to draw full-screen quad with shader
+        // 2. Preparar para dibujar quad de pantalla completa con shader
         shader.bind();
         shader.setUniform("uFilterType", settings.getPhotoColorFilter().ordinal());
         shader.setUniform("uTexture", 0);
 
-        // Advanced Uniforms
+        // Uniforms Avanzados
         shader.setUniform("uExposure", settings.getPhotoExposure());
         shader.setUniform("uContrast", settings.getPhotoContrast());
         shader.setUniform("uSaturation", settings.getPhotoSaturation());
@@ -207,14 +207,14 @@ public class PostProcessor {
         glEnable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, fbo.getTextureId());
 
-        // Reset state for post-process quad
+        // Restablecer estado para quad de post-procesamiento
         glDisable(GL_BLEND);
 
         org.lwjgl.opengl.GL30.glBindVertexArray(vaoId);
         glDrawArrays(GL_TRIANGLES, 0, 6);
         org.lwjgl.opengl.GL30.glBindVertexArray(0);
 
-        glEnable(GL_BLEND); // Restore blend for things like vignette or UI
+        glEnable(GL_BLEND); // Restaurar mezcla para cosas como viñeta o UI
         shader.unbind();
     }
 

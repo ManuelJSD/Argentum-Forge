@@ -8,7 +8,7 @@ import org.argentumforge.engine.utils.AssetRegistry;
 import static org.argentumforge.engine.game.models.Direction.DOWN;
 import static org.argentumforge.engine.renderer.Drawn.drawTexture;
 
-// static import removed
+// importación estática eliminada
 import static org.argentumforge.engine.utils.AssetRegistry.*;
 import static org.argentumforge.engine.utils.Time.timerTicksPerFrame;
 
@@ -99,7 +99,7 @@ public final class Character {
         var charList = context.getCharList();
         var mapData = context.getMapData();
 
-        // apuntamos al ultimo char
+        // apuntamos al último char
         if (charIndex > lastChar)
             lastChar = charIndex;
 
@@ -141,7 +141,7 @@ public final class Character {
         charList[charIndex].setMoveOffsetX(0);
         charList[charIndex].setMoveOffsetY(0);
 
-        // update position
+        // actualizar posición
         charList[charIndex].getPos().setX(x);
         charList[charIndex].getPos().setY(y);
 
@@ -176,8 +176,8 @@ public final class Character {
         mapData[charList[charIndex].getPos().getX()][charList[charIndex].getPos().getY()].setCharIndex(0);
 
         /*
-         * 'Remove char's dialog
-         * Call Dialogos.RemoveDialog(CharIndex)
+         * 'Eliminar diálogo del personaje
+         * Llamar Dialogos.RemoveDialog(CharIndex)
          */
 
         resetCharInfo(charIndex);
@@ -377,7 +377,7 @@ public final class Character {
             }
         }
 
-        // Draw FX (sin respiración)
+        // Dibujar FX (sin respiración)
         if (charList[charIndex].fxIndex != 0) {
             float scale = org.argentumforge.engine.scenes.Camera.getZoomScale();
             drawTexture(charList[charIndex].fX,
