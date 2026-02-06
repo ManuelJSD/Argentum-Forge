@@ -78,6 +78,10 @@ public enum Options {
             file.getParentFile().mkdirs();
         }
 
+        // Resetear a valores por defecto antes de cargar
+        // Esto evita que opciones del perfil anterior "se filtren" al nuevo
+        resetToDefaults();
+
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -94,6 +98,61 @@ public enum Options {
                     configPath);
             save(); // Guarda defaults en el nuevo path
         }
+    }
+
+    /**
+     * Resetea todas las opciones a sus valores por defecto.
+     * Vital al cambiar de perfil.
+     */
+    private void resetToDefaults() {
+        graphicsPath = "";
+        datsPath = "";
+        initPath = "";
+        musicPath = "";
+
+        // UI Defaults
+        fullscreen = false;
+        vsync = true;
+        dockingEnabled = true;
+        visualTheme = "MODERN";
+        language = "es_ES";
+
+        // Resolution
+        screenWidth = 1366;
+        screenHeight = 768;
+        clientWidth = 13;
+        clientHeight = 11;
+
+        // Map
+        lastMapPath = ".";
+        recentMaps.clear();
+
+        // Ambient
+        ambientR = 1.0f;
+        ambientG = 1.0f;
+        ambientB = 1.0f;
+
+        // Gameplay
+        moveSpeedNormal = 32;
+        moveSpeedWalk = 8;
+        autoSaveEnabled = true;
+        autoSaveIntervalMinutes = 5;
+
+        // User
+        userBody = 1;
+        userHead = 4;
+        userWaterBody = 84;
+
+        // Ignored Objs
+        ignoredObjTypes.clear();
+        ignoredObjTypes.addAll(java.util.Arrays.asList(4, 6, 8, 10, 15, 20, 22, 27, 28));
+
+        // Updates
+        checkPreReleases = true;
+        ignoredUpdateTag = "";
+
+        // Reset RenderSettings
+        renderSettings.resetToDefaults();
     }
 
     /**
