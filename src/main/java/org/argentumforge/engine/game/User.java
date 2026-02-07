@@ -218,7 +218,6 @@ public enum User {
                 // Actualizar Mapa
                 if (mapData != null) {
                     mapData[tX][tY].setCharIndex(userCharIndex);
-                    org.tinylog.Logger.info("  -> SET New Position (" + tX + "," + tY + ")");
                 }
 
                 // Configuración de Movimiento Suave

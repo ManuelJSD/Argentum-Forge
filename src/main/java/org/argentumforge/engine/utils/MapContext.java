@@ -26,11 +26,21 @@ public class MapContext {
     private int savedUserX = 50;
     private int savedUserY = 50;
 
+    private MapFormat mapFormat = MapFormat.LEGACY;
+
     public MapContext(String filePath, MapData[][] mapData, MapProperties mapProperties, Character[] charList) {
         this.filePath = normalizePath(filePath);
         this.mapData = mapData;
         this.mapProperties = mapProperties;
         this.charList = charList;
+    }
+
+    public MapFormat getMapFormat() {
+        return mapFormat;
+    }
+
+    public void setMapFormat(MapFormat mapFormat) {
+        this.mapFormat = mapFormat;
     }
 
     private String normalizePath(String path) {

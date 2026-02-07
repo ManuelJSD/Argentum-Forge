@@ -7,6 +7,8 @@ import imgui.type.ImInt;
 import org.argentumforge.engine.utils.GameData;
 import org.argentumforge.engine.utils.MapManager;
 import org.argentumforge.engine.utils.MapManager.MapSaveOptions;
+import org.argentumforge.engine.utils.MapContext;
+import org.argentumforge.engine.utils.MapFormat;
 import org.argentumforge.engine.i18n.I18n;
 import org.argentumforge.engine.gui.FileDialog;
 import org.argentumforge.engine.game.Options;
@@ -175,15 +177,26 @@ public class FMapSaveOptions extends Form {
             }
         }
 
+        // Prioritize Context format, fallback to Global
+        MapFormat targetFormat = MapManager.getActiveFormat();
+        MapContext context = GameData.getActiveContext();
+        if (context != null && context.getMapFormat() != null) {
+            targetFormat = context.getMapFormat();
+        }
+
+        String ext = targetFormat.getExtension();
+        String desc = targetFormat.getDescription();
+        String filter = "*" + ext;
+
         String selectedFile = FileDialog.showSaveDialog(
                 I18n.INSTANCE.get("menu.file.saveAs"),
-                lastPath + "mapa.map",
-                "Archivos de Mapa (*.map)",
-                "*.map");
+                lastPath + "mapa" + ext,
+                desc + " (" + filter + ")",
+                filter);
 
         if (selectedFile != null) {
-            if (!selectedFile.toLowerCase().endsWith(".map")) {
-                selectedFile += ".map";
+            if (!selectedFile.toLowerCase().endsWith(ext)) {
+                selectedFile += ext;
             }
 
             Options.INSTANCE.setLastMapPath(new File(selectedFile).getParent());

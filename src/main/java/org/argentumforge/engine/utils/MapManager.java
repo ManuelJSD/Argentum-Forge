@@ -103,23 +103,35 @@ public final class MapManager {
         }
     }
 
+    private static MapFormat activeFormat = MapFormat.LEGACY;
+
+    public static MapFormat getActiveFormat() {
+        return activeFormat;
+    }
+
+    public static void setActiveFormat(MapFormat format) {
+        activeFormat = format;
+    }
+
     /**
      * Resuelve la ruta absoluta del archivo de mapa dado su numero.
      * Busca en la carpeta del ultimo mapa abierto, config, o recursos por defecto.
      */
     public static String resolveMapPath(int numMap) {
+        String ext = activeFormat.getExtension();
+
         // 1. Verificar carpeta del último mapa cargado
         String lastPath = Options.INSTANCE.getLastMapPath();
         if (lastPath != null && !lastPath.isEmpty()) {
             File currentFile = new File(lastPath);
             String mapDir = currentFile.getParent();
             if (mapDir != null) {
-                // Probar "MapaX.map" y "mapaX.map"
-                File try1 = new File(mapDir, "Mapa" + numMap + ".map");
+                // Probar "MapaX.ext" y "mapaX.ext"
+                File try1 = new File(mapDir, "Mapa" + numMap + ext);
                 if (try1.exists())
                     return try1.getAbsolutePath();
 
-                File try2 = new File(mapDir, "mapa" + numMap + ".map");
+                File try2 = new File(mapDir, "mapa" + numMap + ext);
                 if (try2.exists())
                     return try2.getAbsolutePath();
             }
@@ -128,26 +140,26 @@ public final class MapManager {
         // 2. Verificar ruta de mapas configurada
         String configuredPath = Options.INSTANCE.getMapsPath();
         if (configuredPath != null && !configuredPath.isEmpty()) {
-            File try1 = new File(configuredPath, "Mapa" + numMap + ".map");
+            File try1 = new File(configuredPath, "Mapa" + numMap + ext);
             if (try1.exists())
                 return try1.getAbsolutePath();
 
-            File try2 = new File(configuredPath, "mapa" + numMap + ".map");
+            File try2 = new File(configuredPath, "mapa" + numMap + ext);
             if (try2.exists())
                 return try2.getAbsolutePath();
         }
 
         // 3. Verificar recursos por defecto
-        File def1 = new File("resources/maps/mapa" + numMap + ".map");
+        File def1 = new File("resources/maps/mapa" + numMap + ext);
         if (def1.exists())
             return def1.getAbsolutePath();
 
-        File def2 = new File("resources/maps/Mapa" + numMap + ".map"); // Por si acaso
+        File def2 = new File("resources/maps/Mapa" + numMap + ext); // Por si acaso
         if (def2.exists())
             return def2.getAbsolutePath();
 
         // 4. Intentar fallback en directorio actual (CWD)
-        File local = new File("mapa" + numMap + ".map");
+        File local = new File("mapa" + numMap + ext);
         if (local.exists())
             return local.getAbsolutePath();
 
@@ -369,6 +381,14 @@ public final class MapManager {
                 context.setLastChar((short) 0);
                 context.setSaveOptions(detectedOptions);
 
+                // Detect Format
+                for (MapFormat fmt : MapFormat.values()) {
+                    if (fmt.match(filePath)) {
+                        context.setMapFormat(fmt);
+                        break;
+                    }
+                }
+
                 // Pasar resultados a fase 2
                 MapLoadingResult result = new MapLoadingResult(context, particlesLoaded);
                 result.contextToReplace = contextToReplace;
@@ -435,6 +455,27 @@ public final class MapManager {
         MapManager.markAsSaved();
         org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().clearHistory();
 
+        // --- FIX: Limpieza de Estado de Herramientas para evitar "Objetos Fantasma"
+        // ---
+        // Desactivar modos de edición persistentes
+        org.argentumforge.engine.game.EditorController.INSTANCE.setPasteModeActive(false);
+
+        // Limpiar selección actual (evita renderizado de cajas de selección o
+        // referencias a entidades del mapa anterior)
+        // Limpiar selección actual (setActive(false) limpia la lista interna)
+        org.argentumforge.engine.utils.editor.Selection.getInstance().setActive(false);
+
+        // Resetear herramientas específicas
+        org.argentumforge.engine.utils.editor.Particle.getInstance().setActive(false);
+        org.argentumforge.engine.utils.editor.Obj.getInstance().setMode(0); // Desactivar herramienta de objetos
+        // -----------------------------------------------------------------------------
+
+        // Actualizar ID del mapa en el usuario si es posible extraerlo del nombre
+        int mapId = extractMapNumber(result.context.getFilePath());
+        if (mapId > 0) {
+            org.argentumforge.engine.game.User.INSTANCE.setUserMap((short) mapId);
+        }
+
         // Teleport Usuario
         org.argentumforge.engine.game.User user = org.argentumforge.engine.game.User.INSTANCE;
         if (user.getUserPos().getX() == 0 || user.getUserPos().getY() == 0) {
@@ -445,6 +486,28 @@ public final class MapManager {
             // mapa
             user.refreshUserCharacter();
         }
+    }
+
+    private static int extractMapNumber(String filePath) {
+        try {
+            File f = new File(filePath);
+            String name = f.getName();
+            // Eliminar extensión
+            int dotIndex = name.lastIndexOf('.');
+            if (dotIndex > 0) {
+                name = name.substring(0, dotIndex);
+            }
+
+            // Buscar número al final
+            // Ejemplo: "Mapa1" -> 1, "mapa123" -> 123
+            String numberStr = name.replaceAll("\\D+", "");
+            if (!numberStr.isEmpty()) {
+                return Integer.parseInt(numberStr);
+            }
+        } catch (Exception e) {
+            // Ignore format errors
+        }
+        return 0;
     }
 
     private static int countParticles(MapData[][] map) {
@@ -540,6 +603,14 @@ public final class MapManager {
             MapContext context = new MapContext(filePath, newMapData, newMapProperties, newCharList);
             context.setLastChar((short) 0); // Resetear lastChar localmente
             context.setSaveOptions(detectedOptions);
+
+            // Detect Format
+            for (MapFormat fmt : MapFormat.values()) {
+                if (fmt.match(filePath)) {
+                    context.setMapFormat(fmt);
+                    break;
+                }
+            }
             GameData.setActiveContext(context);
 
             // Reiniciar estado de modificaciones
