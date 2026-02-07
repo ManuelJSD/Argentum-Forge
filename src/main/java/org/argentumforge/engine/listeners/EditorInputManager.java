@@ -260,6 +260,10 @@ public class EditorInputManager {
             }
         }
 
+        if (KeyHandler.isActionKeyJustPressed(Key.RELOAD_MAP)) {
+            org.argentumforge.engine.game.EditorController.INSTANCE.reloadMap();
+        }
+
         // Atajos de velocidad
         if (!imgui.ImGui.getIO().getWantCaptureKeyboard()) {
             // Teclado numérico + para aumentar velocidad
