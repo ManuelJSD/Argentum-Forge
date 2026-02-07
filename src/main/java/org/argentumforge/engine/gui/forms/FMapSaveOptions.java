@@ -183,6 +183,10 @@ public class FMapSaveOptions extends Form {
         if (lastPath == null || lastPath.isEmpty()) {
             lastPath = new File(".").getAbsolutePath() + File.separator;
         } else {
+            File pathFile = new File(lastPath);
+            if (pathFile.isFile()) {
+                lastPath = pathFile.getParent();
+            }
             if (!lastPath.endsWith(File.separator)) {
                 lastPath += File.separator;
             }
