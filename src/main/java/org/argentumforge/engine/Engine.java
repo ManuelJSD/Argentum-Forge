@@ -153,6 +153,7 @@ public final class Engine {
         // Habilitar Viewports y Docking tras el setup
         guiSystem.setViewportsEnabled(true);
         ImGui.getIO().addConfigFlags(imgui.flag.ImGuiConfigFlags.DockingEnable);
+        window.setResizable(true); // Permitir redimensionar la ventana principal del editor
 
         // Verificar actualizaciones
         org.argentumforge.engine.utils.GithubReleaseChecker.checkForUpdates();
@@ -183,6 +184,7 @@ public final class Engine {
 
         guiSystem.closeAllFrms();
         guiSystem.setViewportsEnabled(false);
+        window.setResizable(false); // Bloquear redimensionamiento durante la selección de perfil
         org.argentumforge.engine.gui.forms.FProfileSelector selector = new org.argentumforge.engine.gui.forms.FProfileSelector(
                 this::completeInitialization);
         guiSystem.show(selector);

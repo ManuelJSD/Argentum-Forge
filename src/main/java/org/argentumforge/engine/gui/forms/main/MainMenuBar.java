@@ -359,6 +359,12 @@ public class MainMenuBar {
                             !GameData.options.getRenderSettings().isPhotoModeActive());
                 }
 
+                if (ImGui.menuItem(I18n.INSTANCE.get("menu.misc.reloadGraphics", "Recargar Gráficos Fallidos"))) {
+                    org.argentumforge.engine.renderer.Surface.INSTANCE.retryFailedTextures();
+                    DialogManager.getInstance().showInfo("Gráficos",
+                            "Se ha solicitado la recarga de texturas fallidas.");
+                }
+
                 ImGui.separator();
 
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.misc.walkMode"), "",

@@ -266,9 +266,20 @@ public class Texture {
 
     private static byte[] tryReadFile(Path path) {
         if (Files.exists(path)) {
-            try {
-                return Files.readAllBytes(path);
-            } catch (IOException ignored) {
+            // Intentar leer hasta 3 veces para evitar bloqueos transitorios del SO
+            for (int i = 0; i < 3; i++) {
+                try {
+                    return Files.readAllBytes(path);
+                } catch (IOException e) {
+                    if (i == 2) {
+                        Logger.warn("Error leyendo archivo {} tras 3 intentos: {}", path, e.getMessage());
+                    } else {
+                        try {
+                            Thread.sleep(15);
+                        } catch (InterruptedException ignored) {
+                        }
+                    }
+                }
             }
         }
         return null;

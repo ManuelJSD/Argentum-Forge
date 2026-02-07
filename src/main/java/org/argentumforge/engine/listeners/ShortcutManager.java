@@ -109,6 +109,14 @@ public class ShortcutManager {
                 MapFileUtils.quickSaveMap();
             }
         }
+        // Nuevo Mapa: Ctrl + N
+        else if (KeyHandler.isActionKeyJustPressed(Key.NEW_MAP)) {
+            org.argentumforge.engine.game.EditorController.INSTANCE.newMap();
+        }
+        // Abrir Mapa: Ctrl + O
+        else if (KeyHandler.isActionKeyJustPressed(Key.OPEN_MAP)) {
+            org.argentumforge.engine.game.EditorController.INSTANCE.loadMapAction();
+        }
     }
 
     private void handleGlobalShortcuts() {
@@ -141,6 +149,82 @@ public class ShortcutManager {
                     .setShowViewportOverlay(!Options.INSTANCE.getRenderSettings().isShowViewportOverlay());
             Options.INSTANCE.save();
         }
+
+        // Capas (Toggles)
+        if (KeyHandler.isActionKeyJustPressed(Key.TOGGLE_LAYER_1)) {
+            boolean[] layers = Options.INSTANCE.getRenderSettings().getShowLayer();
+            layers[0] = !layers[0];
+            org.argentumforge.engine.game.console.Console.INSTANCE.addMsgToConsole(
+                    "Capa 1: " + (layers[0] ? "ON" : "OFF"),
+                    org.argentumforge.engine.game.console.FontStyle.REGULAR,
+                    new org.argentumforge.engine.renderer.RGBColor(1f, 1f, 1f));
+        }
+        if (KeyHandler.isActionKeyJustPressed(Key.TOGGLE_LAYER_2)) {
+            boolean[] layers = Options.INSTANCE.getRenderSettings().getShowLayer();
+            layers[1] = !layers[1];
+            org.argentumforge.engine.game.console.Console.INSTANCE.addMsgToConsole(
+                    "Capa 2: " + (layers[1] ? "ON" : "OFF"),
+                    org.argentumforge.engine.game.console.FontStyle.REGULAR,
+                    new org.argentumforge.engine.renderer.RGBColor(1f, 1f, 1f));
+        }
+        if (KeyHandler.isActionKeyJustPressed(Key.TOGGLE_LAYER_3)) {
+            boolean[] layers = Options.INSTANCE.getRenderSettings().getShowLayer();
+            layers[2] = !layers[2];
+            org.argentumforge.engine.game.console.Console.INSTANCE.addMsgToConsole(
+                    "Capa 3: " + (layers[2] ? "ON" : "OFF"),
+                    org.argentumforge.engine.game.console.FontStyle.REGULAR,
+                    new org.argentumforge.engine.renderer.RGBColor(1f, 1f, 1f));
+        }
+        if (KeyHandler.isActionKeyJustPressed(Key.TOGGLE_LAYER_4)) {
+            boolean[] layers = Options.INSTANCE.getRenderSettings().getShowLayer();
+            layers[3] = !layers[3];
+            org.argentumforge.engine.game.console.Console.INSTANCE.addMsgToConsole(
+                    "Capa 4: " + (layers[3] ? "ON" : "OFF"),
+                    org.argentumforge.engine.game.console.FontStyle.REGULAR,
+                    new org.argentumforge.engine.renderer.RGBColor(1f, 1f, 1f));
+        }
+
+        // Visibilidad (Toggles)
+        if (KeyHandler.isActionKeyJustPressed(Key.TOGGLE_BLOCKS)) {
+            boolean current = Options.INSTANCE.getRenderSettings().getShowBlock();
+            Options.INSTANCE.getRenderSettings().setShowBlock(!current);
+            org.argentumforge.engine.game.console.Console.INSTANCE.addMsgToConsole(
+                    "Bloqueos: " + (!current ? "ON" : "OFF"),
+                    org.argentumforge.engine.game.console.FontStyle.REGULAR,
+                    new org.argentumforge.engine.renderer.RGBColor(1f, 1f, 1f));
+        }
+        if (KeyHandler.isActionKeyJustPressed(Key.TOGGLE_TRANSFERS)) {
+            boolean current = Options.INSTANCE.getRenderSettings().getShowMapTransfer();
+            Options.INSTANCE.getRenderSettings().setShowMapTransfer(!current);
+            org.argentumforge.engine.game.console.Console.INSTANCE.addMsgToConsole(
+                    "Traslados: " + (!current ? "ON" : "OFF"),
+                    org.argentumforge.engine.game.console.FontStyle.REGULAR,
+                    new org.argentumforge.engine.renderer.RGBColor(1f, 1f, 1f));
+        }
+        if (KeyHandler.isActionKeyJustPressed(Key.TOGGLE_TRIGGERS)) {
+            boolean current = Options.INSTANCE.getRenderSettings().getShowTriggers();
+            Options.INSTANCE.getRenderSettings().setShowTriggers(!current);
+            org.argentumforge.engine.game.console.Console.INSTANCE.addMsgToConsole(
+                    "Triggers: " + (!current ? "ON" : "OFF"),
+                    org.argentumforge.engine.game.console.FontStyle.REGULAR,
+                    new org.argentumforge.engine.renderer.RGBColor(1f, 1f, 1f));
+        }
+        if (KeyHandler.isActionKeyJustPressed(Key.TOGGLE_NPCS)) {
+            boolean current = Options.INSTANCE.getRenderSettings().getShowNPCs();
+            Options.INSTANCE.getRenderSettings().setShowNPCs(!current);
+            org.argentumforge.engine.game.console.Console.INSTANCE.addMsgToConsole("NPCs: " + (!current ? "ON" : "OFF"),
+                    org.argentumforge.engine.game.console.FontStyle.REGULAR,
+                    new org.argentumforge.engine.renderer.RGBColor(1f, 1f, 1f));
+        }
+        if (KeyHandler.isActionKeyJustPressed(Key.TOGGLE_OBJECTS)) {
+            boolean current = Options.INSTANCE.getRenderSettings().getShowOJBs();
+            Options.INSTANCE.getRenderSettings().setShowOJBs(!current);
+            org.argentumforge.engine.game.console.Console.INSTANCE.addMsgToConsole(
+                    "Objetos: " + (!current ? "ON" : "OFF"),
+                    org.argentumforge.engine.game.console.FontStyle.REGULAR,
+                    new org.argentumforge.engine.renderer.RGBColor(1f, 1f, 1f));
+        }
+
         if (KeyHandler.isActionKeyJustPressed(Key.TOOL_BRUSH)) {
             org.argentumforge.engine.utils.editor.Surface.getInstance().setMode(1);
             org.argentumforge.engine.utils.editor.Surface.getInstance()
@@ -185,6 +269,23 @@ public class ShortcutManager {
         }
         if (KeyHandler.isActionKeyJustPressed(Key.TAKE_SCREENSHOT)) {
             org.argentumforge.engine.utils.ScreenshotUtils.takeScreenshot();
+        }
+
+        if (KeyHandler.isActionKeyJustPressed(Key.VALIDATE_MAP)) {
+            if (org.argentumforge.engine.utils.GameData.getActiveContext() != null) {
+                ImGUISystem.INSTANCE.show(new org.argentumforge.engine.gui.forms.FMapValidator());
+            } else {
+                org.argentumforge.engine.gui.DialogManager.getInstance().showInfo("Mapa",
+                        org.argentumforge.engine.i18n.I18n.INSTANCE.get("msg.noActiveMap"));
+            }
+        }
+
+        if (KeyHandler.isActionKeyJustPressed(Key.ZOOM_IN)) {
+            Camera.setTileSize(Math.min(128, Camera.TILE_PIXEL_SIZE + 16));
+        }
+
+        if (KeyHandler.isActionKeyJustPressed(Key.ZOOM_OUT)) {
+            Camera.setTileSize(Math.max(16, Camera.TILE_PIXEL_SIZE - 16));
         }
     }
 }

@@ -26,8 +26,12 @@ public final class FMinimap extends Form {
 
     @Override
     public void render() {
-        ImGui.setNextWindowSize(MINIMAP_SIZE + 20, MINIMAP_SIZE + 40, ImGuiCond.Always);
-        if (ImGui.begin(I18n.INSTANCE.get("minimap.title"), ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse)) {
+        ImGui.setNextWindowSize(MINIMAP_SIZE + 20, MINIMAP_SIZE + 40, ImGuiCond.FirstUseEver);
+        // Usamos ###MinimapV2 para cambiar el ID interno y resetear la config guardada
+        // en imgui.ini (docking, posición, etc)
+        // Usamos ###MinimapV3 para asegurar que se resetee cualquier config corrupta de
+        // docking/flags
+        if (ImGui.begin(I18n.INSTANCE.get("minimap.title") + "###MinimapV3", ImGuiWindowFlags.None)) {
 
             float mouseX = ImGui.getMousePosX();
             float mouseY = ImGui.getMousePosY();

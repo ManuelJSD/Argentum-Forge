@@ -38,7 +38,7 @@ public enum Options {
     private int moveSpeedWalk = 8;
     private java.util.List<String> recentMaps = new java.util.ArrayList<>();
     private static final int MAX_RECENT_MAPS = 10;
-    private boolean autoSaveEnabled = true;
+    private boolean autoSaveEnabled = false;
     private int autoSaveIntervalMinutes = 5;
     private java.util.Set<Integer> ignoredObjTypes = new java.util.HashSet<>(
             java.util.Arrays.asList(4, 6, 8, 10, 15, 20, 22, 27, 28));
@@ -135,7 +135,7 @@ public enum Options {
         // Gameplay
         moveSpeedNormal = 32;
         moveSpeedWalk = 8;
-        autoSaveEnabled = true;
+        autoSaveEnabled = false;
         autoSaveIntervalMinutes = 5;
 
         // User

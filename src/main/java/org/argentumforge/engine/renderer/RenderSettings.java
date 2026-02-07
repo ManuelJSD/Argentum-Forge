@@ -17,6 +17,7 @@ public class RenderSettings {
     // Bloqueos
     private boolean showBlock = true;
     private float blockOpacity = 0.5f;
+    private float transferOpacity = 0.5f;
     private float ghostOpacity = 0.5f;
     private boolean showGrid = false;
     private float[] gridColor = { 1.0f, 1.0f, 1.0f, 0.2f }; // Blanco semi-transparente por defecto
@@ -135,6 +136,14 @@ public class RenderSettings {
 
     public void setBlockOpacity(float blockOpacity) {
         this.blockOpacity = blockOpacity;
+    }
+
+    public float getTransferOpacity() {
+        return transferOpacity;
+    }
+
+    public void setTransferOpacity(float transferOpacity) {
+        this.transferOpacity = transferOpacity;
     }
 
     public float getGhostOpacity() {
