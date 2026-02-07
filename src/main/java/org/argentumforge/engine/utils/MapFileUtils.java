@@ -29,11 +29,15 @@ public class MapFileUtils {
             }
         }
 
+        String ext = MapManager.getActiveFormat().getExtension();
+        String desc = MapManager.getActiveFormat().getDescription();
+        String filter = "*" + ext;
+
         String selectedFile = org.argentumforge.engine.gui.FileDialog.showOpenDialog(
                 "Seleccionar Mapa",
                 lastPath,
-                "Archivos de Mapa (*.map)",
-                "*.map");
+                desc + " (" + filter + ")",
+                filter);
 
         if (selectedFile != null) {
             File f = new File(selectedFile);

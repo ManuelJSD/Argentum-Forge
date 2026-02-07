@@ -138,18 +138,6 @@ public final class GameData {
     /** Lector de datos binarios persistente para la carga de recursos. */
     static BinaryDataReader reader = new BinaryDataReader();
 
-    static {
-        try {
-            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-            System.out.println("!!! GAMEDATA LOADED - STATIC BLOCK - NEW CODE V2 !!!");
-            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-            java.nio.file.Files.writeString(java.nio.file.Path.of("static_check.txt"),
-                    "New Code Running: " + java.time.Instant.now());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     /**
      * Inicializamos todos los datos almacenados en archivos.
      */

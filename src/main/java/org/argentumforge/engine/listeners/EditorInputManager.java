@@ -66,6 +66,18 @@ public class EditorInputManager {
             int x = getTileMouseX((int) MouseListener.getX() - POS_SCREEN_X);
             int y = getTileMouseY((int) MouseListener.getY() - POS_SCREEN_Y);
 
+            // 1. Double Click (Prioridad Navegación)
+            if (MouseListener.mouseButtonDoubleClick(GLFW_MOUSE_BUTTON_LEFT)) {
+                handleDoubleClick(x, y);
+                return;
+            }
+
+            // 2. Right Click (Menú Contextual o Captura de Herramientas)
+            if (MouseListener.mouseButtonReleased(GLFW_MOUSE_BUTTON_RIGHT)) {
+                handleRightClick(x, y);
+                return;
+            }
+
             // Lógica de Selección siempre activa por defecto (Si no hay herramientas de
             // edición activas)
             // Y si no estamos en modo pegar
@@ -103,14 +115,6 @@ public class EditorInputManager {
 
             if (MouseListener.mouseButtonReleased(GLFW_MOUSE_BUTTON_LEFT)) {
                 surface.endBatch();
-            }
-
-            if (MouseListener.mouseButtonReleased(GLFW_MOUSE_BUTTON_RIGHT)) {
-                handleRightClick(x, y);
-            }
-
-            if (MouseListener.mouseButtonDoubleClick(GLFW_MOUSE_BUTTON_LEFT)) {
-                handleDoubleClick(x, y);
             }
         }
     }
@@ -154,12 +158,20 @@ public class EditorInputManager {
         boolean valid = isValidTile(x, y);
 
         if (valid) {
+            // Verificar Captura de Herramienta 'Traslados' antes de abrir menú
+            // Check form directly, allow capture even if tool mode is not active yet
+            var frm = ImGUISystem.INSTANCE.getForm(org.argentumforge.engine.gui.forms.FTransferEditor.class);
+            if (frm != null) {
+                int currentMap = user.getUserMap();
+                frm.updateInputFields(currentMap, x, y);
+                Console.INSTANCE.addMsgToConsole(
+                        "Destino de traslado capturado: Mapa " + currentMap + " (" + x + "," + y + ")",
+                        REGULAR, new RGBColor(0f, 1f, 0f));
+                return; // Consumir evento, no abrir menú
+            }
+
             ContextMenu.open(x, y);
         }
-
-        // Lógica antigua (Opcional: ¿Mantener si el usuario quiere feedback inmediato
-        // cuando NO se desea menú?)
-        // Priorizando el menú contextual según solicitud
     }
 
     private void handleDoubleClick(int x, int y) {
