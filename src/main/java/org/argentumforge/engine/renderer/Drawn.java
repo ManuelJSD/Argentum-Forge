@@ -251,11 +251,19 @@ public final class Drawn {
     /**
      * Dibuja un rectángulo coloreado en pantalla utilizando el sistema de batching.
      */
+    /**
+     * Dibuja un rectángulo coloreado en pantalla utilizando el sistema de batching.
+     */
     public static void drawColoredRect(int x, int y, int width, int height, RGBColor color, float alpha) {
+        drawColoredRect(x, y, width, height, color, alpha, 0.0f);
+    }
+
+    public static void drawColoredRect(int x, int y, int width, int height, RGBColor color, float alpha, float skewX) {
         if (color == null) {
             color = new RGBColor(1.0f, 1.0f, 1.0f);
         }
-        Engine.batch.draw(Surface.INSTANCE.getWhiteTexture(), x, y, 0, 0, 1, 1, width, height, true, alpha, color);
+        Engine.batch.draw(Surface.INSTANCE.getWhiteTexture(), x, y, 0, 0, 1, 1, width, height, skewX, true, alpha,
+                color);
     }
 
 }

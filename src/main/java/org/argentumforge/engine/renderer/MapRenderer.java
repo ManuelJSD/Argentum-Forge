@@ -333,11 +333,86 @@ public class MapRenderer {
                 camera.setScreenX(camera.getMinXOffset() - TILE_BUFFER_SIZE);
                 for (int x = camera.getMinX(); x <= camera.getMaxX(); x++) {
                     if (mapData[x][y].getBlocked()) {
-                        drawGrhIndex(grhBlock,
-                                POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX,
-                                POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY,
-                                renderSettings.getBlockOpacity(),
-                                null);
+                        int screenX = POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX;
+                        int screenY = POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY;
+
+                        switch (renderSettings.getIndicatorStyle()) {
+                            case MODERN:
+                                // Moderno: Recuadro rojo semitransparente con borde más sólido
+                                Drawn.drawColoredRect(screenX + 2, screenY + 2,
+                                        TILE_PIXEL_SIZE - 4, TILE_PIXEL_SIZE - 4,
+                                        new RGBColor(1.0f, 0.2f, 0.2f), 0.4f);
+
+                                // Pequeña "X"
+                                Drawn.drawColoredRect(screenX + (int) (TILE_PIXEL_SIZE * 0.3f),
+                                        screenY + (int) (TILE_PIXEL_SIZE * 0.3f),
+                                        (int) (TILE_PIXEL_SIZE * 0.4f), (int) (TILE_PIXEL_SIZE * 0.4f),
+                                        new RGBColor(1.0f, 0.6f, 0.6f), 0.6f);
+                                break;
+
+                            case MINIMAL:
+                                // Minimalista: Pequeño cuadrado en el centro
+                                int size = (int) (TILE_PIXEL_SIZE * 0.25f);
+                                int offset = (TILE_PIXEL_SIZE - size) / 2;
+                                Drawn.drawColoredRect(screenX + offset, screenY + offset,
+                                        size, size,
+                                        new RGBColor(1.0f, 0.2f, 0.2f), 0.7f);
+                                break;
+
+                            case SOLID:
+                                // Sólido: Relleno completo del tile
+                                Drawn.drawColoredRect(screenX, screenY,
+                                        TILE_PIXEL_SIZE, TILE_PIXEL_SIZE,
+                                        new RGBColor(1.0f, 0.0f, 0.0f), 0.3f);
+                                break;
+
+                            case MESH:
+                                // Malla: X diagonal completa
+                                // Línea /
+                                Drawn.drawColoredRect(screenX, screenY,
+                                        2, TILE_PIXEL_SIZE,
+                                        new RGBColor(1.0f, 0.4f, 0.4f), 0.5f, (float) TILE_PIXEL_SIZE);
+                                // Línea \
+                                Drawn.drawColoredRect(screenX + TILE_PIXEL_SIZE - 2, screenY,
+                                        2, TILE_PIXEL_SIZE,
+                                        new RGBColor(1.0f, 0.4f, 0.4f), 0.5f, -(float) TILE_PIXEL_SIZE);
+                                break;
+
+                            case CORNERS:
+                                // Esquinas: 4 L-shapes
+                                int len = 8;
+                                int th = 2;
+                                RGBColor cornerColor = new RGBColor(1.0f, 0.3f, 0.3f);
+                                // Top-Left
+                                Drawn.drawColoredRect(screenX, screenY, len, th, cornerColor, 0.8f);
+                                Drawn.drawColoredRect(screenX, screenY, th, len, cornerColor, 0.8f);
+                                // Top-Right
+                                Drawn.drawColoredRect(screenX + TILE_PIXEL_SIZE - len, screenY, len, th, cornerColor,
+                                        0.8f);
+                                Drawn.drawColoredRect(screenX + TILE_PIXEL_SIZE - th, screenY, th, len, cornerColor,
+                                        0.8f);
+                                // Bottom-Left
+                                Drawn.drawColoredRect(screenX, screenY + TILE_PIXEL_SIZE - th, len, th, cornerColor,
+                                        0.8f);
+                                Drawn.drawColoredRect(screenX, screenY + TILE_PIXEL_SIZE - len, th, len, cornerColor,
+                                        0.8f);
+                                // Bottom-Right
+                                Drawn.drawColoredRect(screenX + TILE_PIXEL_SIZE - len, screenY + TILE_PIXEL_SIZE - th,
+                                        len, th, cornerColor, 0.8f);
+                                Drawn.drawColoredRect(screenX + TILE_PIXEL_SIZE - th, screenY + TILE_PIXEL_SIZE - len,
+                                        th, len, cornerColor, 0.8f);
+                                break;
+
+                            case CLASSIC:
+                            default:
+                                // Clásico: Gráfico indexado
+                                drawGrhIndex(grhBlock,
+                                        screenX,
+                                        screenY,
+                                        renderSettings.getBlockOpacity(),
+                                        null);
+                                break;
+                        }
                     }
                     camera.incrementScreenX();
                 }
@@ -356,10 +431,82 @@ public class MapRenderer {
                 camera.setScreenX(camera.getMinXOffset() - TILE_BUFFER_SIZE);
                 for (int x = camera.getMinX(); x <= camera.getMaxX(); x++) {
                     if (mapData[x][y].getExitMap() > 0) {
-                        drawGrhIndex(grhTrans,
-                                POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX,
-                                POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY,
-                                null);
+                        int screenX = POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX;
+                        int screenY = POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY;
+
+                        switch (renderSettings.getIndicatorStyle()) {
+                            case MODERN:
+                                // Moderno: Recuadro azul cian semitransparente
+                                Drawn.drawColoredRect(screenX + 2, screenY + 2,
+                                        TILE_PIXEL_SIZE - 4, TILE_PIXEL_SIZE - 4,
+                                        new RGBColor(0.2f, 0.8f, 1.0f), 0.4f);
+
+                                // Borde interno o detalle
+                                Drawn.drawColoredRect(screenX + 4, screenY + 4,
+                                        TILE_PIXEL_SIZE - 8, TILE_PIXEL_SIZE - 8,
+                                        new RGBColor(0.6f, 1.0f, 1.0f), 0.3f);
+                                break;
+
+                            case MINIMAL:
+                                // Minimalista: Pequeño cuadrado en el centro
+                                int size = (int) (TILE_PIXEL_SIZE * 0.25f);
+                                int offset = (TILE_PIXEL_SIZE - size) / 2;
+                                Drawn.drawColoredRect(screenX + offset, screenY + offset,
+                                        size, size,
+                                        new RGBColor(0.0f, 0.8f, 1.0f), 0.7f);
+                                break;
+
+                            case SOLID:
+                                // Sólido: Relleno completo
+                                Drawn.drawColoredRect(screenX, screenY,
+                                        TILE_PIXEL_SIZE, TILE_PIXEL_SIZE,
+                                        new RGBColor(0.0f, 1.0f, 1.0f), 0.3f);
+                                break;
+
+                            case MESH:
+                                // Malla: X diagonal completa azul
+                                Drawn.drawColoredRect(screenX, screenY,
+                                        2, TILE_PIXEL_SIZE,
+                                        new RGBColor(0.2f, 0.8f, 1.0f), 0.5f, (float) TILE_PIXEL_SIZE);
+                                Drawn.drawColoredRect(screenX + TILE_PIXEL_SIZE - 2, screenY,
+                                        2, TILE_PIXEL_SIZE,
+                                        new RGBColor(0.2f, 0.8f, 1.0f), 0.5f, -(float) TILE_PIXEL_SIZE);
+                                break;
+
+                            case CORNERS:
+                                // Esquinas: 4 L-shapes cyan
+                                int len = 8;
+                                int th = 2;
+                                RGBColor cornerColor = new RGBColor(0.0f, 0.8f, 1.0f);
+                                // Top-Left
+                                Drawn.drawColoredRect(screenX, screenY, len, th, cornerColor, 0.8f);
+                                Drawn.drawColoredRect(screenX, screenY, th, len, cornerColor, 0.8f);
+                                // Top-Right
+                                Drawn.drawColoredRect(screenX + TILE_PIXEL_SIZE - len, screenY, len, th, cornerColor,
+                                        0.8f);
+                                Drawn.drawColoredRect(screenX + TILE_PIXEL_SIZE - th, screenY, th, len, cornerColor,
+                                        0.8f);
+                                // Bottom-Left
+                                Drawn.drawColoredRect(screenX, screenY + TILE_PIXEL_SIZE - th, len, th, cornerColor,
+                                        0.8f);
+                                Drawn.drawColoredRect(screenX, screenY + TILE_PIXEL_SIZE - len, th, len, cornerColor,
+                                        0.8f);
+                                // Bottom-Right
+                                Drawn.drawColoredRect(screenX + TILE_PIXEL_SIZE - len, screenY + TILE_PIXEL_SIZE - th,
+                                        len, th, cornerColor, 0.8f);
+                                Drawn.drawColoredRect(screenX + TILE_PIXEL_SIZE - th, screenY + TILE_PIXEL_SIZE - len,
+                                        th, len, cornerColor, 0.8f);
+                                break;
+
+                            case CLASSIC:
+                            default:
+                                // Clásico
+                                drawGrhIndex(grhTrans,
+                                        screenX,
+                                        screenY,
+                                        null);
+                                break;
+                        }
                     }
                     camera.incrementScreenX();
                 }
