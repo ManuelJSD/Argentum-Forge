@@ -73,6 +73,12 @@ public class MainMenuBar {
                     org.argentumforge.engine.game.EditorController.INSTANCE.loadMapAction();
                 }
 
+                String reloadKey = getKeyName(org.argentumforge.engine.game.models.Key.RELOAD_MAP.getKeyCode());
+                if (ImGui.menuItem(I18n.INSTANCE.get("menu.file.reload"), reloadKey, false,
+                        GameData.getActiveContext() != null)) {
+                    org.argentumforge.engine.game.EditorController.INSTANCE.reloadMap();
+                }
+
                 if (ImGui.beginMenu(I18n.INSTANCE.get("menu.file.recent"))) {
                     java.util.List<String> recentMaps = GameData.options.getRecentMaps();
                     if (recentMaps.isEmpty()) {

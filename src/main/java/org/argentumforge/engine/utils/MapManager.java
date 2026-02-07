@@ -277,6 +277,10 @@ public final class MapManager {
      * @param onComplete Callback opcional al finalizar
      */
     public static void loadMapAsync(String filePath, Runnable onComplete) {
+        loadMapAsync(filePath, false, onComplete);
+    }
+
+    public static void loadMapAsync(String filePath, boolean forceReload, Runnable onComplete) {
         if (mapLoading)
             return;
 
@@ -288,19 +292,29 @@ public final class MapManager {
         } catch (Exception e) {
             /* ignore */ }
 
+        org.argentumforge.engine.utils.MapContext existingContext = null;
         for (org.argentumforge.engine.utils.MapContext context : org.argentumforge.engine.utils.GameData
                 .getOpenMaps()) {
             if (context.getFilePath().equalsIgnoreCase(normalizedTarget)) {
-                org.tinylog.Logger.info("MapManager: Map already open (normalized), switching context. Path={}",
-                        normalizedTarget);
-                org.argentumforge.engine.Engine.INSTANCE.runOnMainThread(() -> {
-                    org.argentumforge.engine.utils.GameData.setActiveContext(context);
-                    if (onComplete != null)
-                        onComplete.run();
-                });
-                return;
+                existingContext = context;
+                break;
             }
         }
+
+        if (existingContext != null && !forceReload) {
+            org.tinylog.Logger.info("MapManager: Map already open (normalized), switching context. Path={}",
+                    normalizedTarget);
+            final org.argentumforge.engine.utils.MapContext finalCtx = existingContext;
+            org.argentumforge.engine.Engine.INSTANCE.runOnMainThread(() -> {
+                org.argentumforge.engine.utils.GameData.setActiveContext(finalCtx);
+                if (onComplete != null)
+                    onComplete.run();
+            });
+            return;
+        }
+
+        // Si forzamos recarga y existe, lo marcaremos para reemplazo posterior
+        final org.argentumforge.engine.utils.MapContext contextToReplace = existingContext;
 
         mapLoading = true;
 
@@ -357,6 +371,7 @@ public final class MapManager {
 
                 // Pasar resultados a fase 2
                 MapLoadingResult result = new MapLoadingResult(context, particlesLoaded);
+                result.contextToReplace = contextToReplace;
 
                 // FASE 2: Aplicación (Main Thread) -> Usamos un Task Queue en Engine o
                 // bloqueamos un frame
@@ -386,6 +401,7 @@ public final class MapManager {
 
     private static class MapLoadingResult {
         MapContext context;
+        MapContext contextToReplace;
         int particlesLoaded;
 
         public MapLoadingResult(MapContext c, int p) {
@@ -397,6 +413,17 @@ public final class MapManager {
     private static void applyMap(MapLoadingResult result) {
         // Limpiar texturas en el hilo principal justo antes de cambiar contexto
         org.argentumforge.engine.renderer.Surface.INSTANCE.deleteAllTextures();
+
+        // Si estamos recargando, reemplazamos la instancia antigua en GameData.openMaps
+        if (result.contextToReplace != null) {
+            int idx = GameData.getOpenMaps().indexOf(result.contextToReplace);
+            if (idx != -1) {
+                GameData.getOpenMaps().set(idx, result.context);
+            }
+            // Si el contexto activo era el que reemplazamos, forzamos que GameData acepte
+            // el nuevo
+            // sin guardarlo en el historial de 'previous' si fuera el mismo
+        }
 
         GameData.setActiveContext(result.context);
 

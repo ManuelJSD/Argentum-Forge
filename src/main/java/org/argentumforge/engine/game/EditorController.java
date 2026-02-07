@@ -142,4 +142,35 @@ public enum EditorController {
                 org.argentumforge.engine.utils.GameData.getActiveContext(), sel.getSelectedEntities()));
         sel.getSelectedEntities().clear();
     }
+
+    public void reloadMap() {
+        if (org.argentumforge.engine.utils.MapManager.isMapLoading())
+            return;
+
+        var context = org.argentumforge.engine.utils.GameData.getActiveContext();
+        if (context == null) {
+            Console.INSTANCE.addMsgToConsole("Error: No hay ningún mapa abierto para recargar.", REGULAR,
+                    new RGBColor(1f, 0f, 0f));
+            return;
+        }
+
+        Runnable doReload = () -> {
+            // Usar forceReload = true para indicar a MapManager que debe reemplazar el
+            // contexto existente
+            org.argentumforge.engine.utils.MapManager.loadMapAsync(context.getFilePath(), true, () -> {
+                Console.INSTANCE.addMsgToConsole(I18n.INSTANCE.get("msg.mapReloaded"),
+                        org.argentumforge.engine.game.console.FontStyle.BOLD, new RGBColor(0, 1, 0));
+            });
+        };
+
+        if (context.isModified()) {
+            org.argentumforge.engine.gui.DialogManager.getInstance().showConfirm(
+                    I18n.INSTANCE.get("dialog.reload.title"),
+                    I18n.INSTANCE.get("dialog.reload.msg"),
+                    doReload,
+                    null);
+        } else {
+            doReload.run();
+        }
+    }
 }

@@ -33,48 +33,83 @@ public class I18n {
      * @param locale Código de idioma (ej: "es_ES", "en_US")
      */
     public void loadLanguage(String locale) {
-        // 1. Intentar cargar desde archivo local (carpeta lang/)
-        Path langFile = Paths.get(LANG_DIR, locale + ".properties");
-        boolean loaded = false;
+        translations.clear();
+        boolean loadedAny = false;
 
-        if (Files.exists(langFile)) {
-            try (InputStream is = new FileInputStream(langFile.toFile());
-                    InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
-                translations.clear();
-                translations.load(reader);
-                currentLocale = locale;
-                Logger.info("Loaded language from file: {}", langFile);
-                loaded = true;
-            } catch (IOException e) {
-                Logger.error(e, "Failed to load language file: {}", langFile);
+        // 1. Base: Cargar desde Classpath (dentro del JAR)
+        String resourcePath = "/" + LANG_DIR + "/" + locale + ".properties";
+        if (loadFromResource(resourcePath)) {
+            loadedAny = true;
+        }
+
+        // 2. Dev: Cargar desde resources/lang (Entorno de desarrollo IDE)
+        Path devPath = Paths.get("resources", LANG_DIR, locale + ".properties");
+        if (Files.exists(devPath)) {
+            if (loadFromFile(devPath)) {
+                loadedAny = true;
             }
         }
 
-        // 2. Si falló, intentar desde Classpath/Resources (src/main/resources/lang/)
-        if (!loaded) {
-            String resourcePath = "/" + LANG_DIR + "/" + locale + ".properties";
-            try (InputStream is = I18n.class.getResourceAsStream(resourcePath)) {
-                if (is != null) {
-                    try (InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
-                        translations.clear();
-                        translations.load(reader);
-                        currentLocale = locale;
-                        Logger.info("Loaded language from classpath: {}", resourcePath);
-                        loaded = true;
-                    }
+        // 3. User/Runtime: Cargar desde lang/ (Carpeta junto al ejecutable o raíz del
+        // proyecto)
+        Path localPath = Paths.get(LANG_DIR, locale + ".properties");
+        if (Files.exists(localPath)) {
+            // Evitar cargar dos veces si apunta al mismo archivo físico que devPath
+            boolean isSame = false;
+            try {
+                if (Files.exists(devPath)
+                        && localPath.toAbsolutePath().normalize().equals(devPath.toAbsolutePath().normalize())) {
+                    isSame = true;
                 }
-            } catch (IOException e) {
-                Logger.error(e, "Failed to load language resource: {}", resourcePath);
+            } catch (Exception e) {
+                /* ignore */ }
+
+            if (!isSame) {
+                if (loadFromFile(localPath)) {
+                    loadedAny = true;
+                }
             }
         }
 
-        // 3. Si sigue fallando y no era el default, probar con default
-        if (!loaded && !locale.equals(DEFAULT_LOCALE)) {
-            Logger.warn("Language {} not found. Falling back to default: {}", locale, DEFAULT_LOCALE);
-            loadLanguage(DEFAULT_LOCALE);
-        } else if (!loaded) {
-            Logger.error("CRITICAL: Default language {} could not be found!", DEFAULT_LOCALE);
+        if (loadedAny) {
+            currentLocale = locale;
+            Logger.info("Language loaded successfully: {}", locale);
+        } else {
+            // Fallback
+            if (!locale.equals(DEFAULT_LOCALE)) {
+                Logger.warn("Language {} not found in any source. Falling back to default: {}", locale, DEFAULT_LOCALE);
+                loadLanguage(DEFAULT_LOCALE);
+            } else {
+                Logger.error("CRITICAL: Default language {} could not be found!", DEFAULT_LOCALE);
+            }
         }
+    }
+
+    private boolean loadFromFile(Path path) {
+        try (InputStream is = new FileInputStream(path.toFile());
+                InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
+            translations.load(reader);
+            Logger.debug("Merged language from file: {}", path.toAbsolutePath());
+            return true;
+        } catch (IOException e) {
+            Logger.error(e, "Failed to load language file: {}", path);
+            return false;
+        }
+    }
+
+    private boolean loadFromResource(String path) {
+        try (InputStream is = I18n.class.getResourceAsStream(path)) {
+            if (is != null) {
+                try (InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
+                    translations.load(reader);
+                    Logger.debug("Merged language from classpath: {}", path);
+                    return true;
+                }
+            }
+        } catch (IOException e) {
+            Logger.error(e, "Failed to load language resource: {}", path);
+        }
+        return false;
     }
 
     /**
