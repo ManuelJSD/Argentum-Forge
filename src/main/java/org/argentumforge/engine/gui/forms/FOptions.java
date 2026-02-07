@@ -246,6 +246,34 @@ public final class FOptions extends Form {
                     options.save();
                 }
 
+                // Indicator Style Selector
+                org.argentumforge.engine.renderer.RenderSettings.IndicatorStyle currentStyle = options
+                        .getRenderSettings().getIndicatorStyle();
+                String styleLabel = org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.visual.indicatorStyle");
+                ImGui.text(styleLabel + ":");
+                ImGui.sameLine();
+                ImGui.setNextItemWidth(200);
+
+                String currentStyleName = org.argentumforge.engine.i18n.I18n.INSTANCE
+                        .get("options.visual.indicator." + currentStyle.name());
+                if (ImGui.beginCombo("##indicatorStyle", currentStyleName)) {
+                    for (org.argentumforge.engine.renderer.RenderSettings.IndicatorStyle style : org.argentumforge.engine.renderer.RenderSettings.IndicatorStyle
+                            .values()) {
+                        boolean isSelected = (style == currentStyle);
+                        String name = org.argentumforge.engine.i18n.I18n.INSTANCE
+                                .get("options.visual.indicator." + style.name());
+
+                        if (ImGui.selectable(name, isSelected)) {
+                            options.getRenderSettings().setIndicatorStyle(style);
+                            options.save();
+                        }
+                        if (isSelected) {
+                            ImGui.setItemDefaultFocus();
+                        }
+                    }
+                    ImGui.endCombo();
+                }
+
                 ImGui.spacing();
                 ImGui.separator();
 

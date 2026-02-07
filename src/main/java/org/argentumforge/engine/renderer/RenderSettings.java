@@ -28,6 +28,12 @@ public class RenderSettings {
     private boolean showNpcBreathing = true;
     private boolean disableAnimations = false;
 
+    public enum IndicatorStyle {
+        CLASSIC, MODERN, MINIMAL, SOLID, MESH, CORNERS
+    }
+
+    private IndicatorStyle indicatorStyle = IndicatorStyle.MODERN;
+
     // Photo Mode
     private boolean photoModeActive = false;
     private boolean photoVignette = true;
@@ -73,6 +79,8 @@ public class RenderSettings {
     private boolean showMinimapExits = true;
     private boolean showMinimapTriggers = true;
     private boolean showMinimapBlocks = false;
+
+    // ... getters and setters ...
 
     public boolean[] getShowLayer() {
         return showLayer;
@@ -256,6 +264,14 @@ public class RenderSettings {
 
     public void setDisableAnimations(boolean disableAnimations) {
         this.disableAnimations = disableAnimations;
+    }
+
+    public IndicatorStyle getIndicatorStyle() {
+        return indicatorStyle;
+    }
+
+    public void setIndicatorStyle(IndicatorStyle indicatorStyle) {
+        this.indicatorStyle = indicatorStyle;
     }
 
     public boolean isPhotoModeActive() {

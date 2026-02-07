@@ -10,7 +10,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import static org.argentumforge.engine.game.models.Character.eraseAllChars;
+
 import org.argentumforge.engine.gui.DialogManager;
 import java.io.File;
 
