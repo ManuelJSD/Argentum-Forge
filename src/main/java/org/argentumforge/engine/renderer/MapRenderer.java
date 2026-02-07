@@ -206,7 +206,7 @@ public class MapRenderer {
 
                 if (renderSettings.getShowOJBs()) {
                     if (mapData[x][y].getObjGrh().getGrhIndex() != 0) {
-                        if (grhData[mapData[x][y].getObjGrh().getGrhIndex()].getPixelWidth() != TILE_PIXEL_SIZE &&
+                        if (grhData[mapData[x][y].getObjGrh().getGrhIndex()].getPixelWidth() != TILE_PIXEL_SIZE ||
                                 grhData[mapData[x][y].getObjGrh().getGrhIndex()].getPixelHeight() != TILE_PIXEL_SIZE) {
 
                             boolean isDragged = false;

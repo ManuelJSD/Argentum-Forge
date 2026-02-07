@@ -32,24 +32,41 @@ public final class MapManager {
         // Clase de utilidad
     }
 
+    public enum MapFormatType {
+        V1_LEGACY,
+        V2_STANDARD
+    }
+
     /**
      * Opciones detalladas para el guardado del mapa.
      */
     public static class MapSaveOptions {
+        private MapFormatType formatType = MapFormatType.V2_STANDARD;
         private short version = 1;
         private boolean useLongIndices = false;
         private boolean includeHeader = true;
 
         public static MapSaveOptions standard() {
             MapSaveOptions opt = new MapSaveOptions();
+            opt.formatType = MapFormatType.V2_STANDARD;
             opt.version = 1;
             opt.useLongIndices = false;
             opt.includeHeader = true;
             return opt;
         }
 
+        public static MapSaveOptions v1Legacy() {
+            MapSaveOptions opt = new MapSaveOptions();
+            opt.formatType = MapFormatType.V1_LEGACY;
+            opt.version = 1;
+            opt.useLongIndices = false;
+            opt.includeHeader = true; // V1 has header too
+            return opt;
+        }
+
         public static MapSaveOptions aoLibre() {
             MapSaveOptions opt = new MapSaveOptions();
+            opt.formatType = MapFormatType.V2_STANDARD;
             opt.version = 136;
             opt.useLongIndices = true;
             opt.includeHeader = true;
@@ -58,10 +75,19 @@ public final class MapManager {
 
         public static MapSaveOptions extended() {
             MapSaveOptions opt = new MapSaveOptions();
+            opt.formatType = MapFormatType.V2_STANDARD;
             opt.version = 1;
             opt.useLongIndices = true;
             opt.includeHeader = true;
             return opt;
+        }
+
+        public MapFormatType getFormatType() {
+            return formatType;
+        }
+
+        public void setFormatType(MapFormatType formatType) {
+            this.formatType = formatType;
         }
 
         public short getVersion() {
@@ -171,15 +197,27 @@ public final class MapManager {
      */
     public static MapSaveOptions detectSaveOptions(byte[] data) {
         MapSaveOptions options = new MapSaveOptions();
+
+        // Heurística de tamaño para V1
+        // .map V1 de 100x100 = 273 (header) + 10000 * 13 (data) = 130273
+        if (data.length == 130273) {
+            options.setFormatType(MapFormatType.V1_LEGACY);
+            options.setVersion((short) 1);
+            options.setIncludeHeader(true);
+            options.setUseLongIndices(false);
+            return options;
+        }
+
         if (data.length < 2)
             return options;
 
         short version = (short) ((data[0] & 0xFF) | ((data[1] & 0xFF) << 8));
         options.setVersion(version);
+        options.setFormatType(MapFormatType.V2_STANDARD);
 
         options.setIncludeHeader(true); // Asumimos cabecera por defecto en carga estándar
 
-        if (version == 136 || data.length > 50000) {
+        if (version == 136 || data.length > 50000) { // 50000 es solo un umbral arbitraro que no discrimina V1
             options.setUseLongIndices(true);
         } else {
             options.setUseLongIndices(false);
@@ -374,7 +412,7 @@ public final class MapManager {
                 }
 
                 if (Files.exists(Path.of(infPath))) {
-                    loadMapInfo(infPath, newMapData, newCharList);
+                    loadMapInfo(infPath, newMapData, newCharList, detectedOptions);
                 }
 
                 MapContext context = new MapContext(filePath, newMapData, newMapProperties, newCharList);
@@ -593,7 +631,7 @@ public final class MapManager {
             // Por ahora, diferiremos llamada a loadMapInfo o pasaremos argumentos?
             // Refactorizando loadMapInfo para aceptar (infPath, mapData, charList).
             if (Files.exists(Path.of(infPath))) {
-                loadMapInfo(infPath, newMapData, newCharList);
+                loadMapInfo(infPath, newMapData, newCharList, detectedOptions);
             } else {
                 Logger.info("Archivo .inf no encontrado en {}, saltando carga de entidades.", infPath);
             }
@@ -663,7 +701,11 @@ public final class MapManager {
 
         try {
             // Guardar datos de capas (.map)
-            saveMapData(filePath, options);
+            if (options.getFormatType() == MapFormatType.V1_LEGACY) {
+                saveMapDataV1(filePath, options);
+            } else {
+                saveMapData(filePath, options);
+            }
 
             String basePath = filePath.substring(0, filePath.lastIndexOf('.'));
             String datPath = basePath + ".dat";
@@ -673,7 +715,11 @@ public final class MapManager {
             saveMapProperties(datPath);
 
             // Guardar información de entidades y triggers (.inf)
-            saveMapInfo(infPath);
+            if (options.getFormatType() == MapFormatType.V1_LEGACY) {
+                saveMapInfoV1(infPath);
+            } else {
+                saveMapInfo(infPath);
+            }
 
             // Reiniciar estado de modificaciones
             markAsSaved();
@@ -759,6 +805,10 @@ public final class MapManager {
      * @param options Opciones de guardado inferidas.
      */
     static MapData[][] initMap(byte[] data, MapSaveOptions options) {
+        if (options.getFormatType() == MapFormatType.V1_LEGACY) {
+            return initMapV1(data, options);
+        }
+
         GameData.reader.init(data);
 
         MapData[][] newMapData = new MapData[GameData.X_MAX_MAP_SIZE + 1][GameData.Y_MAX_MAP_SIZE + 1];
@@ -893,6 +943,64 @@ public final class MapManager {
     }
 
     /**
+     * Procesa los datos binarios del archivo .map V1 (0.99z/0.11.2)
+     * Estructura Fija: Header (273) + 100x100 x (Blocked(1) + 4*Grh(2) + Trigger(2)
+     * + Unused(2))
+     * Total Tile Bytes: 13 bytes
+     */
+    static MapData[][] initMapV1(byte[] data, MapSaveOptions options) {
+        GameData.reader.init(data);
+        MapData[][] newMapData = new MapData[GameData.X_MAX_MAP_SIZE + 1][GameData.Y_MAX_MAP_SIZE + 1];
+
+        // Init Array
+        for (int y = 0; y <= GameData.Y_MAX_MAP_SIZE; y++) {
+            for (int x = 0; x <= GameData.X_MAX_MAP_SIZE; x++) {
+                newMapData[x][y] = new MapData();
+            }
+        }
+
+        // Header check
+        if (options.isIncludeHeader() && GameData.reader.hasRemaining(273)) {
+            // Read and discard header
+            GameData.reader.readShort(); // Version
+            GameData.reader.skipBytes(263); // Fix
+            GameData.reader.readShort(); // Unused ints
+            GameData.reader.readShort();
+            GameData.reader.readShort();
+            GameData.reader.readShort();
+        }
+
+        for (int y = GameData.Y_MIN_MAP_SIZE; y <= GameData.Y_MAX_MAP_SIZE; y++) {
+            for (int x = GameData.X_MIN_MAP_SIZE; x <= GameData.X_MAX_MAP_SIZE; x++) {
+                if (!GameData.reader.hasRemaining(13))
+                    break;
+
+                // Blocked (1 byte)
+                byte blocked = GameData.reader.readByte();
+                newMapData[x][y].setBlocked(blocked == 1);
+
+                // Layers 1-4 (4 * 2 bytes)
+                for (int l = 1; l <= 4; l++) {
+                    int grh = GameData.reader.readUnsignedShort();
+                    newMapData[x][y].getLayer(l).setGrhIndex(grh);
+                    if (grh > 0) {
+                        newMapData[x][y].setLayer(l, GameData.initGrh(newMapData[x][y].getLayer(l), grh, true));
+                    }
+                }
+
+                // Trigger (2 bytes)
+                int trigger = GameData.reader.readUnsignedShort();
+                newMapData[x][y].setTrigger(trigger);
+
+                // Unused (2 bytes) -> TempInt in VB6
+                GameData.reader.readShort();
+            }
+        }
+
+        return newMapData;
+    }
+
+    /**
      * Carga las propiedades generales del mapa (nombre, música, zona) desde un .dat
      *
      * @param filePath Ruta absoluta al archivo .dat del mapa.
@@ -962,11 +1070,25 @@ public final class MapManager {
      * @param filePath Ruta absoluta al archivo .inf
      * @param mapData  Matriz de datos del mapa.
      * @param charList Lista de personajes.
+     * @param options  Opciones de guardado (para saber si es V1)
      */
-    private static void loadMapInfo(String filePath, MapData[][] mapData, Character[] charList) {
+    private static void loadMapInfo(String filePath, MapData[][] mapData, Character[] charList,
+            MapSaveOptions options) {
         try {
             byte[] data = Files.readAllBytes(Path.of(filePath));
+
+            // Heurística de tamaño para .info V1
+            // 100x100 cells * 16 bytes/cell + 10 header = 160010 bytes
+            boolean isV1 = (options.getFormatType() == MapFormatType.V1_LEGACY) || (data.length == 160010);
+            Logger.info("Loading .inf file: size={}, optionsFormat={}, isV1={}", data.length, options.getFormatType(),
+                    isV1);
+
             GameData.reader.init(data);
+
+            if (isV1) {
+                loadMapInfoV1(mapData, charList);
+                return;
+            }
 
             // Saltar cabecera del .inf (10 bytes heredados)
             GameData.reader.skipBytes(10);
@@ -1235,4 +1357,163 @@ public final class MapManager {
         }
     }
 
+    private static void saveMapDataV1(String filePath, MapSaveOptions options) throws IOException {
+        try (FileOutputStream fos = new FileOutputStream(filePath)) {
+            java.nio.channels.FileChannel channel = fos.getChannel();
+            // Header (273 bytes)
+            if (options.isIncludeHeader()) {
+                java.nio.ByteBuffer headerBuf = java.nio.ByteBuffer.allocate(273);
+                headerBuf.order(java.nio.ByteOrder.LITTLE_ENDIAN);
+                headerBuf.putShort(options.getVersion());
+                headerBuf.put(new byte[263]); // Fixed header padding
+                headerBuf.putShort((short) 0);
+                headerBuf.putShort((short) 0);
+                headerBuf.putShort((short) 0);
+                headerBuf.putShort((short) 0);
+                headerBuf.flip();
+                channel.write(headerBuf);
+            }
+
+            // Body: 10000 tiles * 13 bytes = 130000 bytes
+            java.nio.ByteBuffer bodyBuf = java.nio.ByteBuffer.allocate(130000);
+            bodyBuf.order(java.nio.ByteOrder.LITTLE_ENDIAN);
+
+            MapContext context = GameData.getActiveContext();
+            if (context == null || context.getMapData() == null)
+                return;
+            MapData[][] mapData = context.getMapData();
+
+            for (int y = GameData.Y_MIN_MAP_SIZE; y <= GameData.Y_MAX_MAP_SIZE; y++) {
+                for (int x = GameData.X_MIN_MAP_SIZE; x <= GameData.X_MAX_MAP_SIZE; x++) {
+                    // Blocked (1)
+                    bodyBuf.put((byte) (mapData[x][y].getBlocked() ? 1 : 0));
+                    // Layers 1-4 (8)
+                    for (int l = 1; l <= 4; l++) {
+                        bodyBuf.putShort((short) mapData[x][y].getLayer(l).getGrhIndex());
+                    }
+                    // Trigger (2)
+                    bodyBuf.putShort((short) mapData[x][y].getTrigger());
+                    // Unused (2)
+                    bodyBuf.putShort((short) 0);
+                }
+            }
+            bodyBuf.flip();
+            channel.write(bodyBuf);
+        }
+    }
+
+    private static void saveMapInfoV1(String filePath) throws IOException {
+        try (FileOutputStream fos = new FileOutputStream(filePath)) {
+            java.nio.channels.FileChannel channel = fos.getChannel();
+
+            // Header: 10 bytes
+            java.nio.ByteBuffer headerBuf = java.nio.ByteBuffer.allocate(10);
+            headerBuf.order(java.nio.ByteOrder.LITTLE_ENDIAN);
+            for (int i = 0; i < 5; i++)
+                headerBuf.putShort((short) 0);
+            headerBuf.flip();
+            channel.write(headerBuf);
+
+            // Body: 100 tiles * 100 tiles * 16 bytes = 160000 bytes
+            java.nio.ByteBuffer bodyBuf = java.nio.ByteBuffer.allocate(160000);
+            bodyBuf.order(java.nio.ByteOrder.LITTLE_ENDIAN);
+
+            MapContext context = GameData.getActiveContext();
+            if (context == null || context.getMapData() == null)
+                return;
+            MapData[][] mapData = context.getMapData();
+
+            for (int y = GameData.Y_MIN_MAP_SIZE; y <= GameData.Y_MAX_MAP_SIZE; y++) {
+                for (int x = GameData.X_MIN_MAP_SIZE; x <= GameData.X_MAX_MAP_SIZE; x++) {
+                    // Exit (6)
+                    bodyBuf.putShort((short) mapData[x][y].getExitMap());
+                    bodyBuf.putShort((short) mapData[x][y].getExitX());
+                    bodyBuf.putShort((short) mapData[x][y].getExitY());
+                    // NPC (2)
+                    bodyBuf.putShort((short) mapData[x][y].getNpcIndex());
+                    // Obj (4)
+                    bodyBuf.putShort((short) mapData[x][y].getObjIndex());
+                    bodyBuf.putShort((short) mapData[x][y].getObjAmount());
+                    // Unused (4)
+                    bodyBuf.putShort((short) 0);
+                    bodyBuf.putShort((short) 0);
+                }
+            }
+            bodyBuf.flip();
+            channel.write(bodyBuf);
+        }
+    }
+
+    private static void loadMapInfoV1(MapData[][] mapData, Character[] charList) throws IOException {
+        // Cabecera inf (10 bytes: 5 integers)
+        if (GameData.reader.hasRemaining(10)) {
+            GameData.reader.skipBytes(10);
+        }
+
+        // Loop 100x100
+        for (int y = GameData.Y_MIN_MAP_SIZE; y <= GameData.Y_MAX_MAP_SIZE; y++) {
+            for (int x = GameData.X_MIN_MAP_SIZE; x <= GameData.X_MAX_MAP_SIZE; x++) {
+                if (!GameData.reader.hasRemaining(16))
+                    break;
+                if (mapData[x][y] == null)
+                    continue;
+
+                // TileExit (6 bytes)
+                mapData[x][y].setExitMap(GameData.reader.readUnsignedShort());
+                mapData[x][y].setExitX(GameData.reader.readUnsignedShort());
+                mapData[x][y].setExitY(GameData.reader.readUnsignedShort());
+
+                // NPC (2 bytes)
+                int npcIndex = GameData.reader.readUnsignedShort();
+                if (npcIndex > 0) {
+                    mapData[x][y].setNpcIndex(npcIndex);
+                    // Spawn logic
+                    NpcData npc = AssetRegistry.npcs.get(npcIndex);
+                    if (npc != null) {
+                        int openCharIndex = 0;
+                        for (int i = 1; i < charList.length; i++) {
+                            if (!charList[i].isActive()) {
+                                openCharIndex = i;
+                                break;
+                            }
+                        }
+                        if (openCharIndex > 0) {
+                            Character chr = charList[openCharIndex];
+                            chr.setActive(true);
+                            chr.setHeading(Direction.fromID(npc.getHeading()));
+                            chr.getPos().setX(x);
+                            chr.getPos().setY(y);
+                            int bodyIdx = npc.getBody();
+                            if (bodyIdx > 0 && bodyIdx < AssetRegistry.bodyData.length
+                                    && AssetRegistry.bodyData[bodyIdx] != null) {
+                                chr.setBody(new BodyData(AssetRegistry.bodyData[bodyIdx]));
+                            }
+                            int headIdx = npc.getHead();
+                            if (headIdx > 0 && headIdx < AssetRegistry.headData.length
+                                    && AssetRegistry.headData[headIdx] != null) {
+                                chr.setHead(new HeadData(AssetRegistry.headData[headIdx]));
+                            }
+                            mapData[x][y].setCharIndex((short) openCharIndex);
+                        }
+                    }
+                }
+
+                // Obj (4 bytes)
+                int objIndex = GameData.reader.readUnsignedShort();
+                int amount = GameData.reader.readUnsignedShort();
+                mapData[x][y].setObjIndex(objIndex);
+                mapData[x][y].setObjAmount(amount);
+                if (objIndex > 0) {
+                    ObjData obj = AssetRegistry.objs.get(objIndex);
+                    if (obj != null) {
+                        GameData.initGrh(mapData[x][y].getObjGrh(), obj.getGrhIndex(), false);
+                    }
+                }
+
+                // Unused/Placeholders (4 bytes)
+                GameData.reader.readShort();
+                GameData.reader.readShort();
+            }
+        }
+    }
 }

@@ -45,30 +45,40 @@ public class FMapSaveOptions extends Form {
     }
 
     private void detectPreset() {
-        if (version.get() == 1 && !longIndices.get() && header.get()) {
+        if (options.getFormatType() == MapManager.MapFormatType.V1_LEGACY) {
+            preset.set(3); // V1 Legacy
+        } else if (version.get() == 1 && !longIndices.get() && header.get()) {
             preset.set(0); // Standard
         } else if (version.get() == 1 && longIndices.get() && header.get()) {
             preset.set(1); // Extended
         } else if (version.get() == 136 && longIndices.get() && header.get()) {
             preset.set(2); // AOLibre
         } else {
-            preset.set(3); // Custom
+            preset.set(4); // Custom
         }
     }
 
     private void applyPreset(int idx) {
         if (idx == 0) { // Standard
+            options.setFormatType(MapManager.MapFormatType.V2_STANDARD);
             version.set(1);
             header.set(true);
             longIndices.set(false);
         } else if (idx == 1) { // Extended
+            options.setFormatType(MapManager.MapFormatType.V2_STANDARD);
             version.set(1);
             header.set(true);
             longIndices.set(true);
         } else if (idx == 2) { // AOLibre
+            options.setFormatType(MapManager.MapFormatType.V2_STANDARD);
             version.set(136);
             header.set(true);
             longIndices.set(true);
+        } else if (idx == 3) { // V1 Legacy
+            options.setFormatType(MapManager.MapFormatType.V1_LEGACY);
+            version.set(1);
+            header.set(true);
+            longIndices.set(false);
         }
     }
 
@@ -84,6 +94,7 @@ public class FMapSaveOptions extends Form {
                     I18n.INSTANCE.get("map.save.format.standard"),
                     I18n.INSTANCE.get("map.save.format.extended"),
                     I18n.INSTANCE.get("map.save.format.aolibre"),
+                    "V1 Legacy (0.99z/0.11.2)",
                     I18n.INSTANCE.get("map.save.option.custom")
             };
 
@@ -99,25 +110,25 @@ public class FMapSaveOptions extends Form {
                     version.set(0);
                 if (version.get() > 32767)
                     version.set(32767);
-                preset.set(3); // To Custom
+                preset.set(4); // To Custom
             }
 
             ImGui.dummy(0, 5);
 
             if (ImGui.checkbox("Incluir Cabecera (273 bytes)", header)) {
-                preset.set(3); // To Custom
+                preset.set(4); // To Custom
             }
 
             ImGui.dummy(0, 5);
             ImGui.text("Tamaño de Índices:");
             if (ImGui.radioButton("Integer (2 Bytes)", !longIndices.get())) {
                 longIndices.set(false);
-                preset.set(3); // To Custom
+                preset.set(4); // To Custom
             }
             ImGui.sameLine();
             if (ImGui.radioButton("Long (4 Bytes)", longIndices.get())) {
                 longIndices.set(true);
-                preset.set(3); // To Custom
+                preset.set(4); // To Custom
             }
 
             ImGui.dummy(0, 20);
