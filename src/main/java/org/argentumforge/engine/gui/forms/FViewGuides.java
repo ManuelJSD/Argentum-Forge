@@ -18,7 +18,11 @@ public class FViewGuides extends Form {
 
     @Override
     public void render() {
-        ImGui.setNextWindowSize(320, 0, imgui.flag.ImGuiCond.Always);
+        // Dejar que AlwaysAutoResize maneje el tamaño (0, 0)
+        ImGui.setNextWindowSize(0, 0, imgui.flag.ImGuiCond.Always);
+
+        // Agregar margen interno (padding) más generoso
+        ImGui.pushStyleVar(imgui.flag.ImGuiStyleVar.WindowPadding, 15, 15);
 
         if (ImGui.begin(I18n.INSTANCE.get("options.grid.guides"),
                 ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.AlwaysAutoResize)) {
@@ -100,6 +104,27 @@ public class FViewGuides extends Form {
                 Options.INSTANCE.save();
             }
 
+            ImGui.dummy(0, 5);
+            ImGui.separator();
+            ImGui.dummy(0, 5);
+
+            // --- OPACIDAD DE ELEMENTOS ---
+            ImGui.textColored(ImGui.getColorU32(0.2f, 0.7f, 1.0f, 1.0f),
+                    I18n.INSTANCE.get("menu.view.layers") + " & " + I18n.INSTANCE.get("common.visualMode") + ":");
+            ImGui.separator();
+
+            float[] blockAlpha = { settings.getBlockOpacity() };
+            if (ImGui.sliderFloat(I18n.INSTANCE.get("options.visual.opacity.blocks"), blockAlpha, 0.0f, 1.0f)) {
+                settings.setBlockOpacity(blockAlpha[0]);
+                Options.INSTANCE.save();
+            }
+
+            float[] transferAlpha = { settings.getTransferOpacity() };
+            if (ImGui.sliderFloat(I18n.INSTANCE.get("options.visual.opacity.transfers"), transferAlpha, 0.0f, 1.0f)) {
+                settings.setTransferOpacity(transferAlpha[0]);
+                Options.INSTANCE.save();
+            }
+
             ImGui.dummy(0, 10);
 
             // --- GHOST ---
@@ -111,7 +136,17 @@ public class FViewGuides extends Form {
                 settings.setGhostOpacity(ghostAlpha[0]);
                 Options.INSTANCE.save();
             }
+
+            ImGui.dummy(0, 10);
+            ImGui.separator();
+            ImGui.dummy(0, 5);
+
+            // Botón Cerrar
+            if (ImGui.button(I18n.INSTANCE.get("common.close"), ImGui.getContentRegionAvailX(), 30)) {
+                this.close();
+            }
         }
         ImGui.end();
+        ImGui.popStyleVar(); // Pop WindowPadding
     }
 }

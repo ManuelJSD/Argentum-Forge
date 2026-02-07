@@ -5,7 +5,7 @@ import imgui.ImGui;
 import imgui.flag.*;
 import org.argentumforge.engine.game.console.Console;
 import org.argentumforge.engine.gui.Theme;
-import org.argentumforge.engine.utils.editor.*;
+
 import org.argentumforge.engine.gui.forms.main.MainMenuBar;
 import org.argentumforge.engine.gui.forms.main.MainStatusBar;
 import org.argentumforge.engine.gui.forms.main.MainToolbar;
@@ -13,7 +13,6 @@ import org.argentumforge.engine.i18n.I18n;
 
 import static org.argentumforge.engine.utils.GameData.options;
 import org.argentumforge.engine.utils.GithubReleaseChecker;
-// Se eliminaron java.awt.Desktop y java.net.URI
 import org.argentumforge.engine.game.models.Key;
 import org.argentumforge.engine.listeners.KeyHandler;
 import org.argentumforge.engine.scenes.GameScene;
@@ -130,6 +129,13 @@ public final class FMain extends Form {
         ImGui.begin("MainDockSpaceHolder", windowFlags);
         ImGui.popStyleVar(3);
 
+        // Calcular margen superior para no tapar el DockSpace con la Toolbar y Tabs
+        float topMargin = 52.0f; // Altura de MainToolbar
+        if (!org.argentumforge.engine.utils.GameData.getOpenMaps().isEmpty()) {
+            topMargin += 22.0f; // Altura de Tabs
+        }
+        ImGui.setCursorPosY(topMargin);
+
         // Crear el DockSpace real
         int dockspaceId = ImGui.getID("MainEditorDockSpace");
         ImGui.dockSpace(dockspaceId, 0.0f, 0.0f, ImGuiDockNodeFlags.PassthruCentralNode);
@@ -164,6 +170,12 @@ public final class FMain extends Form {
 
         // Renderizar Menú Contextual (siempre disponible para aparecer)
         ContextMenu.render();
+
+        if (org.argentumforge.engine.utils.editor.MinimapColorGenerator.generating) {
+            float centerX = viewport.getWorkPosX() + viewport.getWorkSizeX() * 0.5f;
+            float centerY = viewport.getWorkPosY() + viewport.getWorkSizeY() * 0.5f;
+            ImGui.setNextWindowPos(centerX, centerY, ImGuiCond.Always, 0.5f, 0.5f);
+        }
 
         if (ImGui.beginPopupModal(I18n.INSTANCE.get("msg.processingColors"),
                 ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoTitleBar)) {

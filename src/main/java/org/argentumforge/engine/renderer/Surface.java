@@ -129,6 +129,19 @@ public enum Surface {
     }
 
     /**
+     * Limpia la lista de IDs fallidos, permitiendo que el sistema intente cargar
+     * nuevamente las texturas que fallaron anteriormente.
+     * Util para recuperar texturas tras fallos de red o desbloqueo de archivos.
+     */
+    public void retryFailedTextures() {
+        if (failedIds != null) {
+            int count = failedIds.size();
+            failedIds.clear();
+            Logger.info("Se han reiniciado {} texturas fallidas para reintento.", count);
+        }
+    }
+
+    /**
      * Obtiene una textura asociada al identificador numerico especificado.
      * <p>
      * Si la textura no existe en el mapa, se crea y se agrega al mismo.
@@ -173,10 +186,10 @@ public enum Surface {
                 } else {
                     pendingIds.remove(fileNum);
                     placeholderTextures.remove(fileNum);
-                    if (failedIds != null)
+                    if (failedIds != null) {
                         failedIds.add(fileNum);
-                    Logger.warn("Grafico {} no encontrado en {}", fileNum,
-                            org.argentumforge.engine.game.Options.INSTANCE.getGraphicsPath());
+                        Logger.warn("Grafico {} falló tras reintentos y se marcó como FAILED.", fileNum);
+                    }
                 }
             });
         }

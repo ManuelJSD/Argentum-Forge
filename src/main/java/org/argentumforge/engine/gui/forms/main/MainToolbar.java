@@ -116,18 +116,36 @@ public class MainToolbar {
 
         // Botón Inspector (Anteriormente Selección)
         boolean inspectorActive = org.argentumforge.engine.game.EditorController.INSTANCE.isInspectorMode();
+
+        // Colores para el Inspector (Verde)
+        int inspColor;
+        int inspHover;
+        int inspActive;
+
         if (inspectorActive) {
-            ImGui.pushStyleColor(ImGuiCol.Button, Theme.COLOR_ACCENT);
+            inspColor = Theme.COLOR_ACCENT;
+            inspHover = Theme.rgba(102, 187, 106, 255); // Verde más claro
+            inspActive = Theme.rgba(56, 142, 60, 255); // Verde más oscuro
+        } else {
+            inspColor = Theme.rgba(45, 45, 45, 255);
+            inspHover = Theme.rgba(70, 70, 70, 255);
+            inspActive = Theme.rgba(90, 90, 90, 255);
         }
+
+        ImGui.pushStyleColor(ImGuiCol.Button, inspColor);
+        ImGui.pushStyleColor(ImGuiCol.ButtonHovered, inspHover);
+        ImGui.pushStyleColor(ImGuiCol.ButtonActive, inspActive);
 
         ImGui.pushID("btnInspector");
         if (toolbarIcons.getId() > 0) {
-            ImGui.pushStyleVar(ImGuiStyleVar.FramePadding, 0, 0);
+            float padding = 4.0f; // 2 pixels per side
+            ImGui.pushStyleVar(ImGuiStyleVar.FramePadding, padding / 2, padding / 2);
             if (!mapOpen)
                 ImGui.beginDisabled();
             // Reutilizamos el mismo icono de selección por ahora (o placeholder)
             // Coordenadas UV: 2, 2
-            if (ImGui.imageButton("##inspectorButton", (long) toolbarIcons.getId(), btnSize, btnSize, 2 * uvStep + zoom,
+            if (ImGui.imageButton("##inspectorButton", (long) toolbarIcons.getId(), btnSize - padding,
+                    btnSize - padding, 2 * uvStep + zoom,
                     2 * uvStep + zoom,
                     3 * uvStep - zoom,
                     3 * uvStep - zoom)) {
@@ -143,11 +161,10 @@ public class MainToolbar {
         }
         ImGui.popID();
 
+        ImGui.popStyleColor(3);
+
         if (ImGui.isItemHovered()) {
             ImGui.setTooltip(I18n.INSTANCE.get("common.inspector", "Inspector")); // Fallback text if key missing
-        }
-        if (inspectorActive) {
-            ImGui.popStyleColor();
         }
 
         ImGui.popStyleVar(); // Pop BorderSize
@@ -180,18 +197,41 @@ public class MainToolbar {
         if (!enabled)
             ImGui.beginDisabled();
         ImGui.pushID(formName);
-        // Resaltar si está activo (visible)
+
+        // Determinar estado activo (visible)
         boolean isVisible = ImGUISystem.INSTANCE.isFormVisible(formName);
+
+        // Definir colores según estado
+        int colorButton;
+        int colorHovered;
+        int colorActive;
+
         if (isVisible) {
-            ImGui.pushStyleColor(ImGuiCol.Button, Theme.COLOR_PRIMARY);
+            // Estado ACTIVO (Ventana Abierta)
+            colorButton = Theme.COLOR_PRIMARY;
+            colorHovered = Theme.rgba(100, 181, 246, 255); // Azul más claro
+            colorActive = Theme.rgba(21, 101, 192, 255); // Azul más oscuro
+        } else {
+            // Estado INACTIVO (Ventana Cerrada)
+            colorButton = Theme.rgba(45, 45, 45, 255); // Fondo base
+            colorHovered = Theme.rgba(70, 70, 70, 255); // Hover
+            colorActive = Theme.rgba(90, 90, 90, 255); // Click
         }
+
+        // Aplicar estilos de color
+        ImGui.pushStyleColor(ImGuiCol.Button, colorButton);
+        ImGui.pushStyleColor(ImGuiCol.ButtonHovered, colorHovered);
+        ImGui.pushStyleColor(ImGuiCol.ButtonActive, colorActive);
 
         // Si la textura cargó correctamente, usar ImageButton, sino fallback a Texto
         if (toolbarIcons.getId() > 0) {
-            // Eliminar padding para que el icono ocupe todo el botón
-            ImGui.pushStyleVar(ImGuiStyleVar.FramePadding, 0, 0);
+            // Usar padding pequeño para que se dibuje el fondo (Color) pero manteniendo el
+            // icono grande
+            float padding = 4.0f; // 2px por lado x 2
+            ImGui.pushStyleVar(ImGuiStyleVar.FramePadding, padding / 2, padding / 2);
             ImGui.pushID("##iconButton");
-            if (ImGui.imageButton("##iconButton", (long) toolbarIcons.getId(), size, size, u0, v0, u1, v1)) {
+            if (ImGui.imageButton("##iconButton", (long) toolbarIcons.getId(), size - padding, size - padding, u0, v0,
+                    u1, v1)) {
                 toggleForm(isVisible, formInstance);
             }
             ImGui.popID();
@@ -202,9 +242,8 @@ public class MainToolbar {
             }
         }
 
-        if (isVisible) {
-            ImGui.popStyleColor();
-        }
+        // Restaurar estilos
+        ImGui.popStyleColor(3);
 
         if (ImGui.isItemHovered()) {
             ImGui.setTooltip(tooltip);

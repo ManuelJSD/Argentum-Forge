@@ -64,7 +64,7 @@ public class FProfileSelector extends Form {
         int flags = ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove
                 | ImGuiWindowFlags.NoTitleBar;
 
-        if (ImGui.begin("Seleccionar Perfil", flags)) {
+        if (ImGui.begin(I18n.INSTANCE.get("profile.select.title") + "###ProfileSelector", flags)) {
 
             // Header
             ImGui.spacing();

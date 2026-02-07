@@ -131,6 +131,44 @@ public class FBindKeys extends Form {
                     ImGui.dummy(0, 5);
                 }
 
+                // LAYERS & VISIBILITY
+                if (ImGui.collapsingHeader(I18n.INSTANCE.get("options.keys.layers"), ImGuiTreeNodeFlags.DefaultOpen)) {
+                    ImGui.columns(2, "BindKeysCols_Layers", false);
+                    ImGui.setColumnWidth(0, ImGui.getWindowWidth() - 160);
+
+                    renderKeyBindRow(I18n.INSTANCE.get("options.keys.layer1"), Key.TOGGLE_LAYER_1);
+                    renderKeyBindRow(I18n.INSTANCE.get("options.keys.layer2"), Key.TOGGLE_LAYER_2);
+                    renderKeyBindRow(I18n.INSTANCE.get("options.keys.layer3"), Key.TOGGLE_LAYER_3);
+                    renderKeyBindRow(I18n.INSTANCE.get("options.keys.layer4"), Key.TOGGLE_LAYER_4);
+
+                    ImGui.separator();
+
+                    renderKeyBindRow(I18n.INSTANCE.get("options.keys.blocks"), Key.TOGGLE_BLOCKS);
+                    renderKeyBindRow(I18n.INSTANCE.get("options.keys.transfers"), Key.TOGGLE_TRANSFERS);
+                    renderKeyBindRow(I18n.INSTANCE.get("options.keys.triggers"), Key.TOGGLE_TRIGGERS);
+                    renderKeyBindRow(I18n.INSTANCE.get("options.keys.npcs"), Key.TOGGLE_NPCS);
+                    renderKeyBindRow(I18n.INSTANCE.get("options.keys.objects"), Key.TOGGLE_OBJECTS);
+
+                    ImGui.columns(1);
+                    ImGui.dummy(0, 5);
+                }
+
+                // WORKFLOW
+                if (ImGui.collapsingHeader(I18n.INSTANCE.get("options.keys.workflow"),
+                        ImGuiTreeNodeFlags.DefaultOpen)) {
+                    ImGui.columns(2, "BindKeysCols_Workflow", false);
+                    ImGui.setColumnWidth(0, ImGui.getWindowWidth() - 160);
+
+                    renderKeyBindRow(I18n.INSTANCE.get("options.keys.newMap"), Key.NEW_MAP);
+                    renderKeyBindRow(I18n.INSTANCE.get("options.keys.openMap"), Key.OPEN_MAP);
+                    renderKeyBindRow(I18n.INSTANCE.get("options.keys.validateMap"), Key.VALIDATE_MAP);
+                    renderKeyBindRow(I18n.INSTANCE.get("options.keys.zoomIn"), Key.ZOOM_IN);
+                    renderKeyBindRow(I18n.INSTANCE.get("options.keys.zoomOut"), Key.ZOOM_OUT);
+
+                    ImGui.columns(1);
+                    ImGui.dummy(0, 5);
+                }
+
                 // TOOLS
                 if (ImGui.collapsingHeader(I18n.INSTANCE.get("options.keys.tools"), ImGuiTreeNodeFlags.DefaultOpen)) {
                     ImGui.columns(2, "BindKeysCols_Tools", false);

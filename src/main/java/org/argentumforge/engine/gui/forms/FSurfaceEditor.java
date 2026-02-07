@@ -391,6 +391,11 @@ public class FSurfaceEditor extends Form implements IMapEditor {
                     if (isSelected)
                         ImGui.pushStyleColor(ImGuiCol.Border, Theme.COLOR_ACCENT);
 
+                    // Usar un color de fondo de botón ligeramente más claro para que los tiles
+                    // negros/transparentes
+                    // se vean como "slots" y no como vacíos.
+                    ImGui.pushStyleColor(ImGuiCol.Button, Theme.rgba(50, 50, 55, 255));
+
                     if (tex != null) {
                         float u0 = data.getsX() / (float) tex.getTex_width();
                         float v0 = (data.getsY() + data.getPixelHeight()) / (float) tex.getTex_height();
@@ -410,8 +415,10 @@ public class FSurfaceEditor extends Form implements IMapEditor {
                         }
                     }
 
+                    ImGui.popStyleColor(); // Pop Button Color
+
                     if (isSelected)
-                        ImGui.popStyleColor();
+                        ImGui.popStyleColor(); // Pop Border Color
 
                     if (ImGui.isItemHovered()) {
                         ImGui.beginTooltip();
