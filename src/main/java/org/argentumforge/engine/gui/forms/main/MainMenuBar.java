@@ -204,7 +204,7 @@ public class MainMenuBar {
                 }
 
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.view.guidesConfig"))) {
-                    ImGUISystem.INSTANCE.show(new FViewGuides());
+                    ImGUISystem.INSTANCE.show(new FOptions());
                 }
 
                 ImGui.separator();

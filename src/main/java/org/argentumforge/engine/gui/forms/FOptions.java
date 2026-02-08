@@ -228,52 +228,6 @@ public final class FOptions extends Form {
                 }
 
                 ImGui.spacing();
-                ImGui.separator();
-
-                // --- SECCIÓN: VISUALES ---
-                ImGui.textColored(ImGui.getColorU32(0.2f, 0.7f, 1.0f, 1.0f),
-                        org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.visual.breathing") + " / "
-                                + org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.grid.guides") + ":");
-                ImGui.dummy(0, 5);
-
-                if (ImGui.button(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.grid.config"), 250, 25)) {
-                    org.argentumforge.engine.gui.ImGUISystem.INSTANCE.show(new FViewGuides());
-                }
-
-                if (ImGui.checkbox(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.visual.breathing"),
-                        options.getRenderSettings().isShowNpcBreathing())) {
-                    options.getRenderSettings().setShowNpcBreathing(!options.getRenderSettings().isShowNpcBreathing());
-                    options.save();
-                }
-
-                // Indicator Style Selector
-                org.argentumforge.engine.renderer.RenderSettings.IndicatorStyle currentStyle = options
-                        .getRenderSettings().getIndicatorStyle();
-                String styleLabel = org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.visual.indicatorStyle");
-                ImGui.text(styleLabel + ":");
-                ImGui.sameLine();
-                ImGui.setNextItemWidth(200);
-
-                String currentStyleName = org.argentumforge.engine.i18n.I18n.INSTANCE
-                        .get("options.visual.indicator." + currentStyle.name());
-                if (ImGui.beginCombo("##indicatorStyle", currentStyleName)) {
-                    for (org.argentumforge.engine.renderer.RenderSettings.IndicatorStyle style : org.argentumforge.engine.renderer.RenderSettings.IndicatorStyle
-                            .values()) {
-                        boolean isSelected = (style == currentStyle);
-                        String name = org.argentumforge.engine.i18n.I18n.INSTANCE
-                                .get("options.visual.indicator." + style.name());
-
-                        if (ImGui.selectable(name, isSelected)) {
-                            options.getRenderSettings().setIndicatorStyle(style);
-                            options.save();
-                        }
-                        if (isSelected) {
-                            ImGui.setItemDefaultFocus();
-                        }
-                    }
-                    ImGui.endCombo();
-                }
-
                 ImGui.spacing();
                 ImGui.separator();
 
@@ -304,6 +258,192 @@ public final class FOptions extends Form {
                         options.getRenderSettings().isDisableAnimations())) {
                     options.getRenderSettings()
                             .setDisableAnimations(!options.getRenderSettings().isDisableAnimations());
+                    options.save();
+                }
+
+                ImGui.endTabItem();
+            }
+
+            // --- TAB: GUÍAS VISUALES ---
+            if (ImGui.beginTabItem(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.grid.guides", "Guías"))) {
+                org.argentumforge.engine.renderer.RenderSettings settings = options.getRenderSettings();
+
+                ImGui.dummy(0, 10);
+
+                // --- REJILLA ---
+                ImGui.textColored(ImGui.getColorU32(0.2f, 0.7f, 1.0f, 1.0f),
+                        org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.grid.title") + ":");
+                ImGui.separator();
+
+                if (ImGui.checkbox(org.argentumforge.engine.i18n.I18n.INSTANCE.get("menu.view.grid"),
+                        settings.isShowGrid())) {
+                    settings.setShowGrid(!settings.isShowGrid());
+                    options.save();
+                }
+
+                ImGui.sameLine();
+                if (ImGui.checkbox(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.grid.adaptive"),
+                        settings.isAdaptiveGrid())) {
+                    settings.setAdaptiveGrid(!settings.isAdaptiveGrid());
+                    options.save();
+                }
+
+                float[] gColor = settings.getGridColor();
+                if (ImGui.colorEdit4(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.grid.color"), gColor)) {
+                    settings.setGridColor(gColor);
+                    options.save();
+                }
+
+                ImGui.spacing();
+
+                // --- REJILLA MAYOR ---
+                if (ImGui.checkbox(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.grid.showMajor"),
+                        settings.isShowMajorGrid())) {
+                    settings.setShowMajorGrid(!settings.isShowMajorGrid());
+                    options.save();
+                }
+
+                ImGui.setNextItemWidth(100);
+                ImInt mInterval = new ImInt(settings.getGridMajorInterval());
+                if (ImGui.inputInt(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.grid.majorInterval"),
+                        mInterval)) {
+                    if (mInterval.get() < 2)
+                        mInterval.set(2);
+                    settings.setGridMajorInterval(mInterval.get());
+                    options.save();
+                }
+
+                float[] gmColor = settings.getGridMajorColor();
+                if (ImGui.colorEdit4(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.grid.majorColor"),
+                        gmColor)) {
+                    settings.setGridMajorColor(gmColor);
+                    options.save();
+                }
+
+                ImGui.dummy(0, 10);
+
+                // --- VIEWPORT ---
+                ImGui.textColored(ImGui.getColorU32(0.2f, 0.7f, 1.0f, 1.0f),
+                        org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.viewport") + ":");
+                ImGui.separator();
+
+                if (ImGui.checkbox(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.viewport.enable"),
+                        settings.isShowViewportOverlay())) {
+                    settings.setShowViewportOverlay(!settings.isShowViewportOverlay());
+                    options.save();
+                }
+
+                ImInt vW = new ImInt((int) settings.getViewportWidth());
+                ImInt vH = new ImInt((int) settings.getViewportHeight());
+                ImGui.setNextItemWidth(80);
+                if (ImGui.inputInt("W##vW", vW)) {
+                    settings.setViewportWidth(vW.get());
+                    options.save();
+                }
+                ImGui.sameLine();
+                ImGui.setNextItemWidth(80);
+                if (ImGui.inputInt("H##vH", vH)) {
+                    settings.setViewportHeight(vH.get());
+                    options.save();
+                }
+
+                float[] vColor = settings.getViewportColor();
+                if (ImGui.colorEdit4(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.viewport.color"),
+                        vColor)) {
+                    settings.setViewportColor(vColor);
+                    options.save();
+                }
+
+                ImGui.dummy(0, 10);
+
+                // --- INDICADORES Y ESTILOS ---
+                ImGui.textColored(ImGui.getColorU32(0.2f, 0.7f, 1.0f, 1.0f), "Estilos de Indicadores:");
+                ImGui.separator();
+
+                // 1. BLOQUEOS
+                ImGui.text("Bloqueos:");
+                float[] blockAlpha = { settings.getBlockOpacity() };
+                ImGui.setNextItemWidth(150);
+                if (ImGui.sliderFloat(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.visual.opacity.blocks"),
+                        blockAlpha, 0.0f, 1.0f)) {
+                    settings.setBlockOpacity(blockAlpha[0]);
+                    options.save();
+                }
+
+                ImGui.sameLine();
+                ImGui.setNextItemWidth(200);
+                org.argentumforge.engine.renderer.RenderSettings.IndicatorStyle currentBlockStyle = settings
+                        .getBlockIndicatorStyle();
+                String currentBlockStyleName = org.argentumforge.engine.i18n.I18n.INSTANCE
+                        .get("options.visual.indicator." + currentBlockStyle.name());
+                if (ImGui.beginCombo("##blockStyle", currentBlockStyleName)) {
+                    for (org.argentumforge.engine.renderer.RenderSettings.IndicatorStyle style : org.argentumforge.engine.renderer.RenderSettings.IndicatorStyle
+                            .values()) {
+                        boolean isSelected = (style == currentBlockStyle);
+                        String name = org.argentumforge.engine.i18n.I18n.INSTANCE
+                                .get("options.visual.indicator." + style.name());
+                        if (ImGui.selectable(name, isSelected)) {
+                            settings.setBlockIndicatorStyle(style);
+                            options.save();
+                        }
+                        if (isSelected)
+                            ImGui.setItemDefaultFocus();
+                    }
+                    ImGui.endCombo();
+                }
+
+                // 2. TRASLADOS
+                ImGui.dummy(0, 5);
+                ImGui.text("Traslados:");
+                float[] transferAlpha = { settings.getTransferOpacity() };
+                ImGui.setNextItemWidth(150);
+                if (ImGui.sliderFloat(
+                        org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.visual.opacity.transfers"),
+                        transferAlpha, 0.0f, 1.0f)) {
+                    settings.setTransferOpacity(transferAlpha[0]);
+                    options.save();
+                }
+
+                ImGui.sameLine();
+                ImGui.setNextItemWidth(200);
+                org.argentumforge.engine.renderer.RenderSettings.IndicatorStyle currentTransferStyle = settings
+                        .getTransferIndicatorStyle();
+                String currentTransferStyleName = org.argentumforge.engine.i18n.I18n.INSTANCE
+                        .get("options.visual.indicator." + currentTransferStyle.name());
+                if (ImGui.beginCombo("##transferStyle", currentTransferStyleName)) {
+                    for (org.argentumforge.engine.renderer.RenderSettings.IndicatorStyle style : org.argentumforge.engine.renderer.RenderSettings.IndicatorStyle
+                            .values()) {
+                        boolean isSelected = (style == currentTransferStyle);
+                        String name = org.argentumforge.engine.i18n.I18n.INSTANCE
+                                .get("options.visual.indicator." + style.name());
+                        if (ImGui.selectable(name, isSelected)) {
+                            settings.setTransferIndicatorStyle(style);
+                            options.save();
+                        }
+                        if (isSelected)
+                            ImGui.setItemDefaultFocus();
+                    }
+                    ImGui.endCombo();
+                }
+
+                ImGui.dummy(0, 10);
+
+                // --- OTROS ---
+                ImGui.textColored(ImGui.getColorU32(0.2f, 0.7f, 1.0f, 1.0f), "Otros:");
+                ImGui.separator();
+                // Effecto Respiración (Moved here from Graphics)
+                if (ImGui.checkbox(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.visual.breathing"),
+                        settings.isShowNpcBreathing())) {
+                    settings.setShowNpcBreathing(!settings.isShowNpcBreathing());
+                    options.save();
+                }
+
+                // Ghost Alpha
+                float[] ghostAlpha = { settings.getGhostOpacity() };
+                ImGui.setNextItemWidth(150);
+                if (ImGui.sliderFloat(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.paste.ghostAlpha"),
+                        ghostAlpha, 0.0f, 1.0f)) {
+                    settings.setGhostOpacity(ghostAlpha[0]);
                     options.save();
                 }
 

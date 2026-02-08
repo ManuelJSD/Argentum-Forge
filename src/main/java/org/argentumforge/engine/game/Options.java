@@ -203,6 +203,8 @@ public enum Options {
             write(writer, "RenderShowTranslation", renderSettings.getShowMapTransfer());
             write(writer, "RenderShowBlock", renderSettings.getShowBlock());
             write(writer, "RenderBlockOpacity", renderSettings.getBlockOpacity());
+            write(writer, "RenderBlockIndicatorStyle", renderSettings.getBlockIndicatorStyle().name());
+            write(writer, "RenderTransferIndicatorStyle", renderSettings.getTransferIndicatorStyle().name());
             write(writer, "RenderGhostOpacity", renderSettings.getGhostOpacity());
             write(writer, "RenderShowGrid", renderSettings.isShowGrid());
             write(writer, "RenderGridColorR", renderSettings.getGridColor()[0]);
@@ -524,6 +526,10 @@ public enum Options {
             case "ViewportColorG" -> renderSettings.getViewportColor()[1] = Float.parseFloat(value);
             case "ViewportColorB" -> renderSettings.getViewportColor()[2] = Float.parseFloat(value);
             case "ViewportColorA" -> renderSettings.getViewportColor()[3] = Float.parseFloat(value);
+            case "RenderBlockIndicatorStyle" -> renderSettings.setBlockIndicatorStyle(
+                    org.argentumforge.engine.renderer.RenderSettings.IndicatorStyle.valueOf(value));
+            case "RenderTransferIndicatorStyle" -> renderSettings.setTransferIndicatorStyle(
+                    org.argentumforge.engine.renderer.RenderSettings.IndicatorStyle.valueOf(value));
             case "AutoSaveEnabled" -> autoSaveEnabled = Boolean.parseBoolean(value);
             case "AutoSaveInterval" -> autoSaveIntervalMinutes = Integer.parseInt(value);
             case "IgnoredObjTypes" -> {
