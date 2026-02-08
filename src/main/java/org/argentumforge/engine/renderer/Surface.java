@@ -1,8 +1,10 @@
 package org.argentumforge.engine.renderer;
 
+import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.*;
+import org.lwjgl.BufferUtils;
 import org.tinylog.Logger;
 
 /**
@@ -39,6 +41,11 @@ public enum Surface {
         if (whiteTexture == null) {
             whiteTexture = new Texture();
             whiteTexture.createWhitePixel();
+        }
+
+        // Inicializar textura de error en el hilo principal de OpenGL
+        if (missingTexture == null) {
+            createMissingTexture();
         }
 
         if (loaderExecutor == null || loaderExecutor.isShutdown()) {
@@ -84,6 +91,17 @@ public enum Surface {
             }
             count++;
         }
+
+        // Procesar texturas fallidas: Reemplazar placeholders vacíos con missingTexture
+        if (missingTexture != null && missingTexture.getId() != 0) {
+            for (Integer failedId : failedIds) {
+                Texture current = textures.get(failedId);
+                if (current != null && current.getId() == 0) {
+                    // Reemplazar placeholder vacío con textura de error
+                    textures.put(failedId, missingTexture);
+                }
+            }
+        }
     }
 
     /**
@@ -102,13 +120,20 @@ public enum Surface {
         // No apagar el loaderExecutor aquí, ya que se necesita para seguir cargando
         // texturas después de una limpieza de recursos o cambio de mapa.
         for (Texture texture : textures.values()) {
-            if (texture != whiteTexture) {
+            if (texture != whiteTexture && texture != missingTexture) {
                 texture.cleanup();
             }
         }
         textures.clear();
         placeholderTextures.clear();
         pendingIds.clear();
+
+        // CRITICAL FIX: Limpiar failedIds para resetear estado de cargas fallidas
+        // Esto evita que gráficos que fallaron temporalmente (archivo bloqueado, etc.)
+        // queden marcados permanentemente como fallidos tras un cambio de mapa
+        if (failedIds != null) {
+            failedIds.clear();
+        }
 
         if (readyToUpload != null) {
             readyToUpload.clear();
@@ -168,9 +193,8 @@ public enum Surface {
      */
     private Texture createTexture(int fileNum) {
         if (failedIds != null && failedIds.contains(fileNum)) {
-            // Retornar un objeto Texture vacío (ID=0) para que sea ignorado en el
-            // renderizado
-            return new Texture();
+            // Retornar la textura de error (Magenta/Negro) para feedback visual
+            return missingTexture != null ? missingTexture : new Texture();
         }
 
         Texture texture = new Texture();
@@ -188,7 +212,9 @@ public enum Surface {
                     placeholderTextures.remove(fileNum);
                     if (failedIds != null) {
                         failedIds.add(fileNum);
-                        Logger.warn("Grafico {} falló tras reintentos y se marcó como FAILED.", fileNum);
+                        // NO llamar getMissingTexture() aquí (hilo async sin contexto OpenGL)
+                        // La sustitución se hará en dispatchUploads (hilo principal)
+                        Logger.warn("Grafico {} falló y será reemplazado por MissingTexture.", fileNum);
                     }
                 }
             });
@@ -233,4 +259,41 @@ public enum Surface {
         return whiteTexture;
     }
 
+    public Texture getMissingTexture() {
+        if (missingTexture == null) {
+            createMissingTexture();
+        }
+        return missingTexture;
+    }
+
+    private Texture missingTexture;
+
+    private void createMissingTexture() {
+        missingTexture = new Texture();
+        // Generar patrón de tablero de ajedrez Magenta/Negro 32x32
+        int w = 32;
+        int h = 32;
+        ByteBuffer pixels = BufferUtils.createByteBuffer(w * h * 4);
+
+        for (int i = 0; i < w * h; i++) {
+            int x = i % w;
+            int y = i / w;
+            boolean check = ((x / 16) + (y / 16)) % 2 == 0;
+            if (check) { // Magenta
+                pixels.put((byte) 255).put((byte) 0).put((byte) 255).put((byte) 255);
+            } else { // Black
+                pixels.put((byte) 0).put((byte) 0).put((byte) 0).put((byte) 255);
+            }
+        }
+        pixels.flip();
+
+        // Usar TextureData para subirlo limpiamente
+        Texture.TextureData data = new Texture.TextureData();
+        data.width = w;
+        data.height = h;
+        data.pixels = pixels;
+        data.fileName = "MISSING_TEXTURE";
+
+        missingTexture.upload(data);
+    }
 }
