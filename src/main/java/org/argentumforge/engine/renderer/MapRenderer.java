@@ -612,15 +612,18 @@ public class MapRenderer {
         int tx = EditorInputManager.getTileMouseX(mx);
         int ty = EditorInputManager.getTileMouseY(my);
 
-        // Convertir tile mouse a coordenadas de pantalla (basado en la cámara)
-        // tx, ty es la posición del mouse en tiles.
-        // Pero necesitamos saber dónde se dibujaría con respecto a la cámara actual.
-
         var context = org.argentumforge.engine.utils.GameData.getActiveContext();
         if (context == null)
             return;
 
         Clipboard.PasteSettings settings = clip.getSettings();
+
+        // Efecto pulsante para el fantasma (0.5 a 0.8)
+        float pulse = (float) (Math.sin(org.argentumforge.engine.utils.Time.getRunningTime() * 5.0f) + 1.0f) / 2.0f; // 0..1
+        float alpha = 0.5f + (pulse * 0.3f);
+
+        // Tinte Cyan para indicar modo de inserción
+        RGBColor ghostColor = new RGBColor(0.7f, 1.0f, 1.0f);
 
         for (Clipboard.ClipboardItem item : clip.getItems()) {
             int targetX = tx + item.offsetX;
@@ -632,18 +635,52 @@ public class MapRenderer {
             int screenY = POS_SCREEN_Y + (targetY - camera.getMinY() + camera.getMinYOffset() - TILE_BUFFER_SIZE)
                     * TILE_PIXEL_SIZE + pixelOffsetY;
 
-            if (item.type == Selection.EntityType.TILE && item.layers != null) {
-                for (int i = 1; i <= 4; i++) {
-                    if (settings.layers[i - 1] && item.layers[i] > 0) {
-                        drawGrhIndex(item.layers[i], screenX, screenY, 0.5f, weather.getWeatherColor());
+            if (item.type == Selection.EntityType.TILE) {
+                // Dibujar capas
+                if (item.layers != null) {
+                    for (int i = 1; i <= 4; i++) {
+                        if (i <= settings.layers.length && settings.layers[i - 1] && item.layers[i] > 0) {
+                            drawGhostGrh(item.layers[i], screenX, screenY, alpha, ghostColor);
+                        }
                     }
                 }
+                // Renderizar objetos asociados al tile
+                if (settings.objects && item.objIndex > 0) {
+                    ObjData objData = objs.get(item.objIndex);
+                    if (objData != null) {
+                        drawGhostGrh(objData.getGrhIndex(), screenX, screenY, alpha, ghostColor);
+                    }
+                }
+                // Renderizar NPC es más complejo ya que clipboard guarda ID de NPC, no Grh
+                // directo usualmente.
+                // Si añadimos lógica para NPC aquí:
+                /*
+                 * if (settings.npc && item.npcIndex > 0) {
+                 * // Npc data lookup...
+                 * }
+                 */
+
             } else if (item.type == Selection.EntityType.NPC && settings.npc) {
-                drawCharacter(item.id, screenX, screenY, 0.5f, weather.getWeatherColor());
+                // NPCs usan drawCharacter que ya maneja offsets internos usualmente,
+                // pero si queremos consistencia con el ghost tint:
+                drawCharacter(item.id, screenX, screenY, alpha, ghostColor);
             } else if (item.type == Selection.EntityType.OBJECT && settings.objects) {
-                drawGrhIndex(item.id, screenX, screenY, 0.5f, weather.getWeatherColor());
+                drawGhostGrh(item.id, screenX, screenY, alpha, ghostColor);
             }
         }
+    }
+
+    private void drawGhostGrh(int grhIndex, int x, int y, float alpha, RGBColor color) {
+        if (grhIndex <= 0 || grhIndex >= grhData.length || grhData[grhIndex] == null)
+            return;
+
+        // Aplicar logica de centrado de Drawn.drawTexture
+        if (grhData[grhIndex].getTileWidth() != 1)
+            x = x - (int) (grhData[grhIndex].getTileWidth() * TILE_PIXEL_SIZE / 2) + TILE_PIXEL_SIZE / 2;
+        if (grhData[grhIndex].getTileHeight() != 1)
+            y = y - (int) (grhData[grhIndex].getTileHeight() * TILE_PIXEL_SIZE) + TILE_PIXEL_SIZE;
+
+        drawGrhIndex(grhIndex, x, y, alpha, color);
     }
 
     private void renderSelectionHighlight(int pixelOffsetX, int pixelOffsetY) {
