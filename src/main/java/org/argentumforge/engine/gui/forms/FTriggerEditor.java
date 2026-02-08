@@ -129,7 +129,7 @@ public class FTriggerEditor extends Form implements IMapEditor {
                 if (active) {
                     tool.setActive(false);
                 } else {
-                    tool.setActive(true);
+                    tool.setMode(1);
                     tool.setSelectedTriggerId(triggers.get(selectedIndex).getId());
                 }
             }
@@ -151,7 +151,7 @@ public class FTriggerEditor extends Form implements IMapEditor {
             if (isErasing) {
                 tool.setActive(false);
             } else {
-                tool.setActive(true);
+                tool.setMode(1);
                 tool.setSelectedTriggerId(0);
             }
         }

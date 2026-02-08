@@ -424,11 +424,13 @@ public class EditorInputManager {
     }
 
     public static int getTileMouseX(int mouseX) {
-        return (User.INSTANCE.getUserPos().getX() + mouseX / Camera.TILE_PIXEL_SIZE - Camera.HALF_WINDOW_TILE_WIDTH);
+        return (User.INSTANCE.getUserPos().getX() + (int) Math.floor((double) mouseX / Camera.TILE_PIXEL_SIZE)
+                - Camera.HALF_WINDOW_TILE_WIDTH);
     }
 
     public static int getTileMouseY(int mouseY) {
-        return (User.INSTANCE.getUserPos().getY() + mouseY / Camera.TILE_PIXEL_SIZE - Camera.HALF_WINDOW_TILE_HEIGHT);
+        return (User.INSTANCE.getUserPos().getY() + (int) Math.floor((double) mouseY / Camera.TILE_PIXEL_SIZE)
+                - Camera.HALF_WINDOW_TILE_HEIGHT);
     }
 
     private boolean isValidTile(int x, int y) {
