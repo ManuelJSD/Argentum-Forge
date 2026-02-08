@@ -227,10 +227,10 @@ public final class GameScene extends Scene {
         int pixelOffsetY = 0;
 
         if (user.getAddToUserPos().getX() != 0) {
-            pixelOffsetX = (int) (-1 * user.getAddToUserPos().getX() * (offSetCounterX * TILE_PIXEL_SIZE));
+            pixelOffsetX = (int) (-1 * Math.signum(user.getAddToUserPos().getX()) * (offSetCounterX * TILE_PIXEL_SIZE));
         }
         if (user.getAddToUserPos().getY() != 0) {
-            pixelOffsetY = (int) (-1 * user.getAddToUserPos().getY() * (offSetCounterY * TILE_PIXEL_SIZE));
+            pixelOffsetY = (int) (-1 * Math.signum(user.getAddToUserPos().getY()) * (offSetCounterY * TILE_PIXEL_SIZE));
         }
 
         mapRenderer.renderImGuiOverlays(pixelOffsetX, pixelOffsetY);

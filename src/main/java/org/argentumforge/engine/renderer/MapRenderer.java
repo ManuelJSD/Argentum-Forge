@@ -336,18 +336,19 @@ public class MapRenderer {
                         int screenX = POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX;
                         int screenY = POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY;
 
+                        float opacity = renderSettings.getBlockOpacity();
                         switch (renderSettings.getIndicatorStyle()) {
                             case MODERN:
                                 // Moderno: Recuadro rojo semitransparente con borde más sólido
                                 Drawn.drawColoredRect(screenX + 2, screenY + 2,
                                         TILE_PIXEL_SIZE - 4, TILE_PIXEL_SIZE - 4,
-                                        new RGBColor(1.0f, 0.2f, 0.2f), 0.4f);
+                                        new RGBColor(1.0f, 0.2f, 0.2f), 0.4f * opacity);
 
                                 // Pequeña "X"
                                 Drawn.drawColoredRect(screenX + (int) (TILE_PIXEL_SIZE * 0.3f),
                                         screenY + (int) (TILE_PIXEL_SIZE * 0.3f),
                                         (int) (TILE_PIXEL_SIZE * 0.4f), (int) (TILE_PIXEL_SIZE * 0.4f),
-                                        new RGBColor(1.0f, 0.6f, 0.6f), 0.6f);
+                                        new RGBColor(1.0f, 0.6f, 0.6f), 0.6f * opacity);
                                 break;
 
                             case MINIMAL:
@@ -356,14 +357,14 @@ public class MapRenderer {
                                 int offset = (TILE_PIXEL_SIZE - size) / 2;
                                 Drawn.drawColoredRect(screenX + offset, screenY + offset,
                                         size, size,
-                                        new RGBColor(1.0f, 0.2f, 0.2f), 0.7f);
+                                        new RGBColor(1.0f, 0.2f, 0.2f), 0.7f * opacity);
                                 break;
 
                             case SOLID:
                                 // Sólido: Relleno completo del tile
                                 Drawn.drawColoredRect(screenX, screenY,
                                         TILE_PIXEL_SIZE, TILE_PIXEL_SIZE,
-                                        new RGBColor(1.0f, 0.0f, 0.0f), 0.3f);
+                                        new RGBColor(1.0f, 0.0f, 0.0f), 0.6f * opacity);
                                 break;
 
                             case MESH:
@@ -371,11 +372,11 @@ public class MapRenderer {
                                 // Línea /
                                 Drawn.drawColoredRect(screenX, screenY,
                                         2, TILE_PIXEL_SIZE,
-                                        new RGBColor(1.0f, 0.4f, 0.4f), 0.5f, (float) TILE_PIXEL_SIZE);
+                                        new RGBColor(1.0f, 0.4f, 0.4f), 0.5f * opacity, (float) TILE_PIXEL_SIZE);
                                 // Línea \
                                 Drawn.drawColoredRect(screenX + TILE_PIXEL_SIZE - 2, screenY,
                                         2, TILE_PIXEL_SIZE,
-                                        new RGBColor(1.0f, 0.4f, 0.4f), 0.5f, -(float) TILE_PIXEL_SIZE);
+                                        new RGBColor(1.0f, 0.4f, 0.4f), 0.5f * opacity, -(float) TILE_PIXEL_SIZE);
                                 break;
 
                             case CORNERS:
@@ -384,23 +385,23 @@ public class MapRenderer {
                                 int th = 2;
                                 RGBColor cornerColor = new RGBColor(1.0f, 0.3f, 0.3f);
                                 // Top-Left
-                                Drawn.drawColoredRect(screenX, screenY, len, th, cornerColor, 0.8f);
-                                Drawn.drawColoredRect(screenX, screenY, th, len, cornerColor, 0.8f);
+                                Drawn.drawColoredRect(screenX, screenY, len, th, cornerColor, 0.8f * opacity);
+                                Drawn.drawColoredRect(screenX, screenY, th, len, cornerColor, 0.8f * opacity);
                                 // Top-Right
                                 Drawn.drawColoredRect(screenX + TILE_PIXEL_SIZE - len, screenY, len, th, cornerColor,
-                                        0.8f);
+                                        0.8f * opacity);
                                 Drawn.drawColoredRect(screenX + TILE_PIXEL_SIZE - th, screenY, th, len, cornerColor,
-                                        0.8f);
+                                        0.8f * opacity);
                                 // Bottom-Left
                                 Drawn.drawColoredRect(screenX, screenY + TILE_PIXEL_SIZE - th, len, th, cornerColor,
-                                        0.8f);
+                                        0.8f * opacity);
                                 Drawn.drawColoredRect(screenX, screenY + TILE_PIXEL_SIZE - len, th, len, cornerColor,
-                                        0.8f);
+                                        0.8f * opacity);
                                 // Bottom-Right
                                 Drawn.drawColoredRect(screenX + TILE_PIXEL_SIZE - len, screenY + TILE_PIXEL_SIZE - th,
-                                        len, th, cornerColor, 0.8f);
+                                        len, th, cornerColor, 0.8f * opacity);
                                 Drawn.drawColoredRect(screenX + TILE_PIXEL_SIZE - th, screenY + TILE_PIXEL_SIZE - len,
-                                        th, len, cornerColor, 0.8f);
+                                        th, len, cornerColor, 0.8f * opacity);
                                 break;
 
                             case CLASSIC:
@@ -434,17 +435,18 @@ public class MapRenderer {
                         int screenX = POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX;
                         int screenY = POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY;
 
+                        float opacity = renderSettings.getTransferOpacity();
                         switch (renderSettings.getIndicatorStyle()) {
                             case MODERN:
                                 // Moderno: Recuadro azul cian semitransparente
                                 Drawn.drawColoredRect(screenX + 2, screenY + 2,
                                         TILE_PIXEL_SIZE - 4, TILE_PIXEL_SIZE - 4,
-                                        new RGBColor(0.2f, 0.8f, 1.0f), 0.4f);
+                                        new RGBColor(0.2f, 0.8f, 1.0f), 0.4f * opacity);
 
                                 // Borde interno o detalle
                                 Drawn.drawColoredRect(screenX + 4, screenY + 4,
                                         TILE_PIXEL_SIZE - 8, TILE_PIXEL_SIZE - 8,
-                                        new RGBColor(0.6f, 1.0f, 1.0f), 0.3f);
+                                        new RGBColor(0.6f, 1.0f, 1.0f), 0.3f * opacity);
                                 break;
 
                             case MINIMAL:
@@ -453,24 +455,24 @@ public class MapRenderer {
                                 int offset = (TILE_PIXEL_SIZE - size) / 2;
                                 Drawn.drawColoredRect(screenX + offset, screenY + offset,
                                         size, size,
-                                        new RGBColor(0.0f, 0.8f, 1.0f), 0.7f);
+                                        new RGBColor(0.0f, 0.8f, 1.0f), 0.7f * opacity);
                                 break;
 
                             case SOLID:
                                 // Sólido: Relleno completo
                                 Drawn.drawColoredRect(screenX, screenY,
                                         TILE_PIXEL_SIZE, TILE_PIXEL_SIZE,
-                                        new RGBColor(0.0f, 1.0f, 1.0f), 0.3f);
+                                        new RGBColor(0.0f, 1.0f, 1.0f), 0.6f * opacity);
                                 break;
 
                             case MESH:
                                 // Malla: X diagonal completa azul
                                 Drawn.drawColoredRect(screenX, screenY,
                                         2, TILE_PIXEL_SIZE,
-                                        new RGBColor(0.2f, 0.8f, 1.0f), 0.5f, (float) TILE_PIXEL_SIZE);
+                                        new RGBColor(0.2f, 0.8f, 1.0f), 0.5f * opacity, (float) TILE_PIXEL_SIZE);
                                 Drawn.drawColoredRect(screenX + TILE_PIXEL_SIZE - 2, screenY,
                                         2, TILE_PIXEL_SIZE,
-                                        new RGBColor(0.2f, 0.8f, 1.0f), 0.5f, -(float) TILE_PIXEL_SIZE);
+                                        new RGBColor(0.2f, 0.8f, 1.0f), 0.5f * opacity, -(float) TILE_PIXEL_SIZE);
                                 break;
 
                             case CORNERS:
@@ -479,23 +481,23 @@ public class MapRenderer {
                                 int th = 2;
                                 RGBColor cornerColor = new RGBColor(0.0f, 0.8f, 1.0f);
                                 // Top-Left
-                                Drawn.drawColoredRect(screenX, screenY, len, th, cornerColor, 0.8f);
-                                Drawn.drawColoredRect(screenX, screenY, th, len, cornerColor, 0.8f);
+                                Drawn.drawColoredRect(screenX, screenY, len, th, cornerColor, 0.8f * opacity);
+                                Drawn.drawColoredRect(screenX, screenY, th, len, cornerColor, 0.8f * opacity);
                                 // Top-Right
                                 Drawn.drawColoredRect(screenX + TILE_PIXEL_SIZE - len, screenY, len, th, cornerColor,
-                                        0.8f);
+                                        0.8f * opacity);
                                 Drawn.drawColoredRect(screenX + TILE_PIXEL_SIZE - th, screenY, th, len, cornerColor,
-                                        0.8f);
+                                        0.8f * opacity);
                                 // Bottom-Left
                                 Drawn.drawColoredRect(screenX, screenY + TILE_PIXEL_SIZE - th, len, th, cornerColor,
-                                        0.8f);
+                                        0.8f * opacity);
                                 Drawn.drawColoredRect(screenX, screenY + TILE_PIXEL_SIZE - len, th, len, cornerColor,
-                                        0.8f);
+                                        0.8f * opacity);
                                 // Bottom-Right
                                 Drawn.drawColoredRect(screenX + TILE_PIXEL_SIZE - len, screenY + TILE_PIXEL_SIZE - th,
-                                        len, th, cornerColor, 0.8f);
+                                        len, th, cornerColor, 0.8f * opacity);
                                 Drawn.drawColoredRect(screenX + TILE_PIXEL_SIZE - th, screenY + TILE_PIXEL_SIZE - len,
-                                        th, len, cornerColor, 0.8f);
+                                        th, len, cornerColor, 0.8f * opacity);
                                 break;
 
                             case CLASSIC:
@@ -558,6 +560,9 @@ public class MapRenderer {
                 return;
             var mapData = context.getMapData();
 
+            float viewportX = imgui.ImGui.getMainViewport().getWorkPosX();
+            float viewportY = imgui.ImGui.getMainViewport().getWorkPosY();
+
             for (int y = camera.getMinY(); y <= camera.getMaxY(); y++) {
                 camera.setScreenX(camera.getMinXOffset() - TILE_BUFFER_SIZE);
                 for (int x = camera.getMinX(); x <= camera.getMaxX(); x++) {
@@ -568,8 +573,8 @@ public class MapRenderer {
 
                         String idText = String.valueOf(mapData[x][y].getTrigger());
                         float textWidth = imgui.ImGui.calcTextSize(idText).x;
-                        float textX = screenX + (TILE_PIXEL_SIZE - textWidth) / 2;
-                        float textY = screenY + (TILE_PIXEL_SIZE - 28) / 2;
+                        float textX = viewportX + screenX + (TILE_PIXEL_SIZE - textWidth) / 2;
+                        float textY = viewportY + screenY + (TILE_PIXEL_SIZE - 28) / 2;
 
                         drawList.addText(textX + 1, textY + 1, 0xFF000000, idText);
                         drawList.addText(textX, textY, 0xFFFFFFFF, idText);
@@ -581,8 +586,8 @@ public class MapRenderer {
 
                         String idText = "P" + mapData[x][y].getParticleIndex();
                         float textWidth = imgui.ImGui.calcTextSize(idText).x;
-                        float textX = screenX + (TILE_PIXEL_SIZE - textWidth) / 2;
-                        float textY = screenY + (TILE_PIXEL_SIZE + 4) / 2;
+                        float textX = viewportX + screenX + (TILE_PIXEL_SIZE - textWidth) / 2;
+                        float textY = viewportY + screenY + (TILE_PIXEL_SIZE + 4) / 2;
 
                         drawList.addText(textX + 1, textY + 1, 0xFF000000, idText);
                         drawList.addText(textX, textY, 0xFFFFFF00, idText);
