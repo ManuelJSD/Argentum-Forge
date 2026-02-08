@@ -121,6 +121,10 @@ public class UIComponents {
      * @param onConfirm Callback a ejecutar si se confirma
      */
     public static void confirmDialog(String modalId, String title, String message, Runnable onConfirm) {
+        // Force center alignment for the modal
+        imgui.ImVec2 center = ImGui.getMainViewport().getCenter();
+        ImGui.setNextWindowPos(center.x, center.y, imgui.flag.ImGuiCond.Appearing, 0.5f, 0.5f);
+
         if (ImGui.beginPopupModal(modalId, ImGuiWindowFlags.AlwaysAutoResize)) {
             ImGui.text(message);
             ImGui.spacing();

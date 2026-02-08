@@ -20,19 +20,17 @@ import org.argentumforge.engine.utils.MapContext;
  */
 public class FBlockEditor extends Form implements IMapEditor {
 
-    private MapContext context;
     private Block block;
     // private int activeMode = 0; // Estado local eliminado para evitar
     // desincronización
 
     public FBlockEditor() {
         block = Block.getInstance();
-        this.context = org.argentumforge.engine.utils.GameData.getActiveContext();
     }
 
     @Override
     public void setContext(MapContext context) {
-        this.context = context;
+        // Context is now retrieved dynamically to ensure it's always up to date
     }
 
     @Override
@@ -150,7 +148,7 @@ public class FBlockEditor extends Form implements IMapEditor {
                 I18n.INSTANCE.get("editor.block.blockBorders"),
                 I18n.INSTANCE.get("editor.block.confirm.blockBorders.msg"),
                 () -> {
-                    block.blockBorders(context);
+                    block.blockBorders(org.argentumforge.engine.utils.GameData.getActiveContext());
                     options.getRenderSettings().setShowBlock(true);
                 });
 
@@ -159,7 +157,7 @@ public class FBlockEditor extends Form implements IMapEditor {
                 I18n.INSTANCE.get("editor.block.blockAll"),
                 I18n.INSTANCE.get("editor.block.confirm.blockAll.msg"),
                 () -> {
-                    block.blockAll(context);
+                    block.blockAll(org.argentumforge.engine.utils.GameData.getActiveContext());
                     options.getRenderSettings().setShowBlock(true);
                 });
 
@@ -167,13 +165,13 @@ public class FBlockEditor extends Form implements IMapEditor {
                 I18n.INSTANCE.get("editor.block.confirm.clearBorders.title"),
                 I18n.INSTANCE.get("editor.block.clearBorders"),
                 I18n.INSTANCE.get("editor.block.confirm.clearBorders.msg"),
-                () -> block.unblockBorders(context));
+                () -> block.unblockBorders(org.argentumforge.engine.utils.GameData.getActiveContext()));
 
         UIComponents.confirmDialog(
                 I18n.INSTANCE.get("editor.block.confirm.clearAll.title"),
                 I18n.INSTANCE.get("editor.block.clearAll"),
                 I18n.INSTANCE.get("editor.block.confirm.clearAll.msg"),
-                () -> block.unblockAll(context));
+                () -> block.unblockAll(org.argentumforge.engine.utils.GameData.getActiveContext()));
 
         ImGui.separator();
         ImGui.text(I18n.INSTANCE.get("editor.block.opacity"));

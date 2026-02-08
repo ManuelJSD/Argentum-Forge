@@ -28,8 +28,8 @@ public enum Options {
     private String musicPath = "";
     private int screenWidth = 1366;
     private int screenHeight = 768;
-    private int clientWidth = 13;
-    private int clientHeight = 11;
+    private int clientWidth = 17;
+    private int clientHeight = 13;
     private String lastMapPath = ".";
     private float ambientR = 1.0f;
     private float ambientG = 1.0f;
@@ -120,8 +120,8 @@ public enum Options {
         // Resolution
         screenWidth = 1366;
         screenHeight = 768;
-        clientWidth = 13;
-        clientHeight = 11;
+        clientWidth = 17;
+        clientHeight = 13;
 
         // Map
         lastMapPath = ".";
