@@ -30,12 +30,6 @@ public class Transfer {
     private static final int MIN_COORD = 1;
     private static final int MAX_COORD = 100;
 
-    // Límites de borde para unión manual
-    private static final int BORDER_RIGHT = 90;
-    private static final int BORDER_LEFT = 11;
-    private static final int BORDER_BOTTOM = 91;
-    private static final int BORDER_TOP = 10;
-
     private Transfer() {
         this.isActive = false;
         this.mode = 0;
@@ -86,24 +80,56 @@ public class Transfer {
                 finalX = destinationX;
                 finalY = destinationY;
 
+                // Get dynamic border sizes
+                int halfWidth = org.argentumforge.engine.utils.GameData.options.getClientWidth() / 2;
+                int halfHeight = org.argentumforge.engine.utils.GameData.options.getClientHeight() / 2;
+
+                int borderRight = 100 - halfWidth + 1; // e.g. 100 - 8 + 1 = 93
+                int borderLeft = halfWidth; // e.g. 8
+                int borderBottom = 100 - halfHeight + 1; // e.g. 100 - 6 + 1 = 95
+                int borderTop = halfHeight; // e.g. 6
+
                 // Detectar en qué borde está el tile
-                if (x >= BORDER_RIGHT) {
+                if (x >= borderRight) {
                     // Borde derecho -> destino en borde izquierdo
-                    finalX = 12;
+                    finalX = borderLeft + 1; // Logic check: if exit is at 93 (start of border), dest is 12?
+                                             // VB6 original logic uses fixed 12 usually.
+                                             // If we are at X=93, we go to MapE at X=?
+                                             // If view is 17 wide (8 radius). X=93 is 8 tiles from edge.
+                                             // Ideally we want user to appear at X=8??
+                                             // Unhardcoding this logic implies dest is also dynamic?
+                                             // Original code: if x >= BORDER_RIGHT(90) -> finalX = 12. (11+1)
+                                             // So finalX should be borderLeft + 1.
+                    finalX = borderLeft + 1;
                     finalY = y;
-                } else if (x <= BORDER_LEFT) {
-                    // Borde izquierdo -> destino en borde derecho
-                    finalX = 91;
+                } else if (x <= borderLeft) {
+                    // Borde izquierdo -> destino en borde derecho (91)
+                    // If borderLeft is 11, dest is 90?
+                    // Original code: if x <= BORDER_LEFT(11) -> finalX = 91. (100 - 11 + 2?) or
+                    // (100 - 9)?
+                    // Logic: 100 - halfWidth.
+                    // If halfWidth=11. 100-11 = 89?
+                    // Let's stick to standard behavior:
+                    // If I walk left into MapW, I appear at the right side of MapW.
+                    // Right side start is borderRight.
+                    // Original code used 91. BORDER_RIGHT was 90. So it put you at BORDER_RIGHT +
+                    // 1.
+                    finalX = borderRight;
                     finalY = y;
                 }
 
-                if (y >= BORDER_BOTTOM) {
+                if (y >= borderBottom) {
                     // Borde inferior -> destino en borde superior
-                    finalY = 11;
+                    // Original: if y >= 91 -> finalY = 11. (BORDER_TOP + 1)
+                    // BORDER_TOP was 10.
+                    finalY = borderTop + 1;
                     finalX = x;
-                } else if (y <= BORDER_TOP) {
+                } else if (y <= borderTop) {
                     // Borde superior -> destino en borde inferior
-                    finalY = 90;
+                    // Original: if y <= 10 -> finalY = 90.
+                    // BORDER_BOTTOM was 91.
+                    // So it puts you at BORDER_BOTTOM - 1.
+                    finalY = borderBottom - 1;
                     finalX = x;
                 }
             }
@@ -167,41 +193,80 @@ public class Transfer {
 
         boolean changed = false;
 
-        // Norte (Arriba) -> Destino: Sur del mapa norte (y=90)
+        // Calcular límites exactos igual que Block.java para consistencia
+        int clientWidth = org.argentumforge.engine.utils.GameData.options.getClientWidth();
+        int clientHeight = org.argentumforge.engine.utils.GameData.options.getClientHeight();
+
+        int mapWidth = mapData.length;
+        int mapHeight = mapData[0].length;
+
+        // Volver a lógica estándar sin +3 (VB6 Style)
+        int halfW = clientWidth / 2;
+        int halfH = clientHeight / 2;
+
+        int minXBorder = halfW; // Bloquea <= 8
+        int maxXBorder = mapWidth - 1 - halfW; // Bloquea >= 93
+
+        int minYBorder = halfH;
+        int maxYBorder = mapHeight - 1 - halfH;
+
+        // Líneas de Trigger (Debe ser el primer tile NO bloqueado)
+        // West Block <= 8 -> Trigger en 9.
+        int triggerX_West = minXBorder + 1;
+
+        // East Block >= 93 -> Trigger en 92.
+        int triggerX_East = maxXBorder - 1;
+
+        int triggerY_North = minYBorder + 1;
+        int triggerY_South = maxYBorder - 1;
+
+        // Destinos
+        // Nota: Los destinos suelen ser fijos o simétricos, pero para coincidir
+        // exactamente con la posición inversa:
+        int destY_North = triggerY_South;
+        int destY_South = triggerY_North;
+        int destX_East = triggerX_West;
+        int destX_West = triggerX_East;
+
+        // Norte (Arriba) -> Trigger en triggerY_North
         if (north >= 0) {
-            for (int x = 1; x <= 100; x++) {
-                for (int y = 1; y <= BORDER_TOP; y++) {
-                    applyAutoTransfer(context, x, y, north, (north == 0 ? 0 : x), (north == 0 ? 0 : 90));
+            for (int x = 1; x < mapWidth; x++) {
+                if (mapData[x][triggerY_North] != null && !mapData[x][triggerY_North].getBlocked()) {
+                    applyAutoTransfer(context, x, triggerY_North, north, (north == 0 ? 0 : x),
+                            (north == 0 ? 0 : destY_North));
                     changed = true;
                 }
             }
         }
 
-        // Sur (Abajo) -> Destino: Norte del mapa sur (y=11)
+        // Sur (Abajo) -> Trigger en triggerY_South
         if (south >= 0) {
-            for (int x = 1; x <= 100; x++) {
-                for (int y = BORDER_BOTTOM; y <= 100; y++) {
-                    applyAutoTransfer(context, x, y, south, (south == 0 ? 0 : x), (south == 0 ? 0 : 11));
+            for (int x = 1; x < mapWidth; x++) {
+                if (mapData[x][triggerY_South] != null && !mapData[x][triggerY_South].getBlocked()) {
+                    applyAutoTransfer(context, x, triggerY_South, south, (south == 0 ? 0 : x),
+                            (south == 0 ? 0 : destY_South));
                     changed = true;
                 }
             }
         }
 
-        // Este (Derecha) -> Destino: Oeste del mapa este (x=12)
+        // Este (Derecha) -> Trigger en triggerX_East
         if (east >= 0) {
-            for (int x = BORDER_RIGHT; x <= 100; x++) {
-                for (int y = 1; y <= 100; y++) {
-                    applyAutoTransfer(context, x, y, east, (east == 0 ? 0 : 12), (east == 0 ? 0 : y));
+            for (int y = 1; y < mapHeight; y++) {
+                if (mapData[triggerX_East][y] != null && !mapData[triggerX_East][y].getBlocked()) {
+                    applyAutoTransfer(context, triggerX_East, y, east, (east == 0 ? 0 : destX_East),
+                            (east == 0 ? 0 : y));
                     changed = true;
                 }
             }
         }
 
-        // Oeste (Izquierda) -> Destino: Este del mapa oeste (x=91)
+        // Oeste (Izquierda) -> Trigger en triggerX_West
         if (west >= 0) {
-            for (int x = 1; x <= BORDER_LEFT; x++) {
-                for (int y = 1; y <= 100; y++) {
-                    applyAutoTransfer(context, x, y, west, (west == 0 ? 0 : 91), (west == 0 ? 0 : y));
+            for (int y = 1; y < mapHeight; y++) {
+                if (mapData[triggerX_West][y] != null && !mapData[triggerX_West][y].getBlocked()) {
+                    applyAutoTransfer(context, triggerX_West, y, west, (west == 0 ? 0 : destX_West),
+                            (west == 0 ? 0 : y));
                     changed = true;
                 }
             }

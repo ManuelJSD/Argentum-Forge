@@ -100,7 +100,7 @@ public class MapRenderer {
             for (int y = camera.getMinY(); y <= camera.getMaxY(); y++) {
                 camera.setScreenX(camera.getMinXOffset() - TILE_BUFFER_SIZE);
                 for (int x = camera.getMinX(); x <= camera.getMaxX(); x++) {
-                    if (mapData[x][y].getLayer(1).getGrhIndex() != 0) {
+                    if (mapData[x][y] != null && mapData[x][y].getLayer(1).getGrhIndex() != 0) {
                         int finalX = POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX;
                         int finalY = POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY;
 
@@ -124,6 +124,10 @@ public class MapRenderer {
         for (int y = camera.getMinY(); y <= camera.getMaxY(); y++) {
             camera.setScreenX(camera.getMinXOffset() - TILE_BUFFER_SIZE);
             for (int x = camera.getMinX(); x <= camera.getMaxX(); x++) {
+                if (mapData[x][y] == null) {
+                    camera.incrementScreenX();
+                    continue;
+                }
                 if (renderSettings.getShowLayer()[1]) {
                     if (mapData[x][y].getLayer(2).getGrhIndex() != 0) {
                         drawTexture(mapData[x][y].getLayer(2),
@@ -203,6 +207,10 @@ public class MapRenderer {
         for (int y = camera.getMinY(); y <= camera.getMaxY(); y++) {
             camera.setScreenX(camera.getMinXOffset() - TILE_BUFFER_SIZE);
             for (int x = camera.getMinX(); x <= camera.getMaxX(); x++) {
+                if (mapData[x][y] == null) {
+                    camera.incrementScreenX();
+                    continue;
+                }
 
                 if (renderSettings.getShowOJBs()) {
                     if (mapData[x][y].getObjGrh().getGrhIndex() != 0) {
@@ -310,7 +318,7 @@ public class MapRenderer {
                 for (int y = camera.getMinY(); y <= camera.getMaxY(); y++) {
                     camera.setScreenX(camera.getMinXOffset() - TILE_BUFFER_SIZE);
                     for (int x = camera.getMinX(); x <= camera.getMaxX(); x++) {
-                        if (mapData[x][y].getLayer(4).getGrhIndex() > 0) {
+                        if (mapData[x][y] != null && mapData[x][y].getLayer(4).getGrhIndex() > 0) {
                             drawTexture(mapData[x][y].getLayer(4),
                                     POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX,
                                     POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY,
@@ -332,7 +340,7 @@ public class MapRenderer {
             for (int y = camera.getMinY(); y <= camera.getMaxY(); y++) {
                 camera.setScreenX(camera.getMinXOffset() - TILE_BUFFER_SIZE);
                 for (int x = camera.getMinX(); x <= camera.getMaxX(); x++) {
-                    if (mapData[x][y].getBlocked()) {
+                    if (mapData[x][y] != null && mapData[x][y].getBlocked()) {
                         int screenX = POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX;
                         int screenY = POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY;
 
@@ -431,7 +439,7 @@ public class MapRenderer {
             for (int y = camera.getMinY(); y <= camera.getMaxY(); y++) {
                 camera.setScreenX(camera.getMinXOffset() - TILE_BUFFER_SIZE);
                 for (int x = camera.getMinX(); x <= camera.getMaxX(); x++) {
-                    if (mapData[x][y].getExitMap() > 0) {
+                    if (mapData[x][y] != null && mapData[x][y].getExitMap() > 0) {
                         int screenX = POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX;
                         int screenY = POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY;
 
@@ -566,6 +574,10 @@ public class MapRenderer {
             for (int y = camera.getMinY(); y <= camera.getMaxY(); y++) {
                 camera.setScreenX(camera.getMinXOffset() - TILE_BUFFER_SIZE);
                 for (int x = camera.getMinX(); x <= camera.getMaxX(); x++) {
+                    if (mapData[x][y] == null) {
+                        camera.incrementScreenX();
+                        continue;
+                    }
 
                     if (mapData[x][y].getTrigger() > 0 && renderSettings.getShowTriggers()) {
                         int screenX = POS_SCREEN_X + camera.getScreenX() * TILE_PIXEL_SIZE + pixelOffsetX;

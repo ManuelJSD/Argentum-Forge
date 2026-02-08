@@ -46,7 +46,7 @@ public class RenderSettings {
     // Viewport Overlay (Reference Frame)
     private boolean showViewportOverlay = false;
     private int viewportWidth = 17;
-    private int viewportHeight = 15;
+    private int viewportHeight = 13;
     private float[] viewportColor = { 1.0f, 1.0f, 1.0f, 0.5f }; // White semi-transparent
 
     // --- PHOTO MODE ULTRA ---
@@ -268,6 +268,9 @@ public class RenderSettings {
     }
 
     public IndicatorStyle getBlockIndicatorStyle() {
+        if (blockIndicatorStyle == null) {
+            blockIndicatorStyle = IndicatorStyle.CLASSIC;
+        }
         return blockIndicatorStyle;
     }
 
@@ -521,7 +524,7 @@ public class RenderSettings {
 
         showViewportOverlay = false;
         viewportWidth = 17;
-        viewportHeight = 15;
+        viewportHeight = 13;
         viewportColor = new float[] { 1.0f, 1.0f, 1.0f, 0.5f };
 
         minimapLayers = new boolean[] { true, false, false, false };

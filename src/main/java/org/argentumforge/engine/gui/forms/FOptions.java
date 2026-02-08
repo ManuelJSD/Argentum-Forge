@@ -229,6 +229,70 @@ public final class FOptions extends Form {
 
                 ImGui.spacing();
                 ImGui.spacing();
+
+                // Client Area (View)
+                ImGui.text(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.clientArea") + ":");
+                ImGui.dummy(0, 5);
+
+                ImInt cW = new ImInt(options.getClientWidth());
+                ImInt cH = new ImInt(options.getClientHeight());
+
+                ImGui.setNextItemWidth(100);
+                if (ImGui.inputInt(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.clientArea.width"), cW)) {
+                    if (cW.get() < 9)
+                        cW.set(9); // Min limit
+                    options.setClientWidth(cW.get());
+                    // Unify: Viewport size always follows Client size
+                    options.getRenderSettings().setViewportWidth(cW.get());
+                    options.save();
+                }
+
+                // Tooltip for Width/Height
+                if (ImGui.isItemHovered()) {
+                    ImGui.setTooltip(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.clientArea.tooltip"));
+                }
+
+                ImGui.setNextItemWidth(100);
+                if (ImGui.inputInt(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.clientArea.height"), cH)) {
+                    if (cH.get() < 9)
+                        cH.set(9); // Min limit
+                    options.setClientHeight(cH.get());
+                    // Unify: Viewport size always follows Client size
+                    options.getRenderSettings().setViewportHeight(cH.get());
+                    options.save();
+                }
+
+                // Tooltip for Width/Height (Same tooltip for consistency)
+                if (ImGui.isItemHovered()) {
+                    ImGui.setTooltip(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.clientArea.tooltip"));
+                }
+
+                // Move Viewport Toggle Here
+                ImGui.dummy(0, 5);
+                boolean showViewport = options.getRenderSettings().isShowViewportOverlay();
+                if (ImGui.checkbox(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.viewport.enable"),
+                        showViewport)) {
+                    options.getRenderSettings().setShowViewportOverlay(!showViewport);
+                    options.save();
+                }
+                // Optional: Allow changing color if desired, but maybe keep it simple as
+                // requested "unify".
+                // Let's keep the color picker here too for completeness, or just the toggle if
+                // the user just wanted the "option".
+                // The user said "trasladar esa opcion" (singular), but usually color goes with
+                // it.
+                // I will add the color picker below the checkbox for completeness.
+                ImGui.sameLine();
+                float[] vColor = options.getRenderSettings().getViewportColor();
+                if (ImGui.colorEdit4(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.viewport.color"),
+                        vColor,
+                        imgui.flag.ImGuiColorEditFlags.NoInputs | imgui.flag.ImGuiColorEditFlags.AlphaPreview)) {
+                    options.getRenderSettings().setViewportColor(vColor);
+                    options.save();
+                }
+
+                ImGui.spacing();
+                ImGui.spacing();
                 ImGui.separator();
 
                 // --- SECCIÓN: MOTOR Y RENDIMIENTO ---
@@ -322,37 +386,9 @@ public final class FOptions extends Form {
 
                 ImGui.dummy(0, 10);
 
-                // --- VIEWPORT ---
-                ImGui.textColored(ImGui.getColorU32(0.2f, 0.7f, 1.0f, 1.0f),
-                        org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.viewport") + ":");
-                ImGui.separator();
-
-                if (ImGui.checkbox(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.viewport.enable"),
-                        settings.isShowViewportOverlay())) {
-                    settings.setShowViewportOverlay(!settings.isShowViewportOverlay());
-                    options.save();
-                }
-
-                ImInt vW = new ImInt((int) settings.getViewportWidth());
-                ImInt vH = new ImInt((int) settings.getViewportHeight());
-                ImGui.setNextItemWidth(80);
-                if (ImGui.inputInt("W##vW", vW)) {
-                    settings.setViewportWidth(vW.get());
-                    options.save();
-                }
-                ImGui.sameLine();
-                ImGui.setNextItemWidth(80);
-                if (ImGui.inputInt("H##vH", vH)) {
-                    settings.setViewportHeight(vH.get());
-                    options.save();
-                }
-
-                float[] vColor = settings.getViewportColor();
-                if (ImGui.colorEdit4(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.viewport.color"),
-                        vColor)) {
-                    settings.setViewportColor(vColor);
-                    options.save();
-                }
+                // --- VIEWPORT (Moved to Graphics) ---
+                // Kept empty placeholder or just remove.
+                // Removing entire section.
 
                 ImGui.dummy(0, 10);
 

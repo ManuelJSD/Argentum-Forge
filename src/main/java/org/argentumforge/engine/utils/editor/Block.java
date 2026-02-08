@@ -162,17 +162,48 @@ public class Block {
         java.util.Map<org.argentumforge.engine.utils.editor.commands.BlockChangeCommand.TilePos, Boolean> oldStates = new java.util.HashMap<>();
         java.util.Map<org.argentumforge.engine.utils.editor.commands.BlockChangeCommand.TilePos, Boolean> newStates = new java.util.HashMap<>();
 
+        int mapWidth = mapData.length;
+        int mapHeight = mapData[0].length;
+
         int clientWidth = org.argentumforge.engine.utils.GameData.options.getClientWidth();
         int clientHeight = org.argentumforge.engine.utils.GameData.options.getClientHeight();
 
-        int minXBorder = clientWidth / 2;
-        int maxXBorder = mapData.length - (clientWidth / 2) - 1;
-        int minYBorder = clientHeight / 2;
-        int maxYBorder = mapData[0].length - (clientHeight / 2) - 1;
+        // Debug Log
+        org.argentumforge.engine.game.console.Console.INSTANCE.addMsgToConsole(
+                "DEBUG: Blocking Borders (Client: " + clientWidth + "x" + clientHeight + ") -> H:" + (clientWidth / 2)
+                        + " V:" + (clientHeight / 2),
+                org.argentumforge.engine.game.console.FontStyle.ITALIC,
+                new org.argentumforge.engine.renderer.RGBColor(1, 1, 0));
+
+        // Ajuste: Revertir offset manual y usar lógica exacta de VB6
+        // VB6: MinXBorder = XMinMapSize + (ClienteWidth / 2) -> Block if X < MinXBorder
+        // VB6: MaxXBorder = XMaxMapSize - (ClienteWidth / 2) -> Block if X > MaxXBorder
+
+        // Suponiendo mapa 1..100
+        // Ajuste Definitivo: Lógica basada en cantidad exacta de tiles (Cero-based)
+        // Ejemplo Width=17 -> halfW=8. Queremos bloquear 8 tiles exactos.
+        // Indices: 0, 1, 2, 3, 4, 5, 6, 7. (Total 8).
+        // Condición: x < halfW.
+
+        // Derecha: Queremos bloquear 8 tiles exactos desde el final.
+        // Array Length 100 (0..99).
+        // Indices: 92, 93, 94, 95, 96, 97, 98, 99. (Total 8).
+        // Condición: x >= (mapWidth - halfW).
+
+        int halfW = clientWidth / 2;
+        int halfH = clientHeight / 2;
+
+        int minXBorder = halfW;
+        int maxXBorder = mapWidth - 1 - halfW;
+
+        int minYBorder = halfH;
+        int maxYBorder = mapHeight - 1 - halfH;
 
         for (int x = 0; x < mapData.length; x++) {
             for (int y = 0; y < mapData[0].length; y++) {
                 if (mapData[x][y] != null) {
+                    // Condición corregida para 1-based rendering: <= y >=
+                    // Ejemplo Leff: x <= 8 (1..8) -> 8 tiles.
                     boolean isBorder = x <= minXBorder || x >= maxXBorder || y <= minYBorder || y >= maxYBorder;
                     if (!bordersOnly || isBorder) {
                         boolean current = mapData[x][y].getBlocked();
