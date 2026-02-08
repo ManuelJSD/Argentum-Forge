@@ -84,8 +84,8 @@ public enum RenderManager {
                 // Reiniciar batch para dibujar UI/Vignette sobre el post-procesado
                 batch.begin();
                 float intensity = settings.getVignetteIntensity();
-                if (org.argentumforge.engine.game.User.INSTANCE.isUnderCeiling())
-                    intensity = Math.min(0.95f, intensity + 0.15f);
+                // REMOVED: Automatic intensity increase based on underCeiling (legacy client
+                // feature)
 
                 org.argentumforge.engine.renderer.Drawn.drawVignette(
                         window.getWidth(),

@@ -312,7 +312,7 @@ public class MapRenderer {
     private void renderFourthLayer(org.argentumforge.engine.utils.inits.MapData[][] mapData,
             RenderSettings renderSettings, final int pixelOffsetX, final int pixelOffsetY) {
         if (renderSettings.getShowLayer()[3]) {
-            checkEffectCeiling();
+            // REMOVED: checkEffectCeiling() call - Automatic roof fading is now disabled
             if (alphaCeiling > 0.0f) {
                 camera.setScreenY(camera.getMinYOffset() - TILE_BUFFER_SIZE);
                 for (int y = camera.getMinY(); y <= camera.getMaxY(); y++) {
@@ -525,15 +525,10 @@ public class MapRenderer {
         }
     }
 
-    private void checkEffectCeiling() {
-        if (user.isUnderCeiling()) {
-            if (alphaCeiling > 0.0f)
-                alphaCeiling -= 0.5f * org.argentumforge.engine.utils.Time.deltaTime;
-        } else {
-            if (alphaCeiling < 1.0f)
-                alphaCeiling += 0.5f * org.argentumforge.engine.utils.Time.deltaTime;
-        }
-    }
+    // REMOVED: checkEffectCeiling() - Automatic roof fading based on underCeiling
+    // (legacy client feature)
+    // Roofs now only hide via manual toggle (Options/Shortcut) as this is an editor
+    // tool
 
     public float getAlphaCeiling() {
         return alphaCeiling;

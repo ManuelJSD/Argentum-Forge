@@ -178,33 +178,45 @@ public class Texture {
         String graphicsPath = Options.INSTANCE.getGraphicsPath();
         String[] extensions = { ".png", ".bmp", ".jpg", ".PNG", ".BMP", ".JPG" };
 
+        Logger.debug("→ Intentando cargar gráfico: {} | GraphicsPath: {}", fileName, graphicsPath);
+
         // 1. Si ya tiene extensión, intentar carga directa o en carpetas de recursos
         // comunes
         if (fileName.contains(".")) {
             // A. Disco (Path configurado)
             if (!graphicsPath.isEmpty()) {
                 Path directPath = Path.of(graphicsPath, fileName);
+                Logger.debug("  Intento 1A: {}", directPath.toAbsolutePath());
                 byte[] data = tryReadFile(directPath);
-                if (data != null)
+                if (data != null) {
+                    Logger.debug("  ✓ Cargado desde: {}", directPath.toAbsolutePath());
                     return data;
+                }
             }
 
             // B. Carpetas de recursos estandar
             String[] resourceDirs = { "resources/gui/", "resources/graphics/", "resources/" };
             for (String dir : resourceDirs) {
                 Path p = Path.of(dir, fileName);
+                Logger.debug("  Intento 1B: {}", p.toAbsolutePath());
                 byte[] data = tryReadFile(p);
-                if (data != null)
+                if (data != null) {
+                    Logger.debug("  ✓ Cargado desde: {}", p.toAbsolutePath());
                     return data;
+                }
             }
 
             // C. Fallback JAR
             String[] jarPaths = { "/graphics/", "/gui/", "/" };
             for (String jarPath : jarPaths) {
                 // Try original
-                try (java.io.InputStream is = Texture.class.getResourceAsStream(jarPath + fileName)) {
-                    if (is != null)
+                String fullPath = jarPath + fileName;
+                Logger.debug("  Intento 1C (JAR): {}", fullPath);
+                try (java.io.InputStream is = Texture.class.getResourceAsStream(fullPath)) {
+                    if (is != null) {
+                        Logger.debug("  ✓ Cargado desde JAR: {}", fullPath);
                         return is.readAllBytes();
+                    }
                 } catch (IOException ignored) {
                 }
 
@@ -215,9 +227,13 @@ public class Texture {
                         : (ext.equals(".bmp") ? ".BMP" : (ext.equals(".jpg") ? ".JPG" : null));
 
                 if (reversedExt != null) {
-                    try (java.io.InputStream is = Texture.class.getResourceAsStream(jarPath + base + reversedExt)) {
-                        if (is != null)
+                    String variantPath = jarPath + base + reversedExt;
+                    Logger.debug("  Intento 1C-variant (JAR): {}", variantPath);
+                    try (java.io.InputStream is = Texture.class.getResourceAsStream(variantPath)) {
+                        if (is != null) {
+                            Logger.debug("  ✓ Cargado desde JAR (variant): {}", variantPath);
                             return is.readAllBytes();
+                        }
                     } catch (IOException ignored) {
                     }
                 }
@@ -229,9 +245,12 @@ public class Texture {
         if (!graphicsPath.isEmpty()) {
             for (String ext : extensions) {
                 Path p = Path.of(graphicsPath, fileName + ext);
+                Logger.debug("  Intento 2A: {}", p.toAbsolutePath());
                 byte[] data = tryReadFile(p);
-                if (data != null)
+                if (data != null) {
+                    Logger.debug("  ✓ Cargado desde: {}", p.toAbsolutePath());
                     return data;
+                }
             }
         }
 
@@ -240,9 +259,12 @@ public class Texture {
         for (String dir : resourceDirs) {
             for (String ext : extensions) {
                 Path p = Path.of(dir, fileName + ext);
+                Logger.debug("  Intento 2B: {}", p.toAbsolutePath());
                 byte[] data = tryReadFile(p);
-                if (data != null)
+                if (data != null) {
+                    Logger.debug("  ✓ Cargado desde: {}", p.toAbsolutePath());
                     return data;
+                }
             }
         }
 
@@ -250,17 +272,19 @@ public class Texture {
         String[] jarPaths = { "/graphics/", "/gui/", "/" };
         for (String jarPath : jarPaths) {
             for (String ext : extensions) {
-                try (java.io.InputStream is = Texture.class.getResourceAsStream(jarPath + fileName + ext)) {
-                    if (is != null)
+                String fullPath = jarPath + fileName + ext;
+                Logger.debug("  Intento 2C (JAR): {}", fullPath);
+                try (java.io.InputStream is = Texture.class.getResourceAsStream(fullPath)) {
+                    if (is != null) {
+                        Logger.debug("  ✓ Cargado desde JAR: {}", fullPath);
                         return is.readAllBytes();
+                    }
                 } catch (IOException ignored) {
                 }
             }
         }
 
-        Logger.warn("Grafico no encontrado: {} (ID:{}) en {}. Buscado en carpetas de recursos y JAR.", fileName,
-                fileName,
-                graphicsPath);
+        Logger.warn("✗ Grafico NO encontrado tras todos los intentos: {} | GraphicsPath: {}", fileName, graphicsPath);
         return null;
     }
 
