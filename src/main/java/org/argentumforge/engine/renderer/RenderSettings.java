@@ -32,7 +32,8 @@ public class RenderSettings {
         CLASSIC, MODERN, MINIMAL, SOLID, MESH, CORNERS
     }
 
-    private IndicatorStyle indicatorStyle = IndicatorStyle.MODERN;
+    private IndicatorStyle blockIndicatorStyle = IndicatorStyle.MODERN;
+    private IndicatorStyle transferIndicatorStyle = IndicatorStyle.MODERN;
 
     // Photo Mode
     private boolean photoModeActive = false;
@@ -266,12 +267,20 @@ public class RenderSettings {
         this.disableAnimations = disableAnimations;
     }
 
-    public IndicatorStyle getIndicatorStyle() {
-        return indicatorStyle;
+    public IndicatorStyle getBlockIndicatorStyle() {
+        return blockIndicatorStyle;
     }
 
-    public void setIndicatorStyle(IndicatorStyle indicatorStyle) {
-        this.indicatorStyle = indicatorStyle;
+    public void setBlockIndicatorStyle(IndicatorStyle blockIndicatorStyle) {
+        this.blockIndicatorStyle = blockIndicatorStyle;
+    }
+
+    public IndicatorStyle getTransferIndicatorStyle() {
+        return transferIndicatorStyle;
+    }
+
+    public void setTransferIndicatorStyle(IndicatorStyle transferIndicatorStyle) {
+        this.transferIndicatorStyle = transferIndicatorStyle;
     }
 
     public boolean isPhotoModeActive() {

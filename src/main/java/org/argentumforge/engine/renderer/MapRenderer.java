@@ -337,7 +337,7 @@ public class MapRenderer {
                         int screenY = POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY;
 
                         float opacity = renderSettings.getBlockOpacity();
-                        switch (renderSettings.getIndicatorStyle()) {
+                        switch (renderSettings.getBlockIndicatorStyle()) {
                             case MODERN:
                                 // Moderno: Recuadro rojo semitransparente con borde más sólido
                                 Drawn.drawColoredRect(screenX + 2, screenY + 2,
@@ -436,7 +436,7 @@ public class MapRenderer {
                         int screenY = POS_SCREEN_Y + camera.getScreenY() * TILE_PIXEL_SIZE + pixelOffsetY;
 
                         float opacity = renderSettings.getTransferOpacity();
-                        switch (renderSettings.getIndicatorStyle()) {
+                        switch (renderSettings.getTransferIndicatorStyle()) {
                             case MODERN:
                                 // Moderno: Recuadro azul cian semitransparente
                                 Drawn.drawColoredRect(screenX + 2, screenY + 2,
