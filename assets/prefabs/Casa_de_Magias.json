@@ -1,0 +1,1890 @@
+{
+  "name": "Casa de Magias",
+  "category": "Casa",
+  "author": "manue",
+  "width": 10,
+  "height": 11,
+  "features": {
+    "layer1": true,
+    "layer2": true,
+    "layer3": true,
+    "layer4": true,
+    "block": true,
+    "triggers": true,
+    "npcs": true,
+    "objects": true,
+    "particles": true
+  },
+  "data": [
+    {
+      "x": 0,
+      "y": 0,
+      "layerGrhs": [
+        0,
+        6013,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 0,
+      "y": 1,
+      "layerGrhs": [
+        0,
+        6001,
+        0,
+        7148,
+        0
+      ],
+      "blocked": true,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 0,
+      "y": 2,
+      "layerGrhs": [
+        0,
+        6005,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 0,
+      "y": 3,
+      "layerGrhs": [
+        0,
+        6009,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 0,
+      "y": 4,
+      "layerGrhs": [
+        0,
+        6013,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 0,
+      "y": 5,
+      "layerGrhs": [
+        0,
+        6001,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 0,
+      "y": 6,
+      "layerGrhs": [
+        0,
+        6005,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 0,
+      "y": 7,
+      "layerGrhs": [
+        0,
+        6009,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 0,
+      "y": 8,
+      "layerGrhs": [
+        0,
+        6013,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 0,
+      "y": 9,
+      "layerGrhs": [
+        0,
+        6001,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 0,
+      "y": 10,
+      "layerGrhs": [
+        0,
+        6320,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 1,
+      "y": 0,
+      "layerGrhs": [
+        0,
+        6014,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 1,
+      "y": 1,
+      "layerGrhs": [
+        0,
+        6002,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 1,
+      "y": 2,
+      "layerGrhs": [
+        0,
+        6006,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 1,
+      "y": 3,
+      "layerGrhs": [
+        0,
+        6010,
+        0,
+        0,
+        0
+      ],
+      "blocked": true,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 1,
+      "y": 4,
+      "layerGrhs": [
+        0,
+        6014,
+        0,
+        0,
+        0
+      ],
+      "blocked": true,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 1,
+      "y": 5,
+      "layerGrhs": [
+        0,
+        6002,
+        0,
+        0,
+        0
+      ],
+      "blocked": true,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 1,
+      "y": 6,
+      "layerGrhs": [
+        0,
+        6006,
+        0,
+        0,
+        0
+      ],
+      "blocked": true,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 1,
+      "y": 7,
+      "layerGrhs": [
+        0,
+        6010,
+        0,
+        0,
+        0
+      ],
+      "blocked": true,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 1,
+      "y": 8,
+      "layerGrhs": [
+        0,
+        6014,
+        0,
+        0,
+        0
+      ],
+      "blocked": true,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 1,
+      "y": 9,
+      "layerGrhs": [
+        0,
+        6002,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 1,
+      "y": 10,
+      "layerGrhs": [
+        0,
+        6321,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 2,
+      "y": 0,
+      "layerGrhs": [
+        0,
+        6015,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 2,
+      "y": 1,
+      "layerGrhs": [
+        0,
+        6003,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 2,
+      "y": 2,
+      "layerGrhs": [
+        0,
+        6007,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 2,
+      "y": 3,
+      "layerGrhs": [
+        0,
+        6011,
+        0,
+        0,
+        0
+      ],
+      "blocked": true,
+      "trigger": 1,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 2,
+      "y": 4,
+      "layerGrhs": [
+        0,
+        5503,
+        0,
+        592,
+        0
+      ],
+      "blocked": true,
+      "trigger": 1,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 2,
+      "y": 5,
+      "layerGrhs": [
+        0,
+        5501,
+        0,
+        592,
+        0
+      ],
+      "blocked": true,
+      "trigger": 1,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 2,
+      "y": 6,
+      "layerGrhs": [
+        0,
+        5503,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 1,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 2,
+      "y": 7,
+      "layerGrhs": [
+        0,
+        5501,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 1,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 2,
+      "y": 8,
+      "layerGrhs": [
+        0,
+        5503,
+        0,
+        0,
+        0
+      ],
+      "blocked": true,
+      "trigger": 1,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 2,
+      "y": 9,
+      "layerGrhs": [
+        0,
+        6003,
+        0,
+        0,
+        0
+      ],
+      "blocked": true,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 2,
+      "y": 10,
+      "layerGrhs": [
+        0,
+        6322,
+        0,
+        0,
+        0
+      ],
+      "blocked": true,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 3,
+      "y": 0,
+      "layerGrhs": [
+        0,
+        6012,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 3,
+      "y": 1,
+      "layerGrhs": [
+        0,
+        6000,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 3,
+      "y": 2,
+      "layerGrhs": [
+        0,
+        6004,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 3,
+      "y": 3,
+      "layerGrhs": [
+        0,
+        6008,
+        0,
+        0,
+        0
+      ],
+      "blocked": true,
+      "trigger": 1,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 3,
+      "y": 4,
+      "layerGrhs": [
+        0,
+        5502,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 1,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 3,
+      "y": 5,
+      "layerGrhs": [
+        0,
+        5500,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 1,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 3,
+      "y": 6,
+      "layerGrhs": [
+        0,
+        5502,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 1,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 3,
+      "y": 7,
+      "layerGrhs": [
+        0,
+        5500,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 1,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 3,
+      "y": 8,
+      "layerGrhs": [
+        0,
+        5502,
+        0,
+        0,
+        0
+      ],
+      "blocked": true,
+      "trigger": 1,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 3,
+      "y": 9,
+      "layerGrhs": [
+        0,
+        6000,
+        0,
+        0,
+        0
+      ],
+      "blocked": true,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 3,
+      "y": 10,
+      "layerGrhs": [
+        0,
+        6323,
+        0,
+        622,
+        0
+      ],
+      "blocked": true,
+      "trigger": 0,
+      "objIndex": 221,
+      "objAmount": 1,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 4,
+      "y": 0,
+      "layerGrhs": [
+        0,
+        6013,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 4,
+      "y": 1,
+      "layerGrhs": [
+        0,
+        6001,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 4,
+      "y": 2,
+      "layerGrhs": [
+        0,
+        6005,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 4,
+      "y": 3,
+      "layerGrhs": [
+        0,
+        6009,
+        0,
+        0,
+        0
+      ],
+      "blocked": true,
+      "trigger": 1,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 4,
+      "y": 4,
+      "layerGrhs": [
+        0,
+        5503,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 1,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 4,
+      "y": 5,
+      "layerGrhs": [
+        0,
+        5501,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 1,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 4,
+      "y": 6,
+      "layerGrhs": [
+        0,
+        5503,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 1,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 4,
+      "y": 7,
+      "layerGrhs": [
+        0,
+        5501,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 1,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 4,
+      "y": 8,
+      "layerGrhs": [
+        0,
+        5503,
+        0,
+        0,
+        0
+      ],
+      "blocked": true,
+      "trigger": 1,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 4,
+      "y": 9,
+      "layerGrhs": [
+        0,
+        6001,
+        0,
+        0,
+        0
+      ],
+      "blocked": true,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 4,
+      "y": 10,
+      "layerGrhs": [
+        0,
+        6320,
+        0,
+        0,
+        0
+      ],
+      "blocked": true,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 5,
+      "y": 0,
+      "layerGrhs": [
+        0,
+        6014,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 5,
+      "y": 1,
+      "layerGrhs": [
+        0,
+        6002,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 5,
+      "y": 2,
+      "layerGrhs": [
+        0,
+        6006,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 5,
+      "y": 3,
+      "layerGrhs": [
+        0,
+        6010,
+        0,
+        5590,
+        0
+      ],
+      "blocked": true,
+      "trigger": 1,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 5,
+      "y": 4,
+      "layerGrhs": [
+        0,
+        5502,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 1,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 46,
+      "particleIndex": 0
+    },
+    {
+      "x": 5,
+      "y": 5,
+      "layerGrhs": [
+        0,
+        5500,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 1,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 5,
+      "y": 6,
+      "layerGrhs": [
+        0,
+        5502,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 1,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 5,
+      "y": 7,
+      "layerGrhs": [
+        0,
+        5500,
+        0,
+        0,
+        5591
+      ],
+      "blocked": false,
+      "trigger": 1,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 5,
+      "y": 8,
+      "layerGrhs": [
+        0,
+        5502,
+        0,
+        5589,
+        0
+      ],
+      "blocked": true,
+      "trigger": 1,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 5,
+      "y": 9,
+      "layerGrhs": [
+        0,
+        6002,
+        0,
+        5588,
+        0
+      ],
+      "blocked": false,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 5,
+      "y": 10,
+      "layerGrhs": [
+        0,
+        6321,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 6,
+      "y": 0,
+      "layerGrhs": [
+        0,
+        6015,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 6,
+      "y": 1,
+      "layerGrhs": [
+        0,
+        6003,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 6,
+      "y": 2,
+      "layerGrhs": [
+        0,
+        6007,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 6,
+      "y": 3,
+      "layerGrhs": [
+        0,
+        6011,
+        0,
+        0,
+        0
+      ],
+      "blocked": true,
+      "trigger": 1,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 6,
+      "y": 4,
+      "layerGrhs": [
+        0,
+        5503,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 1,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 6,
+      "y": 5,
+      "layerGrhs": [
+        0,
+        5501,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 1,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 6,
+      "y": 6,
+      "layerGrhs": [
+        0,
+        5503,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 1,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 6,
+      "y": 7,
+      "layerGrhs": [
+        0,
+        5501,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 1,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 6,
+      "y": 8,
+      "layerGrhs": [
+        0,
+        5503,
+        0,
+        0,
+        0
+      ],
+      "blocked": true,
+      "trigger": 1,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 6,
+      "y": 9,
+      "layerGrhs": [
+        0,
+        6003,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 6,
+      "y": 10,
+      "layerGrhs": [
+        0,
+        6322,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 7,
+      "y": 0,
+      "layerGrhs": [
+        0,
+        6012,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 7,
+      "y": 1,
+      "layerGrhs": [
+        0,
+        6000,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 7,
+      "y": 2,
+      "layerGrhs": [
+        0,
+        6004,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 7,
+      "y": 3,
+      "layerGrhs": [
+        0,
+        6008,
+        0,
+        0,
+        0
+      ],
+      "blocked": true,
+      "trigger": 1,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 7,
+      "y": 4,
+      "layerGrhs": [
+        0,
+        5502,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 1,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 7,
+      "y": 5,
+      "layerGrhs": [
+        0,
+        5500,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 1,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 7,
+      "y": 6,
+      "layerGrhs": [
+        0,
+        5502,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 1,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 7,
+      "y": 7,
+      "layerGrhs": [
+        0,
+        5500,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 1,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 7,
+      "y": 8,
+      "layerGrhs": [
+        0,
+        5502,
+        0,
+        0,
+        0
+      ],
+      "blocked": true,
+      "trigger": 1,
+      "objIndex": 8,
+      "objAmount": 1,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 7,
+      "y": 9,
+      "layerGrhs": [
+        0,
+        6000,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 7,
+      "y": 10,
+      "layerGrhs": [
+        0,
+        6323,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 8,
+      "y": 0,
+      "layerGrhs": [
+        0,
+        6013,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 8,
+      "y": 1,
+      "layerGrhs": [
+        0,
+        6001,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 8,
+      "y": 2,
+      "layerGrhs": [
+        0,
+        6005,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 8,
+      "y": 3,
+      "layerGrhs": [
+        0,
+        6009,
+        0,
+        0,
+        0
+      ],
+      "blocked": true,
+      "trigger": 1,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 8,
+      "y": 4,
+      "layerGrhs": [
+        0,
+        5503,
+        591,
+        0,
+        0
+      ],
+      "blocked": true,
+      "trigger": 1,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 8,
+      "y": 5,
+      "layerGrhs": [
+        0,
+        5501,
+        0,
+        598,
+        0
+      ],
+      "blocked": true,
+      "trigger": 1,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 8,
+      "y": 6,
+      "layerGrhs": [
+        0,
+        5503,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 1,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 8,
+      "y": 7,
+      "layerGrhs": [
+        0,
+        5501,
+        0,
+        0,
+        0
+      ],
+      "blocked": true,
+      "trigger": 1,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 8,
+      "y": 8,
+      "layerGrhs": [
+        0,
+        5503,
+        0,
+        0,
+        0
+      ],
+      "blocked": true,
+      "trigger": 1,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 8,
+      "y": 9,
+      "layerGrhs": [
+        0,
+        6001,
+        0,
+        0,
+        0
+      ],
+      "blocked": true,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 8,
+      "y": 10,
+      "layerGrhs": [
+        0,
+        6320,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 9,
+      "y": 0,
+      "layerGrhs": [
+        0,
+        6014,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 9,
+      "y": 1,
+      "layerGrhs": [
+        0,
+        6002,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 9,
+      "y": 2,
+      "layerGrhs": [
+        0,
+        6006,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 9,
+      "y": 3,
+      "layerGrhs": [
+        0,
+        6010,
+        0,
+        0,
+        0
+      ],
+      "blocked": true,
+      "trigger": 1,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 9,
+      "y": 4,
+      "layerGrhs": [
+        0,
+        6014,
+        0,
+        0,
+        0
+      ],
+      "blocked": true,
+      "trigger": 1,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 9,
+      "y": 5,
+      "layerGrhs": [
+        0,
+        6002,
+        0,
+        0,
+        0
+      ],
+      "blocked": true,
+      "trigger": 1,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 9,
+      "y": 6,
+      "layerGrhs": [
+        0,
+        6001,
+        0,
+        0,
+        0
+      ],
+      "blocked": true,
+      "trigger": 1,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 9,
+      "y": 7,
+      "layerGrhs": [
+        0,
+        6005,
+        0,
+        0,
+        0
+      ],
+      "blocked": true,
+      "trigger": 1,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 9,
+      "y": 8,
+      "layerGrhs": [
+        0,
+        6009,
+        0,
+        0,
+        0
+      ],
+      "blocked": true,
+      "trigger": 1,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 9,
+      "y": 9,
+      "layerGrhs": [
+        0,
+        6002,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    },
+    {
+      "x": 9,
+      "y": 10,
+      "layerGrhs": [
+        0,
+        6321,
+        0,
+        0,
+        0
+      ],
+      "blocked": false,
+      "trigger": 0,
+      "objIndex": 0,
+      "objAmount": 0,
+      "npcIndex": 0,
+      "particleIndex": 0
+    }
+  ]
+}

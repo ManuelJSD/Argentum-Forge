@@ -212,6 +212,192 @@ public final class PreviewUtils {
         ImGui.dummy(64 * scale, 64 * scale);
     }
 
+    /**
+     * Dibuja una previsualización de un Prefab con escalado inteligente basado en
+     * el contenido real.
+     */
+    public static void drawPrefab(org.argentumforge.engine.utils.editor.models.Prefab prefab, float maxWidth,
+            float maxHeight) {
+        if (prefab == null || prefab.getData().isEmpty())
+            return;
+
+        // 1. Calcular Bounding Box Real del contenido visual
+        float minX = Float.MAX_VALUE;
+        float minY = Float.MAX_VALUE;
+        float maxX = -Float.MAX_VALUE;
+        float maxY = -Float.MAX_VALUE;
+        boolean hasContent = false;
+
+        for (org.argentumforge.engine.utils.editor.models.Prefab.PrefabCell cell : prefab.getData()) {
+            float cellBaseX = cell.x * 32.0f; // Posición base del tile en pixeles del mundo
+            float cellBaseY = cell.y * 32.0f;
+
+            for (int l = 1; l <= 4; l++) {
+                int grhIndex = cell.layerGrhs[l];
+                if (grhIndex <= 0)
+                    continue;
+
+                GrhData data = grhData[grhIndex];
+                if (data == null)
+                    continue;
+                if (data.getNumFrames() > 1) {
+                    int f1 = data.getFrame(1);
+                    if (f1 > 0 && f1 < grhData.length && grhData[f1] != null)
+                        data = grhData[f1];
+                    else
+                        continue; // If frame 1 is invalid, skip this grh
+                }
+                if (data == null || data.getFileNum() <= 0)
+                    continue;
+
+                // Calcular bounds de este gráfico
+                // En AO, los gráficos se dibujan:
+                // X: Centrado en el tile -> cellBaseX - (pixelWidth - 32) / 2
+                // Y: Bottom aligned -> cellBaseY - (pixelHeight - 32)
+
+                float grhW = data.getPixelWidth();
+                float grhH = data.getPixelHeight();
+
+                float gX = cellBaseX - (grhW - 32) / 2.0f;
+                float gY = cellBaseY - (grhH - 32); // Y crece hacia abajo en screen coords?
+                // Ojo: En este motor (libGDX/LWJGL setup tradicional), Y suele ser invertido o
+                // no.
+                // Pero aquí estamos en ImGui.
+                // cell.y aumenta hacia abajo (filas 0, 1, 2...).
+                // Un gráfico offsetado "arriba" debería tener Y MENOR.
+                // (pixelHeight - 32) es positivo si el gráfico es alto (ej arbol).
+                // cellBaseY - positivo = Y menor (más arriba). CORRECTO.
+
+                if (gX < minX)
+                    minX = gX;
+                if (gY < minY)
+                    minY = gY;
+                if (gX + grhW > maxX)
+                    maxX = gX + grhW;
+                if (gY + grhH > maxY)
+                    maxY = gY + grhH;
+
+                hasContent = true;
+            }
+        }
+
+        if (!hasContent)
+            return;
+
+        // Añadir un pequeño margen
+        float margin = 0.0f; // No margin for now, let's see how it looks
+        minX -= margin;
+        minY -= margin;
+        maxX += margin;
+        maxY += margin;
+
+        float contentW = maxX - minX;
+        float contentH = maxY - minY;
+
+        if (contentW <= 0 || contentH <= 0)
+            return;
+
+        // 2. Calcular Escala para encajar en maxWidth/maxHeight
+        float scale = 1.0f;
+        if (contentW > maxWidth || contentH > maxHeight) {
+            scale = Math.min(maxWidth / contentW, maxHeight / contentH);
+        } else {
+            // Si es más pequeño, escalar UP para llenar?
+            // O mantener 1.0?
+            // Mejor escalar UP hasta cierto límite (ej 2.0) o llenar el espacio para
+            // uniformidad.
+            // For now, if it's smaller, we'll just scale it up to fit the smaller
+            // dimension,
+            // but not exceed 1.0 if it's already small enough.
+            // Let's just use the same logic as above, it will result in scale <= 1.0 if
+            // content fits.
+            scale = Math.min(maxWidth / contentW, maxHeight / contentH);
+            if (scale > 1.0f)
+                scale = 1.0f; // Don't upscale if it already fits
+        }
+
+        float finalW = contentW * scale;
+        float finalH = contentH * scale;
+
+        float startX = ImGui.getCursorPosX();
+        float startY = ImGui.getCursorPosY();
+
+        // 3. Centrar en el área destino
+        float offsetX = (maxWidth - finalW) / 2;
+        float offsetY = (maxHeight - finalH) / 2;
+
+        // Fondo y Borde de debug (opcional)
+        ImGui.getWindowDrawList().addRectFilled(
+                startX + offsetX, startY + offsetY,
+                startX + offsetX + finalW, startY + offsetY + finalH,
+                ImGui.getColorU32(0, 0, 0, 100));
+
+        // 4. Dibujar
+        for (org.argentumforge.engine.utils.editor.models.Prefab.PrefabCell cell : prefab.getData()) {
+            float cellBaseX = cell.x * 32.0f;
+            float cellBaseY = cell.y * 32.0f;
+
+            for (int l = 1; l <= 4; l++) {
+                int grhIndex = cell.layerGrhs[l];
+                if (grhIndex > 0) {
+                    drawGrhWithBounds(grhIndex, cellBaseX, cellBaseY, startX + offsetX, startY + offsetY, minX, minY,
+                            scale);
+                }
+            }
+        }
+
+        ImGui.setCursorPos(startX, startY);
+        ImGui.dummy(maxWidth, maxHeight);
+    }
+
+    private static void drawGrhWithBounds(int grhIndex, float cellBaseX, float cellBaseY, float drawOriginX,
+            float drawOriginY, float contentMinX, float contentMinY, float scale) {
+        if (grhIndex <= 0 || grhIndex >= grhData.length || grhData[grhIndex] == null)
+            return;
+
+        GrhData data = grhData[grhIndex];
+        if (data.getNumFrames() > 1) {
+            int f1 = data.getFrame(1);
+            if (f1 > 0 && f1 < grhData.length && grhData[f1] != null)
+                data = grhData[f1];
+            else
+                return; // If frame 1 is invalid, skip this grh
+        }
+        if (data.getFileNum() <= 0)
+            return;
+
+        Texture tex = Surface.INSTANCE.getTexture(data.getFileNum());
+        if (tex == null)
+            return;
+
+        float grhW = data.getPixelWidth();
+        float grhH = data.getPixelHeight();
+
+        // Calculate graphic's position in the prefab's original coordinate system
+        float gX = cellBaseX - (grhW - 32) / 2.0f;
+        float gY = cellBaseY - (grhH - 32);
+
+        // Adjust position relative to the content's bounding box origin (contentMinX,
+        // contentMinY)
+        float relativeX = gX - contentMinX;
+        float relativeY = gY - contentMinY;
+
+        // Scale and offset to the ImGui drawing area
+        float finalX = drawOriginX + (relativeX * scale);
+        float finalY = drawOriginY + (relativeY * scale);
+
+        float drawW = grhW * scale;
+        float drawH = grhH * scale;
+
+        float u0 = data.getsX() / (float) tex.getTex_width();
+        float v0 = (data.getsY() + data.getPixelHeight()) / (float) tex.getTex_height();
+        float u1 = (data.getsX() + data.getPixelWidth()) / (float) tex.getTex_width();
+        float v1 = data.getsY() / (float) tex.getTex_height();
+
+        ImGui.setCursorPos(finalX, finalY);
+        ImGui.image(tex.getId(), drawW, drawH, u0, v1, u1, v0);
+    }
+
     private static void drawGrhRelative(int grhIndex, float basePosX, float basePosY, float scale, float offsetX,
             float offsetY) {
         if (grhIndex <= 0 || grhData[grhIndex] == null)

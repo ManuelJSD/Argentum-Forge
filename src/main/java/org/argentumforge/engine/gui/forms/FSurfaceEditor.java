@@ -7,6 +7,8 @@ import imgui.flag.ImGuiWindowFlags;
 import imgui.flag.ImGuiTableFlags;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
+import imgui.type.ImString;
+import imgui.flag.ImGuiTreeNodeFlags;
 import org.argentumforge.engine.gui.PreviewUtils;
 import org.argentumforge.engine.utils.editor.Surface;
 import org.argentumforge.engine.utils.AssetRegistry;
@@ -15,6 +17,18 @@ import org.argentumforge.engine.renderer.Texture;
 import org.argentumforge.engine.gui.Theme;
 import org.argentumforge.engine.gui.widgets.UIComponents;
 import org.argentumforge.engine.i18n.I18n;
+import org.argentumforge.engine.utils.editor.PrefabManager;
+import org.argentumforge.engine.utils.editor.models.Prefab;
+import org.argentumforge.engine.utils.editor.Selection;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.awt.Desktop;
+import org.tinylog.Logger;
+
+import org.argentumforge.engine.gui.DialogManager;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -34,6 +48,8 @@ public class FSurfaceEditor extends Form implements IMapEditor {
     private final float[] scatterDensityArr = { 0.3f };
     private final ImBoolean useMosaicChecked = new ImBoolean(true);
     private final ImBoolean libraryVisualMode = new ImBoolean(true);
+    private final ImString searchPrefab = new ImString(64);
+    private final ImBoolean prefabListViewMode = new ImBoolean(false);
 
     // Configuración de la rejilla
     private static final int TILE_SIZE = 48;
@@ -103,10 +119,265 @@ public class FSurfaceEditor extends Form implements IMapEditor {
                     drawLibraryTab();
                     ImGui.endTabItem();
                 }
+
+                if (ImGui.beginTabItem("Prefabricados")) {
+                    drawPrefabsTab();
+                    ImGui.endTabItem();
+                }
                 ImGui.endTabBar();
             }
         }
         ImGui.end();
+    }
+
+    private void drawPrefabsTab() {
+        ImGui.pushStyleColor(ImGuiCol.Button, Theme.COLOR_ACCENT);
+        // Habilitar si hay entidades seleccionadas (ya sea por área o individualmente)
+        boolean canCreate = Selection.getInstance().isActive()
+                && !Selection.getInstance().getSelectedEntities().isEmpty();
+        if (!canCreate && ImGui.isItemHovered()) {
+            ImGui.setTooltip(I18n.INSTANCE.get("prefab.create.tooltip"));
+        }
+
+        if (canCreate) {
+            if (ImGui.button(I18n.INSTANCE.get("prefab.new"), ImGui.getContentRegionAvailX() / 2 - 5, 25)) {
+                org.argentumforge.engine.gui.ImGUISystem.INSTANCE.show(new FCreatePrefab());
+            }
+        } else {
+            ImGui.beginDisabled();
+            ImGui.button(I18n.INSTANCE.get("prefab.new"), ImGui.getContentRegionAvailX() / 2 - 5, 25);
+            ImGui.endDisabled();
+        }
+        ImGui.popStyleColor();
+
+        ImGui.sameLine();
+
+        // Import Button
+        if (ImGui.button(I18n.INSTANCE.get("prefab.import"), (ImGui.getContentRegionAvailX() / 2) - 5, 25)) {
+            try {
+                // Usar TinyFileDialogs vía wrapper seguro para evitar bloqueos de Swing/LWJGL
+                String result = org.argentumforge.engine.gui.FileDialog.showOpenDialog(
+                        I18n.INSTANCE.get("prefab.import"),
+                        new File("assets/prefabs/").getAbsolutePath() + File.separator,
+                        "JSON Files",
+                        "*.json");
+
+                if (result != null) {
+                    File source = new File(result);
+                    File dest = new File("assets/prefabs/" + source.getName());
+
+                    try {
+                        Files.copy(source.toPath(), dest.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                        PrefabManager.getInstance().loadPrefabs(); // Recargar
+                        DialogManager.getInstance().showInfo(I18n.INSTANCE.get("prefab.import"),
+                                I18n.INSTANCE.get("prefab.import.success", source.getName()));
+                    } catch (IOException e) {
+                        Logger.error(e);
+                        DialogManager.getInstance().showError(I18n.INSTANCE.get("prefab.import"),
+                                I18n.INSTANCE.get("prefab.import.error"));
+                    }
+                }
+            } catch (Exception e) {
+                Logger.error(e);
+            }
+        }
+
+        ImGui.sameLine();
+
+        // Open Folder Button (Icono o Texto "Abrir")
+        if (ImGui.button(I18n.INSTANCE.get("prefab.openFolder"), ImGui.getContentRegionAvailX(), 25)) {
+            try {
+                Desktop.getDesktop().open(new File("assets/prefabs/"));
+            } catch (IOException e) {
+                Logger.error(e);
+            }
+        }
+
+        ImGui.separator();
+
+        ImGui.text(I18n.INSTANCE.get("prefab.search") + ":");
+        ImGui.sameLine();
+        ImGui.inputText("##searchPrefab", searchPrefab);
+
+        if (ImGui.checkbox(I18n.INSTANCE.get("prefab.listMode"), prefabListViewMode)) {
+            // Toggle
+        }
+
+        PrefabManager pm = PrefabManager.getInstance();
+        List<String> categories = pm.getCategories();
+
+        String filter = searchPrefab.get().toLowerCase();
+
+        if (ImGui.beginChild("PrefabsList")) {
+            for (String cat : categories) {
+                List<Prefab> prefabs = pm.getPrefabsByCategory(cat);
+
+                // Filtrar lista
+                if (!filter.isEmpty()) {
+                    prefabs = prefabs.stream()
+                            .filter(p -> p.getName().toLowerCase().contains(filter))
+                            .collect(java.util.stream.Collectors.toList());
+                }
+
+                if (prefabs.isEmpty())
+                    continue;
+
+                if (ImGui.collapsingHeader(cat, ImGuiTreeNodeFlags.DefaultOpen)) {
+                    if (prefabListViewMode.get()) {
+                        // VISTA DE LISTA
+                        if (ImGui.beginTable("ListPrefab_" + cat, 1)) {
+                            for (Prefab p : prefabs) {
+                                ImGui.tableNextColumn();
+                                ImGui.pushID(p.getName());
+
+                                // Small preview?
+                                float previewSize = 32;
+                                float cursorX = ImGui.getCursorPosX();
+                                float cursorY = ImGui.getCursorPosY();
+
+                                PreviewUtils.drawPrefab(p, previewSize, previewSize);
+
+                                ImGui.setCursorPos(cursorX + previewSize + 5, cursorY + 5);
+                                if (ImGui.selectable(p.getName(), false, 0, 0, previewSize)) {
+                                    pm.pastePrefab(p);
+                                }
+
+                                if (ImGui.isItemHovered()) {
+                                    int bgCol = (Theme.COLOR_ACCENT & 0x00FFFFFF) | (0x40 << 24);
+                                    ImGui.getWindowDrawList().addRectFilled(
+                                            ImGui.getItemRectMinX(), ImGui.getItemRectMinY(),
+                                            ImGui.getItemRectMaxX(), ImGui.getItemRectMaxY(),
+                                            bgCol);
+                                    ImGui.getWindowDrawList().addRect(
+                                            ImGui.getItemRectMinX(), ImGui.getItemRectMinY(),
+                                            ImGui.getItemRectMaxX(), ImGui.getItemRectMaxY(),
+                                            Theme.COLOR_ACCENT);
+                                }
+
+                                // Context Menu
+                                if (ImGui.beginPopupContextItem()) {
+                                    if (ImGui.menuItem(I18n.INSTANCE.get("prefab.context.edit"))) {
+                                        org.argentumforge.engine.gui.ImGUISystem.INSTANCE.show(new FEditPrefab(p));
+                                    }
+                                    if (ImGui.menuItem(I18n.INSTANCE.get("prefab.context.delete"))) {
+                                        DialogManager.getInstance().showConfirm(
+                                                I18n.INSTANCE.get("prefab.delete.title"),
+                                                I18n.INSTANCE.get("prefab.delete.confirm", p.getName()),
+                                                () -> {
+                                                    if (pm.deletePrefab(p)) {
+                                                        DialogManager.getInstance().showInfo("Eliminado",
+                                                                I18n.INSTANCE.get("prefab.delete.success"));
+                                                    } else {
+                                                        DialogManager.getInstance().showError("Error",
+                                                                I18n.INSTANCE.get("prefab.delete.error"));
+                                                    }
+                                                }, () -> {
+                                                });
+                                    }
+                                    ImGui.endPopup();
+                                }
+                                ImGui.popID();
+                            }
+                            ImGui.endTable();
+                        }
+                    } else {
+                        // VISTA DE GRILLA
+                        int columns = Math.max(1, (int) (ImGui.getContentRegionAvailX() / 100)); // ~100px per item
+
+                        if (ImGui.beginTable("GridPrefab_" + cat, columns)) {
+                            for (Prefab p : prefabs) {
+                                ImGui.tableNextColumn();
+                                ImGui.pushID(p.getName());
+
+                                // Diseño de tarjeta (Card)
+                                float previewHeight = 64; // Altura fija para preview
+
+                                ImGui.beginGroup();
+
+                                // 1. Preview
+                                float startX = ImGui.getCursorPosX();
+                                float startY = ImGui.getCursorPosY();
+
+                                // Dibujar preview
+                                PreviewUtils.drawPrefab(p, 64, previewHeight);
+
+                                // 2. Nombre (Limitado visualmente)
+                                String name = p.getName();
+                                if (name.length() > 12)
+                                    name = name.substring(0, 9) + "...";
+
+                                // Centrar texto
+                                float textW = ImGui.calcTextSize(name).x;
+                                float centeredTextX = startX + (64 - textW) / 2;
+                                if (centeredTextX < startX)
+                                    centeredTextX = startX;
+
+                                ImGui.setCursorPosY(startY + previewHeight + 2); // Forzar posición Y abajo
+                                ImGui.setCursorPosX(centeredTextX);
+                                ImGui.text(name);
+
+                                ImGui.endGroup();
+
+                                // Lógica de botón invisible que cubre todo el grupo
+                                float groupW = ImGui.getItemRectSizeX();
+                                float groupH = ImGui.getItemRectSizeY();
+
+                                ImGui.setCursorPos(startX, startY);
+                                if (ImGui.invisibleButton("##btn", groupW, groupH)) {
+                                    pm.pastePrefab(p);
+                                }
+
+                                boolean hovered = ImGui.isItemHovered();
+
+                                // Context Menu
+                                if (ImGui.beginPopupContextItem()) {
+                                    if (ImGui.menuItem("Editar")) {
+                                        org.argentumforge.engine.gui.ImGUISystem.INSTANCE.show(new FEditPrefab(p));
+                                    }
+                                    if (ImGui.menuItem("Eliminar")) {
+                                        DialogManager.getInstance().showConfirm("Eliminar Prefab",
+                                                "¿Estás seguro de que deseas eliminar '" + p.getName() + "'?",
+                                                () -> {
+                                                    if (pm.deletePrefab(p)) {
+                                                        DialogManager.getInstance().showInfo("Eliminado",
+                                                                "Prefabricado eliminado.");
+                                                    } else {
+                                                        DialogManager.getInstance().showError("Error",
+                                                                "No se pudo eliminar el prefab.");
+                                                    }
+                                                }, () -> {
+                                                });
+                                    }
+                                    ImGui.endPopup();
+                                }
+
+                                // Dibujar efectos si hover
+                                if (hovered) {
+                                    float minX = ImGui.getItemRectMinX();
+                                    float minY = ImGui.getItemRectMinY();
+                                    float maxX = ImGui.getItemRectMaxX();
+                                    float maxY = ImGui.getItemRectMaxY();
+
+                                    // Fondo semi-transparente
+                                    int bgCol = (Theme.COLOR_ACCENT & 0x00FFFFFF) | (0x40 << 24); // ~25% alpha
+                                    ImGui.getWindowDrawList().addRectFilled(minX, minY, maxX, maxY, bgCol);
+
+                                    // Borde resaltado
+                                    ImGui.getWindowDrawList().addRect(minX, minY, maxX, maxY, Theme.COLOR_ACCENT);
+
+                                    ImGui.setTooltip("Click izquierdo: Pegar\nClick derecho: Opciones\nDimensiones: "
+                                            + p.getWidth() + "x" + p.getHeight());
+                                }
+
+                                ImGui.popID();
+                            }
+                            ImGui.endTable();
+                        }
+                    }
+                }
+            }
+        }
+        ImGui.endChild();
     }
 
     private void drawLibraryTab() {
