@@ -2,6 +2,8 @@ package org.argentumforge.engine.gui.forms;
 
 import imgui.ImGui;
 import imgui.flag.ImGuiCond;
+import imgui.flag.ImGuiTableColumnFlags;
+import imgui.flag.ImGuiTableFlags;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImString;
 import org.argentumforge.engine.game.Options;
@@ -17,7 +19,11 @@ import org.argentumforge.engine.renderer.Surface;
 public class FProfileSelector extends Form {
     private final Runnable onProfileSelected;
     private final ImString newProfileName = new ImString(64);
+    private final ImString renameProfileName = new ImString(64);
     private boolean showCreateDialog = false;
+    private boolean showRenameDialog = false;
+    private boolean editMode = false;
+    private Profile profileToRename;
     private Profile selectedProfile = null;
     private String errorMessage = "";
     private Texture backgroundTexture;
@@ -52,8 +58,8 @@ public class FProfileSelector extends Form {
                     org.argentumforge.engine.Engine.INSTANCE.getWindow().getHeight());
         }
 
-        int windowWidth = 350;
-        int windowHeight = 270;
+        int windowWidth = 450;
+        int windowHeight = 350;
 
         ImGui.setNextWindowSize(windowWidth, windowHeight, ImGuiCond.Always);
         ImGui.setNextWindowPos(
@@ -76,90 +82,225 @@ public class FProfileSelector extends Form {
             ImGui.separator();
             ImGui.spacing();
 
-            // Move profiles list scope here
             List<Profile> profiles = ProfileManager.INSTANCE.getProfiles();
 
             ImGui.pushStyleColor(imgui.flag.ImGuiCol.FrameBg, org.argentumforge.engine.gui.Theme.BG_PANEL);
-            if (ImGui.beginChild("ProfileList", 0, 150, true)) {
-                for (int i = 0; i < profiles.size(); i++) {
-                    Profile p = profiles.get(i);
-                    boolean isSelected = (selectedProfile == p);
-                    if (isSelected) {
-                        ImGui.pushStyleColor(imgui.flag.ImGuiCol.Header,
-                                org.argentumforge.engine.gui.Theme.COLOR_PRIMARY);
+            if (ImGui.beginChild("ProfileList", 0, 180, true)) {
+                if (ImGui.beginTable("ProfilesTable", editMode ? 2 : 1, ImGuiTableFlags.SizingStretchProp)) {
+                    ImGui.tableSetupColumn("Name", ImGuiTableColumnFlags.WidthStretch);
+                    if (editMode) {
+                        ImGui.tableSetupColumn("Actions", ImGuiTableColumnFlags.WidthFixed, 150);
                     }
 
-                    // Use pushID to ensure unique IDs even if names are identical
-                    ImGui.pushID(i);
-                    if (ImGui.selectable(p.getName(), isSelected)) {
-                        selectedProfile = p;
-                    }
-                    ImGui.popID();
+                    for (int i = 0; i < profiles.size(); i++) {
+                        Profile p = profiles.get(i);
+                        boolean isSelected = (selectedProfile == p);
 
-                    if (isSelected) {
-                        ImGui.popStyleColor();
-                        ImGui.setItemDefaultFocus();
+                        ImGui.tableNextRow();
+                        ImGui.tableNextColumn();
+
+                        // Use pushID to ensure unique IDs even if names are identical
+                        ImGui.pushID(i);
+
+                        if (isSelected) {
+                            ImGui.pushStyleColor(imgui.flag.ImGuiCol.Header,
+                                    org.argentumforge.engine.gui.Theme.COLOR_PRIMARY);
+                        }
+
+                        if (ImGui.selectable(p.getName(), isSelected)) {
+                            selectedProfile = p;
+                        }
+
+                        // Menú Contextual (Click derecho)
+                        if (ImGui.beginPopupContextItem("ProfileContextMenu")) {
+                            selectedProfile = p; // Asegurar que el click derecho selecciona el perfil
+
+                            if (ImGui.menuItem(I18n.INSTANCE.get("profile.edit"))) {
+                                profileToRename = p;
+                                renameProfileName.set(p.getName());
+                                showRenameDialog = true;
+                            }
+
+                            ImGui.separator();
+
+                            if (ImGui.menuItem(I18n.INSTANCE.get("profile.moveUp"), null, false, i > 0)) {
+                                ProfileManager.INSTANCE.reorderProfile(i, true);
+                            }
+                            if (ImGui.menuItem(I18n.INSTANCE.get("profile.moveDown"), null, false,
+                                    i < profiles.size() - 1)) {
+                                ProfileManager.INSTANCE.reorderProfile(i, false);
+                            }
+
+                            ImGui.separator();
+
+                            ImGui.pushStyleColor(imgui.flag.ImGuiCol.Text,
+                                    org.argentumforge.engine.gui.Theme.COLOR_DANGER);
+                            if (ImGui.menuItem(I18n.INSTANCE.get("profile.delete"))) {
+                                final Profile toDelete = p;
+                                org.argentumforge.engine.gui.DialogManager.getInstance().showConfirm(
+                                        I18n.INSTANCE.get("profile.delete.confirm.title"),
+                                        String.format(I18n.INSTANCE.get("profile.delete.confirm.msg"),
+                                                toDelete.getName()),
+                                        () -> {
+                                            ProfileManager.INSTANCE.deleteProfile(toDelete);
+                                            if (selectedProfile == toDelete) {
+                                                selectedProfile = ProfileManager.INSTANCE.hasProfiles()
+                                                        ? ProfileManager.INSTANCE.getProfiles().get(0)
+                                                        : null;
+                                            }
+                                        },
+                                        null);
+                            }
+                            ImGui.popStyleColor();
+
+                            ImGui.endPopup();
+                        }
+
+                        if (isSelected) {
+                            ImGui.popStyleColor();
+                            ImGui.setItemDefaultFocus();
+                        }
+
+                        if (editMode) {
+                            ImGui.tableNextColumn();
+
+                            // Botones de acción compactos
+                            if (ImGui.button("^", 25, 20)) {
+                                ProfileManager.INSTANCE.reorderProfile(i, true);
+                            }
+                            if (ImGui.isItemHovered())
+                                ImGui.setTooltip(I18n.INSTANCE.get("profile.moveUp"));
+
+                            ImGui.sameLine();
+                            if (ImGui.button("v", 25, 20)) {
+                                ProfileManager.INSTANCE.reorderProfile(i, false);
+                            }
+                            if (ImGui.isItemHovered())
+                                ImGui.setTooltip(I18n.INSTANCE.get("profile.moveDown"));
+
+                            ImGui.sameLine();
+                            if (ImGui.button(I18n.INSTANCE.get("profile.edit"), 45, 20)) {
+                                profileToRename = p;
+                                renameProfileName.set(p.getName());
+                                showRenameDialog = true;
+                            }
+
+                            ImGui.sameLine();
+                            ImGui.pushStyleColor(imgui.flag.ImGuiCol.Button,
+                                    org.argentumforge.engine.gui.Theme.COLOR_DANGER);
+                            if (ImGui.button("X", 25, 20)) {
+                                final Profile toDelete = p;
+                                org.argentumforge.engine.gui.DialogManager.getInstance().showConfirm(
+                                        I18n.INSTANCE.get("profile.delete.confirm.title"),
+                                        String.format(I18n.INSTANCE.get("profile.delete.confirm.msg"),
+                                                toDelete.getName()),
+                                        () -> {
+                                            ProfileManager.INSTANCE.deleteProfile(toDelete);
+                                            if (selectedProfile == toDelete) {
+                                                selectedProfile = ProfileManager.INSTANCE.hasProfiles()
+                                                        ? ProfileManager.INSTANCE.getProfiles().get(0)
+                                                        : null;
+                                            }
+                                        },
+                                        null);
+                            }
+                            ImGui.popStyleColor();
+                        }
+
+                        ImGui.popID();
                     }
+                    ImGui.endTable();
                 }
             }
             ImGui.endChild();
             ImGui.popStyleColor();
 
-            ImGui.dummy(0, 10); // Spacing to center buttons logically
+            ImGui.dummy(0, 5); // Spacing to center buttons logically
 
-            // Botones de acción centrados
-            float buttonWidth = 100;
-            float totalButtonWidth = (buttonWidth * 3) + (ImGui.getStyle().getItemSpacingX() * 2);
-            ImGui.setCursorPosX((windowWidth - totalButtonWidth) / 2f);
+            // Bloque de flujo principal (Seleccionar + Nuevo)
+            float buttonWidth = 140;
+            float groupWidth = (buttonWidth * 2) + ImGui.getStyle().getItemSpacingX();
+            ImGui.setCursorPosX((windowWidth - groupWidth) / 2f);
 
+            ImGui.beginGroup();
             // Select - Primary
             ImGui.pushStyleColor(imgui.flag.ImGuiCol.Button, org.argentumforge.engine.gui.Theme.COLOR_PRIMARY);
-            if (ImGui.button(I18n.INSTANCE.get("common.select"), buttonWidth, 30)) {
+            if (ImGui.button(I18n.INSTANCE.get("common.select"), buttonWidth, 35)) {
                 selectProfile();
             }
             ImGui.popStyleColor();
 
             ImGui.sameLine();
 
-            // New - Default/Accent
-            if (ImGui.button(I18n.INSTANCE.get("profile.create"), buttonWidth, 30)) {
+            // New - Grouped with Select
+            if (ImGui.button(I18n.INSTANCE.get("profile.create"), buttonWidth, 35)) {
                 showCreateDialog = true;
                 newProfileName.set("");
                 errorMessage = "";
             }
+            ImGui.endGroup();
 
-            ImGui.sameLine();
-
-            // Delete - Danger
-            ImGui.pushStyleColor(imgui.flag.ImGuiCol.Button, org.argentumforge.engine.gui.Theme.COLOR_DANGER);
-            if (ImGui.button(I18n.INSTANCE.get("profile.delete"), buttonWidth, 30)) {
-                if (selectedProfile != null) {
-
-                    org.argentumforge.engine.gui.DialogManager.getInstance().showConfirm(
-                            I18n.INSTANCE.get("profile.delete.confirm.title"),
-                            String.format(I18n.INSTANCE.get("profile.delete.confirm.msg"), selectedProfile.getName()),
-                            () -> {
-                                ProfileManager.INSTANCE.deleteProfile(selectedProfile);
-                                if (profiles.isEmpty()) {
-                                    selectedProfile = null;
-                                } else {
-                                    selectedProfile = profiles.get(0);
-                                }
-                            },
-                            null);
-                }
+            ImGui.dummy(0, 5);
+            ImGui.setCursorPosX((windowWidth - buttonWidth) / 2f);
+            boolean pushedManageColor = false;
+            if (editMode) {
+                ImGui.pushStyleColor(imgui.flag.ImGuiCol.Button, org.argentumforge.engine.gui.Theme.COLOR_ACCENT);
+                pushedManageColor = true;
             }
-            ImGui.popStyleColor();
+            if (ImGui.button(I18n.INSTANCE.get("profile.manage"), buttonWidth, 30)) {
+                editMode = !editMode;
+            }
+            if (pushedManageColor) {
+                ImGui.popStyleColor();
+            }
 
             // Mensaje de error principal
-            if (!errorMessage.isEmpty() && !showCreateDialog) {
+            if (!errorMessage.isEmpty() && !showCreateDialog && !showRenameDialog) {
                 ImGui.spacing();
                 ImGui.textColored(org.argentumforge.engine.gui.Theme.COLOR_DANGER, errorMessage);
             }
 
             renderCreateDialog();
+            renderRenameDialog();
         }
         ImGui.end();
+    }
+
+    private void renderRenameDialog() {
+        if (showRenameDialog) {
+            ImGui.openPopup(I18n.INSTANCE.get("profile.rename.title"));
+        }
+
+        // Center the popup
+        ImGui.setNextWindowPos(
+                (org.argentumforge.engine.Engine.INSTANCE.getWindow().getWidth() - 300) / 2f,
+                (org.argentumforge.engine.Engine.INSTANCE.getWindow().getHeight() - 150) / 2f,
+                ImGuiCond.Appearing);
+
+        if (ImGui.beginPopupModal(I18n.INSTANCE.get("profile.rename.title"), ImGuiWindowFlags.AlwaysAutoResize)) {
+            ImGui.text(I18n.INSTANCE.get("profile.create.name"));
+            ImGui.inputText("##renamepro", renameProfileName);
+
+            ImGui.spacing();
+
+            if (ImGui.button(I18n.INSTANCE.get("common.apply"), 120, 0)) {
+                String name = renameProfileName.get().trim();
+                if (name.isEmpty()) {
+                    errorMessage = I18n.INSTANCE.get("wizard.error.emptyPath");
+                } else {
+                    ProfileManager.INSTANCE.renameProfile(profileToRename, name);
+                    showRenameDialog = false;
+                    ImGui.closeCurrentPopup();
+                }
+            }
+            ImGui.sameLine();
+            if (ImGui.button(I18n.INSTANCE.get("common.cancel"), 120, 0)) {
+                showRenameDialog = false;
+                ImGui.closeCurrentPopup();
+            }
+
+            ImGui.endPopup();
+        }
     }
 
     private void renderCreateDialog() {
@@ -234,11 +375,6 @@ public class FProfileSelector extends Form {
         ProfileManager.INSTANCE.setCurrentProfile(selectedProfile);
         Options.INSTANCE.setConfigPath(selectedProfile.getConfigPath());
         Options.INSTANCE.load();
-
-        // Si es la primera vez que se carga este perfil (no existe config),
-        // deberíamos lanzar el SetupWizard.
-        // Pero `load()` ya crea un default si no existe.
-        // Quizá queramos detectar esto para lanzar el Wizard.
 
         // Ejecutar callback
         if (onProfileSelected != null) {
