@@ -183,7 +183,7 @@ public class GithubReleaseChecker {
      * Devuelve > 0 si v1 > v2, < 0 si v1 < v2, y 0 si son iguales.
      */
     public static int compareVersions(String v1, String v2) {
-        // Eliminar sufijos como -beta3 para comparación numérica
+        // Eliminar sufijos como -beta5 para comparación numérica
         String[] v1Parts = v1.split("-");
         String[] v2Parts = v2.split("-");
 

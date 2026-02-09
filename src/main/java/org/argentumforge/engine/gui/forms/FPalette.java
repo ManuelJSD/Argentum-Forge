@@ -161,8 +161,9 @@ public class FPalette extends Form {
 
                     if (ImGui.isItemHovered()) {
                         ImGui.beginTooltip();
-                        ImGui.text("GRH: " + i);
-                        ImGui.text("Size: " + data.getPixelWidth() + "x" + data.getPixelHeight());
+                        ImGui.text(I18n.INSTANCE.get("common.grh") + " " + i);
+                        ImGui.text(I18n.INSTANCE.get("common.size") + " " + data.getPixelWidth() + "x"
+                                + data.getPixelHeight());
                         PreviewUtils.drawGrh(i, 2.0f);
                         ImGui.endTooltip();
                     }

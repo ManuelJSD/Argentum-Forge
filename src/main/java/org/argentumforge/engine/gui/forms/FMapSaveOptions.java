@@ -87,9 +87,9 @@ public class FMapSaveOptions extends Form {
         ImGui.setNextWindowSize(400, 300, imgui.flag.ImGuiCond.Appearing);
         int flags = ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoDocking;
 
-        if (ImGui.begin("Opciones de Guardado", flags)) {
+        if (ImGui.begin(I18n.INSTANCE.get("menu.file.save.custom.title"), flags)) {
 
-            ImGui.text("Preajuste:");
+            ImGui.text(I18n.INSTANCE.get("map.save.preset"));
             String[] presets = {
                     I18n.INSTANCE.get("map.save.format.standard"),
                     I18n.INSTANCE.get("map.save.format.extended"),
@@ -104,7 +104,7 @@ public class FMapSaveOptions extends Form {
 
             ImGui.separator();
 
-            ImGui.text("Versión:");
+            ImGui.text(I18n.INSTANCE.get("map.save.version"));
             if (ImGui.inputInt("##version", version)) {
                 if (version.get() < 0)
                     version.set(0);
@@ -115,18 +115,18 @@ public class FMapSaveOptions extends Form {
 
             ImGui.dummy(0, 5);
 
-            if (ImGui.checkbox("Incluir Cabecera (273 bytes)", header)) {
+            if (ImGui.checkbox(I18n.INSTANCE.get("map.save.header"), header)) {
                 preset.set(4); // To Custom
             }
 
             ImGui.dummy(0, 5);
-            ImGui.text("Tamaño de Índices:");
-            if (ImGui.radioButton("Integer (2 Bytes)", !longIndices.get())) {
+            ImGui.text(I18n.INSTANCE.get("map.save.indices"));
+            if (ImGui.radioButton(I18n.INSTANCE.get("map.save.indices.int"), !longIndices.get())) {
                 longIndices.set(false);
                 preset.set(4); // To Custom
             }
             ImGui.sameLine();
-            if (ImGui.radioButton("Long (4 Bytes)", longIndices.get())) {
+            if (ImGui.radioButton(I18n.INSTANCE.get("map.save.indices.long"), longIndices.get())) {
                 longIndices.set(true);
                 preset.set(4); // To Custom
             }
@@ -147,7 +147,7 @@ public class FMapSaveOptions extends Form {
             ImGui.pushStyleColor(imgui.flag.ImGuiCol.Button, 0.2f, 0.4f, 0.8f, 1.0f);
             ImGui.pushStyleColor(imgui.flag.ImGuiCol.ButtonHovered, 0.3f, 0.5f, 0.9f, 1.0f);
             ImGui.pushStyleColor(imgui.flag.ImGuiCol.ButtonActive, 0.1f, 0.3f, 0.7f, 1.0f);
-            if (ImGui.button("Guardar", btnWidth, btnHeight)) {
+            if (ImGui.button(I18n.INSTANCE.get("map.save.btn"), btnWidth, btnHeight)) {
                 requestSave();
             }
             ImGui.popStyleColor(3);
@@ -158,7 +158,7 @@ public class FMapSaveOptions extends Form {
             ImGui.pushStyleColor(imgui.flag.ImGuiCol.Button, 0.8f, 0.2f, 0.2f, 1.0f);
             ImGui.pushStyleColor(imgui.flag.ImGuiCol.ButtonHovered, 0.9f, 0.3f, 0.3f, 1.0f);
             ImGui.pushStyleColor(imgui.flag.ImGuiCol.ButtonActive, 0.7f, 0.1f, 0.1f, 1.0f);
-            if (ImGui.button("Cancelar", btnWidth, btnHeight)) {
+            if (ImGui.button(I18n.INSTANCE.get("map.save.cancel"), btnWidth, btnHeight)) {
                 if (onCancel != null)
                     onCancel.run();
                 this.close();

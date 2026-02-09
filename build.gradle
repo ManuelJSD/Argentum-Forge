@@ -20,7 +20,14 @@ tasks.withType(JavaCompile) {
 }
 
 group = 'org.argentumforge'
-version = '1.0.0-beta4'
+version = projectVersion
+
+processResources {
+    inputs.property "version", projectVersion
+    filesMatching("version.properties") {
+        expand "version": projectVersion
+    }
+}
 
 import org.gradle.internal.os.OperatingSystem
 

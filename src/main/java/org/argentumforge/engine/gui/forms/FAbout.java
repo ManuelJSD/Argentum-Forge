@@ -18,7 +18,7 @@ public class FAbout extends Form {
         int flags = imgui.flag.ImGuiWindowFlags.NoCollapse | imgui.flag.ImGuiWindowFlags.NoResize
                 | imgui.flag.ImGuiWindowFlags.NoDocking | imgui.flag.ImGuiWindowFlags.AlwaysAutoResize;
 
-        if (ImGui.begin("Acerca de Argentum Forge", flags)) {
+        if (ImGui.begin(org.argentumforge.engine.i18n.I18n.INSTANCE.get("about.title"), flags)) {
             ImGui.spacing();
 
             // Title
@@ -39,7 +39,7 @@ public class FAbout extends Form {
             ImGui.spacing();
 
             // Credits
-            ImGui.text("Desarrollado por:");
+            ImGui.text(org.argentumforge.engine.i18n.I18n.INSTANCE.get("about.developed"));
             ImGui.sameLine();
             ImGui.textColored(Theme.COLOR_ACCENT, "Lorwik");
 
@@ -52,11 +52,14 @@ public class FAbout extends Form {
             ImGui.spacing();
 
             // Links / Info
-            ImGui.text("Repositorio:");
+            ImGui.text(org.argentumforge.engine.i18n.I18n.INSTANCE.get("about.repo"));
             ImGui.textColored(0.4f, 0.8f, 1.0f, 1.0f, "https://github.com/ManuelJSD/Argentum-Forge");
             if (ImGui.isItemHovered()) {
-                ImGui.setTooltip("Click para copiar URL"); // ImGui doesn't support clickable links easily without extra
-                                                           // logic
+                ImGui.setTooltip(org.argentumforge.engine.i18n.I18n.INSTANCE.get("about.copy")); // ImGui doesn't
+                                                                                                 // support clickable
+                                                                                                 // links easily without
+                                                                                                 // extra
+                // logic
                 if (ImGui.isMouseClicked(0)) {
                     ImGui.setClipboardText("https://github.com/ManuelJSD/Argentum-Forge");
                 }
@@ -65,16 +68,18 @@ public class FAbout extends Form {
             ImGui.spacing();
 
             // License
-            ImGui.textColored(Theme.COLOR_DANGER, "PROHIBIDO SU USO COMERCIAL");
+            ImGui.textColored(Theme.COLOR_DANGER,
+                    org.argentumforge.engine.i18n.I18n.INSTANCE.get("about.license.title"));
             ImGui.textWrapped(
-                    "Este software es libre y de código abierto bajo licencia MIT. Su venta o distribución comercial está estrictamente prohibida sin autorización expresa.");
+                    org.argentumforge.engine.i18n.I18n.INSTANCE.get("about.license.body"));
 
             ImGui.spacing();
             ImGui.separator();
             ImGui.spacing();
 
             // Close Button
-            if (ImGui.button("Cerrar", -1, 0)) { // -1 width = fill
+            if (ImGui.button(org.argentumforge.engine.i18n.I18n.INSTANCE.get("common.close"), -1, 0)) { // -1 width =
+                                                                                                        // fill
                 this.close();
             }
         }

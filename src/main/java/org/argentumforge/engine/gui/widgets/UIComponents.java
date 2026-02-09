@@ -5,6 +5,7 @@ import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImString;
 import org.argentumforge.engine.gui.Theme;
+import org.argentumforge.engine.i18n.I18n;
 
 /**
  * Biblioteca de componentes UI reutilizables.
@@ -72,7 +73,7 @@ public class UIComponents {
      * @return Nueva página seleccionada, o -1 si no cambió
      */
     public static int paginationControls(int currentPage, int maxPage, String id) {
-        ImGui.text("Pag: " + (currentPage + 1) + "/" + (maxPage + 1));
+        ImGui.text(I18n.INSTANCE.get("common.page") + ": " + (currentPage + 1) + "/" + (maxPage + 1));
         ImGui.sameLine();
 
         int newPage = currentPage;
@@ -103,7 +104,7 @@ public class UIComponents {
 
         if (!searchString.isEmpty()) {
             ImGui.sameLine();
-            if (ImGui.button("X##clear" + id)) {
+            if (ImGui.button(org.argentumforge.engine.i18n.I18n.INSTANCE.get("common.symbol.clear") + "##clear" + id)) {
                 searchString.set("");
                 changed = true;
             }
@@ -129,14 +130,14 @@ public class UIComponents {
             ImGui.text(message);
             ImGui.spacing();
 
-            if (ImGui.button("Sí", 120, 0)) {
+            if (ImGui.button(I18n.INSTANCE.get("common.yes"), 120, 0)) {
                 if (onConfirm != null) {
                     onConfirm.run();
                 }
                 ImGui.closeCurrentPopup();
             }
             ImGui.sameLine();
-            if (ImGui.button("No", 120, 0)) {
+            if (ImGui.button(I18n.INSTANCE.get("common.no"), 120, 0)) {
                 ImGui.closeCurrentPopup();
             }
 

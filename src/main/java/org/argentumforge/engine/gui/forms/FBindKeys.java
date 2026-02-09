@@ -221,17 +221,17 @@ public class FBindKeys extends Form {
 
             ImGui.sameLine();
 
-            if (ImGui.button("Guardar", buttonWidth, 30)) {
+            if (ImGui.button(I18n.INSTANCE.get("keys.save"), buttonWidth, 30)) {
                 Key.saveKeys();
                 org.argentumforge.engine.game.console.Console.INSTANCE.addMsgToConsole(
-                        "Teclas guardadas.",
+                        I18n.INSTANCE.get("keys.saved"),
                         org.argentumforge.engine.game.console.FontStyle.REGULAR,
                         new org.argentumforge.engine.renderer.RGBColor(0, 1, 0));
             }
 
             ImGui.sameLine();
 
-            if (ImGui.button("Salir", buttonWidth, 30)) {
+            if (ImGui.button(I18n.INSTANCE.get("keys.exit"), buttonWidth, 30)) {
                 close();
             }
 

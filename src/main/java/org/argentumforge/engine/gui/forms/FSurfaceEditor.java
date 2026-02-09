@@ -120,7 +120,7 @@ public class FSurfaceEditor extends Form implements IMapEditor {
                     ImGui.endTabItem();
                 }
 
-                if (ImGui.beginTabItem("Prefabricados")) {
+                if (ImGui.beginTabItem(I18n.INSTANCE.get("editor.surface.prefabs"))) {
                     drawPrefabsTab();
                     ImGui.endTabItem();
                 }
@@ -256,20 +256,23 @@ public class FSurfaceEditor extends Form implements IMapEditor {
 
                                 // Context Menu
                                 if (ImGui.beginPopupContextItem()) {
-                                    if (ImGui.menuItem(I18n.INSTANCE.get("prefab.context.edit"))) {
+                                    if (ImGui.menuItem(I18n.INSTANCE.get("editor.prefab.edit"))) {
                                         org.argentumforge.engine.gui.ImGUISystem.INSTANCE.show(new FEditPrefab(p));
                                     }
-                                    if (ImGui.menuItem(I18n.INSTANCE.get("prefab.context.delete"))) {
+                                    if (ImGui.menuItem(I18n.INSTANCE.get("editor.prefab.delete"))) {
                                         DialogManager.getInstance().showConfirm(
-                                                I18n.INSTANCE.get("prefab.delete.title"),
-                                                I18n.INSTANCE.get("prefab.delete.confirm", p.getName()),
+                                                I18n.INSTANCE.get("editor.prefab.delete.title"),
+                                                String.format(I18n.INSTANCE.get("editor.prefab.delete.confirm"),
+                                                        p.getName()),
                                                 () -> {
                                                     if (pm.deletePrefab(p)) {
-                                                        DialogManager.getInstance().showInfo("Eliminado",
-                                                                I18n.INSTANCE.get("prefab.delete.success"));
+                                                        DialogManager.getInstance().showInfo(
+                                                                I18n.INSTANCE.get("common.deleted"),
+                                                                I18n.INSTANCE.get("editor.prefab.delete.success"));
                                                     } else {
-                                                        DialogManager.getInstance().showError("Error",
-                                                                I18n.INSTANCE.get("prefab.delete.error"));
+                                                        DialogManager.getInstance().showError(
+                                                                I18n.INSTANCE.get("common.error"),
+                                                                I18n.INSTANCE.get("editor.prefab.delete.error"));
                                                     }
                                                 }, () -> {
                                                 });
@@ -331,19 +334,23 @@ public class FSurfaceEditor extends Form implements IMapEditor {
 
                                 // Context Menu
                                 if (ImGui.beginPopupContextItem()) {
-                                    if (ImGui.menuItem("Editar")) {
+                                    if (ImGui.menuItem(I18n.INSTANCE.get("editor.prefab.edit"))) {
                                         org.argentumforge.engine.gui.ImGUISystem.INSTANCE.show(new FEditPrefab(p));
                                     }
-                                    if (ImGui.menuItem("Eliminar")) {
-                                        DialogManager.getInstance().showConfirm("Eliminar Prefab",
-                                                "¿Estás seguro de que deseas eliminar '" + p.getName() + "'?",
+                                    if (ImGui.menuItem(I18n.INSTANCE.get("editor.prefab.delete"))) {
+                                        DialogManager.getInstance().showConfirm(
+                                                I18n.INSTANCE.get("editor.prefab.delete.title"),
+                                                String.format(I18n.INSTANCE.get("editor.prefab.delete.confirm"),
+                                                        p.getName()),
                                                 () -> {
                                                     if (pm.deletePrefab(p)) {
-                                                        DialogManager.getInstance().showInfo("Eliminado",
-                                                                "Prefabricado eliminado.");
+                                                        DialogManager.getInstance().showInfo(
+                                                                I18n.INSTANCE.get("common.deleted"),
+                                                                I18n.INSTANCE.get("editor.prefab.delete.success"));
                                                     } else {
-                                                        DialogManager.getInstance().showError("Error",
-                                                                "No se pudo eliminar el prefab.");
+                                                        DialogManager.getInstance().showError(
+                                                                I18n.INSTANCE.get("common.error"),
+                                                                I18n.INSTANCE.get("editor.prefab.delete.error"));
                                                     }
                                                 }, () -> {
                                                 });
@@ -365,8 +372,8 @@ public class FSurfaceEditor extends Form implements IMapEditor {
                                     // Borde resaltado
                                     ImGui.getWindowDrawList().addRect(minX, minY, maxX, maxY, Theme.COLOR_ACCENT);
 
-                                    ImGui.setTooltip("Click izquierdo: Pegar\nClick derecho: Opciones\nDimensiones: "
-                                            + p.getWidth() + "x" + p.getHeight());
+                                    ImGui.setTooltip(String.format(I18n.INSTANCE.get("prefab.tooltip"), p.getWidth(),
+                                            p.getHeight()));
                                 }
 
                                 ImGui.popID();
@@ -477,7 +484,7 @@ public class FSurfaceEditor extends Form implements IMapEditor {
         ImGui.beginTooltip();
         ImGui.text(rec.getName() + " (ID: " + rec.getGrhIndex() + ")");
         if (rec.getWidth() > 1 || rec.getHeight() > 1) {
-            ImGui.text("Mosaic: " + rec.getWidth() + "x" + rec.getHeight());
+            ImGui.text(I18n.INSTANCE.get("common.mosaic") + " " + rec.getWidth() + "x" + rec.getHeight());
             PreviewUtils.drawGrhMosaic(rec.getGrhIndex(), rec.getWidth(), rec.getHeight(), 128, 128);
         } else {
             PreviewUtils.drawGrh(rec.getGrhIndex(), 2.0f);
@@ -589,7 +596,7 @@ public class FSurfaceEditor extends Form implements IMapEditor {
 
         if (searchGrh.get() > 0) {
             ImGui.sameLine();
-            if (ImGui.button("X"))
+            if (ImGui.button(I18n.INSTANCE.get("common.symbol.clear")))
                 searchGrh.set(0);
         }
 
@@ -693,8 +700,9 @@ public class FSurfaceEditor extends Form implements IMapEditor {
 
                     if (ImGui.isItemHovered()) {
                         ImGui.beginTooltip();
-                        ImGui.text("GRH: " + i);
-                        ImGui.text("Size: " + data.getPixelWidth() + "x" + data.getPixelHeight());
+                        ImGui.text(I18n.INSTANCE.get("common.grh") + " " + i);
+                        ImGui.text(I18n.INSTANCE.get("common.size") + " " + data.getPixelWidth() + "x"
+                                + data.getPixelHeight());
                         PreviewUtils.drawGrh(i, 2.0f);
                         ImGui.endTooltip();
                     }

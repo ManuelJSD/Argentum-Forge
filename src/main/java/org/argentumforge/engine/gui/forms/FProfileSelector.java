@@ -134,10 +134,10 @@ public class FProfileSelector extends Form {
             ImGui.pushStyleColor(imgui.flag.ImGuiCol.Button, org.argentumforge.engine.gui.Theme.COLOR_DANGER);
             if (ImGui.button(I18n.INSTANCE.get("profile.delete"), buttonWidth, 30)) {
                 if (selectedProfile != null) {
+
                     org.argentumforge.engine.gui.DialogManager.getInstance().showConfirm(
-                            "Confirmar Eliminación",
-                            "¿Está seguro que desea eliminar el perfil '" + selectedProfile.getName()
-                                    + "'?\nEsta acción no se puede deshacer.",
+                            I18n.INSTANCE.get("profile.delete.confirm.title"),
+                            String.format(I18n.INSTANCE.get("profile.delete.confirm.msg"), selectedProfile.getName()),
                             () -> {
                                 ProfileManager.INSTANCE.deleteProfile(selectedProfile);
                                 if (profiles.isEmpty()) {
@@ -164,7 +164,7 @@ public class FProfileSelector extends Form {
 
     private void renderCreateDialog() {
         if (showCreateDialog) {
-            ImGui.openPopup("Crear Nuevo Perfil");
+            ImGui.openPopup(I18n.INSTANCE.get("profile.create.title"));
         }
 
         // Center the popup
@@ -173,8 +173,8 @@ public class FProfileSelector extends Form {
                 (org.argentumforge.engine.Engine.INSTANCE.getWindow().getHeight() - 150) / 2f,
                 ImGuiCond.Appearing);
 
-        if (ImGui.beginPopupModal("Crear Nuevo Perfil", ImGuiWindowFlags.AlwaysAutoResize)) {
-            ImGui.text("Nombre del Perfil:");
+        if (ImGui.beginPopupModal(I18n.INSTANCE.get("profile.create.title"), ImGuiWindowFlags.AlwaysAutoResize)) {
+            ImGui.text(I18n.INSTANCE.get("profile.create.name"));
             ImGui.inputText("##proname", newProfileName);
 
             if (!errorMessage.isEmpty()) {
@@ -226,7 +226,7 @@ public class FProfileSelector extends Form {
 
     private void selectProfile() {
         if (selectedProfile == null) {
-            errorMessage = "Debe seleccionar un perfil.";
+            errorMessage = I18n.INSTANCE.get("profile.error.noselection");
             return;
         }
 

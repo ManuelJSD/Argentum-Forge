@@ -11,6 +11,7 @@ import org.argentumforge.engine.listeners.MouseListener;
 import org.argentumforge.engine.scenes.Camera;
 import org.argentumforge.engine.utils.GithubReleaseChecker;
 import org.argentumforge.engine.utils.Time;
+import org.argentumforge.engine.gui.forms.Form;
 
 /**
  * Componente para renderizar la barra de estado inferior.
@@ -35,20 +36,20 @@ public class MainStatusBar {
                         | ImGuiWindowFlags.NoBringToFrontOnFocus | ImGuiWindowFlags.NoFocusOnAppearing)) {
 
             // Datos a mostrar
-            String fpsText = Time.FPS + " FPS";
-            String zoomText = "Zoom: " + (int) (Camera.getZoomScale() * 100) + "%";
+            String fpsText = Time.FPS + " " + I18n.INSTANCE.get("status.fps");
+            String zoomText = I18n.INSTANCE.get("status.zoom") + ": " + (int) (Camera.getZoomScale() * 100) + "%";
 
             // Coordenadas del Usuario
             int userX = User.INSTANCE.getUserPos().getX();
             int userY = User.INSTANCE.getUserPos().getY();
-            String userPosText = "User: " + userX + ", " + userY;
+            String userPosText = I18n.INSTANCE.get("status.user") + ": " + userX + ", " + userY;
 
             // Coordenadas del Mouse
             int mx = (int) MouseListener.getX() - Camera.POS_SCREEN_X;
             int my = (int) MouseListener.getY() - Camera.POS_SCREEN_Y;
             int tileMouseX = EditorInputManager.getTileMouseX(mx);
             int tileMouseY = EditorInputManager.getTileMouseY(my);
-            String mousePosText = "Mouse: " + tileMouseX + ", " + tileMouseY;
+            String mousePosText = I18n.INSTANCE.get("status.mouse") + ": " + tileMouseX + ", " + tileMouseY;
 
             // Renderizado con espaciado
             ImGui.text(fpsText);
@@ -84,30 +85,39 @@ public class MainStatusBar {
             float cursorX = viewport.getSizeX() - versionWidth - rightMargin;
 
             if (GithubReleaseChecker.isUpdateAvailable()) {
-                String icon = "(!)";
-                float iconWidth = ImGui.calcTextSize(icon).x;
-                float spacing = 5.0f;
+                GithubReleaseChecker.ReleaseInfo release = GithubReleaseChecker.getLatestRelease();
+                String tagName = (release != null) ? release.tagName : "v?";
+                String updateText = String.format(I18n.INSTANCE.get("status.update"), tagName);
 
-                float iconPos = cursorX - iconWidth - spacing;
+                float textWidth = ImGui.calcTextSize(updateText).x;
+                float spacing = 10.0f;
+                float textPos = cursorX - textWidth - spacing;
 
-                ImGui.sameLine(iconPos);
-                ImGui.textColored(1.0f, 0.8f, 0.0f, 1.0f, icon);
+                // Pulsing effect: Alpha oscillates between 0.6 and 1.0
+                double time = ImGui.getTime();
+                float alpha = (float) (Math.abs(Math.sin(time * 3.0)) * 0.4f + 0.6f);
 
-                if (ImGui.isItemHovered()) {
-                    GithubReleaseChecker.ReleaseInfo release = GithubReleaseChecker.getLatestRelease();
-                    String tooltip = I18n.INSTANCE.get("update.available_short");
-                    if (release != null)
-                        tooltip += ": " + release.tagName;
-                    tooltip += "\n" + I18n.INSTANCE.get("update.click_to_download");
+                ImGui.sameLine(textPos);
+                ImGui.textColored(1.0f, 0.85f, 0.0f, alpha, updateText);
 
-                    ImGui.setTooltip(tooltip);
-
-                    if (ImGui.isMouseClicked(0) && release != null) {
-                        org.argentumforge.engine.gui.forms.Form.openURL(release.htmlUrl);
+                if (ImGui.isItemClicked()) {
+                    if (release != null) {
+                        try {
+                            Form.openURL(release.htmlUrl);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
-            } else {
-                // Nothing specific if no update
+
+                if (ImGui.isItemHovered()) {
+                    ImGui.setMouseCursor(imgui.flag.ImGuiMouseCursor.Hand);
+                    String tooltip = I18n.INSTANCE.get("update.available_short");
+                    if (release != null)
+                        tooltip += "\n" + release.name;
+
+                    ImGui.setTooltip(tooltip);
+                }
             }
 
             // Draw version text at its absolute calculated position

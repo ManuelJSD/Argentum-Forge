@@ -61,25 +61,29 @@ public class MainToolbar {
         boolean mapOpen = !org.argentumforge.engine.utils.GameData.getOpenMaps().isEmpty();
 
         // Superficies (Fila 0, Col 0)
-        drawIconButton("Su", I18n.INSTANCE.get("toolbar.surface"), "FSurfaceEditor", parent.getSurfaceEditor(),
+        drawIconButton(I18n.INSTANCE.get("toolbar.surface.short"), I18n.INSTANCE.get("toolbar.surface"),
+                "FSurfaceEditor", parent.getSurfaceEditor(),
                 btnSize, 0 * uvStep + zoom, 0 * uvStep + zoom, 1 * uvStep - zoom, 1 * uvStep - zoom, mapOpen);
 
         ImGui.sameLine();
 
         // Objetos (Fila 1, Col 1)
-        drawIconButton("Ob", I18n.INSTANCE.get("menu.view.objects"), "FObjEditor", parent.getObjEditor(),
+        drawIconButton(I18n.INSTANCE.get("toolbar.objects.short"), I18n.INSTANCE.get("menu.view.objects"), "FObjEditor",
+                parent.getObjEditor(),
                 btnSize, 1 * uvStep + zoom, 1 * uvStep + zoom, 2 * uvStep - zoom, 2 * uvStep - zoom, mapOpen);
 
         ImGui.sameLine();
 
         // NPCs (Fila 1, Col 0)
-        drawIconButton("NP", I18n.INSTANCE.get("menu.view.npcs"), "FNpcEditor", parent.getNpcEditor(),
+        drawIconButton(I18n.INSTANCE.get("toolbar.npcs.short"), I18n.INSTANCE.get("menu.view.npcs"), "FNpcEditor",
+                parent.getNpcEditor(),
                 btnSize, 0 * uvStep + zoom, 1 * uvStep + zoom, 1 * uvStep - zoom, 2 * uvStep - zoom, mapOpen);
 
         ImGui.sameLine();
 
         // Partículas (Fila 2, Col 0)
-        drawIconButton("Pa", I18n.INSTANCE.get("menu.view.particles"), "FParticleEditor", parent.getParticleEditor(),
+        drawIconButton(I18n.INSTANCE.get("toolbar.particles.short"), I18n.INSTANCE.get("menu.view.particles"),
+                "FParticleEditor", parent.getParticleEditor(),
                 btnSize, 0 * uvStep + zoom, 2 * uvStep + zoom, 1 * uvStep - zoom, 3 * uvStep - zoom, mapOpen);
 
         // --- SEPARADOR ---
@@ -88,19 +92,22 @@ public class MainToolbar {
         // --- GRUPO 2: LÓGICA ---
 
         // Bloqueos (Fila 0, Col 1)
-        drawIconButton("Bl", I18n.INSTANCE.get("menu.view.blocks"), "FBlockEditor", parent.getBlockEditor(),
+        drawIconButton(I18n.INSTANCE.get("toolbar.blocks.short"), I18n.INSTANCE.get("menu.view.blocks"), "FBlockEditor",
+                parent.getBlockEditor(),
                 btnSize, 1 * uvStep + zoom, 0 * uvStep + zoom, 2 * uvStep - zoom, 1 * uvStep - zoom, mapOpen);
 
         ImGui.sameLine();
 
         // Triggers (Fila 0, Col 2)
-        drawIconButton("Tg", I18n.INSTANCE.get("menu.view.triggers"), "FTriggerEditor", parent.getTriggerEditor(),
+        drawIconButton(I18n.INSTANCE.get("toolbar.triggers.short"), I18n.INSTANCE.get("menu.view.triggers"),
+                "FTriggerEditor", parent.getTriggerEditor(),
                 btnSize, 2 * uvStep + zoom, 0 * uvStep + zoom, 3 * uvStep - zoom, 1 * uvStep - zoom, mapOpen);
 
         ImGui.sameLine();
 
         // Traslados (Fila 1, Col 2)
-        drawIconButton("Tl", I18n.INSTANCE.get("menu.view.transfers"), "FTransferEditor", parent.getTransferEditor(),
+        drawIconButton(I18n.INSTANCE.get("toolbar.transfers.short"), I18n.INSTANCE.get("menu.view.transfers"),
+                "FTransferEditor", parent.getTransferEditor(),
                 btnSize, 2 * uvStep + zoom, 1 * uvStep + zoom, 3 * uvStep - zoom, 2 * uvStep - zoom, mapOpen);
 
         // --- SEPARADOR ---
@@ -109,7 +116,8 @@ public class MainToolbar {
         // --- GRUPO 3: UTILIDAD ---
 
         // Minimapa (Fila 2, Col 1)
-        drawIconButton("MM", I18n.INSTANCE.get("menu.view.minimap"), "FMinimap", parent.getMinimap(),
+        drawIconButton(I18n.INSTANCE.get("toolbar.minimap.short"), I18n.INSTANCE.get("menu.view.minimap"), "FMinimap",
+                parent.getMinimap(),
                 btnSize, 1 * uvStep + zoom, 2 * uvStep + zoom, 2 * uvStep - zoom, 3 * uvStep - zoom, mapOpen);
 
         ImGui.sameLine();
@@ -155,7 +163,7 @@ public class MainToolbar {
                 ImGui.endDisabled();
             ImGui.popStyleVar();
         } else {
-            if (ImGui.button("Insp", btnSize, btnSize)) {
+            if (ImGui.button(I18n.INSTANCE.get("toolbar.inspector"), btnSize, btnSize)) {
                 toggleInspector();
             }
         }
@@ -164,7 +172,7 @@ public class MainToolbar {
         ImGui.popStyleColor(3);
 
         if (ImGui.isItemHovered()) {
-            ImGui.setTooltip(I18n.INSTANCE.get("common.inspector", "Inspector")); // Fallback text if key missing
+            ImGui.setTooltip(I18n.INSTANCE.get("common.inspector")); // Fallback text if key missing
         }
 
         ImGui.popStyleVar(); // Pop BorderSize
