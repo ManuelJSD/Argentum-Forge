@@ -53,7 +53,7 @@ public class FSpeedControl extends Form {
             ImGui.sameLine();
 
             // Nice looking Reset button
-            if (ImGui.button("R", 30, 24)) {
+            if (ImGui.button(I18n.INSTANCE.get("common.abbr.reset"), 30, 24)) {
                 if (walking)
                     options.setMoveSpeedWalk(defaultSpeed);
                 else

@@ -116,7 +116,7 @@ public class MainMenuBar {
 
                 ImGui.separator();
 
-                if (ImGui.menuItem("Cambiar Perfil")) {
+                if (ImGui.menuItem(I18n.INSTANCE.get("menu.file.changeProfile"))) {
                     org.argentumforge.engine.Engine.INSTANCE.requestProfileChange();
                 }
 
@@ -184,7 +184,7 @@ public class MainMenuBar {
                     if (GameData.getActiveContext() != null) {
                         ImGUISystem.INSTANCE.show(new FMapValidator());
                     } else {
-                        DialogManager.getInstance().showInfo("Mapa",
+                        DialogManager.getInstance().showInfo(I18n.INSTANCE.get("menu.map"),
                                 I18n.INSTANCE.get("msg.noActiveMap"));
                     }
                 }
@@ -323,9 +323,9 @@ public class MainMenuBar {
             if (ImGui.beginMenu(I18n.INSTANCE.get("menu.tools"))) {
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.file.export"))) {
                     String selectedFile = FileDialog.showSaveDialog(
-                            "Exportar Mapa como Imagen",
+                            I18n.INSTANCE.get("dialog.export.title"),
                             new File(".").getAbsolutePath() + File.separator + "mapa.png",
-                            "Imagen PNG",
+                            I18n.INSTANCE.get("dialog.export.png"),
                             "*.png");
 
                     if (selectedFile != null) {
@@ -334,8 +334,8 @@ public class MainMenuBar {
                             path += ".png";
                         }
                         MapExporter.exportMap(path);
-                        DialogManager.getInstance().showInfo("Exportar Mapa",
-                                "Mapa exportado correctamente a:\n" + path);
+                        DialogManager.getInstance().showInfo(I18n.INSTANCE.get("msg.export.title"),
+                                I18n.INSTANCE.get("msg.export.success") + path);
                     }
                 }
 
@@ -354,15 +354,15 @@ public class MainMenuBar {
             if (ImGui.beginMenu(I18n.INSTANCE.get("menu.misc"))) {
 
                 String photoKey = getKeyName(org.argentumforge.engine.game.models.Key.TOGGLE_PHOTO_MODE.getKeyCode());
-                if (ImGui.menuItem("Modo Foto", photoKey)) {
+                if (ImGui.menuItem(I18n.INSTANCE.get("menu.misc.photoMode"), photoKey)) {
                     GameData.options.getRenderSettings().setPhotoModeActive(
                             !GameData.options.getRenderSettings().isPhotoModeActive());
                 }
 
-                if (ImGui.menuItem(I18n.INSTANCE.get("menu.misc.reloadGraphics", "Recargar Gráficos Fallidos"))) {
+                if (ImGui.menuItem(I18n.INSTANCE.get("menu.misc.reloadGraphics"))) {
                     org.argentumforge.engine.renderer.Surface.INSTANCE.retryFailedTextures();
-                    DialogManager.getInstance().showInfo("Gráficos",
-                            "Se ha solicitado la recarga de texturas fallidas.");
+                    DialogManager.getInstance().showInfo(I18n.INSTANCE.get("msg.graphics.title"),
+                            I18n.INSTANCE.get("msg.graphics.reloadRequested"));
                 }
 
                 ImGui.separator();

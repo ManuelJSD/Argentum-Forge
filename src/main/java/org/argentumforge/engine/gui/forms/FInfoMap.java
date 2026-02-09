@@ -242,12 +242,12 @@ public final class FInfoMap extends Form {
     private void renderMusicSelector() {
         ImGui.setNextWindowSize(300, 400, ImGuiCond.FirstUseEver);
         ImBoolean pOpen = new ImBoolean(true);
-        if (ImGui.begin("Selector de Música", pOpen, ImGuiWindowFlags.NoCollapse)) {
+        if (ImGui.begin(I18n.INSTANCE.get("dialog.music.title"), pOpen, ImGuiWindowFlags.NoCollapse)) {
             if (!pOpen.get()) {
                 showMusicSelector = false;
             }
 
-            if (ImGui.inputText("Filtrar", musicFilter)) {
+            if (ImGui.inputText(I18n.INSTANCE.get("common.filter"), musicFilter)) {
                 updateFilteredMusic();
             }
 
@@ -265,9 +265,10 @@ public final class FInfoMap extends Form {
             ImGui.separator();
 
             String selectedName = getFilenameFromIndex(musicNum.get());
-            ImGui.text("Seleccionado: " + (selectedName.isEmpty() ? musicNum.get() : selectedName));
+            ImGui.text(I18n.INSTANCE.get("dialog.music.selected")
+                    + (selectedName.isEmpty() ? musicNum.get() : selectedName));
 
-            if (ImGui.button("Reproducir")) {
+            if (ImGui.button(I18n.INSTANCE.get("common.play"))) {
                 if (!selectedName.isEmpty()) {
                     Sound.stopMusic();
                     Sound.playMusic(selectedName);
@@ -275,7 +276,7 @@ public final class FInfoMap extends Form {
                 }
             }
             ImGui.sameLine();
-            if (ImGui.button("Detener")) {
+            if (ImGui.button(I18n.INSTANCE.get("common.stop"))) {
                 Sound.stopMusic();
                 Sound.stopMusic();
             }

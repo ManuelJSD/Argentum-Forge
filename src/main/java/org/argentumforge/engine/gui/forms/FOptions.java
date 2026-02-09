@@ -131,15 +131,15 @@ public final class FOptions extends Form {
             }
 
             // --- TAB: APARIENCIA ---
-            if (ImGui.beginTabItem("Apariencia")) {
+            if (ImGui.beginTabItem(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.tab.appearance"))) {
                 ImGui.dummy(0, 10);
 
                 // User Appearance
-                ImGui.text("Apariencia en Tierra:");
+                ImGui.text(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.appearance.land"));
                 ImGui.separator();
 
                 ImInt body = new ImInt(org.argentumforge.engine.game.User.INSTANCE.getUserBody());
-                if (ImGui.inputInt("Cuerpo", body)) {
+                if (ImGui.inputInt(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.appearance.body"), body)) {
                     if (body.get() < 1)
                         body.set(1);
                     org.argentumforge.engine.game.User.INSTANCE.setUserBody(body.get());
@@ -147,7 +147,7 @@ public final class FOptions extends Form {
                 }
 
                 ImInt head = new ImInt(org.argentumforge.engine.game.User.INSTANCE.getUserHead());
-                if (ImGui.inputInt("Cabeza", head)) {
+                if (ImGui.inputInt(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.appearance.head"), head)) {
                     if (head.get() < 1)
                         head.set(1);
                     org.argentumforge.engine.game.User.INSTANCE.setUserHead(head.get());
@@ -155,11 +155,12 @@ public final class FOptions extends Form {
                 }
 
                 ImGui.dummy(0, 10);
-                ImGui.text("Apariencia en Agua:");
+                ImGui.text(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.appearance.water"));
                 ImGui.separator();
 
                 ImInt waterBody = new ImInt(org.argentumforge.engine.game.User.INSTANCE.getUserWaterBody());
-                if (ImGui.inputInt("Cuerpo (Agua)", waterBody)) {
+                if (ImGui.inputInt(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.appearance.body_water"),
+                        waterBody)) {
                     if (waterBody.get() < 1)
                         waterBody.set(1);
                     org.argentumforge.engine.game.User.INSTANCE.setUserWaterBody(waterBody.get());
@@ -170,16 +171,17 @@ public final class FOptions extends Form {
                 }
 
                 ImGui.dummy(0, 10);
-                ImGui.textDisabled("(Los cambios se ven en tiempo real)");
+                ImGui.textDisabled(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.appearance.realtime"));
 
                 ImGui.dummy(0, 10);
-                ImGui.text("Interfaz de Usuario:");
+                ImGui.text(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.appearance.ui"));
                 ImGui.separator();
 
                 // Theme Selector using ThemeManager
                 org.argentumforge.engine.gui.Theme.StyleType currentTheme = org.argentumforge.engine.gui.ThemeManager
                         .getInstance().getCurrentTheme();
-                if (ImGui.beginCombo("Tema Visual", currentTheme.name())) {
+                if (ImGui.beginCombo(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.appearance.theme"),
+                        currentTheme.name())) {
                     for (org.argentumforge.engine.gui.Theme.StyleType type : org.argentumforge.engine.gui.Theme.StyleType
                             .values()) {
                         boolean isSelected = (type == currentTheme);

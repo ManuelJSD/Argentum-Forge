@@ -146,6 +146,6 @@ files: |
 **Ready for your first release?** 🎉
 
 ```bash
-git tag v1.0.0-beta
-git push origin v1.0.0-beta
+git tag v1.0.0-beta5
+git push origin v1.0.0-beta5
 ```

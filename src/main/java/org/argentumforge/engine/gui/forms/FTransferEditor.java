@@ -59,7 +59,7 @@ public class FTransferEditor extends Form implements IMapEditor {
         }
 
         // Campo X
-        ImGui.text("X:");
+        ImGui.text(I18n.INSTANCE.get("common.coord.x"));
         ImGui.sameLine(80);
         ImGui.setNextItemWidth(150);
         if (ImGui.inputInt("##XInput", inputX, 1, 10, ImGuiInputTextFlags.None)) {
@@ -72,7 +72,7 @@ public class FTransferEditor extends Form implements IMapEditor {
         }
 
         // Campo Y
-        ImGui.text("Y:");
+        ImGui.text(I18n.INSTANCE.get("common.coord.y"));
         ImGui.sameLine(80);
         ImGui.setNextItemWidth(150);
         if (ImGui.inputInt("##YInput", inputY, 1, 10, ImGuiInputTextFlags.None)) {

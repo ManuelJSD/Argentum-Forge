@@ -25,19 +25,20 @@ public class FMapValidator extends Form {
     public void render() {
         ImGui.setNextWindowSize(600, 400, imgui.flag.ImGuiCond.FirstUseEver);
 
-        if (ImGui.begin("Validación de Mapa", open, ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking)) {
+        if (ImGui.begin(org.argentumforge.engine.i18n.I18n.INSTANCE.get("validator.title"), open,
+                ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking)) {
 
-            if (ImGui.button("Re-Escanear Mapa")) {
+            if (ImGui.button(org.argentumforge.engine.i18n.I18n.INSTANCE.get("validator.rescan"))) {
                 this.currentErrors = MapValidator.validateCurrentMap();
             }
 
             ImGui.sameLine();
-            if (ImGui.treeNode("Configurar Filtros de Objetos")) {
-                ImGui.text("Ignorar advertencia de bloqueo para ObjTypes:");
+            if (ImGui.treeNode(org.argentumforge.engine.i18n.I18n.INSTANCE.get("validator.config"))) {
+                ImGui.text(org.argentumforge.engine.i18n.I18n.INSTANCE.get("validator.ignore"));
 
-                ImGui.inputInt("ObjType ID", inputObjType);
+                ImGui.inputInt(org.argentumforge.engine.i18n.I18n.INSTANCE.get("validator.objtype"), inputObjType);
                 ImGui.sameLine();
-                if (ImGui.button("Agregar")) {
+                if (ImGui.button(org.argentumforge.engine.i18n.I18n.INSTANCE.get("validator.add"))) {
                     Options.INSTANCE.getIgnoredObjTypes().add(inputObjType.get());
                     Options.INSTANCE.save(); // Salvar cambios
                 }
@@ -49,9 +50,11 @@ public class FMapValidator extends Form {
                 java.util.Collections.sort(sortedTypes);
 
                 for (Integer typeId : sortedTypes) {
-                    ImGui.bulletText("Type " + typeId);
+                    ImGui.bulletText(String
+                            .format(org.argentumforge.engine.i18n.I18n.INSTANCE.get("validator.item.type"), typeId));
                     ImGui.sameLine();
-                    if (ImGui.smallButton("X##" + typeId)) {
+                    if (ImGui.smallButton(
+                            org.argentumforge.engine.i18n.I18n.INSTANCE.get("common.symbol.clear") + "##" + typeId)) {
                         Options.INSTANCE.getIgnoredObjTypes().remove(typeId);
                         Options.INSTANCE.save();
                     }
@@ -62,17 +65,23 @@ public class FMapValidator extends Form {
             ImGui.separator();
 
             if (currentErrors == null || currentErrors.isEmpty()) {
-                ImGui.textColored(0.0f, 1.0f, 0.0f, 1.0f, "¡No se encontraron errores en el mapa!");
+                ImGui.textColored(0.0f, 1.0f, 0.0f, 1.0f,
+                        org.argentumforge.engine.i18n.I18n.INSTANCE.get("validator.noerrors"));
             } else {
-                ImGui.text("Errores encontrados: " + currentErrors.size());
+                ImGui.text(String.format(org.argentumforge.engine.i18n.I18n.INSTANCE.get("validator.errors"),
+                        currentErrors.size()));
 
                 if (ImGui.beginTable("ErrorsTable", 4,
                         ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.ScrollY)) {
 
-                    ImGui.tableSetupColumn("Tipo", ImGuiTableColumnFlags.WidthFixed, 80.0f);
-                    ImGui.tableSetupColumn("Posición", ImGuiTableColumnFlags.WidthFixed, 80.0f);
-                    ImGui.tableSetupColumn("Descripción", ImGuiTableColumnFlags.WidthFixed, 300.0f);
-                    ImGui.tableSetupColumn("Acción", ImGuiTableColumnFlags.WidthFixed, 80.0f);
+                    ImGui.tableSetupColumn(org.argentumforge.engine.i18n.I18n.INSTANCE.get("validator.type"),
+                            ImGuiTableColumnFlags.WidthFixed, 80.0f);
+                    ImGui.tableSetupColumn(org.argentumforge.engine.i18n.I18n.INSTANCE.get("validator.pos"),
+                            ImGuiTableColumnFlags.WidthFixed, 80.0f);
+                    ImGui.tableSetupColumn(org.argentumforge.engine.i18n.I18n.INSTANCE.get("validator.desc"),
+                            ImGuiTableColumnFlags.WidthFixed, 300.0f);
+                    ImGui.tableSetupColumn(org.argentumforge.engine.i18n.I18n.INSTANCE.get("validator.action"),
+                            ImGuiTableColumnFlags.WidthFixed, 80.0f);
                     ImGui.tableHeadersRow();
 
                     for (MapValidator.ValidationError error : currentErrors) {
@@ -95,13 +104,15 @@ public class FMapValidator extends Form {
                         ImGui.text(error.description);
 
                         // Column 3: Action
-                        ImGui.tableNextColumn();
-                        if (ImGui.button("Ir##" + error.x + "_" + error.y)) {
-                            // Teleport camera logic
-                            // Camera operates in pixels, assuming 32x32 tiles.
-                            // We center the camera on the tile.
-                            org.argentumforge.engine.game.User.INSTANCE.getUserPos().setX(error.x);
-                            org.argentumforge.engine.game.User.INSTANCE.getUserPos().setY(error.y);
+                        if (ImGui.tableNextColumn()) {
+                            if (ImGui.button(org.argentumforge.engine.i18n.I18n.INSTANCE.get("common.go") + "##"
+                                    + error.x + "_" + error.y)) {
+                                org.argentumforge.engine.game.User.INSTANCE.teleport(error.x, error.y);
+                                // Camera operates in pixels, assuming 32x32 tiles.
+                                // We center the camera on the tile.
+                                org.argentumforge.engine.game.User.INSTANCE.getUserPos().setX(error.x);
+                                org.argentumforge.engine.game.User.INSTANCE.getUserPos().setY(error.y);
+                            }
                         }
                     }
 

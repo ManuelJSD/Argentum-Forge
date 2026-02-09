@@ -31,12 +31,12 @@ public class FGoTo extends Form {
             ImGui.dummy(0, 5);
 
             // Input X
-            ImGui.text("X:");
+            ImGui.text(I18n.INSTANCE.get("common.coord.x"));
             ImGui.sameLine();
             ImGui.inputInt("##x", xVal);
 
             // Input Y
-            ImGui.text("Y:");
+            ImGui.text(I18n.INSTANCE.get("common.coord.y"));
             ImGui.sameLine();
             ImGui.inputInt("##y", yVal);
 

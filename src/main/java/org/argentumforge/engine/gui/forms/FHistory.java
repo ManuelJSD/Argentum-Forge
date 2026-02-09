@@ -64,9 +64,9 @@ public class FHistory extends Form {
 
             // Status indicator for current state
             if (savedSize == undoStack.size()) {
-                ImGui.textColored(0.0f, 1.0f, 0.0f, 1.0f, "(Estado Actual: Guardado)");
+                ImGui.textColored(0.0f, 1.0f, 0.0f, 1.0f, I18n.INSTANCE.get("history.state.saved"));
             } else {
-                ImGui.textColored(1.0f, 1.0f, 0.0f, 1.0f, "(Estado Actual: Sin Guardar)");
+                ImGui.textColored(1.0f, 1.0f, 0.0f, 1.0f, I18n.INSTANCE.get("history.state.unsaved"));
             }
 
             ImGui.beginChild("HistoryList", 0, 0, true);
@@ -76,7 +76,7 @@ public class FHistory extends Form {
                 Command cmd = undoStack.get(i);
                 boolean isSavedPoint = (i + 1 == savedSize);
                 String label = String.format("%d. %s%s##undo%d", i + 1, cmd.getName(),
-                        (isSavedPoint ? " [GUARDADO]" : ""), i);
+                        (isSavedPoint ? " " + I18n.INSTANCE.get("history.tag.saved") : ""), i);
 
                 if (ImGui.selectable(label, false)) {
                     int undoCount = undoStack.size() - i;
@@ -97,7 +97,8 @@ public class FHistory extends Form {
             for (int i = 0; i < redoStack.size(); i++) {
                 Command cmd = redoStack.get(i);
                 boolean isSavedPoint = (undoStack.size() + i + 1 == savedSize);
-                String label = String.format("%s (Redo)%s##redo%d", cmd.getName(), (isSavedPoint ? " [GUARDADO]" : ""),
+                String label = String.format("%s%s%s##redo%d", cmd.getName(), I18n.INSTANCE.get("history.tag.redo"),
+                        (isSavedPoint ? " " + I18n.INSTANCE.get("history.tag.saved") : ""),
                         i);
 
                 ImGui.pushStyleColor(imgui.flag.ImGuiCol.Text, 0.5f, 0.5f, 0.5f, 1.0f);

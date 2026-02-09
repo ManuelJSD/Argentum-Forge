@@ -78,12 +78,13 @@ public class FParticleEditor extends Form implements IMapEditor {
 
             if (particleTool.getMode() == 1) {
                 if (particleTool.getSelectedParticleId() > 0) {
-                    ImGui.textColored(0xFF00FF00, "Modo: INSERTAR (ID: " + particleTool.getSelectedParticleId() + ")");
+                    ImGui.textColored(0xFF00FF00, String.format(I18n.INSTANCE.get("particle.mode.insert"),
+                            particleTool.getSelectedParticleId()));
                 } else {
-                    ImGui.textColored(0xFF0000FF, "Modo: ELIMINAR");
+                    ImGui.textColored(0xFF0000FF, I18n.INSTANCE.get("particle.mode.delete"));
                 }
             } else {
-                ImGui.textColored(0xFFAAAAAA, "Modo: INACTIVO");
+                ImGui.textColored(0xFFAAAAAA, I18n.INSTANCE.get("particle.mode.inactive"));
             }
 
             ImGui.end();

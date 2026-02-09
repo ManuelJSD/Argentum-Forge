@@ -87,13 +87,13 @@ public class FViewGuides extends Form {
             ImInt vW = new ImInt((int) settings.getViewportWidth());
             ImInt vH = new ImInt((int) settings.getViewportHeight());
             ImGui.setNextItemWidth(80);
-            if (ImGui.inputInt("W##vW", vW)) {
+            if (ImGui.inputInt(I18n.INSTANCE.get("common.abbr.width") + "##vW", vW)) {
                 settings.setViewportWidth(vW.get());
                 Options.INSTANCE.save();
             }
             ImGui.sameLine();
             ImGui.setNextItemWidth(80);
-            if (ImGui.inputInt("H##vH", vH)) {
+            if (ImGui.inputInt(I18n.INSTANCE.get("common.abbr.height") + "##vH", vH)) {
                 settings.setViewportHeight(vH.get());
                 Options.INSTANCE.save();
             }

@@ -46,9 +46,9 @@ class GithubReleaseCheckerTest {
     @Test
     @DisplayName("Should compare beta versions lexicographically")
     void shouldCompareBetaVersionsLexicographically() {
-        // beta3 < beta4 (lexicographically)
-        assertThat(GithubReleaseChecker.compareVersions("1.0.0-beta3", "1.0.0-beta4")).isLessThan(0);
-        assertThat(GithubReleaseChecker.compareVersions("1.0.0-beta4", "1.0.0-beta3")).isGreaterThan(0);
+        // beta4 < beta5 (lexicographically)
+        assertThat(GithubReleaseChecker.compareVersions("1.0.0-beta4", "1.0.0-beta5")).isLessThan(0);
+        assertThat(GithubReleaseChecker.compareVersions("1.0.0-beta5", "1.0.0-beta4")).isGreaterThan(0);
 
         // alpha < beta (lexicographically)
         assertThat(GithubReleaseChecker.compareVersions("1.0.0-alpha1", "1.0.0-beta1")).isLessThan(0);
@@ -57,7 +57,7 @@ class GithubReleaseCheckerTest {
     @Test
     @DisplayName("Should compare equal beta versions as equal")
     void shouldCompareEqualBetaVersions() {
-        assertThat(GithubReleaseChecker.compareVersions("1.0.0-beta3", "1.0.0-beta3")).isEqualTo(0);
+        assertThat(GithubReleaseChecker.compareVersions("1.0.0-beta5", "1.0.0-beta5")).isEqualTo(0);
     }
 
     @Test
@@ -71,11 +71,15 @@ class GithubReleaseCheckerTest {
     @Test
     @DisplayName("Should handle real-world version comparison scenarios")
     void shouldHandleRealWorldScenarios() {
-        // Current version is 1.0.0-beta3, checking against beta4
-        assertThat(GithubReleaseChecker.compareVersions("1.0.0-beta4", "1.0.0-beta3")).isGreaterThan(0);
+        // Current version is 1.0.0-beta4, checking against beta5
+        assertThat(GithubReleaseChecker.compareVersions("1.0.0-beta5", "1.0.0-beta4")).isGreaterThan(0);
 
-        // Current version is 1.0.0-beta3, checking against stable 1.0.0
-        assertThat(GithubReleaseChecker.compareVersions("1.0.0", "1.0.0-beta3")).isGreaterThan(0);
+        // Current version is 1.0.0-beta5, checking against stable 1.0.0
+        assertThat(GithubReleaseChecker.compareVersions("1.0.0", "1.0.0-beta5")).isLessThan(0);
+        assertThat(GithubReleaseChecker.compareVersions("1.0.0", "1.0.0-beta5")).isLessThan(0); // v-pre < v-stable
+        // Note: 1.0.0 is NEWER than 1.0.0-beta5. The assertion was correct: 1.0.0 >
+        // 1.0.0-beta5
+        assertThat(GithubReleaseChecker.compareVersions("1.0.0", "1.0.0-beta5")).isGreaterThan(0);
 
         // Current version is 1.0.0, checking against 1.0.1-beta1
         assertThat(GithubReleaseChecker.compareVersions("1.0.1-beta1", "1.0.0")).isGreaterThan(0);

@@ -32,7 +32,22 @@ public final class Engine {
     /** Flag que indica si el programa esta corriendo. */
     private static boolean prgRun = true;
     /** Versión del programa. */
-    public static final String VERSION = "1.0.0-beta5";
+    public static final String VERSION = loadVersion();
+
+    private static String loadVersion() {
+        try (var stream = Engine.class.getResourceAsStream("/version.properties")) {
+            if (stream == null) {
+                return "1.0.0-beta5"; // Fallback para desarrollo en IDE sin build.gradle
+            }
+            java.util.Properties props = new java.util.Properties();
+            props.load(stream);
+            return props.getProperty("version", "1.0.0-beta5");
+        } catch (java.io.IOException e) {
+            org.tinylog.Logger.error("Error al cargar la versión: {}", e.getMessage());
+            return "1.0.0-beta5";
+        }
+    }
+
     /** Ventana principal del motor grafico. */
     private final Window window = new Window();
 

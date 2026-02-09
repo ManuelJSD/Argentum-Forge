@@ -41,27 +41,27 @@ public final class FAutoUnion extends Form {
             // Etiquetas de Coordenadas (Esquinas) - Estilo original
             // Top Left
             ImGui.setCursorPos(offsetX - 60, startY);
-            ImGui.textColored(0.5f, 0.5f, 1.0f, 1.0f, "Y: 90");
+            ImGui.textColored(0.5f, 0.5f, 1.0f, 1.0f, I18n.INSTANCE.get("common.coord.y") + " 90");
             ImGui.setCursorPos(offsetX - 60, startY + 15);
-            ImGui.textColored(1.0f, 0.6f, 0.6f, 1.0f, "X: 89");
+            ImGui.textColored(1.0f, 0.6f, 0.6f, 1.0f, I18n.INSTANCE.get("common.coord.x") + " 89");
 
             // Top Right
             ImGui.setCursorPos(offsetX + boxWidth + 10, startY);
-            ImGui.textColored(1.0f, 0.0f, 0.0f, 1.0f, "X: 90");
+            ImGui.textColored(1.0f, 0.0f, 0.0f, 1.0f, I18n.INSTANCE.get("common.coord.x") + " 90");
             ImGui.setCursorPos(offsetX + boxWidth + 10, startY + 15);
-            ImGui.textColored(0.3f, 0.3f, 0.8f, 1.0f, "Y: 10");
+            ImGui.textColored(0.3f, 0.3f, 0.8f, 1.0f, I18n.INSTANCE.get("common.coord.y") + " 10");
 
             // Bottom Left
             ImGui.setCursorPos(offsetX - 60, startY + boxHeight - 30);
-            ImGui.textColored(0.0f, 1.0f, 1.0f, 1.0f, "Y: 91");
+            ImGui.textColored(0.0f, 1.0f, 1.0f, 1.0f, I18n.INSTANCE.get("common.coord.y") + " 91");
             ImGui.setCursorPos(offsetX - 60, startY + boxHeight - 15);
-            ImGui.textColored(1.0f, 0.5f, 0.0f, 1.0f, "X: 11");
+            ImGui.textColored(1.0f, 0.5f, 0.0f, 1.0f, I18n.INSTANCE.get("common.coord.x") + " 11");
 
             // Bottom Right
             ImGui.setCursorPos(offsetX + boxWidth + 10, startY + boxHeight - 30);
-            ImGui.textColored(0.5f, 0.5f, 1.0f, 1.0f, "Y: 11");
+            ImGui.textColored(0.5f, 0.5f, 1.0f, 1.0f, I18n.INSTANCE.get("common.coord.y") + " 11");
             ImGui.setCursorPos(offsetX + boxWidth + 10, startY + boxHeight - 15);
-            ImGui.textColored(1.0f, 0.6f, 0.8f, 1.0f, "X: 12");
+            ImGui.textColored(1.0f, 0.6f, 0.8f, 1.0f, I18n.INSTANCE.get("common.coord.x") + " 12");
 
             // Rectángulo del Mapa (Uso de ChildWindow para simular el recuadro)
             ImGui.setCursorPos(offsetX, startY);

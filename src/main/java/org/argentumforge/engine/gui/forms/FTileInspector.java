@@ -86,7 +86,7 @@ public final class FTileInspector extends Form {
                     if (grh > 0) {
                         PreviewUtils.drawGrhFit(grh, boxSize - 12, boxSize - 12);
                         if (ImGui.isItemHovered()) {
-                            ImGui.setTooltip("Grh: " + grh + "\n(Click to edit ID)");
+                            ImGui.setTooltip(String.format(I18n.INSTANCE.get("tile.inspector.tooltip.grh"), grh));
                         }
                     } else {
                         float emptyW = ImGui.calcTextSize(I18n.INSTANCE.get("tile.inspector.empty")).x;

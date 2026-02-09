@@ -29,19 +29,21 @@ public class ContextMenu {
         if (ImGui.beginPopup("TileContextMenu")) {
             var context = GameData.getActiveContext();
             if (context == null || context.getMapData() == null) {
-                ImGui.textDisabled("Sin mapa cargado");
+                ImGui.textDisabled(org.argentumforge.engine.i18n.I18n.INSTANCE.get("context.noMap"));
                 ImGui.endPopup();
                 return;
             }
             var mapData = context.getMapData();
 
-            ImGui.textDisabled("Tile (" + tileX + ", " + tileY + ")");
+            ImGui.textDisabled(
+                    String.format(org.argentumforge.engine.i18n.I18n.INSTANCE.get("context.tile"), tileX, tileY));
             ImGui.separator();
 
             // --- NPC ---
             int npcIndex = mapData[tileX][tileY].getNpcIndex();
             if (npcIndex > 0) {
-                if (ImGui.menuItem("Eliminar NPC (" + npcIndex + ")")) {
+                if (ImGui.menuItem(String.format(org.argentumforge.engine.i18n.I18n.INSTANCE.get("context.npc.delete"),
+                        npcIndex))) {
                     CommandManager.getInstance().executeCommand(
                             new NpcChangeCommand(context, tileX, tileY, npcIndex, 0));
                 }
@@ -50,7 +52,7 @@ public class ContextMenu {
 
             // --- Object ---
             if (mapData[tileX][tileY].getObjIndex() > 0) {
-                if (ImGui.menuItem("Eliminar Objeto")) {
+                if (ImGui.menuItem(org.argentumforge.engine.i18n.I18n.INSTANCE.get("context.obj.delete"))) {
                     int oldGrh = mapData[tileX][tileY].getObjGrh().getGrhIndex();
                     CommandManager.getInstance().executeCommand(
                             new ObjChangeCommand(context, tileX, tileY, oldGrh, 0));
@@ -62,13 +64,14 @@ public class ContextMenu {
             int exitMap = mapData[tileX][tileY].getExitMap();
             if (exitMap > 0) {
                 // "Capturar Coordenadas" (Recuperar el destino de este traslado)
-                if (ImGui.menuItem("Capturar Destino (" + exitMap + ")")) {
+                if (ImGui.menuItem(String.format(
+                        org.argentumforge.engine.i18n.I18n.INSTANCE.get("context.transfer.capture"), exitMap))) {
                     int destX = mapData[tileX][tileY].getExitX();
                     int destY = mapData[tileX][tileY].getExitY();
                     Transfer.getInstance().captureCoordinates(exitMap, destX, destY);
                 }
 
-                if (ImGui.menuItem("Eliminar Traslado")) {
+                if (ImGui.menuItem(org.argentumforge.engine.i18n.I18n.INSTANCE.get("context.transfer.delete"))) {
                     int oldX = mapData[tileX][tileY].getExitX();
                     int oldY = mapData[tileX][tileY].getExitY();
                     CommandManager.getInstance().executeCommand(
@@ -79,7 +82,8 @@ public class ContextMenu {
 
             // --- Block ---
             boolean isBlocked = mapData[tileX][tileY].getBlocked();
-            if (ImGui.menuItem(isBlocked ? "Desbloquear" : "Bloquear")) {
+            if (ImGui.menuItem(isBlocked ? org.argentumforge.engine.i18n.I18n.INSTANCE.get("context.block.unlock")
+                    : org.argentumforge.engine.i18n.I18n.INSTANCE.get("context.block.lock"))) {
                 mapData[tileX][tileY].setBlocked(!isBlocked);
             }
 
