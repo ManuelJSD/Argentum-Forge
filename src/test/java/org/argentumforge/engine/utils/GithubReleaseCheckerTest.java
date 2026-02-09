@@ -74,11 +74,8 @@ class GithubReleaseCheckerTest {
         // Current version is 1.0.0-beta4, checking against beta5
         assertThat(GithubReleaseChecker.compareVersions("1.0.0-beta5", "1.0.0-beta4")).isGreaterThan(0);
 
-        // Current version is 1.0.0-beta5, checking against stable 1.0.0
-        assertThat(GithubReleaseChecker.compareVersions("1.0.0", "1.0.0-beta5")).isLessThan(0);
-        assertThat(GithubReleaseChecker.compareVersions("1.0.0", "1.0.0-beta5")).isLessThan(0); // v-pre < v-stable
-        // Note: 1.0.0 is NEWER than 1.0.0-beta5. The assertion was correct: 1.0.0 >
-        // 1.0.0-beta5
+        // Current version is 1.0.0-beta5, checking against stable 1.0.0 (Should be
+        // newer)
         assertThat(GithubReleaseChecker.compareVersions("1.0.0", "1.0.0-beta5")).isGreaterThan(0);
 
         // Current version is 1.0.0, checking against 1.0.1-beta1
@@ -101,5 +98,52 @@ class GithubReleaseCheckerTest {
         // 2.0.0-alpha should be greater than 1.0.0 (main version takes precedence)
         assertThat(GithubReleaseChecker.compareVersions("2.0.0-alpha", "1.0.0")).isGreaterThan(0);
         assertThat(GithubReleaseChecker.compareVersions("1.0.0", "2.0.0-alpha")).isLessThan(0);
+    }
+
+    @Test
+    @DisplayName("Should handle Release Candidates (RC)")
+    void shouldHandleReleaseCandidates() {
+        // rc > beta
+        assertThat(GithubReleaseChecker.compareVersions("1.0.0-rc1", "1.0.0-beta1")).isGreaterThan(0);
+        assertThat(GithubReleaseChecker.compareVersions("1.0.0-beta1", "1.0.0-rc1")).isLessThan(0);
+
+        // stable > rc
+        assertThat(GithubReleaseChecker.compareVersions("1.0.0", "1.0.0-rc1")).isGreaterThan(0);
+        assertThat(GithubReleaseChecker.compareVersions("1.0.0-rc1", "1.0.0")).isLessThan(0);
+    }
+
+    @Test
+    @DisplayName("Should handle numeric robustness (leading zeros)")
+    void shouldHandleNumericRobustness() {
+        // 1.1 vs 1.01 (should be treated as 1.1 vs 1.1 in current impl, or 1 vs 1)
+        // With parseInt("01") -> 1. So 1.1 == 1.1.
+        assertThat(GithubReleaseChecker.compareVersions("1.1", "1.01")).isEqualTo(0);
+
+        // 1.0 vs 1.0.0
+        assertThat(GithubReleaseChecker.compareVersions("1.0", "1.0.0")).isEqualTo(0);
+        assertThat(GithubReleaseChecker.compareVersions("1.0.0", "1.0")).isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("Should handle 4-component versions")
+    void shouldHandleFourComponentVersions() {
+        assertThat(GithubReleaseChecker.compareVersions("1.0.0.1", "1.0.0")).isGreaterThan(0);
+        assertThat(GithubReleaseChecker.compareVersions("1.0.0.1", "1.0.0.0")).isGreaterThan(0);
+        assertThat(GithubReleaseChecker.compareVersions("1.0.0.0", "1.0.0")).isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("Should be case insensitive")
+    void shouldBeCaseInsensitive() {
+        assertThat(GithubReleaseChecker.compareVersions("1.0.0-BETA", "1.0.0-beta")).isEqualTo(0);
+        assertThat(GithubReleaseChecker.compareVersions("1.0.0-RC", "1.0.0-rc")).isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("Should handle nulls gracefully")
+    void shouldHandleNulls() {
+        assertThat(GithubReleaseChecker.compareVersions(null, "1.0.0")).isLessThan(0);
+        assertThat(GithubReleaseChecker.compareVersions("1.0.0", null)).isGreaterThan(0);
+        assertThat(GithubReleaseChecker.compareVersions(null, null)).isEqualTo(0);
     }
 }

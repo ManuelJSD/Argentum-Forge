@@ -183,9 +183,17 @@ public class GithubReleaseChecker {
      * Devuelve > 0 si v1 > v2, < 0 si v1 < v2, y 0 si son iguales.
      */
     public static int compareVersions(String v1, String v2) {
-        // Eliminar sufijos como -beta5 para comparación numérica
-        String[] v1Parts = v1.split("-");
-        String[] v2Parts = v2.split("-");
+        if (v1 == null && v2 == null)
+            return 0;
+        if (v1 == null)
+            return -1;
+        if (v2 == null)
+            return 1;
+
+        // Eliminar sufijos como -beta5 para comparación numérica y normalizar a
+        // minúsculas
+        String[] v1Parts = v1.toLowerCase().split("-");
+        String[] v2Parts = v2.toLowerCase().split("-");
 
         String[] v1Nums = v1Parts[0].split("\\.");
         String[] v2Nums = v2Parts[0].split("\\.");
@@ -193,8 +201,23 @@ public class GithubReleaseChecker {
         int length = Math.max(v1Nums.length, v2Nums.length);
 
         for (int i = 0; i < length; i++) {
-            int num1 = i < v1Nums.length ? Integer.parseInt(v1Nums[i]) : 0;
-            int num2 = i < v2Nums.length ? Integer.parseInt(v2Nums[i]) : 0;
+            int num1 = 0;
+            int num2 = 0;
+
+            try {
+                if (i < v1Nums.length && !v1Nums[i].isEmpty())
+                    num1 = Integer.parseInt(v1Nums[i]);
+            } catch (NumberFormatException e) {
+                // Si no es un número válido (ej: "beta"), tratar como 0 o manejar error
+                // Para robustez simple, asumimos 0
+            }
+
+            try {
+                if (i < v2Nums.length && !v2Nums[i].isEmpty())
+                    num2 = Integer.parseInt(v2Nums[i]);
+            } catch (NumberFormatException e) {
+                // Igual que arriba
+            }
 
             if (num1 > num2)
                 return 1;
@@ -215,8 +238,16 @@ public class GithubReleaseChecker {
 
         // Si ambas tienen código pre-release, compararlas lexicográficamente (e.g.
         // alpha < beta)
-        if (v1HasPre && v2HasPre) {
-            return v1Parts[1].compareTo(v2Parts[1]);
+        if (v1HasPre) { // v2HasPre is implied true here
+            String pre1 = v1Parts[1];
+            String pre2 = v2Parts[1];
+
+            // Manejo especial para RC (Release Candidate)
+            // Necesitamos orden: alpha < beta < rc
+            // Alfabéticamente: alpha < beta < rc funciona correctamente
+            // Pero qué pasa con "snapshot"? "snapshot" > "rc" > "beta"
+            // Por ahora confiamos en el orden alfabético para alpha/beta/rc
+            return pre1.compareTo(pre2);
         }
 
         return 0;
