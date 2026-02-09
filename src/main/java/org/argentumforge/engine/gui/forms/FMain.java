@@ -9,6 +9,7 @@ import org.argentumforge.engine.gui.Theme;
 import org.argentumforge.engine.gui.forms.main.MainMenuBar;
 import org.argentumforge.engine.gui.forms.main.MainStatusBar;
 import org.argentumforge.engine.gui.forms.main.MainToolbar;
+import org.argentumforge.engine.gui.forms.main.FilmstripBar;
 import org.argentumforge.engine.i18n.I18n;
 
 import static org.argentumforge.engine.utils.GameData.options;
@@ -48,6 +49,7 @@ public final class FMain extends Form {
     private final MainMenuBar menuBar;
     private final MainToolbar toolbar;
     private final MainStatusBar statusBar;
+    private final FilmstripBar filmstripBar;
 
     private final java.util.List<IMapEditor> mapEditors = new java.util.ArrayList<>();
     private org.argentumforge.engine.utils.MapContext lastContextSeen = null;
@@ -82,6 +84,7 @@ public final class FMain extends Form {
         this.menuBar = new MainMenuBar(this);
         this.toolbar = new MainToolbar(this);
         this.statusBar = new MainStatusBar();
+        this.filmstripBar = new FilmstripBar();
 
         // Inicializar Tema
         org.argentumforge.engine.gui.ThemeManager.getInstance().init();
@@ -146,6 +149,7 @@ public final class FMain extends Form {
         if (!isPhoto) {
             statusBar.render();
             toolbar.render();
+            filmstripBar.render();
         }
 
         if (isPhoto) {
