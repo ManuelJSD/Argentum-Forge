@@ -102,6 +102,35 @@ public enum ProfileManager {
         }
     }
 
+    public void renameProfile(Profile profile, String newName) {
+        if (profile == null || newName == null || newName.trim().isEmpty())
+            return;
+
+        // No permitir nombres duplicados
+        for (Profile p : profiles) {
+            if (p != profile && p.getName().equalsIgnoreCase(newName)) {
+                return;
+            }
+        }
+
+        profile.setName(newName);
+        save();
+    }
+
+    public void reorderProfile(int index, boolean up) {
+        if (index < 0 || index >= profiles.size())
+            return;
+
+        int nextIndex = up ? index - 1 : index + 1;
+        if (nextIndex < 0 || nextIndex >= profiles.size())
+            return;
+
+        Profile temp = profiles.get(index);
+        profiles.set(index, profiles.get(nextIndex));
+        profiles.set(nextIndex, temp);
+        save();
+    }
+
     public List<Profile> getProfiles() {
         return profiles;
     }
