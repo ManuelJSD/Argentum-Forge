@@ -424,8 +424,22 @@ public final class GameScene extends Scene {
             int width = (maxX - minX + 1) * TILE_PIXEL_SIZE;
             int height = (maxY - minY + 1) * TILE_PIXEL_SIZE;
 
-            Engine.batch.draw(whiteTexture, screenX, screenY, 0, 0, 1, 1, width, height, true, 0.3f,
-                    new RGBColor(0.2f, 0.5f, 1.0f));
+            float thickness = 2.0f;
+            RGBColor color = new RGBColor(0.2f, 0.5f, 1.0f);
+
+            // Top
+            Engine.batch.draw(whiteTexture, screenX, screenY, 0, 0, 1, 1, width, thickness, true, 0.8f, color);
+            // Bottom
+            Engine.batch.draw(whiteTexture, screenX, screenY + height - thickness, 0, 0, 1, 1, width, thickness, true,
+                    0.8f, color);
+            // Left
+            Engine.batch.draw(whiteTexture, screenX, screenY, 0, 0, 1, 1, thickness, height, true, 0.8f, color);
+            // Right
+            Engine.batch.draw(whiteTexture, screenX + width - thickness, screenY, 0, 0, 1, 1, thickness, height, true,
+                    0.8f, color);
+
+            // Optional: Light fill for context
+            Engine.batch.draw(whiteTexture, screenX, screenY, 0, 0, 1, 1, width, height, true, 0.1f, color);
         }
     }
 
