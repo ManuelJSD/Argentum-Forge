@@ -7,12 +7,14 @@ import org.argentumforge.engine.gui.DialogManager;
 import org.argentumforge.engine.gui.FileDialog;
 import org.argentumforge.engine.gui.ImGUISystem;
 import org.argentumforge.engine.gui.forms.*;
+import org.argentumforge.engine.gui.widgets.UIComponents;
 import org.argentumforge.engine.i18n.I18n;
 import org.argentumforge.engine.renderer.RenderSettings;
 import org.argentumforge.engine.scenes.Camera;
 import org.argentumforge.engine.utils.GameData;
 import org.argentumforge.engine.utils.MapFileUtils;
 import org.argentumforge.engine.utils.MapManager;
+import org.argentumforge.engine.utils.editor.Block;
 import org.argentumforge.engine.utils.editor.Clipboard;
 import org.argentumforge.engine.utils.editor.commands.CommandManager;
 import org.argentumforge.engine.utils.editor.MinimapColorGenerator;
@@ -57,12 +59,21 @@ public class MainMenuBar {
     }
 
     public void render() {
+        boolean openBlockBorders = false;
+        boolean openBlockAll = false;
+        boolean openClearBorders = false;
+        boolean openClearAll = false;
+        boolean openFillLayer = false;
+        boolean openClearLayer = false;
+        boolean openFillBorders = false;
+        boolean openClearBordersSurface = false;
+
         if (ImGui.beginMainMenuBar()) {
 
             RenderSettings renderSettings = GameData.options.getRenderSettings();
 
             if (ImGui.beginMenu(I18n.INSTANCE.get("menu.file"))) {
-
+                // ... (lines 68-132)
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.file.new"))) {
                     org.argentumforge.engine.game.EditorController.INSTANCE.newMap();
                 }
@@ -129,6 +140,7 @@ public class MainMenuBar {
                 ImGui.endMenu();
             }
 
+            // Edicion
             if (ImGui.beginMenu(I18n.INSTANCE.get("menu.edit"))) {
                 CommandManager manager = CommandManager.getInstance();
 
@@ -171,15 +183,62 @@ public class MainMenuBar {
                     org.argentumforge.engine.game.EditorController.INSTANCE.deleteSelection();
                 }
 
+                ImGui.separator();
+
+                if (ImGui.beginMenu(I18n.INSTANCE.get("menu.edit.insertDelete"))) {
+
+                    if (ImGui.menuItem(I18n.INSTANCE.get("editor.block.blockBorders"))) {
+                        openBlockBorders = true;
+                    }
+
+                    if (ImGui.menuItem(I18n.INSTANCE.get("editor.block.clearBorders"))) {
+                        openClearBorders = true;
+                    }
+
+                    ImGui.separator();
+
+                    if (ImGui.menuItem(I18n.INSTANCE.get("editor.block.blockAll"))) {
+                        openBlockAll = true;
+                    }
+
+                    if (ImGui.menuItem(I18n.INSTANCE.get("editor.block.clearAll"))) {
+                        openClearAll = true;
+                    }
+
+                    ImGui.separator();
+
+                    if (ImGui.menuItem(I18n.INSTANCE.get("editor.surface.fillBorders"))) {
+                        openFillBorders = true;
+                    }
+
+                    if (ImGui.menuItem(I18n.INSTANCE.get("editor.surface.clearBorders"))) {
+                        openClearBordersSurface = true;
+                    }
+
+                    ImGui.separator();
+
+                    if (ImGui.menuItem(I18n.INSTANCE.get("editor.surface.fillLayer"))) {
+                        openFillLayer = true;
+                    }
+
+                    if (ImGui.menuItem(I18n.INSTANCE.get("editor.surface.clearLayer"))) {
+                        openClearLayer = true;
+                    }
+
+                    ImGui.endMenu();
+                }
+
                 ImGui.endMenu();
             }
 
+            // ... (rest of menu)
             if (ImGui.beginMenu(I18n.INSTANCE.get("menu.map"))) {
+                // ...
                 String propsKey = getKeyName(org.argentumforge.engine.game.models.Key.MAP_PROPERTIES.getKeyCode());
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.map.properties"), propsKey)) {
                     ImGUISystem.INSTANCE.show(new FInfoMap());
                 }
-
+                // ...
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.map.validate"))) {
                     if (GameData.getActiveContext() != null) {
                         ImGUISystem.INSTANCE.show(new FMapValidator());
@@ -199,17 +258,18 @@ public class MainMenuBar {
             }
 
             if (ImGui.beginMenu(I18n.INSTANCE.get("menu.view"))) {
+                // ... (shortened for brevity, not changing)
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.view.resetZoom"), "Ctrl+0")) {
                     Camera.setTileSize(32);
                 }
-
+                // ...
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.view.guidesConfig"))) {
                     ImGUISystem.INSTANCE.show(new FOptions());
                 }
-
                 ImGui.separator();
-
+                // ... (layers, blocks, etc)
                 if (ImGui.beginMenu(I18n.INSTANCE.get("menu.view.layers"))) {
+                    // ...
                     if (ImGui.menuItem(I18n.INSTANCE.get("menu.view.layer1"), "", renderSettings.getShowLayer()[0])) {
                         renderSettings.getShowLayer()[0] = !renderSettings.getShowLayer()[0];
                         GameData.options.save();
@@ -228,55 +288,48 @@ public class MainMenuBar {
                     }
                     ImGui.endMenu();
                 }
-
+                // ...
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.view.blocks"), "", renderSettings.getShowBlock())) {
                     renderSettings.setShowBlock(!renderSettings.getShowBlock());
                     GameData.options.save();
                 }
-
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.view.objects"), "", renderSettings.getShowOJBs())) {
                     renderSettings.setShowOJBs(!renderSettings.getShowOJBs());
                     GameData.options.save();
                 }
-
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.view.npcs"), "", renderSettings.getShowNPCs())) {
                     renderSettings.setShowNPCs(!renderSettings.getShowNPCs());
                     GameData.options.save();
                 }
-
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.view.transfers"), "", renderSettings.getShowMapTransfer())) {
                     renderSettings.setShowMapTransfer(!renderSettings.getShowMapTransfer());
                     GameData.options.save();
                 }
-
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.view.triggers"), "", renderSettings.getShowTriggers())) {
                     renderSettings.setShowTriggers(!renderSettings.getShowTriggers());
                     GameData.options.save();
                 }
-
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.view.particles"), "", renderSettings.getShowParticles())) {
                     renderSettings.setShowParticles(!renderSettings.getShowParticles());
                     GameData.options.save();
                 }
-
                 ImGui.separator();
-
+                // ...
                 String gridKey = getKeyName(org.argentumforge.engine.game.models.Key.TOGGLE_GRID.getKeyCode());
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.view.grid"), gridKey, renderSettings.isShowGrid())) {
                     renderSettings.setShowGrid(!renderSettings.isShowGrid());
                     GameData.options.save();
                 }
-
                 String viewportKey = getKeyName(org.argentumforge.engine.game.models.Key.TOGGLE_VIEWPORT.getKeyCode());
                 if (ImGui.menuItem(I18n.INSTANCE.get("options.viewport"), viewportKey,
                         renderSettings.isShowViewportOverlay())) {
                     renderSettings.setShowViewportOverlay(!renderSettings.isShowViewportOverlay());
                     GameData.options.save();
                 }
-
                 ImGui.separator();
-
+                // ...
                 if (ImGui.beginMenu(I18n.INSTANCE.get("menu.view.minimap"))) {
+                    // ...
                     if (ImGui.beginMenu(I18n.INSTANCE.get("menu.view.layers"))) {
                         for (int i = 0; i < 4; i++) {
                             if (ImGui.menuItem(I18n.INSTANCE.get("menu.view.layer") + " " + (i + 1), "",
@@ -287,40 +340,34 @@ public class MainMenuBar {
                         }
                         ImGui.endMenu();
                     }
-
                     ImGui.separator();
-
                     if (ImGui.menuItem(I18n.INSTANCE.get("menu.view.minimap.npcs"), "",
                             renderSettings.isShowMinimapNPCs())) {
                         renderSettings.setShowMinimapNPCs(!renderSettings.isShowMinimapNPCs());
                         GameData.options.save();
                     }
-
                     if (ImGui.menuItem(I18n.INSTANCE.get("menu.view.minimap.exits"), "",
                             renderSettings.isShowMinimapExits())) {
                         renderSettings.setShowMinimapExits(!renderSettings.isShowMinimapExits());
                         GameData.options.save();
                     }
-
                     if (ImGui.menuItem(I18n.INSTANCE.get("menu.view.minimap.triggers"), "",
                             renderSettings.isShowMinimapTriggers())) {
                         renderSettings.setShowMinimapTriggers(!renderSettings.isShowMinimapTriggers());
                         GameData.options.save();
                     }
-
                     if (ImGui.menuItem(I18n.INSTANCE.get("menu.view.minimap.blocks"), "",
                             renderSettings.isShowMinimapBlocks())) {
                         renderSettings.setShowMinimapBlocks(!renderSettings.isShowMinimapBlocks());
                         GameData.options.save();
                     }
-
                     ImGui.endMenu();
                 }
-
                 ImGui.endMenu();
             }
 
             if (ImGui.beginMenu(I18n.INSTANCE.get("menu.tools"))) {
+                // ...
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.file.export"))) {
                     String selectedFile = FileDialog.showSaveDialog(
                             I18n.INSTANCE.get("dialog.export.title"),
@@ -338,9 +385,7 @@ public class MainMenuBar {
                                 I18n.INSTANCE.get("msg.export.success") + path);
                     }
                 }
-
                 ImGui.separator();
-
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.tools.generateColors"))) {
                     DialogManager.getInstance().showConfirm(
                             I18n.INSTANCE.get("menu.tools.generateColors"),
@@ -352,27 +397,23 @@ public class MainMenuBar {
             }
 
             if (ImGui.beginMenu(I18n.INSTANCE.get("menu.misc"))) {
-
+                // ...
                 String photoKey = getKeyName(org.argentumforge.engine.game.models.Key.TOGGLE_PHOTO_MODE.getKeyCode());
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.misc.photoMode"), photoKey)) {
                     GameData.options.getRenderSettings().setPhotoModeActive(
                             !GameData.options.getRenderSettings().isPhotoModeActive());
                 }
-
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.misc.reloadGraphics"))) {
                     org.argentumforge.engine.renderer.Surface.INSTANCE.retryFailedTextures();
                     DialogManager.getInstance().showInfo(I18n.INSTANCE.get("msg.graphics.title"),
                             I18n.INSTANCE.get("msg.graphics.reloadRequested"));
                 }
-
                 ImGui.separator();
-
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.misc.walkMode"), "",
                         User.INSTANCE.isWalkingmode())) {
                     User.INSTANCE
                             .setWalkingmode(!User.INSTANCE.isWalkingmode());
                 }
-
                 if (ImGui.menuItem(I18n.INSTANCE.get("options.moveSpeed"))) {
                     if (ImGUISystem.INSTANCE.isFormVisible("FSpeedControl")) {
                         ImGUISystem.INSTANCE.deleteFrmArray(parent.getSpeedControl());
@@ -380,7 +421,6 @@ public class MainMenuBar {
                         ImGUISystem.INSTANCE.show(parent.getSpeedControl());
                     }
                 }
-
                 if (ImGui.beginMenu(I18n.INSTANCE.get("menu.misc.ambient"))) {
                     float[] ambientColorArr = parent.getAmbientColorArr();
                     if (ImGui.colorEdit3(I18n.INSTANCE.get("menu.misc.ambient.color"), ambientColorArr)) {
@@ -390,10 +430,9 @@ public class MainMenuBar {
                     }
                     ImGui.endMenu();
                 }
-
                 ImGui.endMenu();
             }
-
+            // ...
             if (ImGui.beginMenu(I18n.INSTANCE.get("menu.help"))) {
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.help.commands"))) {
                     ImGUISystem.INSTANCE.show(new FHelpCommands());
@@ -403,7 +442,81 @@ public class MainMenuBar {
                 }
                 ImGui.endMenu();
             }
+
             ImGui.endMainMenuBar();
         }
+
+        Block block = Block.getInstance();
+
+        // --- Modificador de Estado para Popups ---
+        if (openBlockBorders)
+            ImGui.openPopup(I18n.INSTANCE.get("editor.block.confirm.blockBorders.title"));
+        if (openBlockAll)
+            ImGui.openPopup(I18n.INSTANCE.get("editor.block.confirm.blockAll.title"));
+        if (openClearBorders)
+            ImGui.openPopup(I18n.INSTANCE.get("editor.block.confirm.clearBorders.title"));
+        if (openClearAll)
+            ImGui.openPopup(I18n.INSTANCE.get("editor.block.confirm.clearAll.title"));
+        if (openFillLayer)
+            ImGui.openPopup(I18n.INSTANCE.get("editor.surface.confirm.fillLayer.title"));
+        if (openClearLayer)
+            ImGui.openPopup(I18n.INSTANCE.get("editor.surface.confirm.clearLayer.title"));
+        if (openFillBorders)
+            ImGui.openPopup(I18n.INSTANCE.get("editor.surface.confirm.fillBorders.title"));
+        if (openClearBordersSurface)
+            ImGui.openPopup(I18n.INSTANCE.get("editor.surface.confirm.clearBorders.title"));
+
+        // --- Modales de Confirmación ---
+        UIComponents.confirmDialog(
+                I18n.INSTANCE.get("editor.block.confirm.blockBorders.title"),
+                I18n.INSTANCE.get("editor.block.blockBorders"),
+                I18n.INSTANCE.get("editor.block.confirm.blockBorders.msg"),
+                () -> block.blockBorders(org.argentumforge.engine.utils.GameData.getActiveContext()));
+
+        UIComponents.confirmDialog(
+                I18n.INSTANCE.get("editor.block.confirm.blockAll.title"),
+                I18n.INSTANCE.get("editor.block.blockAll"),
+                I18n.INSTANCE.get("editor.block.confirm.blockAll.msg"),
+                () -> block.blockAll(org.argentumforge.engine.utils.GameData.getActiveContext()));
+
+        UIComponents.confirmDialog(
+                I18n.INSTANCE.get("editor.block.confirm.clearBorders.title"),
+                I18n.INSTANCE.get("editor.block.clearBorders"),
+                I18n.INSTANCE.get("editor.block.confirm.clearBorders.msg"),
+                () -> block.unblockBorders(org.argentumforge.engine.utils.GameData.getActiveContext()));
+
+        UIComponents.confirmDialog(
+                I18n.INSTANCE.get("editor.block.confirm.clearAll.title"),
+                I18n.INSTANCE.get("editor.block.clearAll"),
+                I18n.INSTANCE.get("editor.block.confirm.clearAll.msg"),
+                () -> block.unblockAll(org.argentumforge.engine.utils.GameData.getActiveContext()));
+
+        UIComponents.confirmDialog(
+                I18n.INSTANCE.get("editor.surface.confirm.fillLayer.title"),
+                I18n.INSTANCE.get("editor.surface.fillLayer"),
+                I18n.INSTANCE.get("editor.surface.confirm.fillLayer.msg"),
+                () -> org.argentumforge.engine.utils.editor.Surface.getInstance()
+                        .fillLayer(org.argentumforge.engine.utils.GameData.getActiveContext()));
+
+        UIComponents.confirmDialog(
+                I18n.INSTANCE.get("editor.surface.confirm.clearLayer.title"),
+                I18n.INSTANCE.get("editor.surface.clearLayer"),
+                I18n.INSTANCE.get("editor.surface.confirm.clearLayer.msg"),
+                () -> org.argentumforge.engine.utils.editor.Surface.getInstance()
+                        .clearLayer(org.argentumforge.engine.utils.GameData.getActiveContext()));
+
+        UIComponents.confirmDialog(
+                I18n.INSTANCE.get("editor.surface.confirm.fillBorders.title"),
+                I18n.INSTANCE.get("editor.surface.fillBorders"),
+                I18n.INSTANCE.get("editor.surface.confirm.fillBorders.msg"),
+                () -> org.argentumforge.engine.utils.editor.Surface.getInstance()
+                        .fillBorders(org.argentumforge.engine.utils.GameData.getActiveContext()));
+
+        UIComponents.confirmDialog(
+                I18n.INSTANCE.get("editor.surface.confirm.clearBorders.title"),
+                I18n.INSTANCE.get("editor.surface.clearBorders"),
+                I18n.INSTANCE.get("editor.surface.confirm.clearBorders.msg"),
+                () -> org.argentumforge.engine.utils.editor.Surface.getInstance()
+                        .clearBorders(org.argentumforge.engine.utils.GameData.getActiveContext()));
     }
 }
