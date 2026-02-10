@@ -14,7 +14,12 @@ import org.argentumforge.engine.utils.ProfileManager;
 
 import java.util.List;
 import org.argentumforge.engine.renderer.Texture;
+import org.argentumforge.engine.renderer.Texture;
 import org.argentumforge.engine.renderer.Surface;
+import org.argentumforge.engine.Engine;
+import org.argentumforge.engine.gui.Theme;
+import org.argentumforge.engine.gui.DialogManager;
+import org.argentumforge.engine.gui.ImGUISystem;
 
 public class FProfileSelector extends Form {
     private final Runnable onProfileSelected;
@@ -34,7 +39,7 @@ public class FProfileSelector extends Form {
         try {
             this.backgroundTexture = Surface.INSTANCE.createTexture("VentanaInicio.jpg", false);
             if (this.backgroundTexture != null) {
-                org.argentumforge.engine.Engine.INSTANCE.getWindow().updateResolution(
+                Engine.INSTANCE.getWindow().updateResolution(
                         this.backgroundTexture.getTex_width(),
                         this.backgroundTexture.getTex_height());
             }
@@ -54,8 +59,8 @@ public class FProfileSelector extends Form {
             ImGui.getBackgroundDrawList().addImage(
                     backgroundTexture.getId(),
                     0, 0,
-                    org.argentumforge.engine.Engine.INSTANCE.getWindow().getWidth(),
-                    org.argentumforge.engine.Engine.INSTANCE.getWindow().getHeight());
+                    Engine.INSTANCE.getWindow().getWidth(),
+                    Engine.INSTANCE.getWindow().getHeight());
         }
 
         int windowWidth = 450;
@@ -63,8 +68,8 @@ public class FProfileSelector extends Form {
 
         ImGui.setNextWindowSize(windowWidth, windowHeight, ImGuiCond.Always);
         ImGui.setNextWindowPos(
-                (org.argentumforge.engine.Engine.INSTANCE.getWindow().getWidth() - windowWidth) / 2f,
-                (org.argentumforge.engine.Engine.INSTANCE.getWindow().getHeight() - windowHeight) * 0.70f,
+                (Engine.INSTANCE.getWindow().getWidth() - windowWidth) / 2f,
+                (Engine.INSTANCE.getWindow().getHeight() - windowHeight) * 0.70f,
                 ImGuiCond.Always);
 
         int flags = ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove
@@ -77,14 +82,14 @@ public class FProfileSelector extends Form {
             String title = I18n.INSTANCE.get("profile.select.title");
             float titleWidth = ImGui.calcTextSize(title).x;
             ImGui.setCursorPosX((windowWidth - titleWidth) / 2f);
-            ImGui.textColored(org.argentumforge.engine.gui.Theme.COLOR_PRIMARY, title);
+            ImGui.textColored(Theme.COLOR_PRIMARY, title);
             ImGui.spacing();
             ImGui.separator();
             ImGui.spacing();
 
             List<Profile> profiles = ProfileManager.INSTANCE.getProfiles();
 
-            ImGui.pushStyleColor(imgui.flag.ImGuiCol.FrameBg, org.argentumforge.engine.gui.Theme.BG_PANEL);
+            ImGui.pushStyleColor(imgui.flag.ImGuiCol.FrameBg, Theme.BG_PANEL);
             if (ImGui.beginChild("ProfileList", 0, 180, true)) {
                 if (ImGui.beginTable("ProfilesTable", editMode ? 2 : 1, ImGuiTableFlags.SizingStretchProp)) {
                     ImGui.tableSetupColumn("Name", ImGuiTableColumnFlags.WidthStretch);
@@ -104,7 +109,7 @@ public class FProfileSelector extends Form {
 
                         if (isSelected) {
                             ImGui.pushStyleColor(imgui.flag.ImGuiCol.Header,
-                                    org.argentumforge.engine.gui.Theme.COLOR_PRIMARY);
+                                    Theme.COLOR_PRIMARY);
                         }
 
                         if (ImGui.selectable(p.getName(), isSelected)) {
@@ -134,10 +139,10 @@ public class FProfileSelector extends Form {
                             ImGui.separator();
 
                             ImGui.pushStyleColor(imgui.flag.ImGuiCol.Text,
-                                    org.argentumforge.engine.gui.Theme.COLOR_DANGER);
+                                    Theme.COLOR_DANGER);
                             if (ImGui.menuItem(I18n.INSTANCE.get("profile.delete"))) {
                                 final Profile toDelete = p;
-                                org.argentumforge.engine.gui.DialogManager.getInstance().showConfirm(
+                                DialogManager.getInstance().showConfirm(
                                         I18n.INSTANCE.get("profile.delete.confirm.title"),
                                         String.format(I18n.INSTANCE.get("profile.delete.confirm.msg"),
                                                 toDelete.getName()),
@@ -187,10 +192,10 @@ public class FProfileSelector extends Form {
 
                             ImGui.sameLine();
                             ImGui.pushStyleColor(imgui.flag.ImGuiCol.Button,
-                                    org.argentumforge.engine.gui.Theme.COLOR_DANGER);
+                                    Theme.COLOR_DANGER);
                             if (ImGui.button("X", 25, 20)) {
                                 final Profile toDelete = p;
-                                org.argentumforge.engine.gui.DialogManager.getInstance().showConfirm(
+                                DialogManager.getInstance().showConfirm(
                                         I18n.INSTANCE.get("profile.delete.confirm.title"),
                                         String.format(I18n.INSTANCE.get("profile.delete.confirm.msg"),
                                                 toDelete.getName()),
@@ -224,7 +229,7 @@ public class FProfileSelector extends Form {
 
             ImGui.beginGroup();
             // Select - Primary
-            ImGui.pushStyleColor(imgui.flag.ImGuiCol.Button, org.argentumforge.engine.gui.Theme.COLOR_PRIMARY);
+            ImGui.pushStyleColor(imgui.flag.ImGuiCol.Button, Theme.COLOR_PRIMARY);
             if (ImGui.button(I18n.INSTANCE.get("common.select"), buttonWidth, 35)) {
                 selectProfile();
             }
@@ -244,7 +249,7 @@ public class FProfileSelector extends Form {
             ImGui.setCursorPosX((windowWidth - buttonWidth) / 2f);
             boolean pushedManageColor = false;
             if (editMode) {
-                ImGui.pushStyleColor(imgui.flag.ImGuiCol.Button, org.argentumforge.engine.gui.Theme.COLOR_ACCENT);
+                ImGui.pushStyleColor(imgui.flag.ImGuiCol.Button, Theme.COLOR_ACCENT);
                 pushedManageColor = true;
             }
             if (ImGui.button(I18n.INSTANCE.get("profile.manage"), buttonWidth, 30)) {
@@ -257,7 +262,7 @@ public class FProfileSelector extends Form {
             // Mensaje de error principal
             if (!errorMessage.isEmpty() && !showCreateDialog && !showRenameDialog) {
                 ImGui.spacing();
-                ImGui.textColored(org.argentumforge.engine.gui.Theme.COLOR_DANGER, errorMessage);
+                ImGui.textColored(Theme.COLOR_DANGER, errorMessage);
             }
 
             renderCreateDialog();
@@ -273,8 +278,8 @@ public class FProfileSelector extends Form {
 
         // Center the popup
         ImGui.setNextWindowPos(
-                (org.argentumforge.engine.Engine.INSTANCE.getWindow().getWidth() - 300) / 2f,
-                (org.argentumforge.engine.Engine.INSTANCE.getWindow().getHeight() - 150) / 2f,
+                (Engine.INSTANCE.getWindow().getWidth() - 300) / 2f,
+                (Engine.INSTANCE.getWindow().getHeight() - 150) / 2f,
                 ImGuiCond.Appearing);
 
         if (ImGui.beginPopupModal(I18n.INSTANCE.get("profile.rename.title"), ImGuiWindowFlags.AlwaysAutoResize)) {
@@ -347,9 +352,9 @@ public class FProfileSelector extends Form {
                         // Revertir creación si cancela
                         ProfileManager.INSTANCE.deleteProfile(p);
                         // Reabrir selector
-                        org.argentumforge.engine.gui.ImGUISystem.INSTANCE.show(new FProfileSelector(onProfileSelected));
+                        ImGUISystem.INSTANCE.show(new FProfileSelector(onProfileSelected));
                     });
-                    org.argentumforge.engine.gui.ImGUISystem.INSTANCE.show(routesForm);
+                    ImGUISystem.INSTANCE.show(routesForm);
 
                     // Cerrar el selector de perfiles ya que el control pasa al wizard
                     this.close();

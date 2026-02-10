@@ -7,7 +7,9 @@ import imgui.flag.ImGuiTableColumnFlags;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import imgui.type.ImString;
+import imgui.flag.ImGuiCond;
 import org.argentumforge.engine.utils.editor.GrhLibraryManager;
+import org.argentumforge.engine.gui.PreviewUtils;
 import org.argentumforge.engine.utils.editor.models.GrhCategory;
 import org.argentumforge.engine.utils.editor.models.GrhIndexRecord;
 import org.argentumforge.engine.i18n.I18n;
@@ -35,7 +37,7 @@ public class FGrhLibrary extends Form {
 
     @Override
     public void render() {
-        ImGui.setNextWindowSize(700, 500, imgui.flag.ImGuiCond.Always);
+        ImGui.setNextWindowSize(700, 500, ImGuiCond.Always);
         if (ImGui.begin(I18n.INSTANCE.get("grhlib.manageTitle"), pOpen,
                 ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize)) {
 
@@ -226,10 +228,10 @@ public class FGrhLibrary extends Form {
                             ImGui.separator();
                             ImGui.text(I18n.INSTANCE.get("editor.npc.preview") + ":");
                             if (selectedRecord.getWidth() > 1 || selectedRecord.getHeight() > 1) {
-                                org.argentumforge.engine.gui.PreviewUtils.drawGrhMosaic(selectedRecord.getGrhIndex(),
+                                PreviewUtils.drawGrhMosaic(selectedRecord.getGrhIndex(),
                                         selectedRecord.getWidth(), selectedRecord.getHeight(), 128, 128);
                             } else {
-                                org.argentumforge.engine.gui.PreviewUtils.drawGrhFit(selectedRecord.getGrhIndex(), 128,
+                                PreviewUtils.drawGrhFit(selectedRecord.getGrhIndex(), 128,
                                         128);
                             }
                         }

@@ -5,6 +5,7 @@ import imgui.flag.ImGuiCond;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiTreeNodeFlags;
+import imgui.flag.ImGuiStyleVar;
 import imgui.type.ImInt;
 import org.argentumforge.engine.gui.PreviewUtils;
 import org.argentumforge.engine.i18n.I18n;
@@ -67,7 +68,7 @@ public final class FTileInspector extends Form {
             float boxSize = 85.0f;
             float spacing = 10.0f;
 
-            ImGui.pushStyleVar(imgui.flag.ImGuiStyleVar.ChildRounding, 4.0f);
+            ImGui.pushStyleVar(ImGuiStyleVar.ChildRounding, 4.0f);
 
             for (int i = 1; i <= 4; i++) {
                 ImGui.beginGroup();

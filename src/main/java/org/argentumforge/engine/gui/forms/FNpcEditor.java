@@ -4,6 +4,7 @@ import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiCond;
 import imgui.flag.ImGuiWindowFlags;
+import imgui.flag.ImGuiTableFlags;
 import org.argentumforge.engine.utils.editor.Npc;
 import org.argentumforge.engine.utils.inits.NpcData;
 import imgui.type.ImString;
@@ -13,6 +14,8 @@ import org.argentumforge.engine.renderer.RGBColor;
 import org.argentumforge.engine.gui.Theme;
 import org.argentumforge.engine.gui.widgets.UIComponents;
 import org.argentumforge.engine.i18n.I18n;
+import org.argentumforge.engine.gui.PreviewUtils;
+import org.argentumforge.engine.utils.GameData;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -40,7 +43,7 @@ public final class FNpcEditor extends Form implements IMapEditor {
 
     public FNpcEditor() {
         npcEditor = Npc.getInstance();
-        this.context = org.argentumforge.engine.utils.GameData.getActiveContext();
+        this.context = GameData.getActiveContext();
 
         if (npcs != null && !npcs.isEmpty()) {
             selectedNpcNumber = npcs.keySet().stream().min(Integer::compareTo).orElse(-1);
@@ -98,9 +101,9 @@ public final class FNpcEditor extends Form implements IMapEditor {
         ImGui.text(I18n.INSTANCE.get("editor.npc.preview"));
         if (ImGui.beginChild("NpcPreview", 0, 100, true)) {
             if (selectedNpcNumber > 0 && npcs != null) {
-                org.argentumforge.engine.utils.inits.NpcData data = npcs.get(selectedNpcNumber);
+                NpcData data = npcs.get(selectedNpcNumber);
                 if (data != null) {
-                    org.argentumforge.engine.gui.PreviewUtils.drawNpc(data.getBody(), data.getHead(), 1.2f);
+                    PreviewUtils.drawNpc(data.getBody(), data.getHead(), 1.2f);
                     ImGui.sameLine();
                     ImGui.beginGroup();
                     ImGui.text(I18n.INSTANCE.get("common.npc") + " " + data.getNumber());
@@ -143,10 +146,10 @@ public final class FNpcEditor extends Form implements IMapEditor {
         int start = currentPage * itemsPerPage;
         int end = Math.min(start + itemsPerPage, total);
 
-        if (ImGui.beginTable("NpcGridTable", 4, imgui.flag.ImGuiTableFlags.SizingFixedFit)) {
+        if (ImGui.beginTable("NpcGridTable", 4, ImGuiTableFlags.SizingFixedFit)) {
             for (int i = start; i < end; i++) {
                 int npcNum = filteredKeys.get(i);
-                org.argentumforge.engine.utils.inits.NpcData data = npcs.get(npcNum);
+                NpcData data = npcs.get(npcNum);
 
                 ImGui.tableNextColumn();
                 ImGui.pushID(npcNum);
@@ -168,7 +171,7 @@ public final class FNpcEditor extends Form implements IMapEditor {
 
                 // Dibujar el NPC encima de la celda
                 ImGui.setCursorPos(startX, startY);
-                org.argentumforge.engine.gui.PreviewUtils.drawNpc(data.getBody(), data.getHead(), 0.8f);
+                PreviewUtils.drawNpc(data.getBody(), data.getHead(), 0.8f);
 
                 if (ImGui.isItemHovered()) {
                     ImGui.setTooltip(I18n.INSTANCE.get("common.npc") + " " + npcNum + "\n" + data.getName());

@@ -3,6 +3,9 @@ package org.argentumforge.engine.gui.forms;
 import imgui.ImGui;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiSelectableFlags;
+import imgui.flag.ImGuiCond;
+import imgui.flag.ImGuiWindowFlags;
+import imgui.flag.ImGuiCol;
 import imgui.type.ImString;
 import org.argentumforge.engine.utils.editor.Trigger;
 import org.argentumforge.engine.utils.editor.TriggerManager;
@@ -32,8 +35,8 @@ public class FTriggerEditor extends Form implements IMapEditor {
 
     @Override
     public void render() {
-        ImGui.setNextWindowSize(460, 350, imgui.flag.ImGuiCond.Once);
-        ImGui.begin(I18n.INSTANCE.get("editor.trigger"), imgui.flag.ImGuiWindowFlags.NoResize);
+        ImGui.setNextWindowSize(460, 350, ImGuiCond.Once);
+        ImGui.begin(I18n.INSTANCE.get("editor.trigger"), ImGuiWindowFlags.NoResize);
 
         // --- COLUMNA IZQUIERDA: Lista y Gestión ---
         ImGui.beginGroup();
@@ -123,7 +126,7 @@ public class FTriggerEditor extends Form implements IMapEditor {
         if (hasSelection) {
             boolean active = isPlacing && tool.getSelectedTriggerId() == triggers.get(selectedIndex).getId();
             if (active) {
-                ImGui.pushStyleColor(imgui.flag.ImGuiCol.Button, 0xFF00FF00); // Verde
+                ImGui.pushStyleColor(ImGuiCol.Button, 0xFF00FF00); // Verde
             }
             if (ImGui.button(I18n.INSTANCE.get("editor.trigger.place"), 160, 30)) {
                 if (active) {
@@ -145,7 +148,7 @@ public class FTriggerEditor extends Form implements IMapEditor {
 
         // Boton Borrador (Toggle logic)
         if (isErasing) {
-            ImGui.pushStyleColor(imgui.flag.ImGuiCol.Button, 0xFF0000FF); // Rojo
+            ImGui.pushStyleColor(ImGuiCol.Button, 0xFF0000FF); // Rojo
         }
         if (ImGui.button(I18n.INSTANCE.get("editor.trigger.eraser"), 160, 30)) {
             if (isErasing) {
@@ -182,7 +185,7 @@ public class FTriggerEditor extends Form implements IMapEditor {
 
         // 1x1
         if (currentBrush == 1)
-            ImGui.pushStyleColor(imgui.flag.ImGuiCol.Button, activeColor);
+            ImGui.pushStyleColor(ImGuiCol.Button, activeColor);
         if (ImGui.button("1x1", 48, 25))
             tool.setBrushSize(1);
         if (currentBrush == 1)
@@ -192,7 +195,7 @@ public class FTriggerEditor extends Form implements IMapEditor {
 
         // 3x3
         if (currentBrush == 3)
-            ImGui.pushStyleColor(imgui.flag.ImGuiCol.Button, activeColor);
+            ImGui.pushStyleColor(ImGuiCol.Button, activeColor);
         if (ImGui.button("3x3", 48, 25))
             tool.setBrushSize(3);
         if (currentBrush == 3)
@@ -202,7 +205,7 @@ public class FTriggerEditor extends Form implements IMapEditor {
 
         // 5x5
         if (currentBrush == 5)
-            ImGui.pushStyleColor(imgui.flag.ImGuiCol.Button, activeColor);
+            ImGui.pushStyleColor(ImGuiCol.Button, activeColor);
         if (ImGui.button("5x5", 48, 25))
             tool.setBrushSize(5);
         if (currentBrush == 5)

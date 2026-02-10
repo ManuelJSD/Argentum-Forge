@@ -6,6 +6,10 @@ import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImString;
 import org.argentumforge.engine.game.Options;
+import org.argentumforge.engine.Engine;
+import org.argentumforge.engine.i18n.I18n;
+import org.argentumforge.engine.utils.GameData;
+import org.argentumforge.engine.gui.FileDialog;
 
 import java.io.File;
 
@@ -39,28 +43,28 @@ public class FRoutes extends Form {
         int windowWidth = 400;
         int windowHeight = 220;
         ImGui.setNextWindowPos(
-                (org.argentumforge.engine.Engine.INSTANCE.getWindow().getWidth() - windowWidth) / 2f,
-                (org.argentumforge.engine.Engine.INSTANCE.getWindow().getHeight() - windowHeight) / 2f,
+                (Engine.INSTANCE.getWindow().getWidth() - windowWidth) / 2f,
+                (Engine.INSTANCE.getWindow().getHeight() - windowHeight) / 2f,
                 ImGuiCond.Always);
         ImGui.setNextWindowSize(windowWidth, windowHeight, ImGuiCond.Always);
 
-        if (ImGui.begin(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.paths.title"),
+        if (ImGui.begin(I18n.INSTANCE.get("options.paths.title"),
                 ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize)) {
 
-            renderPathSelector(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.paths.graphics"), graphicsPath);
-            renderPathSelector(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.paths.dats"), datsPath);
-            renderPathSelector(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.paths.inits"), initPath);
-            renderPathSelector(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.paths.music"), musicPath);
+            renderPathSelector(I18n.INSTANCE.get("options.paths.graphics"), graphicsPath);
+            renderPathSelector(I18n.INSTANCE.get("options.paths.dats"), datsPath);
+            renderPathSelector(I18n.INSTANCE.get("options.paths.inits"), initPath);
+            renderPathSelector(I18n.INSTANCE.get("options.paths.music"), musicPath);
 
             ImGui.separator();
 
-            if (ImGui.button(org.argentumforge.engine.i18n.I18n.INSTANCE.get("common.save"))) {
+            if (ImGui.button(I18n.INSTANCE.get("common.save"))) {
                 options.setGraphicsPath(graphicsPath.get());
                 options.setDatsPath(datsPath.get());
                 options.setInitPath(initPath.get());
                 options.setMusicPath(musicPath.get());
                 options.save();
-                org.argentumforge.engine.utils.GameData.init();
+                GameData.init();
 
                 if (onComplete != null) {
                     onComplete.run();
@@ -69,7 +73,7 @@ public class FRoutes extends Form {
                 this.close();
             }
             ImGui.sameLine();
-            if (ImGui.button(org.argentumforge.engine.i18n.I18n.INSTANCE.get("common.cancel"))) {
+            if (ImGui.button(I18n.INSTANCE.get("common.cancel"))) {
                 if (onCancel != null) {
                     onCancel.run();
                 }
@@ -101,8 +105,8 @@ public class FRoutes extends Form {
             currentPath = new File(".").getAbsolutePath();
         }
 
-        return org.argentumforge.engine.gui.FileDialog.selectFolder(
-                org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.paths.selectFolder"),
+        return FileDialog.selectFolder(
+                I18n.INSTANCE.get("options.paths.selectFolder"),
                 currentPath);
     }
 

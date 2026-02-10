@@ -5,6 +5,8 @@ import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
+import imgui.ImGuiViewport;
+import imgui.flag.ImGuiCond;
 import org.argentumforge.engine.gui.DialogManager;
 import org.argentumforge.engine.utils.editor.PrefabManager;
 import org.argentumforge.engine.utils.editor.models.Prefab;
@@ -45,8 +47,8 @@ public class FEditPrefab extends Form {
         }
 
         // Centro de pantalla
-        imgui.ImGuiViewport viewport = ImGui.getMainViewport();
-        ImGui.setNextWindowPos(viewport.getCenterX(), viewport.getCenterY(), imgui.flag.ImGuiCond.Appearing, 0.5f,
+        ImGuiViewport viewport = ImGui.getMainViewport();
+        ImGui.setNextWindowPos(viewport.getCenterX(), viewport.getCenterY(), ImGuiCond.Appearing, 0.5f,
                 0.5f);
 
         if (ImGui.beginPopupModal(I18n.INSTANCE.get("prefab.edit.title"), pOpen, ImGuiWindowFlags.AlwaysAutoResize)) {

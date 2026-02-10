@@ -7,6 +7,7 @@ import imgui.type.ImInt;
 import org.argentumforge.engine.utils.editor.Transfer;
 import org.argentumforge.engine.i18n.I18n;
 import org.argentumforge.engine.utils.MapContext;
+import org.argentumforge.engine.gui.ImGUISystem;
 
 /**
  * Formulario de edición de traslados (teleports) en el mapa.
@@ -161,7 +162,7 @@ public class FTransferEditor extends Form implements IMapEditor {
 
         ImGui.sameLine(160);
         if (ImGui.button(I18n.INSTANCE.get("editor.transfer.autoUnion"))) {
-            org.argentumforge.engine.gui.ImGUISystem.INSTANCE.show(new FAutoUnion());
+            ImGUISystem.INSTANCE.show(new FAutoUnion());
         }
 
         ImGui.spacing();

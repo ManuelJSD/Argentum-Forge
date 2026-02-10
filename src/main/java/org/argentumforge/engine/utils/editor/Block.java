@@ -1,6 +1,14 @@
 package org.argentumforge.engine.utils.editor;
 
 import org.argentumforge.engine.utils.MapContext;
+import org.argentumforge.engine.utils.editor.commands.BlockChangeCommand;
+import org.argentumforge.engine.utils.editor.commands.CommandManager;
+import org.argentumforge.engine.utils.GameData;
+import org.argentumforge.engine.game.console.Console;
+import org.argentumforge.engine.game.console.FontStyle;
+import org.argentumforge.engine.renderer.RGBColor;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Clase singleton para gestionar la edición de bloqueos en el mapa.
@@ -79,8 +87,8 @@ public class Block {
         if (mapData == null)
             return;
 
-        java.util.Map<org.argentumforge.engine.utils.editor.commands.BlockChangeCommand.TilePos, Boolean> oldStates = new java.util.HashMap<>();
-        java.util.Map<org.argentumforge.engine.utils.editor.commands.BlockChangeCommand.TilePos, Boolean> newStates = new java.util.HashMap<>();
+        Map<BlockChangeCommand.TilePos, Boolean> oldStates = new HashMap<>();
+        Map<BlockChangeCommand.TilePos, Boolean> newStates = new HashMap<>();
 
         int offset = brushSize / 2;
         double radiusSq = Math.pow(brushSize / 2.0, 2);
@@ -107,7 +115,7 @@ public class Block {
                     }
 
                     if (next != current) {
-                        org.argentumforge.engine.utils.editor.commands.BlockChangeCommand.TilePos pos = new org.argentumforge.engine.utils.editor.commands.BlockChangeCommand.TilePos(
+                        BlockChangeCommand.TilePos pos = new BlockChangeCommand.TilePos(
                                 i, j);
                         oldStates.put(pos, current);
                         newStates.put(pos, next);
@@ -159,21 +167,21 @@ public class Block {
         if (mapData == null)
             return;
 
-        java.util.Map<org.argentumforge.engine.utils.editor.commands.BlockChangeCommand.TilePos, Boolean> oldStates = new java.util.HashMap<>();
-        java.util.Map<org.argentumforge.engine.utils.editor.commands.BlockChangeCommand.TilePos, Boolean> newStates = new java.util.HashMap<>();
+        Map<BlockChangeCommand.TilePos, Boolean> oldStates = new HashMap<>();
+        Map<BlockChangeCommand.TilePos, Boolean> newStates = new HashMap<>();
 
         int mapWidth = mapData.length;
         int mapHeight = mapData[0].length;
 
-        int clientWidth = org.argentumforge.engine.utils.GameData.options.getClientWidth();
-        int clientHeight = org.argentumforge.engine.utils.GameData.options.getClientHeight();
+        int clientWidth = GameData.options.getClientWidth();
+        int clientHeight = GameData.options.getClientHeight();
 
         // Debug Log
-        org.argentumforge.engine.game.console.Console.INSTANCE.addMsgToConsole(
+        Console.INSTANCE.addMsgToConsole(
                 "DEBUG: Blocking Borders (Client: " + clientWidth + "x" + clientHeight + ") -> H:" + (clientWidth / 2)
                         + " V:" + (clientHeight / 2),
-                org.argentumforge.engine.game.console.FontStyle.ITALIC,
-                new org.argentumforge.engine.renderer.RGBColor(1, 1, 0));
+                FontStyle.ITALIC,
+                new RGBColor(1, 1, 0));
 
         // Ajuste: Revertir offset manual y usar lógica exacta de VB6
         // VB6: MinXBorder = XMinMapSize + (ClienteWidth / 2) -> Block if X < MinXBorder
@@ -208,7 +216,7 @@ public class Block {
                     if (!bordersOnly || isBorder) {
                         boolean current = mapData[x][y].getBlocked();
                         if (current != targetState) {
-                            org.argentumforge.engine.utils.editor.commands.BlockChangeCommand.TilePos pos = new org.argentumforge.engine.utils.editor.commands.BlockChangeCommand.TilePos(
+                            BlockChangeCommand.TilePos pos = new BlockChangeCommand.TilePos(
                                     x, y);
                             oldStates.put(pos, current);
                             newStates.put(pos, targetState);
@@ -219,8 +227,8 @@ public class Block {
         }
 
         if (!oldStates.isEmpty()) {
-            org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
-                    new org.argentumforge.engine.utils.editor.commands.BlockChangeCommand(
+            CommandManager.getInstance().executeCommand(
+                    new BlockChangeCommand(
                             context, oldStates, newStates));
         }
     }

@@ -4,6 +4,7 @@ import imgui.ImGui;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImInt;
 import org.argentumforge.engine.game.User;
+import org.argentumforge.engine.Window;
 
 import org.argentumforge.engine.i18n.I18n;
 
@@ -22,8 +23,8 @@ public class FGoTo extends Form {
     public void render() {
         // Centrar ventana
         ImGui.setNextWindowPos(
-                org.argentumforge.engine.Window.SCREEN_WIDTH / 2.0f - 125,
-                org.argentumforge.engine.Window.SCREEN_HEIGHT / 2.0f - 80);
+                Window.SCREEN_WIDTH / 2.0f - 125,
+                Window.SCREEN_HEIGHT / 2.0f - 80);
         ImGui.setNextWindowSize(250, 160);
 
         if (ImGui.begin(I18n.INSTANCE.get("goto.title"), ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse)) {

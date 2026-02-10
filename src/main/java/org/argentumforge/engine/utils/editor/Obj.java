@@ -4,6 +4,8 @@ import org.argentumforge.engine.utils.AssetRegistry;
 
 import org.argentumforge.engine.utils.inits.ObjData;
 
+import org.argentumforge.engine.utils.editor.commands.CommandManager;
+import org.argentumforge.engine.utils.editor.commands.ObjChangeCommand;
 import org.argentumforge.engine.utils.MapContext;
 
 /**
@@ -105,8 +107,8 @@ public class Obj {
                 if (oldGrh == newGrh)
                     return;
 
-                org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
-                        new org.argentumforge.engine.utils.editor.commands.ObjChangeCommand(
+                CommandManager.getInstance().executeCommand(
+                        new ObjChangeCommand(
                                 context, x, y, oldGrh, newGrh));
             }
         }
@@ -121,8 +123,8 @@ public class Obj {
             if (oldGrh == 0)
                 return;
 
-            org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
-                    new org.argentumforge.engine.utils.editor.commands.ObjChangeCommand(
+            CommandManager.getInstance().executeCommand(
+                    new ObjChangeCommand(
                             context, x, y, oldGrh, 0));
         }
     }
@@ -138,7 +140,7 @@ public class Obj {
             int grhIdx = mapData[x][y].getObjGrh().getGrhIndex();
             if (grhIdx > 0) {
                 // Buscamos el ObjNumber que use este GrhIndex
-                for (org.argentumforge.engine.utils.inits.ObjData data : AssetRegistry.objs.values()) {
+                for (ObjData data : AssetRegistry.objs.values()) {
                     if (data.getGrhIndex() == grhIdx) {
                         this.objNumber = data.getNumber();
                         this.mode = 1; // Volver a modo colocar

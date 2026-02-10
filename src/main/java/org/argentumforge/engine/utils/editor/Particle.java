@@ -4,6 +4,7 @@ import org.argentumforge.engine.utils.editor.commands.ParticleChangeCommand;
 import org.argentumforge.engine.utils.editor.commands.CommandManager;
 import java.util.HashMap;
 import java.util.Map;
+import org.argentumforge.engine.utils.MapContext;
 
 public class Particle {
 
@@ -32,7 +33,7 @@ public class Particle {
         return instance;
     }
 
-    public void particle_edit(org.argentumforge.engine.utils.MapContext context, int x, int y) {
+    public void particle_edit(MapContext context, int x, int y) {
         if (context == null)
             return;
         var mapData = context.getMapData();

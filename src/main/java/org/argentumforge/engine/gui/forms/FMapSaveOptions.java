@@ -2,6 +2,8 @@ package org.argentumforge.engine.gui.forms;
 
 import imgui.ImGui;
 import imgui.flag.ImGuiWindowFlags;
+import imgui.flag.ImGuiCond;
+import imgui.flag.ImGuiCol;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import org.argentumforge.engine.utils.GameData;
@@ -84,7 +86,7 @@ public class FMapSaveOptions extends Form {
 
     @Override
     public void render() {
-        ImGui.setNextWindowSize(400, 300, imgui.flag.ImGuiCond.Appearing);
+        ImGui.setNextWindowSize(400, 300, ImGuiCond.Appearing);
         int flags = ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoDocking;
 
         if (ImGui.begin(I18n.INSTANCE.get("menu.file.save.custom.title"), flags)) {
@@ -144,9 +146,9 @@ public class FMapSaveOptions extends Form {
             ImGui.setCursorPosX((width - (btnWidth * 2 + spacing)) / 2);
 
             // Save Button (Blue)
-            ImGui.pushStyleColor(imgui.flag.ImGuiCol.Button, 0.2f, 0.4f, 0.8f, 1.0f);
-            ImGui.pushStyleColor(imgui.flag.ImGuiCol.ButtonHovered, 0.3f, 0.5f, 0.9f, 1.0f);
-            ImGui.pushStyleColor(imgui.flag.ImGuiCol.ButtonActive, 0.1f, 0.3f, 0.7f, 1.0f);
+            ImGui.pushStyleColor(ImGuiCol.Button, 0.2f, 0.4f, 0.8f, 1.0f);
+            ImGui.pushStyleColor(ImGuiCol.ButtonHovered, 0.3f, 0.5f, 0.9f, 1.0f);
+            ImGui.pushStyleColor(ImGuiCol.ButtonActive, 0.1f, 0.3f, 0.7f, 1.0f);
             if (ImGui.button(I18n.INSTANCE.get("map.save.btn"), btnWidth, btnHeight)) {
                 requestSave();
             }
@@ -155,9 +157,9 @@ public class FMapSaveOptions extends Form {
             ImGui.sameLine(0, spacing);
 
             // Cancel Button (Red)
-            ImGui.pushStyleColor(imgui.flag.ImGuiCol.Button, 0.8f, 0.2f, 0.2f, 1.0f);
-            ImGui.pushStyleColor(imgui.flag.ImGuiCol.ButtonHovered, 0.9f, 0.3f, 0.3f, 1.0f);
-            ImGui.pushStyleColor(imgui.flag.ImGuiCol.ButtonActive, 0.7f, 0.1f, 0.1f, 1.0f);
+            ImGui.pushStyleColor(ImGuiCol.Button, 0.8f, 0.2f, 0.2f, 1.0f);
+            ImGui.pushStyleColor(ImGuiCol.ButtonHovered, 0.9f, 0.3f, 0.3f, 1.0f);
+            ImGui.pushStyleColor(ImGuiCol.ButtonActive, 0.7f, 0.1f, 0.1f, 1.0f);
             if (ImGui.button(I18n.INSTANCE.get("map.save.cancel"), btnWidth, btnHeight)) {
                 if (onCancel != null)
                     onCancel.run();

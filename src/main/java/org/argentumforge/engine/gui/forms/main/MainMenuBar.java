@@ -7,11 +7,13 @@ import org.argentumforge.engine.gui.DialogManager;
 import org.argentumforge.engine.gui.FileDialog;
 import org.argentumforge.engine.gui.ImGUISystem;
 import org.argentumforge.engine.gui.forms.*;
+import org.argentumforge.engine.gui.forms.FPasteAdvanced;
 import org.argentumforge.engine.gui.widgets.UIComponents;
 import org.argentumforge.engine.i18n.I18n;
 import org.argentumforge.engine.renderer.RenderSettings;
 import org.argentumforge.engine.scenes.Camera;
 import org.argentumforge.engine.utils.GameData;
+import org.argentumforge.engine.utils.MapContext;
 import org.argentumforge.engine.utils.MapFileUtils;
 import org.argentumforge.engine.utils.MapManager;
 import org.argentumforge.engine.utils.editor.Block;
@@ -21,7 +23,15 @@ import org.argentumforge.engine.utils.editor.MinimapColorGenerator;
 import org.argentumforge.engine.utils.editor.Selection;
 import org.argentumforge.engine.utils.MapExporter;
 
+import org.argentumforge.engine.Engine;
+import org.argentumforge.engine.game.EditorController;
+import org.argentumforge.engine.game.models.Key;
+import org.argentumforge.engine.utils.editor.Surface;
+import org.lwjgl.glfw.GLFW;
+
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Componente para renderizar la barra de menú superior.
@@ -35,23 +45,23 @@ public class MainMenuBar {
     }
 
     private String getKeyName(int key) {
-        int scancode = org.lwjgl.glfw.GLFW.glfwGetKeyScancode(key);
-        String keyName = org.lwjgl.glfw.GLFW.glfwGetKeyName(key, scancode);
+        int scancode = GLFW.glfwGetKeyScancode(key);
+        String keyName = GLFW.glfwGetKeyName(key, scancode);
 
         if (keyName == null) {
             return switch (key) {
-                case org.lwjgl.glfw.GLFW.GLFW_KEY_F1 -> "F1";
-                case org.lwjgl.glfw.GLFW.GLFW_KEY_F2 -> "F2";
-                case org.lwjgl.glfw.GLFW.GLFW_KEY_F3 -> "F3";
-                case org.lwjgl.glfw.GLFW.GLFW_KEY_F4 -> "F4";
-                case org.lwjgl.glfw.GLFW.GLFW_KEY_F5 -> "F5";
-                case org.lwjgl.glfw.GLFW.GLFW_KEY_F6 -> "F6";
-                case org.lwjgl.glfw.GLFW.GLFW_KEY_F7 -> "F7";
-                case org.lwjgl.glfw.GLFW.GLFW_KEY_F8 -> "F8";
-                case org.lwjgl.glfw.GLFW.GLFW_KEY_F9 -> "F9";
-                case org.lwjgl.glfw.GLFW.GLFW_KEY_F10 -> "F10";
-                case org.lwjgl.glfw.GLFW.GLFW_KEY_F11 -> "F11";
-                case org.lwjgl.glfw.GLFW.GLFW_KEY_F12 -> "F12";
+                case GLFW.GLFW_KEY_F1 -> "F1";
+                case GLFW.GLFW_KEY_F2 -> "F2";
+                case GLFW.GLFW_KEY_F3 -> "F3";
+                case GLFW.GLFW_KEY_F4 -> "F4";
+                case GLFW.GLFW_KEY_F5 -> "F5";
+                case GLFW.GLFW_KEY_F6 -> "F6";
+                case GLFW.GLFW_KEY_F7 -> "F7";
+                case GLFW.GLFW_KEY_F8 -> "F8";
+                case GLFW.GLFW_KEY_F9 -> "F9";
+                case GLFW.GLFW_KEY_F10 -> "F10";
+                case GLFW.GLFW_KEY_F11 -> "F11";
+                case GLFW.GLFW_KEY_F12 -> "F12";
                 default -> "KEY " + key;
             };
         }
@@ -75,29 +85,29 @@ public class MainMenuBar {
             if (ImGui.beginMenu(I18n.INSTANCE.get("menu.file"))) {
                 // ... (lines 68-132)
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.file.new"))) {
-                    org.argentumforge.engine.game.EditorController.INSTANCE.newMap();
+                    EditorController.INSTANCE.newMap();
                 }
 
                 ImGui.separator();
 
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.file.open"))) {
-                    org.argentumforge.engine.game.EditorController.INSTANCE.loadMapAction();
+                    EditorController.INSTANCE.loadMapAction();
                 }
 
-                String reloadKey = getKeyName(org.argentumforge.engine.game.models.Key.RELOAD_MAP.getKeyCode());
+                String reloadKey = getKeyName(Key.RELOAD_MAP.getKeyCode());
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.file.reload"), reloadKey, false,
                         GameData.getActiveContext() != null)) {
-                    org.argentumforge.engine.game.EditorController.INSTANCE.reloadMap();
+                    EditorController.INSTANCE.reloadMap();
                 }
 
                 if (ImGui.beginMenu(I18n.INSTANCE.get("menu.file.recent"))) {
-                    java.util.List<String> recentMaps = GameData.options.getRecentMaps();
+                    List<String> recentMaps = GameData.options.getRecentMaps();
                     if (recentMaps.isEmpty()) {
                         ImGui.textDisabled(I18n.INSTANCE.get("menu.file.recent.none"));
                     } else {
                         // Create a copy to avoid ConcurrentModificationException when loading a map
                         // uses this list
-                        for (String mapPath : new java.util.ArrayList<>(recentMaps)) {
+                        for (String mapPath : new ArrayList<>(recentMaps)) {
                             if (ImGui.menuItem(mapPath)) {
                                 MapManager.loadMapAsync(mapPath, null);
                             }
@@ -108,7 +118,9 @@ public class MainMenuBar {
 
                 ImGui.separator();
 
-                org.argentumforge.engine.utils.MapContext context = GameData.getActiveContext();
+                ImGui.separator();
+
+                MapContext context = GameData.getActiveContext();
                 boolean isModified = context != null && context.isModified();
 
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.file.save"), "Ctrl+S", false, isModified)) {
@@ -128,13 +140,13 @@ public class MainMenuBar {
                 ImGui.separator();
 
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.file.changeProfile"))) {
-                    org.argentumforge.engine.Engine.INSTANCE.requestProfileChange();
+                    Engine.INSTANCE.requestProfileChange();
                 }
 
                 ImGui.separator();
 
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.file.exit"))) {
-                    org.argentumforge.engine.Engine.closeClient();
+                    Engine.closeClient();
                 }
 
                 ImGui.endMenu();
@@ -160,27 +172,27 @@ public class MainMenuBar {
 
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.edit.cut"), "Ctrl+X", false,
                         !Selection.getInstance().getSelectedEntities().isEmpty())) {
-                    org.argentumforge.engine.game.EditorController.INSTANCE.cutSelection();
+                    EditorController.INSTANCE.cutSelection();
                 }
 
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.edit.copy"), "Ctrl+C", false,
                         !Selection.getInstance().getSelectedEntities().isEmpty())) {
-                    org.argentumforge.engine.game.EditorController.INSTANCE.copySelection();
+                    EditorController.INSTANCE.copySelection();
                 }
 
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.edit.paste"), "Ctrl+V", false,
                         !Clipboard.getInstance().isEmpty())) {
-                    org.argentumforge.engine.game.EditorController.INSTANCE.pasteSelection();
+                    EditorController.INSTANCE.pasteSelection();
                 }
 
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.edit.pasteAdvanced"), "Ctrl+Shift+V", false,
                         !Clipboard.getInstance().isEmpty())) {
-                    ImGUISystem.INSTANCE.show(new org.argentumforge.engine.gui.forms.FPasteAdvanced());
+                    ImGUISystem.INSTANCE.show(new FPasteAdvanced());
                 }
 
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.edit.delete"), "Supr", false,
                         !Selection.getInstance().getSelectedEntities().isEmpty())) {
-                    org.argentumforge.engine.game.EditorController.INSTANCE.deleteSelection();
+                    EditorController.INSTANCE.deleteSelection();
                 }
 
                 ImGui.separator();
@@ -234,7 +246,7 @@ public class MainMenuBar {
             // ... (rest of menu)
             if (ImGui.beginMenu(I18n.INSTANCE.get("menu.map"))) {
                 // ...
-                String propsKey = getKeyName(org.argentumforge.engine.game.models.Key.MAP_PROPERTIES.getKeyCode());
+                String propsKey = getKeyName(Key.MAP_PROPERTIES.getKeyCode());
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.map.properties"), propsKey)) {
                     ImGUISystem.INSTANCE.show(new FInfoMap());
                 }
@@ -250,7 +262,7 @@ public class MainMenuBar {
 
                 ImGui.separator();
 
-                String gotoKey = getKeyName(org.argentumforge.engine.game.models.Key.GOTO_POS.getKeyCode());
+                String gotoKey = getKeyName(Key.GOTO_POS.getKeyCode());
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.edit.goto"), gotoKey)) {
                     ImGUISystem.INSTANCE.show(new FGoTo());
                 }
@@ -315,12 +327,12 @@ public class MainMenuBar {
                 }
                 ImGui.separator();
                 // ...
-                String gridKey = getKeyName(org.argentumforge.engine.game.models.Key.TOGGLE_GRID.getKeyCode());
+                String gridKey = getKeyName(Key.TOGGLE_GRID.getKeyCode());
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.view.grid"), gridKey, renderSettings.isShowGrid())) {
                     renderSettings.setShowGrid(!renderSettings.isShowGrid());
                     GameData.options.save();
                 }
-                String viewportKey = getKeyName(org.argentumforge.engine.game.models.Key.TOGGLE_VIEWPORT.getKeyCode());
+                String viewportKey = getKeyName(Key.TOGGLE_VIEWPORT.getKeyCode());
                 if (ImGui.menuItem(I18n.INSTANCE.get("options.viewport"), viewportKey,
                         renderSettings.isShowViewportOverlay())) {
                     renderSettings.setShowViewportOverlay(!renderSettings.isShowViewportOverlay());
@@ -398,7 +410,7 @@ public class MainMenuBar {
 
             if (ImGui.beginMenu(I18n.INSTANCE.get("menu.misc"))) {
                 // ...
-                String photoKey = getKeyName(org.argentumforge.engine.game.models.Key.TOGGLE_PHOTO_MODE.getKeyCode());
+                String photoKey = getKeyName(Key.TOGGLE_PHOTO_MODE.getKeyCode());
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.misc.photoMode"), photoKey)) {
                     GameData.options.getRenderSettings().setPhotoModeActive(
                             !GameData.options.getRenderSettings().isPhotoModeActive());
@@ -471,52 +483,52 @@ public class MainMenuBar {
                 I18n.INSTANCE.get("editor.block.confirm.blockBorders.title"),
                 I18n.INSTANCE.get("editor.block.blockBorders"),
                 I18n.INSTANCE.get("editor.block.confirm.blockBorders.msg"),
-                () -> block.blockBorders(org.argentumforge.engine.utils.GameData.getActiveContext()));
+                () -> block.blockBorders(GameData.getActiveContext()));
 
         UIComponents.confirmDialog(
                 I18n.INSTANCE.get("editor.block.confirm.blockAll.title"),
                 I18n.INSTANCE.get("editor.block.blockAll"),
                 I18n.INSTANCE.get("editor.block.confirm.blockAll.msg"),
-                () -> block.blockAll(org.argentumforge.engine.utils.GameData.getActiveContext()));
+                () -> block.blockAll(GameData.getActiveContext()));
 
         UIComponents.confirmDialog(
                 I18n.INSTANCE.get("editor.block.confirm.clearBorders.title"),
                 I18n.INSTANCE.get("editor.block.clearBorders"),
                 I18n.INSTANCE.get("editor.block.confirm.clearBorders.msg"),
-                () -> block.unblockBorders(org.argentumforge.engine.utils.GameData.getActiveContext()));
+                () -> block.unblockBorders(GameData.getActiveContext()));
 
         UIComponents.confirmDialog(
                 I18n.INSTANCE.get("editor.block.confirm.clearAll.title"),
                 I18n.INSTANCE.get("editor.block.clearAll"),
                 I18n.INSTANCE.get("editor.block.confirm.clearAll.msg"),
-                () -> block.unblockAll(org.argentumforge.engine.utils.GameData.getActiveContext()));
+                () -> block.unblockAll(GameData.getActiveContext()));
 
         UIComponents.confirmDialog(
                 I18n.INSTANCE.get("editor.surface.confirm.fillLayer.title"),
                 I18n.INSTANCE.get("editor.surface.fillLayer"),
                 I18n.INSTANCE.get("editor.surface.confirm.fillLayer.msg"),
-                () -> org.argentumforge.engine.utils.editor.Surface.getInstance()
-                        .fillLayer(org.argentumforge.engine.utils.GameData.getActiveContext()));
+                () -> Surface.getInstance()
+                        .fillLayer(GameData.getActiveContext()));
 
         UIComponents.confirmDialog(
                 I18n.INSTANCE.get("editor.surface.confirm.clearLayer.title"),
                 I18n.INSTANCE.get("editor.surface.clearLayer"),
                 I18n.INSTANCE.get("editor.surface.confirm.clearLayer.msg"),
-                () -> org.argentumforge.engine.utils.editor.Surface.getInstance()
-                        .clearLayer(org.argentumforge.engine.utils.GameData.getActiveContext()));
+                () -> Surface.getInstance()
+                        .clearLayer(GameData.getActiveContext()));
 
         UIComponents.confirmDialog(
                 I18n.INSTANCE.get("editor.surface.confirm.fillBorders.title"),
                 I18n.INSTANCE.get("editor.surface.fillBorders"),
                 I18n.INSTANCE.get("editor.surface.confirm.fillBorders.msg"),
-                () -> org.argentumforge.engine.utils.editor.Surface.getInstance()
-                        .fillBorders(org.argentumforge.engine.utils.GameData.getActiveContext()));
+                () -> Surface.getInstance()
+                        .fillBorders(GameData.getActiveContext()));
 
         UIComponents.confirmDialog(
                 I18n.INSTANCE.get("editor.surface.confirm.clearBorders.title"),
                 I18n.INSTANCE.get("editor.surface.clearBorders"),
                 I18n.INSTANCE.get("editor.surface.confirm.clearBorders.msg"),
-                () -> org.argentumforge.engine.utils.editor.Surface.getInstance()
-                        .clearBorders(org.argentumforge.engine.utils.GameData.getActiveContext()));
+                () -> Surface.getInstance()
+                        .clearBorders(GameData.getActiveContext()));
     }
 }

@@ -18,6 +18,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.function.Consumer;
 
 /**
  * Ventana de edición para las propiedades generales del mapa actual.
@@ -178,7 +179,7 @@ public final class FInfoMap extends Form {
         }
     }
 
-    private void applyChange(java.util.function.Consumer<MapProperties> changeAction) {
+    private void applyChange(Consumer<MapProperties> changeAction) {
         if (GameData.mapProperties == null)
             return;
 
@@ -192,7 +193,6 @@ public final class FInfoMap extends Form {
         changeAction.accept(newProps);
 
         // Execute Command (this will apply newProps to GameData.mapProperties)
-        // Ejecutar comando
         CommandManager.getInstance()
                 .executeCommand(new MapPropertiesChangeCommand(GameData.getActiveContext(), oldProps, newProps));
 
@@ -234,8 +234,7 @@ public final class FInfoMap extends Form {
 
     private void updateFilteredMusic() {
         String filter = musicFilter.get().toLowerCase();
-        filteredMusicFiles = musicFiles.stream()
-                .filter(f -> f.getName().toLowerCase().contains(filter))
+        filteredMusicFiles = musicFiles.stream().filter(f -> f.getName().toLowerCase().contains(filter))
                 .collect(Collectors.toList());
     }
 
@@ -272,12 +271,10 @@ public final class FInfoMap extends Form {
                 if (!selectedName.isEmpty()) {
                     Sound.stopMusic();
                     Sound.playMusic(selectedName);
-                    Sound.playMusic(selectedName);
                 }
             }
             ImGui.sameLine();
             if (ImGui.button(I18n.INSTANCE.get("common.stop"))) {
-                Sound.stopMusic();
                 Sound.stopMusic();
             }
 

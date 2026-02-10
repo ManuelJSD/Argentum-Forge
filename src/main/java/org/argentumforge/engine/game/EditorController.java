@@ -11,6 +11,14 @@ import org.argentumforge.engine.scenes.Camera;
 import org.argentumforge.engine.game.console.Console;
 import org.argentumforge.engine.renderer.RGBColor;
 import org.argentumforge.engine.i18n.I18n;
+import org.argentumforge.engine.gui.forms.Form;
+import org.argentumforge.engine.gui.ImGUISystem;
+import org.argentumforge.engine.gui.forms.FTileInspector;
+import org.argentumforge.engine.utils.MapManager;
+import org.argentumforge.engine.utils.GameData;
+import org.argentumforge.engine.game.console.FontStyle;
+import org.argentumforge.engine.utils.MapFileUtils;
+import org.argentumforge.engine.gui.DialogManager;
 
 import static org.argentumforge.engine.game.console.FontStyle.REGULAR;
 
@@ -34,10 +42,10 @@ public enum EditorController {
                     new RGBColor(1f, 1f, 0f));
 
             // Cerrar la ventana del inspector si está abierta
-            org.argentumforge.engine.gui.forms.Form inspector = org.argentumforge.engine.gui.ImGUISystem.INSTANCE
-                    .getForm(org.argentumforge.engine.gui.forms.FTileInspector.class);
+            Form inspector = ImGUISystem.INSTANCE
+                    .getForm(FTileInspector.class);
             if (inspector != null) {
-                org.argentumforge.engine.gui.ImGUISystem.INSTANCE.deleteFrmArray(inspector);
+                ImGUISystem.INSTANCE.deleteFrmArray(inspector);
             }
         }
     }
@@ -58,16 +66,16 @@ public enum EditorController {
     }
 
     public void newMap() {
-        org.argentumforge.engine.utils.MapManager.checkUnsavedChangesAsync(() -> {
-            org.argentumforge.engine.utils.MapManager.createEmptyMap(100, 100);
-            org.argentumforge.engine.utils.GameData.updateWindowTitle();
+        MapManager.checkUnsavedChangesAsync(() -> {
+            MapManager.createEmptyMap(100, 100);
+            GameData.updateWindowTitle();
             Console.INSTANCE.addMsgToConsole(I18n.INSTANCE.get("msg.mapCreated"),
-                    org.argentumforge.engine.game.console.FontStyle.BOLD, new RGBColor(0, 1, 0));
+                    FontStyle.BOLD, new RGBColor(0, 1, 0));
         }, null);
     }
 
     public void loadMapAction() {
-        org.argentumforge.engine.utils.MapFileUtils.openAndLoadMap();
+        MapFileUtils.openAndLoadMap();
     }
 
     public void copySelection() {
@@ -121,7 +129,7 @@ public enum EditorController {
             int ty = EditorInputManager.getTileMouseY(my);
 
             CommandManager.getInstance().executeCommand(new PasteEntitiesCommand(
-                    org.argentumforge.engine.utils.GameData.getActiveContext(), clip.getItems(), tx, ty));
+                    GameData.getActiveContext(), clip.getItems(), tx, ty));
 
             // Si no pulsamos Shift, salimos del modo paste tras un clic?
             // Para "fluidez", mejor quedarnos en modo paste hasta que Escape o cambie
@@ -139,15 +147,15 @@ public enum EditorController {
             return;
 
         CommandManager.getInstance().executeCommand(new DeleteEntitiesCommand(
-                org.argentumforge.engine.utils.GameData.getActiveContext(), sel.getSelectedEntities()));
+                GameData.getActiveContext(), sel.getSelectedEntities()));
         sel.getSelectedEntities().clear();
     }
 
     public void reloadMap() {
-        if (org.argentumforge.engine.utils.MapManager.isMapLoading())
+        if (MapManager.isMapLoading())
             return;
 
-        var context = org.argentumforge.engine.utils.GameData.getActiveContext();
+        var context = GameData.getActiveContext();
         if (context == null) {
             Console.INSTANCE.addMsgToConsole("Error: No hay ningún mapa abierto para recargar.", REGULAR,
                     new RGBColor(1f, 0f, 0f));
@@ -157,14 +165,14 @@ public enum EditorController {
         Runnable doReload = () -> {
             // Usar forceReload = true para indicar a MapManager que debe reemplazar el
             // contexto existente
-            org.argentumforge.engine.utils.MapManager.loadMapAsync(context.getFilePath(), true, () -> {
+            MapManager.loadMapAsync(context.getFilePath(), true, () -> {
                 Console.INSTANCE.addMsgToConsole(I18n.INSTANCE.get("msg.mapReloaded"),
-                        org.argentumforge.engine.game.console.FontStyle.BOLD, new RGBColor(0, 1, 0));
+                        FontStyle.BOLD, new RGBColor(0, 1, 0));
             });
         };
 
         if (context.isModified()) {
-            org.argentumforge.engine.gui.DialogManager.getInstance().showConfirm(
+            DialogManager.getInstance().showConfirm(
                     I18n.INSTANCE.get("dialog.reload.title"),
                     I18n.INSTANCE.get("dialog.reload.msg"),
                     doReload,

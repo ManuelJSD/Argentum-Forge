@@ -3,8 +3,10 @@ package org.argentumforge.engine.gui.forms;
 import imgui.ImGui;
 import imgui.flag.ImGuiCond;
 import imgui.flag.ImGuiWindowFlags;
+import imgui.flag.ImGuiCol;
 import imgui.type.ImInt;
 import org.argentumforge.engine.utils.editor.Transfer;
+import org.argentumforge.engine.utils.GameData;
 import org.argentumforge.engine.i18n.I18n;
 
 /**
@@ -65,7 +67,7 @@ public final class FAutoUnion extends Form {
 
             // Rectángulo del Mapa (Uso de ChildWindow para simular el recuadro)
             ImGui.setCursorPos(offsetX, startY);
-            ImGui.pushStyleColor(imgui.flag.ImGuiCol.ChildBg, 0xFF333333);
+            ImGui.pushStyleColor(ImGuiCol.ChildBg, 0xFF333333);
             ImGui.beginChild("MapBox", boxWidth, boxHeight, true);
 
             // --- Norte ---
@@ -143,13 +145,13 @@ public final class FAutoUnion extends Form {
                 int s = southApply ? southMap.get() : -1;
                 int e = eastApply ? eastMap.get() : -1;
                 int w = westApply ? westMap.get() : -1;
-                Transfer.getInstance().autoUnionBorders(org.argentumforge.engine.utils.GameData.getActiveContext(), n,
+                Transfer.getInstance().autoUnionBorders(GameData.getActiveContext(), n,
                         s, e, w);
             }
             ImGui.popStyleColor();
 
             ImGui.sameLine();
-            ImGui.pushStyleColor(imgui.flag.ImGuiCol.Button, 0xFF000088);
+            ImGui.pushStyleColor(ImGuiCol.Button, 0xFF000088);
             if (ImGui.button(I18n.INSTANCE.get("common.cancel"), 90, 30)) {
                 this.close();
             }

@@ -14,6 +14,15 @@ import java.nio.file.Path;
 import org.argentumforge.engine.gui.DialogManager;
 import java.io.File;
 
+import org.argentumforge.engine.Engine;
+import org.argentumforge.engine.gui.components.LoadingModal;
+import org.argentumforge.engine.game.User;
+import org.argentumforge.engine.utils.editor.commands.CommandManager;
+import org.argentumforge.engine.game.EditorController;
+import org.argentumforge.engine.utils.editor.Selection;
+import org.argentumforge.engine.utils.editor.Particle;
+import org.argentumforge.engine.utils.editor.Obj;
+
 /**
  * Clase responsable de la gestión de archivos de mapa (.map, .inf, .dat).
  * 
@@ -342,8 +351,8 @@ public final class MapManager {
         } catch (Exception e) {
             /* ignore */ }
 
-        org.argentumforge.engine.utils.MapContext existingContext = null;
-        for (org.argentumforge.engine.utils.MapContext context : org.argentumforge.engine.utils.GameData
+        MapContext existingContext = null;
+        for (MapContext context : GameData
                 .getOpenMaps()) {
             if (context.getFilePath().equalsIgnoreCase(normalizedTarget)) {
                 existingContext = context;
@@ -352,11 +361,11 @@ public final class MapManager {
         }
 
         if (existingContext != null && !forceReload) {
-            org.tinylog.Logger.info("MapManager: Map already open (normalized), switching context. Path={}",
+            Logger.info("MapManager: Map already open (normalized), switching context. Path={}",
                     normalizedTarget);
-            final org.argentumforge.engine.utils.MapContext finalCtx = existingContext;
-            org.argentumforge.engine.Engine.INSTANCE.runOnMainThread(() -> {
-                org.argentumforge.engine.utils.GameData.setActiveContext(finalCtx);
+            final MapContext finalCtx = existingContext;
+            Engine.INSTANCE.runOnMainThread(() -> {
+                GameData.setActiveContext(finalCtx);
                 if (onComplete != null)
                     onComplete.run();
             });
@@ -364,15 +373,15 @@ public final class MapManager {
         }
 
         // Si forzamos recarga y existe, lo marcaremos para reemplazo posterior
-        final org.argentumforge.engine.utils.MapContext contextToReplace = existingContext;
+        final MapContext contextToReplace = existingContext;
 
         mapLoading = true;
 
-        org.argentumforge.engine.gui.components.LoadingModal.getInstance()
+        LoadingModal.getInstance()
                 .show("Cargando mapa " + new File(filePath).getName() + "...");
 
         // Asegurar que movimiento y estado se limpien para evitar bloqueo de cámara
-        org.argentumforge.engine.game.User.INSTANCE.resetMovement();
+        User.INSTANCE.resetMovement();
 
         // (WindowTitle/GLFW)
 
@@ -395,7 +404,7 @@ public final class MapManager {
                 int particlesLoaded = countParticles(newMapData); // Nuevo ayudante o inferido
 
                 // Reservar Slot de Usuario
-                int userCharIdx = org.argentumforge.engine.game.User.INSTANCE.getUserCharIndex();
+                int userCharIdx = User.INSTANCE.getUserCharIndex();
                 if (userCharIdx <= 0)
                     userCharIdx = 1;
                 newCharList[userCharIdx].setActive(true);
@@ -433,7 +442,7 @@ public final class MapManager {
 
                 // FASE 2: Aplicación (Main Thread) -> Usamos un Task Queue en Engine o
                 // bloqueamos un frame
-                org.argentumforge.engine.Engine.INSTANCE.runOnMainThread(() -> {
+                Engine.INSTANCE.runOnMainThread(() -> {
                     applyMap(result);
                     // Actualizar opciones persistentes
                     Options.INSTANCE.setLastMapPath(filePath);
@@ -441,15 +450,15 @@ public final class MapManager {
 
                     if (onComplete != null)
                         onComplete.run();
-                    org.argentumforge.engine.gui.components.LoadingModal.getInstance().hide();
+                    LoadingModal.getInstance().hide();
                     mapLoading = false;
                     Logger.info("Carga asíncrona completada.");
                 });
 
             } catch (Exception e) {
                 Logger.error(e, "Error en carga asíncrona de mapa");
-                org.argentumforge.engine.Engine.INSTANCE.runOnMainThread(() -> {
-                    org.argentumforge.engine.gui.components.LoadingModal.getInstance().hide();
+                Engine.INSTANCE.runOnMainThread(() -> {
+                    LoadingModal.getInstance().hide();
                     mapLoading = false;
                     DialogManager.getInstance().showError("Error", "No se pudo cargar el mapa:\n" + e.getMessage());
                 });
@@ -470,7 +479,7 @@ public final class MapManager {
 
     private static void applyMap(MapLoadingResult result) {
         // Limpiar texturas en el hilo principal justo antes de cambiar contexto
-        org.argentumforge.engine.renderer.Surface.INSTANCE.deleteAllTextures();
+        Surface.INSTANCE.deleteAllTextures();
 
         // Si estamos recargando, reemplazamos la instancia antigua en GameData.openMaps
         if (result.contextToReplace != null) {
@@ -491,31 +500,31 @@ public final class MapManager {
         }
 
         MapManager.markAsSaved();
-        org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().clearHistory();
+        CommandManager.getInstance().clearHistory();
 
         // --- FIX: Limpieza de Estado de Herramientas para evitar "Objetos Fantasma"
         // ---
         // Desactivar modos de edición persistentes
-        org.argentumforge.engine.game.EditorController.INSTANCE.setPasteModeActive(false);
+        EditorController.INSTANCE.setPasteModeActive(false);
 
         // Limpiar selección actual (evita renderizado de cajas de selección o
         // referencias a entidades del mapa anterior)
         // Limpiar selección actual (setActive(false) limpia la lista interna)
-        org.argentumforge.engine.utils.editor.Selection.getInstance().setActive(false);
+        Selection.getInstance().setActive(false);
 
         // Resetear herramientas específicas
-        org.argentumforge.engine.utils.editor.Particle.getInstance().setActive(false);
-        org.argentumforge.engine.utils.editor.Obj.getInstance().setMode(0); // Desactivar herramienta de objetos
+        Particle.getInstance().setActive(false);
+        Obj.getInstance().setMode(0); // Desactivar herramienta de objetos
         // -----------------------------------------------------------------------------
 
         // Actualizar ID del mapa en el usuario si es posible extraerlo del nombre
         int mapId = extractMapNumber(result.context.getFilePath());
         if (mapId > 0) {
-            org.argentumforge.engine.game.User.INSTANCE.setUserMap((short) mapId);
+            User.INSTANCE.setUserMap((short) mapId);
         }
 
         // Teleport Usuario
-        org.argentumforge.engine.game.User user = org.argentumforge.engine.game.User.INSTANCE;
+        User user = User.INSTANCE;
         if (user.getUserPos().getX() == 0 || user.getUserPos().getY() == 0) {
             user.teleport(50, 50);
         } else {
@@ -596,7 +605,7 @@ public final class MapManager {
             // ANTES de cargar entidades
             // Solo lo marcamos activo para prevenir que los NPCs lo tomen. NO obtenemos
             // posición ni escribimos al mapa todavía.
-            int userCharIdx = org.argentumforge.engine.game.User.INSTANCE.getUserCharIndex();
+            int userCharIdx = User.INSTANCE.getUserCharIndex();
             if (userCharIdx <= 0)
                 userCharIdx = 1;
             newCharList[userCharIdx].setActive(true);

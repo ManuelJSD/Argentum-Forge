@@ -1,6 +1,8 @@
 package org.argentumforge.engine.utils.editor;
 
 import org.argentumforge.engine.utils.MapContext;
+import org.argentumforge.engine.utils.editor.commands.CommandManager;
+import org.argentumforge.engine.utils.editor.commands.NpcChangeCommand;
 
 /**
  * Gestor de estado del editor para la manipulación de NPCs en el mapa.
@@ -97,8 +99,8 @@ public class Npc {
             if (oldNpc == npcNumber)
                 return;
 
-            org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
-                    new org.argentumforge.engine.utils.editor.commands.NpcChangeCommand(
+            CommandManager.getInstance().executeCommand(
+                    new NpcChangeCommand(
                             context, x, y, oldNpc,
                             npcNumber));
         }
@@ -113,8 +115,8 @@ public class Npc {
             if (oldNpc == 0)
                 return;
 
-            org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
-                    new org.argentumforge.engine.utils.editor.commands.NpcChangeCommand(
+            CommandManager.getInstance().executeCommand(
+                    new NpcChangeCommand(
                             context, x, y, oldNpc, 0));
         }
     }

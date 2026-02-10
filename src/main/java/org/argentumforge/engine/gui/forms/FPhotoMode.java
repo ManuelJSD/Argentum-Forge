@@ -2,7 +2,10 @@ package org.argentumforge.engine.gui.forms;
 
 import imgui.ImGui;
 import imgui.flag.ImGuiWindowFlags;
+import imgui.flag.ImGuiCond;
+import imgui.flag.ImGuiCol;
 import org.argentumforge.engine.i18n.I18n;
+import org.argentumforge.engine.utils.ScreenshotUtils;
 import org.argentumforge.engine.renderer.RenderSettings;
 import static org.argentumforge.engine.utils.GameData.options;
 
@@ -16,8 +19,8 @@ public class FPhotoMode {
         RenderSettings settings = options.getRenderSettings();
 
         // Ventana flotante en la esquina superior derecha
-        ImGui.setNextWindowPos(ImGui.getMainViewport().getSizeX() - 320, 20, imgui.flag.ImGuiCond.Once);
-        ImGui.setNextWindowSize(300, 450, imgui.flag.ImGuiCond.Once);
+        ImGui.setNextWindowPos(ImGui.getMainViewport().getSizeX() - 320, 20, ImGuiCond.Once);
+        ImGui.setNextWindowSize(300, 450, ImGuiCond.Once);
 
         int flags = ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings;
 
@@ -150,11 +153,11 @@ public class FPhotoMode {
             ImGui.dummy(0, 5);
 
             // Botón Principal: HACER FOTO
-            ImGui.pushStyleColor(imgui.flag.ImGuiCol.Button, 0.2f, 0.4f, 0.8f, 1.0f);
-            ImGui.pushStyleColor(imgui.flag.ImGuiCol.ButtonHovered, 0.3f, 0.5f, 0.9f, 1.0f);
-            ImGui.pushStyleColor(imgui.flag.ImGuiCol.ButtonActive, 0.1f, 0.3f, 0.7f, 1.0f);
+            ImGui.pushStyleColor(ImGuiCol.Button, 0.2f, 0.4f, 0.8f, 1.0f);
+            ImGui.pushStyleColor(ImGuiCol.ButtonHovered, 0.3f, 0.5f, 0.9f, 1.0f);
+            ImGui.pushStyleColor(ImGuiCol.ButtonActive, 0.1f, 0.3f, 0.7f, 1.0f);
             if (ImGui.button(getLabel("btn.take", "HACER FOTO (F2)"), -1, 40)) {
-                org.argentumforge.engine.utils.ScreenshotUtils.takeScreenshot();
+                ScreenshotUtils.takeScreenshot();
             }
             ImGui.popStyleColor(3);
 

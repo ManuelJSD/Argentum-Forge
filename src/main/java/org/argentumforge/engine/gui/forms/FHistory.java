@@ -2,6 +2,7 @@ package org.argentumforge.engine.gui.forms;
 
 import imgui.ImGui;
 import imgui.flag.ImGuiWindowFlags;
+import imgui.flag.ImGuiCol;
 import imgui.type.ImBoolean;
 import org.argentumforge.engine.i18n.I18n;
 import org.argentumforge.engine.utils.GameData;
@@ -101,7 +102,7 @@ public class FHistory extends Form {
                         (isSavedPoint ? " " + I18n.INSTANCE.get("history.tag.saved") : ""),
                         i);
 
-                ImGui.pushStyleColor(imgui.flag.ImGuiCol.Text, 0.5f, 0.5f, 0.5f, 1.0f);
+                ImGui.pushStyleColor(ImGuiCol.Text, 0.5f, 0.5f, 0.5f, 1.0f);
                 if (ImGui.selectable(label, false)) {
                     int redoCount = i + 1;
                     for (int k = 0; k < redoCount; k++) {

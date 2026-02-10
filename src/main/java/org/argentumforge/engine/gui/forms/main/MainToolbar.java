@@ -5,7 +5,9 @@ import imgui.ImGuiViewport;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiWindowFlags;
+import org.argentumforge.engine.game.EditorController;
 import org.argentumforge.engine.gui.ImGUISystem;
+import org.argentumforge.engine.utils.GameData;
 import org.argentumforge.engine.gui.Theme;
 import org.argentumforge.engine.gui.forms.FMain;
 import org.argentumforge.engine.gui.forms.Form;
@@ -58,7 +60,7 @@ public class MainToolbar {
 
         // --- GRUPO 1: EDICIÓN (Visual) ---
 
-        boolean mapOpen = !org.argentumforge.engine.utils.GameData.getOpenMaps().isEmpty();
+        boolean mapOpen = !GameData.getOpenMaps().isEmpty();
 
         // Superficies (Fila 0, Col 0)
         drawIconButton(I18n.INSTANCE.get("toolbar.surface.short"), I18n.INSTANCE.get("toolbar.surface"),
@@ -123,7 +125,7 @@ public class MainToolbar {
         ImGui.sameLine();
 
         // Botón Inspector (Anteriormente Selección)
-        boolean inspectorActive = org.argentumforge.engine.game.EditorController.INSTANCE.isInspectorMode();
+        boolean inspectorActive = EditorController.INSTANCE.isInspectorMode();
 
         // Colores para el Inspector (Verde)
         int inspColor;
@@ -196,7 +198,7 @@ public class MainToolbar {
     }
 
     private void toggleInspector() {
-        org.argentumforge.engine.game.EditorController controller = org.argentumforge.engine.game.EditorController.INSTANCE;
+        EditorController controller = EditorController.INSTANCE;
         controller.setInspectorMode(!controller.isInspectorMode());
     }
 

@@ -7,6 +7,7 @@ import org.argentumforge.engine.utils.inits.GrhData;
 import org.tinylog.Logger;
 import org.lwjgl.stb.STBImage;
 import org.lwjgl.system.MemoryStack;
+import org.argentumforge.engine.gui.DialogManager;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -36,9 +37,9 @@ public class MinimapColorGenerator {
 
         new Thread(() -> {
             String fileName = ProfileManager.INSTANCE.getProfilesDir() + "/minimap.bin";
-            if (org.argentumforge.engine.utils.ProfileManager.INSTANCE.getCurrentProfile() != null) {
+            if (ProfileManager.INSTANCE.getCurrentProfile() != null) {
                 fileName = ProfileManager.INSTANCE.getProfilesDir() + "/minimap_"
-                        + org.argentumforge.engine.utils.ProfileManager.INSTANCE.getCurrentProfile().getName() + ".bin";
+                        + ProfileManager.INSTANCE.getCurrentProfile().getName() + ".bin";
             }
             Path outputPath = Path.of(fileName);
             Logger.info("Iniciando generacion de colores de minimapa en: {}", outputPath.toAbsolutePath());
@@ -111,7 +112,7 @@ public class MinimapColorGenerator {
                 }
 
                 Logger.info("Generacion completada. {} colores guardados.", processed);
-                org.argentumforge.engine.gui.DialogManager.getInstance().showInfo(
+                DialogManager.getInstance().showInfo(
                         "Generador de Minimapa",
                         "Se generaron los colores del minimapa exitosamente.\nArchivo guardado en: "
                                 + outputPath.toAbsolutePath());

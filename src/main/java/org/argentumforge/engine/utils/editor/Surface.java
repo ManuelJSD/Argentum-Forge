@@ -1,6 +1,19 @@
 package org.argentumforge.engine.utils.editor;
 
 import org.argentumforge.engine.listeners.KeyHandler;
+import org.argentumforge.engine.utils.GameData;
+import org.argentumforge.engine.utils.MapContext;
+import org.argentumforge.engine.utils.editor.commands.BlockChangeCommand;
+import org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand;
+import org.argentumforge.engine.utils.editor.commands.CommandManager;
+import org.argentumforge.engine.utils.editor.commands.MacroCommand;
+
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Queue;
+
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_SHIFT;
 
 /**
  * Clase singleton para gestionar la edición de superficies (capas de suelo) en
@@ -148,12 +161,12 @@ public class Surface {
     }
 
     private boolean isBatching = false;
-    private org.argentumforge.engine.utils.editor.commands.MacroCommand batchCommand;
+    private MacroCommand batchCommand;
 
     public void startBatch() {
         if (!isBatching) {
             isBatching = true;
-            batchCommand = new org.argentumforge.engine.utils.editor.commands.MacroCommand();
+            batchCommand = new MacroCommand();
         }
     }
 
@@ -161,14 +174,14 @@ public class Surface {
         if (isBatching) {
             isBatching = false;
             if (batchCommand != null && !batchCommand.getCommands().isEmpty()) {
-                org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance()
+                CommandManager.getInstance()
                         .executeCommand(batchCommand);
             }
             batchCommand = null;
         }
     }
 
-    public void surface_edit(org.argentumforge.engine.utils.MapContext context, int x, int y) {
+    public void surface_edit(MapContext context, int x, int y) {
         if (context == null)
             return;
         var mapData = context.getMapData();
@@ -194,20 +207,20 @@ public class Surface {
         }
     }
 
-    private void magic_wand_select(org.argentumforge.engine.utils.MapContext context, int x, int y) {
+    private void magic_wand_select(MapContext context, int x, int y) {
         var mapData = context.getMapData();
         if (mapData[x][y] == null)
             return;
 
         Selection selection = Selection.getInstance();
         selection.setActive(true);
-        if (!KeyHandler.isKeyPressed(org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_SHIFT)) {
+        if (!KeyHandler.isKeyPressed(GLFW_KEY_LEFT_SHIFT)) {
             selection.getSelectedEntities().clear();
         }
 
         int targetGrh = mapData[x][y].getLayer(layer).getGrhIndex();
 
-        java.util.Queue<int[]> queue = new java.util.LinkedList<>();
+        Queue<int[]> queue = new LinkedList<>();
         queue.add(new int[] { x, y });
 
         boolean[][] visited = new boolean[mapData.length][mapData[0].length];
@@ -254,7 +267,7 @@ public class Surface {
         // El selection manager pinta cuadros sobre selectedEntities automáticamente
     }
 
-    private void pick(org.argentumforge.engine.utils.MapContext context, int x, int y) {
+    private void pick(MapContext context, int x, int y) {
         var mapData = context.getMapData();
         if (mapData != null && x >= 0 && x < mapData.length && y >= 0 && y < mapData[0].length) {
             int grhIdx = mapData[x][y].getLayer(layer).getGrhIndex();
@@ -266,16 +279,16 @@ public class Surface {
         }
     }
 
-    private void brush_edit(org.argentumforge.engine.utils.MapContext context, int x, int y) {
+    private void brush_edit(MapContext context, int x, int y) {
         if (mode == 0)
             return;
 
         var mapData = context.getMapData();
 
-        java.util.Map<org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos, Integer> oldTiles = new java.util.HashMap<>();
-        java.util.Map<org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos, Integer> newTiles = new java.util.HashMap<>();
-        java.util.Map<org.argentumforge.engine.utils.editor.commands.BlockChangeCommand.TilePos, Boolean> oldBlocks = new java.util.HashMap<>();
-        java.util.Map<org.argentumforge.engine.utils.editor.commands.BlockChangeCommand.TilePos, Boolean> newBlocks = new java.util.HashMap<>();
+        Map<BulkTileChangeCommand.TilePos, Integer> oldTiles = new HashMap<>();
+        Map<BulkTileChangeCommand.TilePos, Integer> newTiles = new HashMap<>();
+        Map<BlockChangeCommand.TilePos, Boolean> oldBlocks = new HashMap<>();
+        Map<BlockChangeCommand.TilePos, Boolean> newBlocks = new HashMap<>();
 
         int half = brushSize / 2;
 
@@ -290,11 +303,11 @@ public class Surface {
                         int currentGrh = mapData[mapX][mapY].getLayer(layer).getGrhIndex();
                         if (currentGrh != targetGrhWithMosaic) {
                             oldTiles.put(
-                                    new org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos(
+                                    new BulkTileChangeCommand.TilePos(
                                             mapX, mapY),
                                     currentGrh);
                             newTiles.put(
-                                    new org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos(
+                                    new BulkTileChangeCommand.TilePos(
                                             mapX, mapY),
                                     targetGrhWithMosaic);
                         }
@@ -303,11 +316,11 @@ public class Surface {
                             boolean currentBlock = mapData[mapX][mapY].getBlocked();
                             if (!currentBlock) {
                                 oldBlocks.put(
-                                        new org.argentumforge.engine.utils.editor.commands.BlockChangeCommand.TilePos(
+                                        new BlockChangeCommand.TilePos(
                                                 mapX, mapY),
                                         false);
                                 newBlocks.put(
-                                        new org.argentumforge.engine.utils.editor.commands.BlockChangeCommand.TilePos(
+                                        new BlockChangeCommand.TilePos(
                                                 mapX, mapY),
                                         true);
                             }
@@ -344,7 +357,7 @@ public class Surface {
 
                         int currentGrh = mapData[i][j].getLayer(layer).getGrhIndex();
                         if (currentGrh != targetGrhWithMosaic) {
-                            org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos pos = new org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos(
+                            BulkTileChangeCommand.TilePos pos = new BulkTileChangeCommand.TilePos(
                                     i, j);
                             oldTiles.put(pos, currentGrh);
                             newTiles.put(pos, targetGrhWithMosaic);
@@ -354,11 +367,11 @@ public class Surface {
                             boolean currentBlock = mapData[i][j].getBlocked();
                             if (!currentBlock) {
                                 oldBlocks.put(
-                                        new org.argentumforge.engine.utils.editor.commands.BlockChangeCommand.TilePos(i,
+                                        new BlockChangeCommand.TilePos(i,
                                                 j),
                                         false);
                                 newBlocks.put(
-                                        new org.argentumforge.engine.utils.editor.commands.BlockChangeCommand.TilePos(i,
+                                        new BlockChangeCommand.TilePos(i,
                                                 j),
                                         true);
                             }
@@ -369,15 +382,15 @@ public class Surface {
         }
 
         if (!oldTiles.isEmpty() || !oldBlocks.isEmpty()) {
-            org.argentumforge.engine.utils.editor.commands.MacroCommand macro = new org.argentumforge.engine.utils.editor.commands.MacroCommand();
+            MacroCommand macro = new MacroCommand();
             if (!oldTiles.isEmpty()) {
-                macro.addCommand(new org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand(
+                macro.addCommand(new BulkTileChangeCommand(
                         context, layer,
                         oldTiles, newTiles));
             }
             if (!oldBlocks.isEmpty()) {
                 macro.addCommand(
-                        new org.argentumforge.engine.utils.editor.commands.BlockChangeCommand(
+                        new BlockChangeCommand(
                                 context, oldBlocks, newBlocks));
             }
 
@@ -397,7 +410,7 @@ public class Surface {
         }
     }
 
-    private void bucket_fill(org.argentumforge.engine.utils.MapContext context, int x, int y) {
+    private void bucket_fill(MapContext context, int x, int y) {
         if (mode == 0)
             return;
 
@@ -409,12 +422,12 @@ public class Surface {
         if (startGrh == targetGrh && !autoBlock && (mosaicWidth <= 1 && mosaicHeight <= 1))
             return;
 
-        java.util.Map<org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos, Integer> oldTiles = new java.util.HashMap<>();
-        java.util.Map<org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos, Integer> newTiles = new java.util.HashMap<>();
-        java.util.Map<org.argentumforge.engine.utils.editor.commands.BlockChangeCommand.TilePos, Boolean> oldBlocks = new java.util.HashMap<>();
-        java.util.Map<org.argentumforge.engine.utils.editor.commands.BlockChangeCommand.TilePos, Boolean> newBlocks = new java.util.HashMap<>();
+        Map<BulkTileChangeCommand.TilePos, Integer> oldTiles = new HashMap<>();
+        Map<BulkTileChangeCommand.TilePos, Integer> newTiles = new HashMap<>();
+        Map<BlockChangeCommand.TilePos, Boolean> oldBlocks = new HashMap<>();
+        Map<BlockChangeCommand.TilePos, Boolean> newBlocks = new HashMap<>();
 
-        java.util.Queue<int[]> queue = new java.util.LinkedList<>();
+        Queue<int[]> queue = new LinkedList<>();
         queue.add(new int[] { x, y });
 
         boolean[][] visited = new boolean[mapData.length][mapData[0].length];
@@ -432,19 +445,19 @@ public class Surface {
                 targetGrhWithMosaic = (surfaceIndex + (offsetY * mosaicWidth) + offsetX);
             }
 
-            oldTiles.put(new org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos(currX, currY),
+            oldTiles.put(new BulkTileChangeCommand.TilePos(currX, currY),
                     startGrh);
-            newTiles.put(new org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos(currX, currY),
+            newTiles.put(new BulkTileChangeCommand.TilePos(currX, currY),
                     targetGrhWithMosaic);
 
             if (autoBlock && mode == 1) {
                 boolean currentBlock = mapData[currX][currY].getBlocked();
                 if (!currentBlock) {
                     oldBlocks.put(
-                            new org.argentumforge.engine.utils.editor.commands.BlockChangeCommand.TilePos(currX, currY),
+                            new BlockChangeCommand.TilePos(currX, currY),
                             false);
                     newBlocks.put(
-                            new org.argentumforge.engine.utils.editor.commands.BlockChangeCommand.TilePos(currX, currY),
+                            new BlockChangeCommand.TilePos(currX, currY),
                             true);
                 }
             }
@@ -465,15 +478,15 @@ public class Surface {
         }
 
         if (!oldTiles.isEmpty() || !oldBlocks.isEmpty()) {
-            org.argentumforge.engine.utils.editor.commands.MacroCommand macro = new org.argentumforge.engine.utils.editor.commands.MacroCommand();
+            MacroCommand macro = new MacroCommand();
             if (!oldTiles.isEmpty()) {
-                macro.addCommand(new org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand(
+                macro.addCommand(new BulkTileChangeCommand(
                         context, layer,
                         oldTiles, newTiles));
             }
             if (!oldBlocks.isEmpty()) {
                 macro.addCommand(
-                        new org.argentumforge.engine.utils.editor.commands.BlockChangeCommand(
+                        new BlockChangeCommand(
                                 context, oldBlocks, newBlocks));
             }
 
@@ -483,20 +496,20 @@ public class Surface {
                 batchCommand.addCommand(macro);
                 macro.execute();
             } else {
-                org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(macro);
+                CommandManager.getInstance().executeCommand(macro);
             }
         }
     }
 
-    public void fillLayer(org.argentumforge.engine.utils.MapContext context) {
+    public void fillLayer(MapContext context) {
         if (context == null)
             return;
         var mapData = context.getMapData();
         if (mapData == null)
             return;
 
-        java.util.Map<org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos, Integer> oldTiles = new java.util.HashMap<>();
-        java.util.Map<org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos, Integer> newTiles = new java.util.HashMap<>();
+        Map<BulkTileChangeCommand.TilePos, Integer> oldTiles = new HashMap<>();
+        Map<BulkTileChangeCommand.TilePos, Integer> newTiles = new HashMap<>();
 
         // If we are filling with the "erase" graphic (0), acts like clear
         // But if mode is 1 (insert) use surfaceIndex.
@@ -509,7 +522,7 @@ public class Surface {
             for (int y = 0; y < mapData[0].length; y++) {
                 int currentGrh = mapData[x][y].getLayer(layer).getGrhIndex();
                 if (currentGrh != targetGrh) {
-                    org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos pos = new org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos(
+                    BulkTileChangeCommand.TilePos pos = new BulkTileChangeCommand.TilePos(
                             x, y);
                     oldTiles.put(pos, currentGrh);
                     newTiles.put(pos, targetGrh);
@@ -518,21 +531,21 @@ public class Surface {
         }
 
         if (!oldTiles.isEmpty()) {
-            org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand command = new org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand(
+            BulkTileChangeCommand command = new BulkTileChangeCommand(
                     context, layer, oldTiles, newTiles);
-            org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(command);
+            CommandManager.getInstance().executeCommand(command);
         }
     }
 
-    public void clearLayer(org.argentumforge.engine.utils.MapContext context) {
+    public void clearLayer(MapContext context) {
         if (context == null)
             return;
         var mapData = context.getMapData();
         if (mapData == null)
             return;
 
-        java.util.Map<org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos, Integer> oldTiles = new java.util.HashMap<>();
-        java.util.Map<org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos, Integer> newTiles = new java.util.HashMap<>();
+        Map<BulkTileChangeCommand.TilePos, Integer> oldTiles = new HashMap<>();
+        Map<BulkTileChangeCommand.TilePos, Integer> newTiles = new HashMap<>();
 
         int targetGrh = 0; // Clear implies 0
 
@@ -540,7 +553,7 @@ public class Surface {
             for (int y = 0; y < mapData[0].length; y++) {
                 int currentGrh = mapData[x][y].getLayer(layer).getGrhIndex();
                 if (currentGrh != targetGrh) {
-                    org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos pos = new org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos(
+                    BulkTileChangeCommand.TilePos pos = new BulkTileChangeCommand.TilePos(
                             x, y);
                     oldTiles.put(pos, currentGrh);
                     newTiles.put(pos, targetGrh);
@@ -549,21 +562,21 @@ public class Surface {
         }
 
         if (!oldTiles.isEmpty()) {
-            org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand command = new org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand(
+            BulkTileChangeCommand command = new BulkTileChangeCommand(
                     context, layer, oldTiles, newTiles);
-            org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(command);
+            CommandManager.getInstance().executeCommand(command);
         }
     }
 
-    public void fillBorders(org.argentumforge.engine.utils.MapContext context) {
+    public void fillBorders(MapContext context) {
         applyGlobalAction(context, true, true);
     }
 
-    public void clearBorders(org.argentumforge.engine.utils.MapContext context) {
+    public void clearBorders(MapContext context) {
         applyGlobalAction(context, false, true);
     }
 
-    private void applyGlobalAction(org.argentumforge.engine.utils.MapContext context, boolean fill,
+    private void applyGlobalAction(MapContext context, boolean fill,
             boolean bordersOnly) {
         if (context == null)
             return;
@@ -571,8 +584,8 @@ public class Surface {
         if (mapData == null)
             return;
 
-        java.util.Map<org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos, Integer> oldTiles = new java.util.HashMap<>();
-        java.util.Map<org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos, Integer> newTiles = new java.util.HashMap<>();
+        Map<BulkTileChangeCommand.TilePos, Integer> oldTiles = new HashMap<>();
+        Map<BulkTileChangeCommand.TilePos, Integer> newTiles = new HashMap<>();
 
         // If filtering (fill=true), use selected surface, else use 0 (empty)
         int targetGrh = fill ? surfaceIndex : 0;
@@ -580,8 +593,8 @@ public class Surface {
         int mapWidth = mapData.length;
         int mapHeight = mapData[0].length;
 
-        int clientWidth = org.argentumforge.engine.utils.GameData.options.getClientWidth();
-        int clientHeight = org.argentumforge.engine.utils.GameData.options.getClientHeight();
+        int clientWidth = GameData.options.getClientWidth();
+        int clientHeight = GameData.options.getClientHeight();
 
         int halfW = clientWidth / 2;
         int halfH = clientHeight / 2;
@@ -601,7 +614,7 @@ public class Surface {
                     if (!bordersOnly || isBorder) {
                         int currentGrh = mapData[x][y].getLayer(layer).getGrhIndex();
                         if (currentGrh != targetGrh) {
-                            org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos pos = new org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos(
+                            BulkTileChangeCommand.TilePos pos = new BulkTileChangeCommand.TilePos(
                                     x, y);
                             oldTiles.put(pos, currentGrh);
                             newTiles.put(pos, targetGrh);
@@ -612,9 +625,9 @@ public class Surface {
         }
 
         if (!oldTiles.isEmpty()) {
-            org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand command = new org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand(
+            BulkTileChangeCommand command = new BulkTileChangeCommand(
                     context, layer, oldTiles, newTiles);
-            org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(command);
+            CommandManager.getInstance().executeCommand(command);
         }
     }
 

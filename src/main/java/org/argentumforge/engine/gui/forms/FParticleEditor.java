@@ -7,6 +7,7 @@ import org.argentumforge.engine.i18n.I18n;
 import org.argentumforge.engine.utils.editor.Particle;
 
 import org.argentumforge.engine.utils.MapContext;
+import org.argentumforge.engine.utils.GameData;
 
 public class FParticleEditor extends Form implements IMapEditor {
 
@@ -15,7 +16,7 @@ public class FParticleEditor extends Form implements IMapEditor {
     private final ImInt brushSize = new ImInt(1);
 
     public FParticleEditor() {
-        this.context = org.argentumforge.engine.utils.GameData.getActiveContext();
+        this.context = GameData.getActiveContext();
     }
 
     @Override
@@ -26,8 +27,8 @@ public class FParticleEditor extends Form implements IMapEditor {
     @Override
     public void render() {
         // Auto-activar visualización de partículas
-        if (!org.argentumforge.engine.utils.GameData.options.getRenderSettings().getShowParticles()) {
-            org.argentumforge.engine.utils.GameData.options.getRenderSettings().setShowParticles(true);
+        if (!GameData.options.getRenderSettings().getShowParticles()) {
+            GameData.options.getRenderSettings().setShowParticles(true);
         }
 
         ImGui.setNextWindowSize(200, 180);

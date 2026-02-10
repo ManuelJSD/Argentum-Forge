@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import org.argentumforge.engine.utils.GameData;
 import org.argentumforge.engine.utils.inits.MapData;
+import org.argentumforge.engine.utils.editor.commands.CommandManager;
+import org.argentumforge.engine.utils.editor.commands.BulkEntityMoveCommand;
 // import static org.argentumforge.engine.utils.GameData.mapData; // Removed static import
 
 /**
@@ -243,9 +245,9 @@ public class Selection {
         }
 
         // Ejecutar comando de movimiento masivo
-        org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
-                new org.argentumforge.engine.utils.editor.commands.BulkEntityMoveCommand(
-                        org.argentumforge.engine.utils.GameData.getActiveContext(), selectedEntities, destX,
+        CommandManager.getInstance().executeCommand(
+                new BulkEntityMoveCommand(
+                        GameData.getActiveContext(), selectedEntities, destX,
                         destY));
 
         cancelDrag();

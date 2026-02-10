@@ -2,7 +2,10 @@ package org.argentumforge.engine.utils;
 
 import org.argentumforge.engine.game.Options;
 import org.argentumforge.engine.game.models.Character;
+import org.argentumforge.engine.game.User;
+import org.argentumforge.engine.Engine;
 import org.argentumforge.engine.gui.DialogManager;
+import org.argentumforge.engine.i18n.I18n;
 
 import org.argentumforge.engine.utils.inits.*;
 import org.tinylog.Logger;
@@ -58,7 +61,7 @@ public final class GameData {
 
         // Guardar estado del contexto anterior si existe (y si es diferente al nuevo)
         if (activeContext != null && activeContext != context) {
-            activeContext.setLastChar(org.argentumforge.engine.game.models.Character.lastChar);
+            activeContext.setLastChar(Character.lastChar);
         }
 
         activeContext = context;
@@ -69,18 +72,18 @@ public final class GameData {
         // Registrar estado de lista de chars para depuración
 
         // Restaurar lastChar del nuevo contexto
-        org.argentumforge.engine.game.models.Character.lastChar = context.getLastChar();
+        Character.lastChar = context.getLastChar();
 
         // Forzar persistencia del modo caminar
         // Si el modo caminar está activo, el personaje del usuario DEBE existir en el
         // charList del contexto actual.
-        if (org.argentumforge.engine.game.User.INSTANCE.isWalkingmode()) {
+        if (User.INSTANCE.isWalkingmode()) {
             // LIMPIEZA: Eliminar cualquier instancia antigua del usuario de este contexto
             // de mapa para prevenir
             // clones
-            org.argentumforge.engine.game.User.INSTANCE.removeInstanceFromMap();
+            User.INSTANCE.removeInstanceFromMap();
 
-            org.argentumforge.engine.game.User.INSTANCE.refreshUserCharacter();
+            User.INSTANCE.refreshUserCharacter();
         }
 
         if (!openMaps.contains(context)) {
@@ -107,12 +110,12 @@ public final class GameData {
                 title += " *";
             }
             if (title.length() > 0) {
-                org.argentumforge.engine.Engine.INSTANCE.getWindow().updateTitle(title);
+                Engine.INSTANCE.getWindow().updateTitle(title);
             } else {
-                org.argentumforge.engine.Engine.INSTANCE.getWindow().updateTitle("");
+                Engine.INSTANCE.getWindow().updateTitle("");
             }
         } else {
-            org.argentumforge.engine.Engine.INSTANCE.getWindow().updateTitle("");
+            Engine.INSTANCE.getWindow().updateTitle("");
         }
     }
 
@@ -146,7 +149,7 @@ public final class GameData {
             charList[i] = new Character();
 
         options.load();
-        org.argentumforge.engine.i18n.I18n.INSTANCE.loadLanguage(options.getLanguage());
+        I18n.INSTANCE.loadLanguage(options.getLanguage());
 
         loadGrhData();
         loadMiniMapColors();
