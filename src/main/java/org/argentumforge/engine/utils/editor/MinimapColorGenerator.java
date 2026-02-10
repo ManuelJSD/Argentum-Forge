@@ -128,12 +128,20 @@ public class MinimapColorGenerator {
         if (grh.getFileNum() <= 0)
             return 0;
 
-        // Si es animación, tomamos el primer frame
+        // Si es animación, tomamos el primer frame (Simplificado)
         if (grh.getNumFrames() > 1) {
             int firstFrameIndex = grh.getFrame(1);
             if (firstFrameIndex > 0 && firstFrameIndex < AssetRegistry.grhData.length
                     && AssetRegistry.grhData[firstFrameIndex] != null) {
-                return calculateAverageColor(AssetRegistry.grhData[firstFrameIndex], firstFrameIndex);
+                // No recursion safety needed if we just grab simple Grh
+                // return calculateAverageColor(AssetRegistry.grhData[firstFrameIndex],
+                // firstFrameIndex);
+                // Actually original code might have been recursive but simple.
+                // Let's assume standard behavior: get first frame.
+                GrhData firstFrame = AssetRegistry.grhData[firstFrameIndex];
+                if (firstFrame != null && firstFrame.getFileNum() > 0) {
+                    return calculateAverageColor(firstFrame, firstFrameIndex);
+                }
             }
             return 0;
         }
@@ -156,8 +164,6 @@ public class MinimapColorGenerator {
             // Force 4 channels (RGBA)
             ByteBuffer image = STBImage.stbi_load(filePath, w, h, comp, 4);
             if (image == null) {
-                // Logger.warn("Error cargando imagen {}: {}", filePath,
-                // STBImage.stbi_failure_reason());
                 return 0;
             }
 
@@ -178,7 +184,6 @@ public class MinimapColorGenerator {
 
             for (int y = 0; y < regionH; y++) {
                 for (int x = 0; x < regionW; x++) {
-                    // Calculate index in ByteBuffer (RGBA = 4 bytes per pixel)
                     int pixelIdx = ((sy + y) * width + (sx + x)) * 4;
 
                     int r = image.get(pixelIdx) & 0xFF;

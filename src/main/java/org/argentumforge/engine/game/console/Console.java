@@ -48,6 +48,7 @@ public enum Console {
     private final ImString inputBuffer = new ImString(256);
     private final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
     private boolean isInputActive = false;
+    private boolean reclaimFocus = false;
 
     public boolean isInputActive() {
         return isInputActive;
@@ -213,10 +214,18 @@ public enum Console {
         // Toggle input with Enter
         if (!isInputActive && ImGui.isKeyPressed(imgui.flag.ImGuiKey.Enter)) {
             isInputActive = true;
+            reclaimFocus = true;
         }
 
         if (isInputActive) {
             ImGui.separator();
+
+            // Force focus on start
+            if (reclaimFocus) {
+                ImGui.setKeyboardFocusHere(0);
+                reclaimFocus = false;
+            }
+
             // Command Input
             ImGui.pushItemWidth(-1); // Full width
             if (ImGui.inputText("##ConsoleInput", inputBuffer,
@@ -231,9 +240,10 @@ public enum Console {
                 isInputActive = false; // Hide after submit
             }
 
-            // Focus management
-            if (ImGui.isWindowFocused() && !ImGui.isAnyItemActive()) {
-                ImGui.setKeyboardFocusHere(-1);
+            // Keep focus if window is lost but active
+            // Removing stricter check to avoid fighting with user if they click away
+            if (ImGui.isItemHovered() || (ImGui.isWindowFocused() && !ImGui.isAnyItemActive())) {
+                // Optional: Keep focus?
             }
 
             // Close on Escape

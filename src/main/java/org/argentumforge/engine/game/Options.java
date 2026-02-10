@@ -60,7 +60,6 @@ public enum Options {
     private float consoleFontSize = 1.0f; // Scale
     private float consoleOpacity = 0.5f; // Background opacity
     private boolean consoleShowTimestamps = true;
-
     // Console Colors (RGBA)
     private float[] consoleColorInfo = { 1.0f, 1.0f, 1.0f, 1.0f }; // White
     private float[] consoleColorWarning = { 1.0f, 1.0f, 0.0f, 1.0f }; // Yellow

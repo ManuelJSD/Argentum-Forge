@@ -27,26 +27,102 @@ public final class FMinimap extends Form {
     @Override
     public void render() {
         ImGui.setNextWindowSize(MINIMAP_SIZE + 20, MINIMAP_SIZE + 40, ImGuiCond.FirstUseEver);
-        // Usamos ###MinimapV2 para cambiar el ID interno y resetear la config guardada
-        // en imgui.ini (docking, posición, etc)
-        // Usamos ###MinimapV3 para asegurar que se resetee cualquier config corrupta de
-        // docking/flags
-        if (ImGui.begin(I18n.INSTANCE.get("minimap.title") + "###MinimapV3", ImGuiWindowFlags.None)) {
+
+        if (ImGui.begin(I18n.INSTANCE.get("minimap.title"), ImGuiWindowFlags.None)) {
 
             float mouseX = ImGui.getMousePosX();
             float mouseY = ImGui.getMousePosY();
-            float windowX = ImGui.getWindowPosX();
-            float windowY = ImGui.getWindowPosY();
-            float contentX = windowX + 10;
-            float contentY = windowY + 30;
+            float contentX = ImGui.getWindowPosX() + 10;
+            float contentY = ImGui.getWindowPosY() + 30;
 
             ImDrawList drawList = ImGui.getWindowDrawList();
 
-            // Dibujar fondo del mapa
+            // Fondo Negro base
             drawList.addRectFilled(contentX, contentY, contentX + MINIMAP_SIZE, contentY + MINIMAP_SIZE,
-                    ImGui.getColorU32(0.1f, 0.1f, 0.1f, 1.0f));
+                    ImGui.getColorU32(0.0f, 0.0f, 0.0f, 1.0f));
 
-            // Advertencia si no hay colores generados (o minimap.bin no existe en la raíz)
+            org.argentumforge.engine.utils.MapContext context = GameData.getActiveContext();
+            if (context != null && context.getMapData() != null) {
+                var mapData = context.getMapData();
+
+                for (int y = 1; y <= 100; y++) {
+                    for (int x = 1; x <= 100; x++) {
+                        float tX = contentX + (x - 1) * TILE_SIZE;
+                        float tY = contentY + (y - 1) * TILE_SIZE;
+
+                        // Capa 1 (Suelo)
+                        if (mapData[x][y].getLayer(1).getGrhIndex() > 0) {
+                            int grhIndex = mapData[x][y].getLayer(1).getGrhIndex();
+                            if (AssetRegistry.minimapColors.containsKey(grhIndex)) {
+                                int color = AssetRegistry.minimapColors.get(grhIndex);
+                                drawList.addRectFilled(tX, tY, tX + TILE_SIZE, tY + TILE_SIZE, color);
+                            }
+                        }
+
+                        // Bloqueos
+                        if (Options.INSTANCE.getRenderSettings().isShowMinimapBlocks() && mapData[x][y].getBlocked()) {
+                            drawList.addRectFilled(tX, tY, tX + TILE_SIZE, tY + TILE_SIZE,
+                                    ImGui.getColorU32(1.0f, 0.0f, 0.0f, 0.3f));
+                        }
+
+                        // Exits
+                        if (Options.INSTANCE.getRenderSettings().isShowMinimapExits()
+                                && mapData[x][y].getExitMap() > 0) {
+                            drawList.addRectFilled(tX, tY, tX + TILE_SIZE, tY + TILE_SIZE,
+                                    ImGui.getColorU32(0.0f, 0.0f, 1.0f, 0.8f));
+                        }
+
+                        // Triggers
+                        if (Options.INSTANCE.getRenderSettings().isShowMinimapTriggers()
+                                && mapData[x][y].getTrigger() > 0) {
+                            drawList.addRectFilled(tX, tY, tX + TILE_SIZE, tY + TILE_SIZE,
+                                    ImGui.getColorU32(0.6f, 0.0f, 0.8f, 0.6f));
+                        }
+
+                        // NPCs
+                        int charIndex = mapData[x][y].getCharIndex();
+                        if (Options.INSTANCE.getRenderSettings().isShowMinimapNPCs() && charIndex > 0) {
+                            drawList.addCircleFilled(tX + TILE_SIZE / 2, tY + TILE_SIZE / 2, 1.5f,
+                                    ImGui.getColorU32(1.0f, 1.0f, 0.0f, 1.0f));
+                        }
+                    }
+                }
+            }
+
+            // User Pos
+            int userX = User.INSTANCE.getUserPos().getX();
+            int userY = User.INSTANCE.getUserPos().getY();
+            // Draw a slightly larger rect/box for user
+            drawList.addRect(contentX + (userX - 1) * TILE_SIZE - 1, contentY + (userY - 1) * TILE_SIZE - 1,
+                    contentX + (userX - 1) * TILE_SIZE + TILE_SIZE + 1,
+                    contentY + (userY - 1) * TILE_SIZE + TILE_SIZE + 1,
+                    ImGui.getColorU32(1.0f, 1.0f, 1.0f, 1.0f));
+
+            // Teleport Click
+            if (ImGui.isWindowHovered() && ImGui.isMouseClicked(0)) {
+                float localX = mouseX - contentX;
+                float localY = mouseY - contentY;
+                if (localX >= 0 && localX < MINIMAP_SIZE && localY >= 0 && localY < MINIMAP_SIZE) {
+                    int targetX = (int) (localX / TILE_SIZE) + 1;
+                    int targetY = (int) (localY / TILE_SIZE) + 1;
+                    // Validity check
+                    if (targetX >= 1 && targetX <= 100 && targetY >= 1 && targetY <= 100) {
+                        // Borders check
+                        targetX = Math.max(org.argentumforge.engine.scenes.Camera.minXBorder,
+                                Math.min(targetX, org.argentumforge.engine.scenes.Camera.maxXBorder));
+                        targetY = Math.max(org.argentumforge.engine.scenes.Camera.minYBorder,
+                                Math.min(targetY, org.argentumforge.engine.scenes.Camera.maxYBorder));
+
+                        User.INSTANCE.getUserPos().setX(targetX);
+                        User.INSTANCE.getUserPos().setY(targetY);
+                        User.INSTANCE.getAddToUserPos().setX(0);
+                        User.INSTANCE.getAddToUserPos().setY(0);
+                        User.INSTANCE.setUserMoving(false);
+                    }
+                }
+            }
+
+            // Advertencia si no hay colores generados
             String fileName = org.argentumforge.engine.utils.ProfileManager.INSTANCE.getProfilesDir() + "/minimap.bin";
             if (org.argentumforge.engine.utils.ProfileManager.INSTANCE.getCurrentProfile() != null) {
                 fileName = org.argentumforge.engine.utils.ProfileManager.INSTANCE.getProfilesDir() + "/minimap_"
@@ -55,185 +131,13 @@ public final class FMinimap extends Form {
             boolean binExists = java.nio.file.Files.exists(java.nio.file.Path.of(fileName));
 
             if (!binExists || AssetRegistry.minimapColors.isEmpty()) {
-                ImGui.setCursorPos(20, 150);
-                ImGui.textColored(ImGui.getColorU32(1.0f, 0.0f, 0.0f, 1.0f), I18n.INSTANCE.get("minimap.noColors"));
-                ImGui.setCursorPos(20, 170);
+                ImGui.setCursorPos(20, MINIMAP_SIZE + 10);
                 if (ImGui.button(I18n.INSTANCE.get("minimap.generateNow"))) {
                     org.argentumforge.engine.utils.editor.MinimapColorGenerator.generateBinary();
                 }
             }
 
-            org.argentumforge.engine.utils.MapContext context = GameData.getActiveContext();
-            if (context != null && context.getMapData() != null) {
-                var mapData = context.getMapData();
-                for (int y = 1; y <= 100; y++) {
-                    for (int x = 1; x <= 100; x++) {
-                        // Dibujar capas seleccionadas
-                        for (int layer = 1; layer <= 4; layer++) {
-                            if (!Options.INSTANCE.getRenderSettings().getMinimapLayers()[layer - 1])
-                                continue;
-
-                            int grh = mapData[x][y].getLayer(layer).getGrhIndex();
-                            if (grh > 0) {
-                                int color = getTileColor(grh);
-                                drawList.addRectFilled(
-                                        contentX + (x - 1) * TILE_SIZE,
-                                        contentY + (y - 1) * TILE_SIZE,
-                                        contentX + x * TILE_SIZE,
-                                        contentY + y * TILE_SIZE,
-                                        color);
-                            }
-                        }
-
-                        // Bloqueos (siempre en la parte superior si está en capa 1?)
-                        if (Options.INSTANCE.getRenderSettings().isShowMinimapBlocks()
-                                && mapData[x][y].getBlocked()) {
-                            drawList.addRectFilled(
-                                    contentX + (x - 1) * TILE_SIZE,
-                                    contentY + (y - 1) * TILE_SIZE,
-                                    contentX + x * TILE_SIZE,
-                                    contentY + y * TILE_SIZE,
-                                    ImGui.getColorU32(1.0f, 0.0f, 0.0f, 0.3f));
-                        }
-
-                        // Renderizar Traslados (Exits) - Azul
-                        if (Options.INSTANCE.getRenderSettings().isShowMinimapExits()
-                                && mapData[x][y].getExitMap() > 0) {
-                            drawList.addRectFilled(
-                                    contentX + (x - 1) * TILE_SIZE,
-                                    contentY + (y - 1) * TILE_SIZE,
-                                    contentX + x * TILE_SIZE,
-                                    contentY + y * TILE_SIZE,
-                                    ImGui.getColorU32(0.0f, 0.0f, 1.0f, 0.8f));
-                        }
-
-                        // Renderizar Triggers - Violeta
-                        if (Options.INSTANCE.getRenderSettings().isShowMinimapTriggers()
-                                && mapData[x][y].getTrigger() > 0) {
-                            drawList.addRectFilled(
-                                    contentX + (x - 1) * TILE_SIZE,
-                                    contentY + (y - 1) * TILE_SIZE,
-                                    contentX + x * TILE_SIZE,
-                                    contentY + y * TILE_SIZE,
-                                    ImGui.getColorU32(0.6f, 0.0f, 0.8f, 0.6f));
-                        }
-
-                        // Renderizar NPCs - Amarillo
-                        // Usamos charIndex del mapa
-                        int charIndex = mapData[x][y].getCharIndex();
-                        if (Options.INSTANCE.getRenderSettings().isShowMinimapNPCs() && charIndex > 0) {
-                            // Podríamos verificar si el char está activo o es usuario,
-                            // pero charIndex en mapa suele estar sincronizado.
-                            // El usuario se dibuja aparte, así que filtramos si es el propio usuario?
-                            // No, mapData.getCharIndex() suele tener al user también.
-                            // Dibujamos todos los chars como puntos amarillos pequeños.
-                            drawList.addCircleFilled(
-                                    contentX + (x - 1) * TILE_SIZE + 1,
-                                    contentY + (y - 1) * TILE_SIZE + 1,
-                                    1.5f,
-                                    ImGui.getColorU32(1.0f, 1.0f, 0.0f, 1.0f));
-                        }
-                    }
-                }
-            }
-
-            // Dibujar posicion del usuario
-            int userX = User.INSTANCE.getUserPos().getX();
-            int userY = User.INSTANCE.getUserPos().getY();
-            drawList.addRect(
-                    contentX + (userX - 1) * TILE_SIZE - 2,
-                    contentY + (userY - 1) * TILE_SIZE - 2,
-                    contentX + (userX - 1) * TILE_SIZE + 3,
-                    contentY + (userY - 1) * TILE_SIZE + 3,
-                    ImGui.getColorU32(1.0f, 1.0f, 1.0f, 1.0f));
-
-            // Teletransporte al hacer click
-            if (ImGui.isWindowHovered() && ImGui.isMouseDown(0)) {
-                float localX = mouseX - contentX;
-                float localY = mouseY - contentY;
-                if (localX >= 0 && localX < MINIMAP_SIZE && localY >= 0 && localY < MINIMAP_SIZE) {
-                    int targetX = (int) (localX / TILE_SIZE) + 1;
-                    int targetY = (int) (localY / TILE_SIZE) + 1;
-
-                    // Limitar a bordes legales para evitar que la cámara se salga
-                    targetX = Math.max(org.argentumforge.engine.scenes.Camera.minXBorder,
-                            Math.min(targetX, org.argentumforge.engine.scenes.Camera.maxXBorder));
-                    targetY = Math.max(org.argentumforge.engine.scenes.Camera.minYBorder,
-                            Math.min(targetY, org.argentumforge.engine.scenes.Camera.maxYBorder));
-
-                    User.INSTANCE.getUserPos().setX(targetX);
-                    User.INSTANCE.getUserPos().setY(targetY);
-                    User.INSTANCE.getAddToUserPos().setX(0);
-                    User.INSTANCE.getAddToUserPos().setY(0);
-                    User.INSTANCE.setUserMoving(false);
-                }
-            }
-
-            // Tooltip de coordenadas
-            if (ImGui.isWindowHovered()) {
-                float localX = mouseX - contentX;
-                float localY = mouseY - contentY;
-                if (localX >= 0 && localX < MINIMAP_SIZE && localY >= 0 && localY < MINIMAP_SIZE) {
-                    int hoverX = (int) (localX / TILE_SIZE) + 1;
-                    int hoverY = (int) (localY / TILE_SIZE) + 1;
-
-                    if (hoverX >= 1 && hoverX <= 100 && hoverY >= 1 && hoverY <= 100) {
-                        ImGui.setTooltip(I18n.INSTANCE.get("common.coordFormat", hoverX, hoverY));
-                    }
-                }
-            }
-
             ImGui.end();
         }
-    }
-
-    private int getTileColor(int grh) {
-        // Primero intentamos usar los colores definidos en MiniMap.dat
-        if (AssetRegistry.minimapColors.containsKey(grh)) {
-            return AssetRegistry.minimapColors.get(grh);
-        }
-
-        // Si es animado, probamos con el color del primer frame
-        if (AssetRegistry.grhData[grh].getNumFrames() > 1) {
-            int firstFrame = AssetRegistry.grhData[grh].getFrame(0);
-            if (AssetRegistry.minimapColors.containsKey(firstFrame)) {
-                return AssetRegistry.minimapColors.get(firstFrame);
-            }
-            grh = firstFrame;
-        }
-
-        // Heurística de colores típica de Argentum Online
-        // Pasto / Llanura
-        if (grh <= 600 || (grh >= 1000 && grh <= 1100))
-            return ImGui.getColorU32(0.14f, 0.45f, 0.05f, 1.0f); // Verde oscuro
-        if (grh >= 601 && grh <= 1000)
-            return ImGui.getColorU32(0.20f, 0.55f, 0.10f, 1.0f); // Verde claro
-
-        // Agua / Mar / Ríos
-        if ((grh >= 1500 && grh <= 1650) || (grh >= 5665 && grh <= 5680) || (grh >= 13547 && grh <= 13562))
-            return ImGui.getColorU32(0.05f, 0.15f, 0.60f, 1.0f); // Azul profundo
-
-        // Arena / Desierto
-        if (grh >= 3500 && grh <= 3800)
-            return ImGui.getColorU32(0.85f, 0.75f, 0.45f, 1.0f); // Arena clara
-
-        // Nieve / Hielo
-        if (grh >= 4000 && grh <= 4300)
-            return ImGui.getColorU32(0.90f, 0.95f, 1.0f, 1.0f); // Blanco/Cian mudo
-
-        // Lava / Infierno
-        if (grh >= 5800 && grh <= 5900)
-            return ImGui.getColorU32(0.80f, 0.10f, 0.0f, 1.0f); // Rojo lava
-
-        // Dungeon / Cueva / Piedra
-        if (grh >= 5000 && grh <= 5500)
-            return ImGui.getColorU32(0.30f, 0.30f, 0.35f, 1.0f); // Gris piedra
-
-        // Bosque denso
-        if (grh >= 10000 && grh <= 10500)
-            return ImGui.getColorU32(0.05f, 0.30f, 0.05f, 1.0f); // Verde bosque
-
-        // Color por defecto (verde intermedio)
-        return ImGui.getColorU32(0.20f, 0.50f, 0.20f, 1.0f);
     }
 }
