@@ -704,7 +704,19 @@ public class MapRenderer {
         int screenY = POS_SCREEN_Y + (ty - camera.getMinY() + camera.getMinYOffset() - TILE_BUFFER_SIZE)
                 * TILE_PIXEL_SIZE + pixelOffsetY;
 
-        Drawn.geometryBoxRender(Surface.INSTANCE.getWhiteTexture(),
-                screenX, screenY, TILE_PIXEL_SIZE, TILE_PIXEL_SIZE, 0, 0, true, 0.3f, new RGBColor(0.3f, 0.6f, 1.0f));
+        float thickness = 2.0f;
+        RGBColor color = new RGBColor(0.3f, 0.6f, 1.0f);
+        float alpha = 0.8f;
+
+        // Top
+        Drawn.drawColoredRect(screenX, screenY, TILE_PIXEL_SIZE, (int) thickness, color, alpha);
+        // Bottom
+        Drawn.drawColoredRect(screenX, screenY + TILE_PIXEL_SIZE - (int) thickness, TILE_PIXEL_SIZE, (int) thickness,
+                color, alpha);
+        // Left
+        Drawn.drawColoredRect(screenX, screenY, (int) thickness, TILE_PIXEL_SIZE, color, alpha);
+        // Right
+        Drawn.drawColoredRect(screenX + TILE_PIXEL_SIZE - (int) thickness, screenY, (int) thickness, TILE_PIXEL_SIZE,
+                color, alpha);
     }
 }
