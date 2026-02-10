@@ -54,6 +54,19 @@ public enum Options {
 
     private final RenderSettings renderSettings = new RenderSettings();
 
+    // Console Options
+    private int consoleWidth = 555;
+    private int consoleHeight = 98;
+    private float consoleFontSize = 1.0f; // Scale
+    private float consoleOpacity = 0.5f; // Background opacity
+    private boolean consoleShowTimestamps = true;
+
+    // Console Colors (RGBA)
+    private float[] consoleColorInfo = { 1.0f, 1.0f, 1.0f, 1.0f }; // White
+    private float[] consoleColorWarning = { 1.0f, 1.0f, 0.0f, 1.0f }; // Yellow
+    private float[] consoleColorError = { 1.0f, 0.2f, 0.2f, 1.0f }; // Red
+    private float[] consoleColorCommand = { 0.0f, 1.0f, 1.0f, 1.0f }; // Cyan
+
     public void setConfigPath(String path) {
         this.configPath = path;
     }
@@ -153,6 +166,17 @@ public enum Options {
 
         // Reset RenderSettings
         renderSettings.resetToDefaults();
+
+        // Console Defaults
+        consoleWidth = 555;
+        consoleHeight = 98;
+        consoleFontSize = 1.0f;
+        consoleOpacity = 0.5f;
+        consoleShowTimestamps = true;
+        consoleColorInfo = new float[] { 1.0f, 1.0f, 1.0f, 1.0f };
+        consoleColorWarning = new float[] { 1.0f, 1.0f, 0.0f, 1.0f };
+        consoleColorError = new float[] { 1.0f, 0.2f, 0.2f, 1.0f };
+        consoleColorCommand = new float[] { 0.0f, 1.0f, 1.0f, 1.0f };
     }
 
     /**
@@ -256,7 +280,31 @@ public enum Options {
             write(writer, "IgnoredObjTypes", ignoredStr);
 
             write(writer, "CheckPreReleases", checkPreReleases);
+            write(writer, "CheckPreReleases", checkPreReleases);
             write(writer, "IgnoredUpdateTag", ignoredUpdateTag);
+
+            // Console
+            write(writer, "ConsoleWidth", consoleWidth);
+            write(writer, "ConsoleHeight", consoleHeight);
+            write(writer, "ConsoleFontSize", consoleFontSize);
+            write(writer, "ConsoleOpacity", consoleOpacity);
+            write(writer, "ConsoleShowTimestamps", consoleShowTimestamps);
+
+            write(writer, "ConsoleColorInfo R", consoleColorInfo[0]);
+            write(writer, "ConsoleColorInfo G", consoleColorInfo[1]);
+            write(writer, "ConsoleColorInfo B", consoleColorInfo[2]);
+
+            write(writer, "ConsoleColorWarning R", consoleColorWarning[0]);
+            write(writer, "ConsoleColorWarning G", consoleColorWarning[1]);
+            write(writer, "ConsoleColorWarning B", consoleColorWarning[2]);
+
+            write(writer, "ConsoleColorError R", consoleColorError[0]);
+            write(writer, "ConsoleColorError G", consoleColorError[1]);
+            write(writer, "ConsoleColorError B", consoleColorError[2]);
+
+            write(writer, "ConsoleColorCommand R", consoleColorCommand[0]);
+            write(writer, "ConsoleColorCommand G", consoleColorCommand[1]);
+            write(writer, "ConsoleColorCommand B", consoleColorCommand[2]);
         } catch (IOException e) {
             Logger.error("¡No se pudo escribir en el archivo de opciones: {}!", configPath);
         }
@@ -549,6 +597,29 @@ public enum Options {
             case "UserWaterBody" -> userWaterBody = Integer.parseInt(value);
             case "CheckPreReleases" -> checkPreReleases = Boolean.parseBoolean(value);
             case "IgnoredUpdateTag" -> ignoredUpdateTag = value;
+
+            // Console
+            case "ConsoleWidth" -> consoleWidth = Integer.parseInt(value);
+            case "ConsoleHeight" -> consoleHeight = Integer.parseInt(value);
+            case "ConsoleFontSize" -> consoleFontSize = Float.parseFloat(value);
+            case "ConsoleOpacity" -> consoleOpacity = Float.parseFloat(value);
+            case "ConsoleShowTimestamps" -> consoleShowTimestamps = Boolean.parseBoolean(value);
+
+            case "ConsoleColorInfo R" -> consoleColorInfo[0] = Float.parseFloat(value);
+            case "ConsoleColorInfo G" -> consoleColorInfo[1] = Float.parseFloat(value);
+            case "ConsoleColorInfo B" -> consoleColorInfo[2] = Float.parseFloat(value);
+
+            case "ConsoleColorWarning R" -> consoleColorWarning[0] = Float.parseFloat(value);
+            case "ConsoleColorWarning G" -> consoleColorWarning[1] = Float.parseFloat(value);
+            case "ConsoleColorWarning B" -> consoleColorWarning[2] = Float.parseFloat(value);
+
+            case "ConsoleColorError R" -> consoleColorError[0] = Float.parseFloat(value);
+            case "ConsoleColorError G" -> consoleColorError[1] = Float.parseFloat(value);
+            case "ConsoleColorError B" -> consoleColorError[2] = Float.parseFloat(value);
+
+            case "ConsoleColorCommand R" -> consoleColorCommand[0] = Float.parseFloat(value);
+            case "ConsoleColorCommand G" -> consoleColorCommand[1] = Float.parseFloat(value);
+            case "ConsoleColorCommand B" -> consoleColorCommand[2] = Float.parseFloat(value);
             default -> {
                 if (option.startsWith("Recent")) {
                     if (!recentMaps.contains(value) && new java.io.File(value).exists()) {
@@ -651,5 +722,89 @@ public enum Options {
 
     public void setIgnoredUpdateTag(String ignoredUpdateTag) {
         this.ignoredUpdateTag = ignoredUpdateTag;
+    }
+
+    public int getConsoleWidth() {
+        return consoleWidth;
+    }
+
+    public void setConsoleWidth(int consoleWidth) {
+        this.consoleWidth = consoleWidth;
+    }
+
+    public int getConsoleHeight() {
+        return consoleHeight;
+    }
+
+    public void setConsoleHeight(int consoleHeight) {
+        this.consoleHeight = consoleHeight;
+    }
+
+    public float getConsoleFontSize() {
+        return consoleFontSize;
+    }
+
+    public void setConsoleFontSize(float consoleFontSize) {
+        this.consoleFontSize = consoleFontSize;
+    }
+
+    public float getConsoleOpacity() {
+        return consoleOpacity;
+    }
+
+    public void setConsoleOpacity(float consoleOpacity) {
+        this.consoleOpacity = consoleOpacity;
+    }
+
+    public boolean isConsoleShowTimestamps() {
+        return consoleShowTimestamps;
+    }
+
+    public void setConsoleShowTimestamps(boolean consoleShowTimestamps) {
+        this.consoleShowTimestamps = consoleShowTimestamps;
+    }
+
+    public float[] getConsoleColorInfo() {
+        return consoleColorInfo;
+    }
+
+    public void setConsoleColorInfo(float[] consoleColorInfo) {
+        this.consoleColorInfo = consoleColorInfo;
+    }
+
+    public float[] getConsoleColorWarning() {
+        return consoleColorWarning;
+    }
+
+    public void setConsoleColorWarning(float[] consoleColorWarning) {
+        this.consoleColorWarning = consoleColorWarning;
+    }
+
+    public float[] getConsoleColorError() {
+        return consoleColorError;
+    }
+
+    public void setConsoleColorError(float[] consoleColorError) {
+        this.consoleColorError = consoleColorError;
+    }
+
+    public float[] getConsoleColorCommand() {
+        return consoleColorCommand;
+    }
+
+    public void setConsoleColorCommand(float[] consoleColorCommand) {
+        this.consoleColorCommand = consoleColorCommand;
+    }
+
+    public void resetConsoleToDefaults() {
+        consoleWidth = 555;
+        consoleHeight = 98;
+        consoleFontSize = 1.0f;
+        consoleOpacity = 0.5f;
+        consoleShowTimestamps = true;
+        consoleColorInfo = new float[] { 1.0f, 1.0f, 1.0f, 1.0f };
+        consoleColorWarning = new float[] { 1.0f, 1.0f, 0.0f, 1.0f };
+        consoleColorError = new float[] { 1.0f, 0.2f, 0.2f, 1.0f };
+        consoleColorCommand = new float[] { 0.0f, 1.0f, 1.0f, 1.0f };
     }
 }

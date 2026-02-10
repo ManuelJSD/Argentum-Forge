@@ -488,6 +488,97 @@ public final class FOptions extends Form {
                 ImGui.endTabItem();
             }
 
+            // --- TAB: CONSOLA ---
+            if (ImGui.beginTabItem("Consola")) {
+                ImGui.dummy(0, 10);
+                ImGui.textColored(ImGui.getColorU32(0.2f, 0.7f, 1.0f, 1.0f), "Apariencia de la Consola:");
+                ImGui.separator();
+                ImGui.dummy(0, 5);
+
+                // Width & Height
+                ImInt cW = new ImInt(options.getConsoleWidth());
+                ImInt cH = new ImInt(options.getConsoleHeight());
+
+                ImGui.text("Dimensiones:");
+                if (ImGui.inputInt("Ancho", cW)) {
+                    if (cW.get() < 100)
+                        cW.set(100);
+                    options.setConsoleWidth(cW.get());
+                    options.save();
+                }
+                if (ImGui.inputInt("Alto", cH)) {
+                    if (cH.get() < 50)
+                        cH.set(50);
+                    options.setConsoleHeight(cH.get());
+                    options.save();
+                }
+
+                ImGui.dummy(0, 5);
+
+                // Font Size
+                float[] fontScale = { options.getConsoleFontSize() };
+                if (ImGui.sliderFloat("Escala Fuente", fontScale, 0.5f, 3.0f)) {
+                    options.setConsoleFontSize(fontScale[0]);
+                    options.save();
+                }
+
+                // Opacity
+                float[] opacity = { options.getConsoleOpacity() };
+                if (ImGui.sliderFloat("Opacidad Fondo", opacity, 0.0f, 1.0f)) {
+                    options.setConsoleOpacity(opacity[0]);
+                    options.save();
+                }
+
+                ImGui.dummy(0, 5);
+
+                // Timestamps
+                if (ImGui.checkbox("Mostrar Timestamps", options.isConsoleShowTimestamps())) {
+                    options.setConsoleShowTimestamps(!options.isConsoleShowTimestamps());
+                    options.save();
+                }
+
+                ImGui.dummy(0, 10);
+                ImGui.textColored(ImGui.getColorU32(0.2f, 0.7f, 1.0f, 1.0f), "Colores de Mensajes:");
+                ImGui.separator();
+                ImGui.dummy(0, 5);
+
+                // Colors
+                float[] colorInfo = options.getConsoleColorInfo();
+                if (ImGui.colorEdit3("Información", colorInfo)) {
+                    options.setConsoleColorInfo(colorInfo);
+                    options.save();
+                }
+
+                float[] colorWarn = options.getConsoleColorWarning();
+                if (ImGui.colorEdit3("Advertencia", colorWarn)) {
+                    options.setConsoleColorWarning(colorWarn);
+                    options.save();
+                }
+
+                float[] colorError = options.getConsoleColorError();
+                if (ImGui.colorEdit3("Error", colorError)) {
+                    options.setConsoleColorError(colorError);
+                    options.save();
+                }
+
+                float[] colorCmd = options.getConsoleColorCommand();
+                if (ImGui.colorEdit3("Comando", colorCmd)) {
+                    options.setConsoleColorCommand(colorCmd);
+                    options.save();
+                }
+
+                ImGui.dummy(0, 15);
+                ImGui.separator();
+
+                // Reset Button
+                if (ImGui.button("Restablecer Valores Por Defecto")) {
+                    options.resetConsoleToDefaults();
+                    options.save();
+                }
+
+                ImGui.endTabItem();
+            }
+
             ImGui.endTabBar();
         }
 
