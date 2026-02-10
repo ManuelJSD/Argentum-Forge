@@ -1,5 +1,11 @@
 package org.argentumforge.engine.utils.editor;
 
+import org.argentumforge.engine.utils.MapContext;
+import org.argentumforge.engine.utils.editor.commands.CommandManager;
+import org.argentumforge.engine.utils.editor.commands.TriggerChangeCommand;
+import java.util.Map;
+import java.util.HashMap;
+
 public class Trigger {
 
     public enum BrushShape {
@@ -27,15 +33,15 @@ public class Trigger {
         return instance;
     }
 
-    public void trigger_edit(org.argentumforge.engine.utils.MapContext context, int x, int y) {
+    public void trigger_edit(MapContext context, int x, int y) {
         if (context == null)
             return;
         var mapData = context.getMapData();
         if (!isActive || mapData == null)
             return;
 
-        java.util.Map<org.argentumforge.engine.utils.editor.commands.TriggerChangeCommand.TilePos, Short> oldStates = new java.util.HashMap<>();
-        java.util.Map<org.argentumforge.engine.utils.editor.commands.TriggerChangeCommand.TilePos, Short> newStates = new java.util.HashMap<>();
+        Map<TriggerChangeCommand.TilePos, Short> oldStates = new HashMap<>();
+        Map<TriggerChangeCommand.TilePos, Short> newStates = new HashMap<>();
 
         int offset = brushSize / 2;
         double radiusSq = Math.pow(brushSize / 2.0, 2);
@@ -55,7 +61,7 @@ public class Trigger {
                     // Aplicar trigger mediante comando (soporta undo/redo y dirty flag)
                     short oldTrigger = (short) mapData[i][j].getTrigger();
                     if (oldTrigger != (short) selectedTriggerId) {
-                        org.argentumforge.engine.utils.editor.commands.TriggerChangeCommand.TilePos pos = new org.argentumforge.engine.utils.editor.commands.TriggerChangeCommand.TilePos(
+                        TriggerChangeCommand.TilePos pos = new TriggerChangeCommand.TilePos(
                                 i, j);
                         oldStates.put(pos, oldTrigger);
                         newStates.put(pos, (short) selectedTriggerId);
@@ -65,8 +71,8 @@ public class Trigger {
         }
 
         if (!oldStates.isEmpty()) {
-            org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(
-                    new org.argentumforge.engine.utils.editor.commands.TriggerChangeCommand(
+            CommandManager.getInstance().executeCommand(
+                    new TriggerChangeCommand(
                             context, oldStates, newStates));
         }
     }

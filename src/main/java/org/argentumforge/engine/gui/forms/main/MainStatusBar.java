@@ -4,6 +4,7 @@ import imgui.ImGui;
 import imgui.ImGuiViewport;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiWindowFlags;
+import org.argentumforge.engine.Engine;
 import org.argentumforge.engine.game.User;
 import org.argentumforge.engine.i18n.I18n;
 import org.argentumforge.engine.listeners.EditorInputManager;
@@ -79,7 +80,7 @@ public class MainStatusBar {
             }
 
             // Version info at the right
-            String versionText = "v" + org.argentumforge.engine.Engine.VERSION;
+            String versionText = "v" + Engine.VERSION;
             float versionWidth = ImGui.calcTextSize(versionText).x;
             float rightMargin = 20.0f;
             float cursorX = viewport.getSizeX() - versionWidth - rightMargin;

@@ -7,6 +7,9 @@ import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiTreeNodeFlags;
 import org.argentumforge.engine.game.models.Key;
 import org.argentumforge.engine.listeners.KeyHandler;
+import org.argentumforge.engine.game.console.Console;
+import org.argentumforge.engine.game.console.FontStyle;
+import org.argentumforge.engine.renderer.RGBColor;
 
 import org.argentumforge.engine.i18n.I18n;
 
@@ -223,10 +226,10 @@ public class FBindKeys extends Form {
 
             if (ImGui.button(I18n.INSTANCE.get("keys.save"), buttonWidth, 30)) {
                 Key.saveKeys();
-                org.argentumforge.engine.game.console.Console.INSTANCE.addMsgToConsole(
+                Console.INSTANCE.addMsgToConsole(
                         I18n.INSTANCE.get("keys.saved"),
-                        org.argentumforge.engine.game.console.FontStyle.REGULAR,
-                        new org.argentumforge.engine.renderer.RGBColor(0, 1, 0));
+                        FontStyle.REGULAR,
+                        new RGBColor(0, 1, 0));
             }
 
             ImGui.sameLine();

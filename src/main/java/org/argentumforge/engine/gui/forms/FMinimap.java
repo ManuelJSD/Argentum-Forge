@@ -9,6 +9,13 @@ import org.argentumforge.engine.utils.AssetRegistry;
 import org.argentumforge.engine.utils.GameData;
 import org.argentumforge.engine.game.Options;
 import org.argentumforge.engine.i18n.I18n;
+import org.argentumforge.engine.utils.MapContext;
+import org.argentumforge.engine.scenes.Camera;
+import org.argentumforge.engine.utils.ProfileManager;
+import org.argentumforge.engine.utils.editor.MinimapColorGenerator;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 /**
  * Formulario que muestra un mapa en miniatura (minimapa) del escenario actual.
@@ -41,7 +48,7 @@ public final class FMinimap extends Form {
             drawList.addRectFilled(contentX, contentY, contentX + MINIMAP_SIZE, contentY + MINIMAP_SIZE,
                     ImGui.getColorU32(0.0f, 0.0f, 0.0f, 1.0f));
 
-            org.argentumforge.engine.utils.MapContext context = GameData.getActiveContext();
+            MapContext context = GameData.getActiveContext();
             if (context != null && context.getMapData() != null) {
                 var mapData = context.getMapData();
 
@@ -108,10 +115,10 @@ public final class FMinimap extends Form {
                     // Validity check
                     if (targetX >= 1 && targetX <= 100 && targetY >= 1 && targetY <= 100) {
                         // Borders check
-                        targetX = Math.max(org.argentumforge.engine.scenes.Camera.minXBorder,
-                                Math.min(targetX, org.argentumforge.engine.scenes.Camera.maxXBorder));
-                        targetY = Math.max(org.argentumforge.engine.scenes.Camera.minYBorder,
-                                Math.min(targetY, org.argentumforge.engine.scenes.Camera.maxYBorder));
+                        targetX = Math.max(Camera.minXBorder,
+                                Math.min(targetX, Camera.maxXBorder));
+                        targetY = Math.max(Camera.minYBorder,
+                                Math.min(targetY, Camera.maxYBorder));
 
                         User.INSTANCE.getUserPos().setX(targetX);
                         User.INSTANCE.getUserPos().setY(targetY);
@@ -123,17 +130,17 @@ public final class FMinimap extends Form {
             }
 
             // Advertencia si no hay colores generados
-            String fileName = org.argentumforge.engine.utils.ProfileManager.INSTANCE.getProfilesDir() + "/minimap.bin";
-            if (org.argentumforge.engine.utils.ProfileManager.INSTANCE.getCurrentProfile() != null) {
-                fileName = org.argentumforge.engine.utils.ProfileManager.INSTANCE.getProfilesDir() + "/minimap_"
-                        + org.argentumforge.engine.utils.ProfileManager.INSTANCE.getCurrentProfile().getName() + ".bin";
+            String fileName = ProfileManager.INSTANCE.getProfilesDir() + "/minimap.bin";
+            if (ProfileManager.INSTANCE.getCurrentProfile() != null) {
+                fileName = ProfileManager.INSTANCE.getProfilesDir() + "/minimap_"
+                        + ProfileManager.INSTANCE.getCurrentProfile().getName() + ".bin";
             }
-            boolean binExists = java.nio.file.Files.exists(java.nio.file.Path.of(fileName));
+            boolean binExists = Files.exists(Path.of(fileName));
 
             if (!binExists || AssetRegistry.minimapColors.isEmpty()) {
                 ImGui.setCursorPos(20, MINIMAP_SIZE + 10);
                 if (ImGui.button(I18n.INSTANCE.get("minimap.generateNow"))) {
-                    org.argentumforge.engine.utils.editor.MinimapColorGenerator.generateBinary();
+                    MinimapColorGenerator.generateBinary();
                 }
             }
 

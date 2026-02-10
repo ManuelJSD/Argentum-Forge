@@ -3,6 +3,8 @@ package org.argentumforge.engine.gui.forms;
 import imgui.ImGui;
 
 import org.argentumforge.engine.gui.Theme;
+import org.argentumforge.engine.Engine;
+import org.argentumforge.engine.i18n.I18n;
 
 public class FAbout extends Form {
 
@@ -10,15 +12,15 @@ public class FAbout extends Form {
     public void render() {
         // Center window
         ImGui.setNextWindowPos(
-                (org.argentumforge.engine.Engine.INSTANCE.getWindow().getWidth() - 400) / 2f,
-                (org.argentumforge.engine.Engine.INSTANCE.getWindow().getHeight() - 290) / 2f,
+                (Engine.INSTANCE.getWindow().getWidth() - 400) / 2f,
+                (Engine.INSTANCE.getWindow().getHeight() - 290) / 2f,
                 imgui.flag.ImGuiCond.Once);
         ImGui.setNextWindowSize(400, 290, imgui.flag.ImGuiCond.Always);
 
         int flags = imgui.flag.ImGuiWindowFlags.NoCollapse | imgui.flag.ImGuiWindowFlags.NoResize
                 | imgui.flag.ImGuiWindowFlags.NoDocking | imgui.flag.ImGuiWindowFlags.AlwaysAutoResize;
 
-        if (ImGui.begin(org.argentumforge.engine.i18n.I18n.INSTANCE.get("about.title"), flags)) {
+        if (ImGui.begin(I18n.INSTANCE.get("about.title"), flags)) {
             ImGui.spacing();
 
             // Title
@@ -29,7 +31,7 @@ public class FAbout extends Form {
             ImGui.textColored(Theme.COLOR_PRIMARY, title);
 
             // Version
-            String version = "Versión " + org.argentumforge.engine.Engine.VERSION;
+            String version = "Versión " + Engine.VERSION;
             float verWidth = ImGui.calcTextSize(version).x;
             ImGui.setCursorPosX((windowWidth - verWidth) / 2f);
             ImGui.textColored(0.7f, 0.7f, 0.7f, 1.0f, version);
@@ -39,7 +41,7 @@ public class FAbout extends Form {
             ImGui.spacing();
 
             // Credits
-            ImGui.text(org.argentumforge.engine.i18n.I18n.INSTANCE.get("about.developed"));
+            ImGui.text(I18n.INSTANCE.get("about.developed"));
             ImGui.sameLine();
             ImGui.textColored(Theme.COLOR_ACCENT, "Lorwik");
 
@@ -52,13 +54,13 @@ public class FAbout extends Form {
             ImGui.spacing();
 
             // Links / Info
-            ImGui.text(org.argentumforge.engine.i18n.I18n.INSTANCE.get("about.repo"));
+            ImGui.text(I18n.INSTANCE.get("about.repo"));
             ImGui.textColored(0.4f, 0.8f, 1.0f, 1.0f, "https://github.com/ManuelJSD/Argentum-Forge");
             if (ImGui.isItemHovered()) {
-                ImGui.setTooltip(org.argentumforge.engine.i18n.I18n.INSTANCE.get("about.copy")); // ImGui doesn't
-                                                                                                 // support clickable
-                                                                                                 // links easily without
-                                                                                                 // extra
+                ImGui.setTooltip(I18n.INSTANCE.get("about.copy")); // ImGui doesn't
+                                                                   // support clickable
+                                                                   // links easily without
+                                                                   // extra
                 // logic
                 if (ImGui.isMouseClicked(0)) {
                     ImGui.setClipboardText("https://github.com/ManuelJSD/Argentum-Forge");
@@ -69,17 +71,17 @@ public class FAbout extends Form {
 
             // License
             ImGui.textColored(Theme.COLOR_DANGER,
-                    org.argentumforge.engine.i18n.I18n.INSTANCE.get("about.license.title"));
+                    I18n.INSTANCE.get("about.license.title"));
             ImGui.textWrapped(
-                    org.argentumforge.engine.i18n.I18n.INSTANCE.get("about.license.body"));
+                    I18n.INSTANCE.get("about.license.body"));
 
             ImGui.spacing();
             ImGui.separator();
             ImGui.spacing();
 
             // Close Button
-            if (ImGui.button(org.argentumforge.engine.i18n.I18n.INSTANCE.get("common.close"), -1, 0)) { // -1 width =
-                                                                                                        // fill
+            if (ImGui.button(I18n.INSTANCE.get("common.close"), -1, 0)) { // -1 width =
+                                                                          // fill
                 this.close();
             }
         }

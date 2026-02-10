@@ -18,6 +18,17 @@ import org.argentumforge.engine.game.models.Key;
 import org.argentumforge.engine.listeners.KeyHandler;
 import org.argentumforge.engine.scenes.GameScene;
 import org.argentumforge.engine.gui.components.ContextMenu;
+import org.argentumforge.engine.game.Weather;
+import org.argentumforge.engine.utils.MapContext;
+import org.argentumforge.engine.utils.GameData;
+import org.argentumforge.engine.gui.ThemeManager;
+import org.argentumforge.engine.Engine;
+import org.argentumforge.engine.utils.editor.MinimapColorGenerator;
+import org.argentumforge.engine.game.Options;
+import imgui.ImGuiViewport;
+import org.argentumforge.engine.game.User;
+import org.argentumforge.engine.utils.MapManager;
+import org.argentumforge.engine.game.EditorController;
 import static org.lwjgl.glfw.GLFW.*;
 
 /**
@@ -52,14 +63,14 @@ public final class FMain extends Form {
     private final FilmstripBar filmstripBar;
 
     private final java.util.List<IMapEditor> mapEditors = new java.util.ArrayList<>();
-    private org.argentumforge.engine.utils.MapContext lastContextSeen = null;
+    private MapContext lastContextSeen = null;
     private boolean syncRequested = false;
 
     public FMain() {
         ambientColorArr = new float[] {
-                org.argentumforge.engine.game.Weather.INSTANCE.getWeatherColor().getRed(),
-                org.argentumforge.engine.game.Weather.INSTANCE.getWeatherColor().getGreen(),
-                org.argentumforge.engine.game.Weather.INSTANCE.getWeatherColor().getBlue()
+                Weather.INSTANCE.getWeatherColor().getRed(),
+                Weather.INSTANCE.getWeatherColor().getGreen(),
+                Weather.INSTANCE.getWeatherColor().getBlue()
         };
         surfaceEditor = new FSurfaceEditor();
         blockEditor = new FBlockEditor();
@@ -87,11 +98,12 @@ public final class FMain extends Form {
         this.filmstripBar = new FilmstripBar();
 
         // Inicializar Tema
-        org.argentumforge.engine.gui.ThemeManager.getInstance().init();
+        // Inicializar Tema
+        ThemeManager.getInstance().init();
 
     }
 
-    private void updateEditorsContext(org.argentumforge.engine.utils.MapContext context) {
+    private void updateEditorsContext(MapContext context) {
         for (IMapEditor editor : mapEditors) {
             editor.setContext(context);
         }
@@ -113,7 +125,7 @@ public final class FMain extends Form {
         }
 
         // 2. VENTANA RAÍZ PARA DOCKING
-        imgui.ImGuiViewport viewport = ImGui.getMainViewport();
+        ImGuiViewport viewport = ImGui.getMainViewport();
         ImGui.setNextWindowPos(viewport.getWorkPosX(), viewport.getWorkPosY());
         ImGui.setNextWindowSize(viewport.getWorkSizeX(), viewport.getWorkSizeY());
         ImGui.setNextWindowViewport(viewport.getID());
@@ -133,8 +145,9 @@ public final class FMain extends Form {
         ImGui.popStyleVar(3);
 
         // Calcular margen superior para no tapar el DockSpace con la Toolbar y Tabs
+        // Calcular margen superior para no tapar el DockSpace con la Toolbar y Tabs
         float topMargin = 52.0f; // Altura de MainToolbar
-        if (!org.argentumforge.engine.utils.GameData.getOpenMaps().isEmpty()) {
+        if (!GameData.getOpenMaps().isEmpty()) {
             topMargin += 22.0f; // Altura de Tabs
         }
         ImGui.setCursorPosY(topMargin);
@@ -163,19 +176,19 @@ public final class FMain extends Form {
         Console.INSTANCE.drawConsole();
         handleShortcuts();
 
-        if (org.argentumforge.engine.Engine.getCurrentScene() instanceof GameScene) {
-            ((GameScene) org.argentumforge.engine.Engine.getCurrentScene()).renderImGuiOverlays();
+        if (Engine.getCurrentScene() instanceof GameScene) {
+            ((GameScene) Engine.getCurrentScene()).renderImGuiOverlays();
         }
 
         // Modal de Progreso Global para Generación del Minimapa
-        if (org.argentumforge.engine.utils.editor.MinimapColorGenerator.generating) {
+        if (MinimapColorGenerator.generating) {
             ImGui.openPopup(I18n.INSTANCE.get("msg.processingColors"));
         }
 
         // Renderizar Menú Contextual (siempre disponible para aparecer)
         ContextMenu.render();
 
-        if (org.argentumforge.engine.utils.editor.MinimapColorGenerator.generating) {
+        if (MinimapColorGenerator.generating) {
             float centerX = viewport.getWorkPosX() + viewport.getWorkSizeX() * 0.5f;
             float centerY = viewport.getWorkPosY() + viewport.getWorkSizeY() * 0.5f;
             ImGui.setNextWindowPos(centerX, centerY, ImGuiCond.Always, 0.5f, 0.5f);
@@ -183,7 +196,7 @@ public final class FMain extends Form {
 
         if (ImGui.beginPopupModal(I18n.INSTANCE.get("msg.processingColors"),
                 ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoTitleBar)) {
-            if (!org.argentumforge.engine.utils.editor.MinimapColorGenerator.generating) {
+            if (!MinimapColorGenerator.generating) {
                 ImGui.textColored(ImGui.getColorU32(0.0f, 1.0f, 0.0f, 1.0f), I18n.INSTANCE.get("msg.complete"));
                 if (ImGui.button(I18n.INSTANCE.get("common.close"), 300, 0)) {
                     ImGui.closeCurrentPopup();
@@ -191,9 +204,9 @@ public final class FMain extends Form {
             } else {
                 ImGui.text(I18n.INSTANCE.get("msg.processingColors"));
                 ImGui.separator();
-                ImGui.progressBar(org.argentumforge.engine.utils.editor.MinimapColorGenerator.progress / 100.0f, 300,
+                ImGui.progressBar(MinimapColorGenerator.progress / 100.0f, 300,
                         20,
-                        String.format("%.0f%%", org.argentumforge.engine.utils.editor.MinimapColorGenerator.progress));
+                        String.format("%.0f%%", MinimapColorGenerator.progress));
             }
             ImGui.endPopup();
         }
@@ -201,7 +214,7 @@ public final class FMain extends Form {
         // Lógica de Notificación de Actualizaciones (Movido desde FLauncher)
         if (GithubReleaseChecker.isUpdateAvailable() && !updatePopupShown) {
             GithubReleaseChecker.ReleaseInfo r = GithubReleaseChecker.getLatestRelease();
-            String ignored = org.argentumforge.engine.game.Options.INSTANCE.getIgnoredUpdateTag();
+            String ignored = Options.INSTANCE.getIgnoredUpdateTag();
 
             if (r != null && !r.tagName.equals(ignored)) {
                 ImGui.openPopup(I18n.INSTANCE.get("update.available"));
@@ -248,8 +261,8 @@ public final class FMain extends Form {
             ImGui.spacing();
             if (ImGui.button(I18n.INSTANCE.get("update.skip"), 308, 20)) {
                 if (release != null) {
-                    org.argentumforge.engine.game.Options.INSTANCE.setIgnoredUpdateTag(release.tagName);
-                    org.argentumforge.engine.game.Options.INSTANCE.save();
+                    Options.INSTANCE.setIgnoredUpdateTag(release.tagName);
+                    Options.INSTANCE.save();
                 }
                 ImGui.closeCurrentPopup();
             }
@@ -263,12 +276,12 @@ public final class FMain extends Form {
     }
 
     private void drawTabs() {
-        java.util.List<org.argentumforge.engine.utils.MapContext> openMaps = org.argentumforge.engine.utils.GameData
+        java.util.List<MapContext> openMaps = GameData
                 .getOpenMaps();
         if (openMaps.isEmpty())
             return;
 
-        imgui.ImGuiViewport viewport = ImGui.getMainViewport();
+        ImGuiViewport viewport = ImGui.getMainViewport();
         float toolbarHeight = 52.0f;
         float tabsHeight = 22.0f;
 
@@ -278,7 +291,7 @@ public final class FMain extends Form {
         ImGui.setNextWindowViewport(viewport.getID());
 
         // Detectar si el contexto cambió fuera de este loop (ej: teletransporte)
-        org.argentumforge.engine.utils.MapContext currentActive = org.argentumforge.engine.utils.GameData
+        MapContext currentActive = GameData
                 .getActiveContext();
 
         // Si el contexto actual no es el último que vimos en el rendering, forzamos un
@@ -291,9 +304,9 @@ public final class FMain extends Form {
                 | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoSavedSettings)) {
             ImGui.pushStyleVar(ImGuiStyleVar.FramePadding, 10.0f, 2.0f);
             if (ImGui.beginTabBar("##WorkspaceTabs", ImGuiTabBarFlags.None)) {
-                org.argentumforge.engine.utils.MapContext contextToClose = null;
+                MapContext contextToClose = null;
 
-                for (org.argentumforge.engine.utils.MapContext context : openMaps) {
+                for (MapContext context : openMaps) {
                     ImBoolean open = new ImBoolean(true);
                     int flags = ImGuiTabItemFlags.None;
 
@@ -314,22 +327,22 @@ public final class FMain extends Form {
                             // Salvar posición anterior
                             if (currentActive != null) {
                                 currentActive
-                                        .setSavedUserX(org.argentumforge.engine.game.User.INSTANCE.getUserPos().getX());
+                                        .setSavedUserX(User.INSTANCE.getUserPos().getX());
                                 currentActive
-                                        .setSavedUserY(org.argentumforge.engine.game.User.INSTANCE.getUserPos().getY());
+                                        .setSavedUserY(User.INSTANCE.getUserPos().getY());
                             }
 
                             // Diferir cambio al final del frame para prevenir corrupción de ImGui
-                            org.argentumforge.engine.Engine.INSTANCE.runOnMainThread(() -> {
-                                org.argentumforge.engine.utils.GameData.setActiveContext(context);
+                            Engine.INSTANCE.runOnMainThread(() -> {
+                                GameData.setActiveContext(context);
                                 updateEditorsContext(context);
 
                                 // Restaurar posición
-                                org.argentumforge.engine.game.User.INSTANCE.getUserPos().setX(context.getSavedUserX());
-                                org.argentumforge.engine.game.User.INSTANCE.getUserPos().setY(context.getSavedUserY());
-                                org.argentumforge.engine.game.User.INSTANCE.getAddToUserPos().setX(0);
-                                org.argentumforge.engine.game.User.INSTANCE.getAddToUserPos().setY(0);
-                                org.argentumforge.engine.game.User.INSTANCE.setUserMoving(false);
+                                User.INSTANCE.getUserPos().setX(context.getSavedUserX());
+                                User.INSTANCE.getUserPos().setY(context.getSavedUserY());
+                                User.INSTANCE.getAddToUserPos().setX(0);
+                                User.INSTANCE.getAddToUserPos().setY(0);
+                                User.INSTANCE.setUserMoving(false);
                             });
                         }
                         ImGui.endTabItem();
@@ -339,10 +352,10 @@ public final class FMain extends Form {
                         if (context.isModified()) {
                             // Cambiar temporalmente al contexto para guardar si es necesario
                             // Diferir cambio y chequeo modal
-                            org.argentumforge.engine.Engine.INSTANCE.runOnMainThread(() -> {
-                                org.argentumforge.engine.utils.GameData.setActiveContext(context);
-                                org.argentumforge.engine.utils.MapManager.checkUnsavedChangesAsync(
-                                        () -> org.argentumforge.engine.utils.GameData.closeMap(context),
+                            Engine.INSTANCE.runOnMainThread(() -> {
+                                GameData.setActiveContext(context);
+                                MapManager.checkUnsavedChangesAsync(
+                                        () -> GameData.closeMap(context),
                                         null);
                             });
                             open.set(true); // Cancelar cierre inmediato mientras preguntamos
@@ -353,9 +366,9 @@ public final class FMain extends Form {
                 }
 
                 if (contextToClose != null) {
-                    final org.argentumforge.engine.utils.MapContext finalToClose = contextToClose;
-                    org.argentumforge.engine.Engine.INSTANCE.runOnMainThread(() -> {
-                        org.argentumforge.engine.utils.GameData.closeMap(finalToClose);
+                    final MapContext finalToClose = contextToClose;
+                    Engine.INSTANCE.runOnMainThread(() -> {
+                        GameData.closeMap(finalToClose);
                     });
                 }
 
@@ -366,7 +379,7 @@ public final class FMain extends Form {
         ImGui.end();
 
         // Actualizar último contexto visto para el siguiente frame
-        lastContextSeen = org.argentumforge.engine.utils.GameData.getActiveContext();
+        lastContextSeen = GameData.getActiveContext();
     }
 
     // Getters para MainToolbar y MainMenuBar
@@ -417,13 +430,13 @@ public final class FMain extends Form {
         boolean modifierPressed = KeyHandler.isActionKeyPressed(Key.MULTI_SELECT);
 
         if (modifierPressed && ImGui.isKeyPressed(GLFW_KEY_C))
-            org.argentumforge.engine.game.EditorController.INSTANCE.copySelection();
+            EditorController.INSTANCE.copySelection();
         if (modifierPressed && ImGui.isKeyPressed(GLFW_KEY_X))
-            org.argentumforge.engine.game.EditorController.INSTANCE.cutSelection();
+            EditorController.INSTANCE.cutSelection();
         if (modifierPressed && ImGui.isKeyPressed(GLFW_KEY_V))
-            org.argentumforge.engine.game.EditorController.INSTANCE.pasteSelection();
+            EditorController.INSTANCE.pasteSelection();
         if (ImGui.isKeyPressed(GLFW_KEY_DELETE))
-            org.argentumforge.engine.game.EditorController.INSTANCE.deleteSelection();
+            EditorController.INSTANCE.deleteSelection();
     }
 
 }

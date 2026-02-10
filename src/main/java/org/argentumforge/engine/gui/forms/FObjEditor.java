@@ -4,6 +4,7 @@ import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiCond;
 import imgui.flag.ImGuiWindowFlags;
+import imgui.flag.ImGuiTableFlags;
 import org.argentumforge.engine.utils.editor.Obj;
 import org.argentumforge.engine.utils.inits.ObjData;
 import imgui.type.ImString;
@@ -13,6 +14,8 @@ import org.argentumforge.engine.renderer.RGBColor;
 import org.argentumforge.engine.gui.Theme;
 import org.argentumforge.engine.gui.widgets.UIComponents;
 import org.argentumforge.engine.i18n.I18n;
+import org.argentumforge.engine.utils.GameData;
+import org.argentumforge.engine.gui.PreviewUtils;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -40,7 +43,7 @@ public final class FObjEditor extends Form implements IMapEditor {
 
     public FObjEditor() {
         objEditor = Obj.getInstance();
-        this.context = org.argentumforge.engine.utils.GameData.getActiveContext();
+        this.context = GameData.getActiveContext();
 
         if (objs != null && !objs.isEmpty()) {
             selectedObjNumber = objs.keySet().stream().min(Integer::compareTo).orElse(-1);
@@ -100,7 +103,7 @@ public final class FObjEditor extends Form implements IMapEditor {
             if (selectedObjNumber > 0 && objs != null) {
                 ObjData data = objs.get(selectedObjNumber);
                 if (data != null && data.getGrhIndex() > 0) {
-                    org.argentumforge.engine.gui.PreviewUtils.drawGrh(data.getGrhIndex(), 1.5f);
+                    PreviewUtils.drawGrh(data.getGrhIndex(), 1.5f);
                     ImGui.sameLine();
                     ImGui.beginGroup();
                     ImGui.text(I18n.INSTANCE.get("common.object") + " " + data.getNumber());
@@ -141,7 +144,7 @@ public final class FObjEditor extends Form implements IMapEditor {
         int start = currentPage * itemsPerPage;
         int end = Math.min(start + itemsPerPage, total);
 
-        if (ImGui.beginTable("ObjGridTable", 4, imgui.flag.ImGuiTableFlags.SizingFixedFit)) {
+        if (ImGui.beginTable("ObjGridTable", 4, ImGuiTableFlags.SizingFixedFit)) {
             for (int i = start; i < end; i++) {
                 int objNum = filteredKeys.get(i);
                 ObjData data = objs.get(objNum);
@@ -166,7 +169,7 @@ public final class FObjEditor extends Form implements IMapEditor {
                 // Dibujar el objeto centrado y ajustado en la celda
                 ImGui.setCursorPos(startX, startY);
                 if (data.getGrhIndex() > 0) {
-                    org.argentumforge.engine.gui.PreviewUtils.drawGrhFit(data.getGrhIndex(), 64, 64);
+                    PreviewUtils.drawGrhFit(data.getGrhIndex(), 64, 64);
                 }
 
                 if (ImGui.isItemHovered()) {

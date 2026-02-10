@@ -32,7 +32,15 @@ import org.argentumforge.engine.gui.DialogManager;
 import java.util.List;
 import java.util.ArrayList;
 
+import org.argentumforge.engine.gui.ImGUISystem;
+import org.argentumforge.engine.gui.FileDialog;
+
+import org.argentumforge.engine.utils.editor.GrhLibraryManager;
+import org.argentumforge.engine.utils.editor.models.GrhCategory;
+import org.argentumforge.engine.utils.editor.models.GrhIndexRecord;
 import org.argentumforge.engine.utils.MapContext;
+
+import java.util.stream.Collectors;
 
 /**
  * Editor de Superficies Unificado.
@@ -104,7 +112,7 @@ public class FSurfaceEditor extends Form implements IMapEditor {
 
                 if (ImGui.beginTabItem(I18n.INSTANCE.get("editor.surface.library"))) {
                     if (ImGui.button(I18n.INSTANCE.get("editor.surface.editLib"), ImGui.getContentRegionAvailX(), 25)) {
-                        IM_GUI_SYSTEM.show(new FGrhLibrary());
+                        ImGUISystem.INSTANCE.show(new FGrhLibrary());
                     }
                     ImGui.separator();
 
@@ -141,7 +149,7 @@ public class FSurfaceEditor extends Form implements IMapEditor {
 
         if (canCreate) {
             if (ImGui.button(I18n.INSTANCE.get("prefab.new"), ImGui.getContentRegionAvailX() / 2 - 5, 25)) {
-                org.argentumforge.engine.gui.ImGUISystem.INSTANCE.show(new FCreatePrefab());
+                ImGUISystem.INSTANCE.show(new FCreatePrefab());
             }
         } else {
             ImGui.beginDisabled();
@@ -156,7 +164,7 @@ public class FSurfaceEditor extends Form implements IMapEditor {
         if (ImGui.button(I18n.INSTANCE.get("prefab.import"), (ImGui.getContentRegionAvailX() / 2) - 5, 25)) {
             try {
                 // Usar TinyFileDialogs vía wrapper seguro para evitar bloqueos de Swing/LWJGL
-                String result = org.argentumforge.engine.gui.FileDialog.showOpenDialog(
+                String result = FileDialog.showOpenDialog(
                         I18n.INSTANCE.get("prefab.import"),
                         new File("assets/prefabs/").getAbsolutePath() + File.separator,
                         "JSON Files",
@@ -216,7 +224,7 @@ public class FSurfaceEditor extends Form implements IMapEditor {
                 if (!filter.isEmpty()) {
                     prefabs = prefabs.stream()
                             .filter(p -> p.getName().toLowerCase().contains(filter))
-                            .collect(java.util.stream.Collectors.toList());
+                            .collect(Collectors.toList());
                 }
 
                 if (prefabs.isEmpty())
@@ -257,7 +265,7 @@ public class FSurfaceEditor extends Form implements IMapEditor {
                                 // Context Menu
                                 if (ImGui.beginPopupContextItem()) {
                                     if (ImGui.menuItem(I18n.INSTANCE.get("editor.prefab.edit"))) {
-                                        org.argentumforge.engine.gui.ImGUISystem.INSTANCE.show(new FEditPrefab(p));
+                                        ImGUISystem.INSTANCE.show(new FEditPrefab(p));
                                     }
                                     if (ImGui.menuItem(I18n.INSTANCE.get("editor.prefab.delete"))) {
                                         DialogManager.getInstance().showConfirm(
@@ -335,7 +343,7 @@ public class FSurfaceEditor extends Form implements IMapEditor {
                                 // Context Menu
                                 if (ImGui.beginPopupContextItem()) {
                                     if (ImGui.menuItem(I18n.INSTANCE.get("editor.prefab.edit"))) {
-                                        org.argentumforge.engine.gui.ImGUISystem.INSTANCE.show(new FEditPrefab(p));
+                                        ImGUISystem.INSTANCE.show(new FEditPrefab(p));
                                     }
                                     if (ImGui.menuItem(I18n.INSTANCE.get("editor.prefab.delete"))) {
                                         DialogManager.getInstance().showConfirm(
@@ -388,19 +396,19 @@ public class FSurfaceEditor extends Form implements IMapEditor {
     }
 
     private void drawLibraryTab() {
-        org.argentumforge.engine.utils.editor.GrhLibraryManager lib = org.argentumforge.engine.utils.editor.GrhLibraryManager
+        GrhLibraryManager lib = GrhLibraryManager
                 .getInstance();
-        List<org.argentumforge.engine.utils.editor.models.GrhCategory> categories = lib.getCategories();
+        List<GrhCategory> categories = lib.getCategories();
 
         if (ImGui.beginChild("LibraryChild")) {
             float windowWidth = ImGui.getContentRegionAvailX();
             int columns = Math.max(1, (int) (windowWidth / (TILE_SIZE + 10)));
 
-            for (org.argentumforge.engine.utils.editor.models.GrhCategory cat : categories) {
+            for (GrhCategory cat : categories) {
                 if (ImGui.collapsingHeader(cat.getName())) {
                     if (libraryVisualMode.get()) {
                         if (ImGui.beginTable("GridCat_" + cat.getName(), columns, ImGuiTableFlags.SizingFixedFit)) {
-                            for (org.argentumforge.engine.utils.editor.models.GrhIndexRecord rec : cat.getRecords()) {
+                            for (GrhIndexRecord rec : cat.getRecords()) {
                                 ImGui.tableNextColumn();
                                 ImGui.pushID(rec.getGrhIndex());
 
@@ -447,7 +455,7 @@ public class FSurfaceEditor extends Form implements IMapEditor {
                             ImGui.endTable();
                         }
                     } else {
-                        for (org.argentumforge.engine.utils.editor.models.GrhIndexRecord rec : cat.getRecords()) {
+                        for (GrhIndexRecord rec : cat.getRecords()) {
                             boolean isSelected = (selectedGrhIndex == rec.getGrhIndex());
                             if (ImGui.selectable(rec.getName() + " (GRH: " + rec.getGrhIndex() + ")", isSelected)) {
                                 selectRecord(rec);
@@ -463,7 +471,7 @@ public class FSurfaceEditor extends Form implements IMapEditor {
         ImGui.endChild();
     }
 
-    private void selectRecord(org.argentumforge.engine.utils.editor.models.GrhIndexRecord rec) {
+    private void selectRecord(GrhIndexRecord rec) {
         selectedGrhIndex = rec.getGrhIndex();
         surface.setSurfaceIndex(rec.getGrhIndex());
         surface.setLayer(rec.getLayer());
@@ -480,7 +488,7 @@ public class FSurfaceEditor extends Form implements IMapEditor {
         }
     }
 
-    private void showRecordTooltip(org.argentumforge.engine.utils.editor.models.GrhIndexRecord rec) {
+    private void showRecordTooltip(GrhIndexRecord rec) {
         ImGui.beginTooltip();
         ImGui.text(rec.getName() + " (ID: " + rec.getGrhIndex() + ")");
         if (rec.getWidth() > 1 || rec.getHeight() > 1) {

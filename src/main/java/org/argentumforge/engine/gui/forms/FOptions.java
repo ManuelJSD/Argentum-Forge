@@ -4,6 +4,17 @@ import imgui.ImGui;
 import imgui.flag.ImGuiCond;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImInt;
+import imgui.flag.ImGuiColorEditFlags;
+
+import org.argentumforge.engine.i18n.I18n;
+import org.argentumforge.engine.gui.DialogManager;
+import org.argentumforge.engine.utils.editor.AutoSaveManager;
+import org.argentumforge.engine.game.User;
+import org.argentumforge.engine.gui.ThemeManager;
+import org.argentumforge.engine.gui.Theme;
+import org.argentumforge.engine.Engine;
+import org.argentumforge.engine.renderer.RenderSettings;
+import org.argentumforge.engine.gui.ImGUISystem;
 
 import static org.argentumforge.engine.utils.GameData.options;
 
@@ -36,36 +47,36 @@ public final class FOptions extends Form {
     @Override
     public void render() {
         ImGui.setNextWindowSize(500, 0, ImGuiCond.Once);
-        ImGui.begin(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.title"),
+        ImGui.begin(I18n.INSTANCE.get("options.title"),
                 ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.AlwaysAutoResize
                         | ImGuiWindowFlags.NoDocking);
 
         if (ImGui.beginTabBar("OptionsTabs")) {
 
             // --- TAB: GENERAL ---
-            if (ImGui.beginTabItem(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.tab.general", "General"))) {
+            if (ImGui.beginTabItem(I18n.INSTANCE.get("options.tab.general", "General"))) {
                 ImGui.dummy(0, 10);
 
                 // Language
-                java.util.List<String> availableLanguages = org.argentumforge.engine.i18n.I18n.INSTANCE
+                java.util.List<String> availableLanguages = I18n.INSTANCE
                         .getAvailableLanguages();
                 String currentLanguage = options.getLanguage();
                 int currentLangIndex = availableLanguages.indexOf(currentLanguage);
                 if (currentLangIndex == -1)
                     currentLangIndex = 0;
 
-                ImGui.text(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.language") + ":");
+                ImGui.text(I18n.INSTANCE.get("options.language") + ":");
                 ImGui.sameLine();
                 ImGui.setNextItemWidth(200);
                 if (ImGui.beginCombo("##language",
-                        org.argentumforge.engine.i18n.I18n.INSTANCE.getLanguageName(currentLanguage))) {
+                        I18n.INSTANCE.getLanguageName(currentLanguage))) {
                     for (int i = 0; i < availableLanguages.size(); i++) {
                         String lang = availableLanguages.get(i);
                         boolean isSelected = (i == currentLangIndex);
-                        if (ImGui.selectable(org.argentumforge.engine.i18n.I18n.INSTANCE.getLanguageName(lang),
+                        if (ImGui.selectable(I18n.INSTANCE.getLanguageName(lang),
                                 isSelected)) {
                             options.setLanguage(lang);
-                            org.argentumforge.engine.i18n.I18n.INSTANCE.loadLanguage(lang);
+                            I18n.INSTANCE.loadLanguage(lang);
                             options.save();
                         }
                         if (isSelected)
@@ -74,26 +85,26 @@ public final class FOptions extends Form {
                     ImGui.endCombo();
                 }
                 ImGui.textColored(ImGui.getColorU32(1.0f, 1.0f, 0.0f, 1.0f),
-                        "* " + org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.restart"));
+                        "* " + I18n.INSTANCE.get("options.restart"));
 
                 ImGui.separator();
 
                 // Docking Option
-                if (ImGui.checkbox(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.docking"),
+                if (ImGui.checkbox(I18n.INSTANCE.get("options.docking"),
                         options.isDockingEnabled())) {
                     options.setDockingEnabled(!options.isDockingEnabled());
                     options.save();
-                    org.argentumforge.engine.gui.DialogManager.getInstance().showInfo("Docking",
-                            org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.docking.message"));
+                    DialogManager.getInstance().showInfo("Docking",
+                            I18n.INSTANCE.get("options.docking.message"));
                 }
                 if (ImGui.isItemHovered()) {
-                    ImGui.setTooltip(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.docking.tooltip"));
+                    ImGui.setTooltip(I18n.INSTANCE.get("options.docking.tooltip"));
                 }
 
                 ImGui.separator();
 
                 // Pre-releases Option
-                if (ImGui.checkbox(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.general.check_prereleases"),
+                if (ImGui.checkbox(I18n.INSTANCE.get("options.general.check_prereleases"),
                         options.isCheckPreReleases())) {
                     options.setCheckPreReleases(!options.isCheckPreReleases());
                     options.save();
@@ -103,10 +114,10 @@ public final class FOptions extends Form {
 
                 // Auto-save Settings
                 ImGui.textColored(ImGui.getColorU32(0.2f, 0.7f, 1.0f, 1.0f),
-                        org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.autosave") + ":");
+                        I18n.INSTANCE.get("options.autosave") + ":");
                 ImGui.dummy(0, 5);
 
-                if (ImGui.checkbox(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.autosave.enabled"),
+                if (ImGui.checkbox(I18n.INSTANCE.get("options.autosave.enabled"),
                         options.isAutoSaveEnabled())) {
                     options.setAutoSaveEnabled(!options.isAutoSaveEnabled());
                     options.save();
@@ -122,71 +133,71 @@ public final class FOptions extends Form {
                     options.setAutoSaveIntervalMinutes(interval.get());
                     options.save();
                     // Reset timer to apply new interval from now
-                    org.argentumforge.engine.utils.editor.AutoSaveManager.getInstance().resetTimer();
+                    AutoSaveManager.getInstance().resetTimer();
                 }
                 ImGui.sameLine();
-                ImGui.text(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.autosave.interval"));
+                ImGui.text(I18n.INSTANCE.get("options.autosave.interval"));
 
                 ImGui.endTabItem();
             }
 
             // --- TAB: APARIENCIA ---
-            if (ImGui.beginTabItem(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.tab.appearance"))) {
+            if (ImGui.beginTabItem(I18n.INSTANCE.get("options.tab.appearance"))) {
                 ImGui.dummy(0, 10);
 
                 // User Appearance
-                ImGui.text(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.appearance.land"));
+                ImGui.text(I18n.INSTANCE.get("options.appearance.land"));
                 ImGui.separator();
 
-                ImInt body = new ImInt(org.argentumforge.engine.game.User.INSTANCE.getUserBody());
-                if (ImGui.inputInt(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.appearance.body"), body)) {
+                ImInt body = new ImInt(User.INSTANCE.getUserBody());
+                if (ImGui.inputInt(I18n.INSTANCE.get("options.appearance.body"), body)) {
                     if (body.get() < 1)
                         body.set(1);
-                    org.argentumforge.engine.game.User.INSTANCE.setUserBody(body.get());
-                    org.argentumforge.engine.game.User.INSTANCE.refreshUserCharacter();
+                    User.INSTANCE.setUserBody(body.get());
+                    User.INSTANCE.refreshUserCharacter();
                 }
 
-                ImInt head = new ImInt(org.argentumforge.engine.game.User.INSTANCE.getUserHead());
-                if (ImGui.inputInt(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.appearance.head"), head)) {
+                ImInt head = new ImInt(User.INSTANCE.getUserHead());
+                if (ImGui.inputInt(I18n.INSTANCE.get("options.appearance.head"), head)) {
                     if (head.get() < 1)
                         head.set(1);
-                    org.argentumforge.engine.game.User.INSTANCE.setUserHead(head.get());
-                    org.argentumforge.engine.game.User.INSTANCE.refreshUserCharacter();
+                    User.INSTANCE.setUserHead(head.get());
+                    User.INSTANCE.refreshUserCharacter();
                 }
 
                 ImGui.dummy(0, 10);
-                ImGui.text(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.appearance.water"));
+                ImGui.text(I18n.INSTANCE.get("options.appearance.water"));
                 ImGui.separator();
 
-                ImInt waterBody = new ImInt(org.argentumforge.engine.game.User.INSTANCE.getUserWaterBody());
-                if (ImGui.inputInt(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.appearance.body_water"),
+                ImInt waterBody = new ImInt(User.INSTANCE.getUserWaterBody());
+                if (ImGui.inputInt(I18n.INSTANCE.get("options.appearance.body_water"),
                         waterBody)) {
                     if (waterBody.get() < 1)
                         waterBody.set(1);
-                    org.argentumforge.engine.game.User.INSTANCE.setUserWaterBody(waterBody.get());
+                    User.INSTANCE.setUserWaterBody(waterBody.get());
                     // Update appearance immediately if on water
-                    if (org.argentumforge.engine.game.User.INSTANCE.isWalkingmode()) {
-                        org.argentumforge.engine.game.User.INSTANCE.checkAppearance();
+                    if (User.INSTANCE.isWalkingmode()) {
+                        User.INSTANCE.checkAppearance();
                     }
                 }
 
                 ImGui.dummy(0, 10);
-                ImGui.textDisabled(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.appearance.realtime"));
+                ImGui.textDisabled(I18n.INSTANCE.get("options.appearance.realtime"));
 
                 ImGui.dummy(0, 10);
-                ImGui.text(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.appearance.ui"));
+                ImGui.text(I18n.INSTANCE.get("options.appearance.ui"));
                 ImGui.separator();
 
                 // Theme Selector using ThemeManager
-                org.argentumforge.engine.gui.Theme.StyleType currentTheme = org.argentumforge.engine.gui.ThemeManager
+                Theme.StyleType currentTheme = ThemeManager
                         .getInstance().getCurrentTheme();
-                if (ImGui.beginCombo(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.appearance.theme"),
+                if (ImGui.beginCombo(I18n.INSTANCE.get("options.appearance.theme"),
                         currentTheme.name())) {
-                    for (org.argentumforge.engine.gui.Theme.StyleType type : org.argentumforge.engine.gui.Theme.StyleType
+                    for (Theme.StyleType type : Theme.StyleType
                             .values()) {
                         boolean isSelected = (type == currentTheme);
                         if (ImGui.selectable(type.name(), isSelected)) {
-                            org.argentumforge.engine.gui.ThemeManager.getInstance().setTheme(type);
+                            ThemeManager.getInstance().setTheme(type);
                         }
                         if (isSelected) {
                             ImGui.setItemDefaultFocus();
@@ -200,7 +211,7 @@ public final class FOptions extends Form {
             }
 
             // --- TAB: GRAFICOS ---
-            if (ImGui.beginTabItem(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.tab.graphics"))) {
+            if (ImGui.beginTabItem(I18n.INSTANCE.get("options.tab.graphics"))) {
                 ImGui.dummy(0, 10);
 
                 // Resolution
@@ -208,7 +219,7 @@ public final class FOptions extends Form {
                         "3840x2160" };
                 String currentResString = options.getScreenWidth() + "x" + options.getScreenHeight();
 
-                ImGui.text(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.resolution") + ":");
+                ImGui.text(I18n.INSTANCE.get("options.resolution") + ":");
                 ImGui.sameLine();
                 ImGui.setNextItemWidth(200);
                 if (ImGui.beginCombo("##resolution", currentResString)) {
@@ -218,7 +229,7 @@ public final class FOptions extends Form {
                             String[] parts = res.split("x");
                             options.setScreenWidth(Integer.parseInt(parts[0]));
                             options.setScreenHeight(Integer.parseInt(parts[1]));
-                            org.argentumforge.engine.Engine.INSTANCE.getWindow().updateResolution(
+                            Engine.INSTANCE.getWindow().updateResolution(
                                     options.getScreenWidth(),
                                     options.getScreenHeight());
                             options.save();
@@ -233,14 +244,14 @@ public final class FOptions extends Form {
                 ImGui.spacing();
 
                 // Client Area (View)
-                ImGui.text(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.clientArea") + ":");
+                ImGui.text(I18n.INSTANCE.get("options.clientArea") + ":");
                 ImGui.dummy(0, 5);
 
                 ImInt cW = new ImInt(options.getClientWidth());
                 ImInt cH = new ImInt(options.getClientHeight());
 
                 ImGui.setNextItemWidth(100);
-                if (ImGui.inputInt(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.clientArea.width"), cW)) {
+                if (ImGui.inputInt(I18n.INSTANCE.get("options.clientArea.width"), cW)) {
                     if (cW.get() < 9)
                         cW.set(9); // Min limit
                     options.setClientWidth(cW.get());
@@ -251,11 +262,11 @@ public final class FOptions extends Form {
 
                 // Tooltip for Width/Height
                 if (ImGui.isItemHovered()) {
-                    ImGui.setTooltip(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.clientArea.tooltip"));
+                    ImGui.setTooltip(I18n.INSTANCE.get("options.clientArea.tooltip"));
                 }
 
                 ImGui.setNextItemWidth(100);
-                if (ImGui.inputInt(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.clientArea.height"), cH)) {
+                if (ImGui.inputInt(I18n.INSTANCE.get("options.clientArea.height"), cH)) {
                     if (cH.get() < 9)
                         cH.set(9); // Min limit
                     options.setClientHeight(cH.get());
@@ -266,13 +277,13 @@ public final class FOptions extends Form {
 
                 // Tooltip for Width/Height (Same tooltip for consistency)
                 if (ImGui.isItemHovered()) {
-                    ImGui.setTooltip(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.clientArea.tooltip"));
+                    ImGui.setTooltip(I18n.INSTANCE.get("options.clientArea.tooltip"));
                 }
 
                 // Move Viewport Toggle Here
                 ImGui.dummy(0, 5);
                 boolean showViewport = options.getRenderSettings().isShowViewportOverlay();
-                if (ImGui.checkbox(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.viewport.enable"),
+                if (ImGui.checkbox(I18n.INSTANCE.get("options.viewport.enable"),
                         showViewport)) {
                     options.getRenderSettings().setShowViewportOverlay(!showViewport);
                     options.save();
@@ -286,9 +297,9 @@ public final class FOptions extends Form {
                 // I will add the color picker below the checkbox for completeness.
                 ImGui.sameLine();
                 float[] vColor = options.getRenderSettings().getViewportColor();
-                if (ImGui.colorEdit4(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.viewport.color"),
+                if (ImGui.colorEdit4(I18n.INSTANCE.get("options.viewport.color"),
                         vColor,
-                        imgui.flag.ImGuiColorEditFlags.NoInputs | imgui.flag.ImGuiColorEditFlags.AlphaPreview)) {
+                        ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.AlphaPreview)) {
                     options.getRenderSettings().setViewportColor(vColor);
                     options.save();
                 }
@@ -299,15 +310,15 @@ public final class FOptions extends Form {
 
                 // --- SECCIÓN: MOTOR Y RENDIMIENTO ---
                 ImGui.textColored(ImGui.getColorU32(0.2f, 0.7f, 1.0f, 1.0f),
-                        org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.tab.simulation") + ":");
+                        I18n.INSTANCE.get("options.tab.simulation") + ":");
                 ImGui.dummy(0, 5);
 
                 // Fullscreen
                 if (ImGui.checkbox(
-                        org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.graphics") + " (Fullscreen)",
+                        I18n.INSTANCE.get("options.graphics") + " (Fullscreen)",
                         options.isFullscreen())) {
                     options.setFullscreen(!options.isFullscreen());
-                    org.argentumforge.engine.Engine.INSTANCE.getWindow().toggleWindow();
+                    Engine.INSTANCE.getWindow().toggleWindow();
                 }
 
                 ImGui.sameLine(250);
@@ -315,12 +326,12 @@ public final class FOptions extends Form {
                 // VSync
                 if (ImGui.checkbox("VSync", options.isVsync())) {
                     options.setVsync(!options.isVsync());
-                    org.argentumforge.engine.Engine.INSTANCE.getWindow().toggleWindow();
+                    Engine.INSTANCE.getWindow().toggleWindow();
                 }
 
                 // Disable Animations
                 if (ImGui.checkbox(
-                        org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.graphics.disableAnimations"),
+                        I18n.INSTANCE.get("options.graphics.disableAnimations"),
                         options.getRenderSettings().isDisableAnimations())) {
                     options.getRenderSettings()
                             .setDisableAnimations(!options.getRenderSettings().isDisableAnimations());
@@ -331,31 +342,31 @@ public final class FOptions extends Form {
             }
 
             // --- TAB: GUÍAS VISUALES ---
-            if (ImGui.beginTabItem(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.grid.guides", "Guías"))) {
-                org.argentumforge.engine.renderer.RenderSettings settings = options.getRenderSettings();
+            if (ImGui.beginTabItem(I18n.INSTANCE.get("options.grid.guides", "Guías"))) {
+                RenderSettings settings = options.getRenderSettings();
 
                 ImGui.dummy(0, 10);
 
                 // --- REJILLA ---
                 ImGui.textColored(ImGui.getColorU32(0.2f, 0.7f, 1.0f, 1.0f),
-                        org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.grid.title") + ":");
+                        I18n.INSTANCE.get("options.grid.title") + ":");
                 ImGui.separator();
 
-                if (ImGui.checkbox(org.argentumforge.engine.i18n.I18n.INSTANCE.get("menu.view.grid"),
+                if (ImGui.checkbox(I18n.INSTANCE.get("menu.view.grid"),
                         settings.isShowGrid())) {
                     settings.setShowGrid(!settings.isShowGrid());
                     options.save();
                 }
 
                 ImGui.sameLine();
-                if (ImGui.checkbox(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.grid.adaptive"),
+                if (ImGui.checkbox(I18n.INSTANCE.get("options.grid.adaptive"),
                         settings.isAdaptiveGrid())) {
                     settings.setAdaptiveGrid(!settings.isAdaptiveGrid());
                     options.save();
                 }
 
                 float[] gColor = settings.getGridColor();
-                if (ImGui.colorEdit4(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.grid.color"), gColor)) {
+                if (ImGui.colorEdit4(I18n.INSTANCE.get("options.grid.color"), gColor)) {
                     settings.setGridColor(gColor);
                     options.save();
                 }
@@ -363,7 +374,7 @@ public final class FOptions extends Form {
                 ImGui.spacing();
 
                 // --- REJILLA MAYOR ---
-                if (ImGui.checkbox(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.grid.showMajor"),
+                if (ImGui.checkbox(I18n.INSTANCE.get("options.grid.showMajor"),
                         settings.isShowMajorGrid())) {
                     settings.setShowMajorGrid(!settings.isShowMajorGrid());
                     options.save();
@@ -371,7 +382,7 @@ public final class FOptions extends Form {
 
                 ImGui.setNextItemWidth(100);
                 ImInt mInterval = new ImInt(settings.getGridMajorInterval());
-                if (ImGui.inputInt(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.grid.majorInterval"),
+                if (ImGui.inputInt(I18n.INSTANCE.get("options.grid.majorInterval"),
                         mInterval)) {
                     if (mInterval.get() < 2)
                         mInterval.set(2);
@@ -380,7 +391,7 @@ public final class FOptions extends Form {
                 }
 
                 float[] gmColor = settings.getGridMajorColor();
-                if (ImGui.colorEdit4(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.grid.majorColor"),
+                if (ImGui.colorEdit4(I18n.INSTANCE.get("options.grid.majorColor"),
                         gmColor)) {
                     settings.setGridMajorColor(gmColor);
                     options.save();
@@ -402,7 +413,7 @@ public final class FOptions extends Form {
                 ImGui.text("Bloqueos:");
                 float[] blockAlpha = { settings.getBlockOpacity() };
                 ImGui.setNextItemWidth(150);
-                if (ImGui.sliderFloat(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.visual.opacity.blocks"),
+                if (ImGui.sliderFloat(I18n.INSTANCE.get("options.visual.opacity.blocks"),
                         blockAlpha, 0.0f, 1.0f)) {
                     settings.setBlockOpacity(blockAlpha[0]);
                     options.save();
@@ -410,15 +421,15 @@ public final class FOptions extends Form {
 
                 ImGui.sameLine();
                 ImGui.setNextItemWidth(200);
-                org.argentumforge.engine.renderer.RenderSettings.IndicatorStyle currentBlockStyle = settings
+                RenderSettings.IndicatorStyle currentBlockStyle = settings
                         .getBlockIndicatorStyle();
-                String currentBlockStyleName = org.argentumforge.engine.i18n.I18n.INSTANCE
+                String currentBlockStyleName = I18n.INSTANCE
                         .get("options.visual.indicator." + currentBlockStyle.name());
                 if (ImGui.beginCombo("##blockStyle", currentBlockStyleName)) {
-                    for (org.argentumforge.engine.renderer.RenderSettings.IndicatorStyle style : org.argentumforge.engine.renderer.RenderSettings.IndicatorStyle
+                    for (RenderSettings.IndicatorStyle style : RenderSettings.IndicatorStyle
                             .values()) {
                         boolean isSelected = (style == currentBlockStyle);
-                        String name = org.argentumforge.engine.i18n.I18n.INSTANCE
+                        String name = I18n.INSTANCE
                                 .get("options.visual.indicator." + style.name());
                         if (ImGui.selectable(name, isSelected)) {
                             settings.setBlockIndicatorStyle(style);
@@ -436,7 +447,7 @@ public final class FOptions extends Form {
                 float[] transferAlpha = { settings.getTransferOpacity() };
                 ImGui.setNextItemWidth(150);
                 if (ImGui.sliderFloat(
-                        org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.visual.opacity.transfers"),
+                        I18n.INSTANCE.get("options.visual.opacity.transfers"),
                         transferAlpha, 0.0f, 1.0f)) {
                     settings.setTransferOpacity(transferAlpha[0]);
                     options.save();
@@ -444,15 +455,15 @@ public final class FOptions extends Form {
 
                 ImGui.sameLine();
                 ImGui.setNextItemWidth(200);
-                org.argentumforge.engine.renderer.RenderSettings.IndicatorStyle currentTransferStyle = settings
+                RenderSettings.IndicatorStyle currentTransferStyle = settings
                         .getTransferIndicatorStyle();
-                String currentTransferStyleName = org.argentumforge.engine.i18n.I18n.INSTANCE
+                String currentTransferStyleName = I18n.INSTANCE
                         .get("options.visual.indicator." + currentTransferStyle.name());
                 if (ImGui.beginCombo("##transferStyle", currentTransferStyleName)) {
-                    for (org.argentumforge.engine.renderer.RenderSettings.IndicatorStyle style : org.argentumforge.engine.renderer.RenderSettings.IndicatorStyle
+                    for (RenderSettings.IndicatorStyle style : RenderSettings.IndicatorStyle
                             .values()) {
                         boolean isSelected = (style == currentTransferStyle);
-                        String name = org.argentumforge.engine.i18n.I18n.INSTANCE
+                        String name = I18n.INSTANCE
                                 .get("options.visual.indicator." + style.name());
                         if (ImGui.selectable(name, isSelected)) {
                             settings.setTransferIndicatorStyle(style);
@@ -470,7 +481,7 @@ public final class FOptions extends Form {
                 ImGui.textColored(ImGui.getColorU32(0.2f, 0.7f, 1.0f, 1.0f), "Otros:");
                 ImGui.separator();
                 // Effecto Respiración (Moved here from Graphics)
-                if (ImGui.checkbox(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.visual.breathing"),
+                if (ImGui.checkbox(I18n.INSTANCE.get("options.visual.breathing"),
                         settings.isShowNpcBreathing())) {
                     settings.setShowNpcBreathing(!settings.isShowNpcBreathing());
                     options.save();
@@ -479,7 +490,7 @@ public final class FOptions extends Form {
                 // Ghost Alpha
                 float[] ghostAlpha = { settings.getGhostOpacity() };
                 ImGui.setNextItemWidth(150);
-                if (ImGui.sliderFloat(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.paste.ghostAlpha"),
+                if (ImGui.sliderFloat(I18n.INSTANCE.get("options.paste.ghostAlpha"),
                         ghostAlpha, 0.0f, 1.0f)) {
                     settings.setGhostOpacity(ghostAlpha[0]);
                     options.save();
@@ -602,21 +613,21 @@ public final class FOptions extends Form {
 
         // Botón Teclas
         ImGui.setCursorPosX(startX);
-        if (ImGui.button(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.keys"), buttonWidth, 25)) {
-            org.argentumforge.engine.gui.ImGUISystem.INSTANCE.show(new FBindKeys());
+        if (ImGui.button(I18n.INSTANCE.get("options.keys"), buttonWidth, 25)) {
+            ImGUISystem.INSTANCE.show(new FBindKeys());
         }
 
         ImGui.sameLine();
 
         // Botón Rutas
-        if (ImGui.button(org.argentumforge.engine.i18n.I18n.INSTANCE.get("options.paths"), buttonWidth, 25)) {
-            org.argentumforge.engine.gui.ImGUISystem.INSTANCE.show(new FRoutes());
+        if (ImGui.button(I18n.INSTANCE.get("options.paths"), buttonWidth, 25)) {
+            ImGUISystem.INSTANCE.show(new FRoutes());
         }
 
         ImGui.sameLine();
 
         // Botón Cerrar
-        if (ImGui.button(org.argentumforge.engine.i18n.I18n.INSTANCE.get("common.close"), buttonWidth, 25)) {
+        if (ImGui.button(I18n.INSTANCE.get("common.close"), buttonWidth, 25)) {
             options.save();
             this.close();
         }

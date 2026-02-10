@@ -11,6 +11,8 @@ import org.argentumforge.engine.utils.GithubReleaseChecker;
 
 import java.io.IOException;
 
+import org.argentumforge.engine.utils.MapFileUtils;
+import org.argentumforge.engine.utils.MapManager;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ENTER;
 
 /**
@@ -64,8 +66,8 @@ public final class FLauncher extends Form {
 
     @Override
     public void render() {
-        ImGui.setNextWindowSize(org.argentumforge.engine.Engine.INSTANCE.getWindow().getWidth(),
-                org.argentumforge.engine.Engine.INSTANCE.getWindow().getHeight(), ImGuiCond.Always);
+        ImGui.setNextWindowSize(Engine.INSTANCE.getWindow().getWidth(),
+                Engine.INSTANCE.getWindow().getHeight(), ImGuiCond.Always);
         ImGui.setNextWindowPos(0, 0, ImGuiCond.Always);
 
         ImGui.begin(this.getClass().getSimpleName(), ImGuiWindowFlags.NoTitleBar |
@@ -80,8 +82,8 @@ public final class FLauncher extends Form {
         // Dimensiones de la imagen de fondo (diseñado para 1024x1024 o similar)
         int imageWidth = 1024;
         int imageHeight = 1024;
-        int x = (org.argentumforge.engine.Engine.INSTANCE.getWindow().getWidth() - imageWidth) / 2;
-        int y = (org.argentumforge.engine.Engine.INSTANCE.getWindow().getHeight() - imageHeight) / 2;
+        int x = (Engine.INSTANCE.getWindow().getWidth() - imageWidth) / 2;
+        int y = (Engine.INSTANCE.getWindow().getHeight() - imageHeight) / 2;
 
         if (backgroundImage != 0) {
             ImGui.getWindowDrawList().addImage(backgroundImage, x, y, x + imageWidth, y + imageHeight);
@@ -170,7 +172,7 @@ public final class FLauncher extends Form {
     }
 
     private void buttonLoadMapAction() {
-        if (org.argentumforge.engine.utils.MapFileUtils.openAndLoadMap()) {
+        if (MapFileUtils.openAndLoadMap()) {
             simulateEditorConnection(false);
         }
     }
@@ -187,7 +189,7 @@ public final class FLauncher extends Form {
         user.setUserCharIndex(charIndex);
 
         if (newMap) {
-            org.argentumforge.engine.utils.MapManager.createEmptyMap(100, 100);
+            MapManager.createEmptyMap(100, 100);
         }
 
         // Configurar apariencia en el singleton User para persistencia

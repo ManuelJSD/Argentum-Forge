@@ -5,6 +5,7 @@ import org.argentumforge.engine.Engine;
 import org.argentumforge.engine.game.Options;
 import org.argentumforge.engine.game.Weather;
 import org.argentumforge.engine.renderer.RenderSettings;
+import org.argentumforge.engine.utils.inits.MapData;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.system.MemoryStack;
 
@@ -125,7 +126,7 @@ public class MapExporter {
         Logger.info("Mapa exportado a: {}", filePath);
     }
 
-    private static void renderMapContent(org.argentumforge.engine.utils.inits.MapData[][] mapData, int mapWidth,
+    private static void renderMapContent(MapData[][] mapData, int mapWidth,
             int mapHeight) {
         RenderSettings renderSettings = Options.INSTANCE.getRenderSettings();
         Weather weather = Weather.INSTANCE;

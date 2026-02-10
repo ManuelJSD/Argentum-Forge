@@ -8,6 +8,11 @@ package org.argentumforge.engine.utils;
  */
 import org.argentumforge.engine.game.Options;
 import org.argentumforge.engine.i18n.I18n;
+import org.argentumforge.engine.gui.FileDialog;
+import org.argentumforge.engine.gui.ImGUISystem;
+import org.argentumforge.engine.gui.DialogManager;
+import org.argentumforge.engine.gui.forms.FMapSaveOptions;
+import org.argentumforge.engine.utils.editor.commands.CommandManager;
 
 import java.io.File;
 
@@ -37,7 +42,7 @@ public class MapFileUtils {
         String desc = MapManager.getActiveFormat().getDescription();
         String filter = "*" + ext;
 
-        String selectedFile = org.argentumforge.engine.gui.FileDialog.showOpenDialog(
+        String selectedFile = FileDialog.showOpenDialog(
                 "Seleccionar Mapa",
                 lastPath,
                 desc + " (" + filter + ")",
@@ -49,8 +54,8 @@ public class MapFileUtils {
             Options.INSTANCE.setLastMapPath(f.getParent());
             Options.INSTANCE.save();
 
-            org.argentumforge.engine.utils.MapManager.loadMapAsync(selectedFile, null);
-            org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().clearHistory();
+            MapManager.loadMapAsync(selectedFile, null);
+            CommandManager.getInstance().clearHistory();
             return true;
         }
         return false;
@@ -72,8 +77,8 @@ public class MapFileUtils {
         // Abrir formulario de opciones
         // FMapSaveOptions se encargará de llamar al FileDialog y luego a
         // GameData.saveMap
-        org.argentumforge.engine.gui.ImGUISystem.INSTANCE.show(
-                new org.argentumforge.engine.gui.forms.FMapSaveOptions(currentOpts, onSuccess, onFailure));
+        ImGUISystem.INSTANCE.show(
+                new FMapSaveOptions(currentOpts, onSuccess, onFailure));
     }
 
     public static void saveMapAs(Runnable onSuccess) {
@@ -97,7 +102,7 @@ public class MapFileUtils {
     public static void quickSaveMap(Runnable onSuccess, Runnable onFailure) {
         MapContext context = GameData.getActiveContext();
         if (context == null) {
-            org.argentumforge.engine.gui.DialogManager.getInstance().showInfo("Mapa",
+            DialogManager.getInstance().showInfo("Mapa",
                     I18n.INSTANCE.get("msg.noActiveMap"));
             if (onFailure != null)
                 onFailure.run();

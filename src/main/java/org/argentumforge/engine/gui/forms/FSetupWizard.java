@@ -8,6 +8,14 @@ import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import org.argentumforge.engine.game.Options;
 import org.argentumforge.engine.i18n.I18n;
+import org.argentumforge.engine.gui.Theme;
+import org.argentumforge.engine.renderer.Surface;
+import org.argentumforge.engine.Engine;
+import org.argentumforge.engine.gui.FileDialog;
+import org.argentumforge.engine.utils.ProfileManager;
+import org.argentumforge.engine.utils.Profile;
+import org.argentumforge.engine.utils.GameData;
+import org.argentumforge.engine.utils.editor.MinimapColorGenerator;
 
 import java.io.File;
 
@@ -81,7 +89,7 @@ public final class FSetupWizard extends Form {
         this.languageNames = langNameList.toArray(new String[0]);
 
         // Cargar temas dinámicamente desde Theme.StyleType
-        this.styles = java.util.Arrays.stream(org.argentumforge.engine.gui.Theme.StyleType.values())
+        this.styles = java.util.Arrays.stream(Theme.StyleType.values())
                 .map(Enum::name)
                 .toArray(String[]::new);
 
@@ -132,10 +140,10 @@ public final class FSetupWizard extends Form {
     public void render() {
         if (backgroundTexture == null) {
             try {
-                this.backgroundTexture = org.argentumforge.engine.renderer.Surface.INSTANCE
+                this.backgroundTexture = Surface.INSTANCE
                         .createTexture("VentanaInicio.jpg", false);
                 if (this.backgroundTexture != null) {
-                    org.argentumforge.engine.Engine.INSTANCE.getWindow().updateResolution(
+                    Engine.INSTANCE.getWindow().updateResolution(
                             this.backgroundTexture.getTex_width(),
                             this.backgroundTexture.getTex_height());
                 }
@@ -148,8 +156,8 @@ public final class FSetupWizard extends Form {
             ImGui.getBackgroundDrawList().addImage(
                     backgroundTexture.getId(),
                     0, 0,
-                    org.argentumforge.engine.Engine.INSTANCE.getWindow().getWidth(),
-                    org.argentumforge.engine.Engine.INSTANCE.getWindow().getHeight());
+                    Engine.INSTANCE.getWindow().getWidth(),
+                    Engine.INSTANCE.getWindow().getHeight());
         }
 
         // Tamaño adaptativo según el paso actual
@@ -165,8 +173,8 @@ public final class FSetupWizard extends Form {
 
         ImGui.setNextWindowSize(650, windowHeight, ImGuiCond.Always);
         ImGui.setNextWindowPos(
-                (org.argentumforge.engine.Engine.INSTANCE.getWindow().getWidth() - 650) / 2f,
-                (org.argentumforge.engine.Engine.INSTANCE.getWindow().getHeight() - windowHeight) * 0.70f,
+                (Engine.INSTANCE.getWindow().getWidth() - 650) / 2f,
+                (Engine.INSTANCE.getWindow().getHeight() - windowHeight) * 0.70f,
                 ImGuiCond.Always);
 
         int flags = ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoScrollbar
@@ -255,7 +263,7 @@ public final class FSetupWizard extends Form {
             String defaultPath = pathField.get();
             if (defaultPath.isEmpty())
                 defaultPath = "";
-            String selected = org.argentumforge.engine.gui.FileDialog.selectFolder(I18n.INSTANCE.get(labelKey),
+            String selected = FileDialog.selectFolder(I18n.INSTANCE.get(labelKey),
                     defaultPath);
             if (selected != null) {
                 pathField.set(selected);
@@ -290,8 +298,8 @@ public final class FSetupWizard extends Form {
         ImGui.text(I18n.INSTANCE.get("options.visualTheme"));
         if (ImGui.combo("##visualStyle", styleIndex, styles)) {
             // Aplicar estilo inmediatamente para previsualización
-            org.argentumforge.engine.gui.Theme.applyStyle(
-                    org.argentumforge.engine.gui.Theme.StyleType.valueOf(styles[styleIndex.get()]));
+            Theme.applyStyle(
+                    Theme.StyleType.valueOf(styles[styleIndex.get()]));
         }
     }
 
@@ -467,10 +475,10 @@ public final class FSetupWizard extends Form {
         if (pName.isEmpty())
             pName = I18n.INSTANCE.get("wizard.profile.defaultName");
 
-        org.argentumforge.engine.utils.Profile newProfile = org.argentumforge.engine.utils.ProfileManager.INSTANCE
+        Profile newProfile = ProfileManager.INSTANCE
                 .createProfile(pName);
 
-        org.argentumforge.engine.utils.ProfileManager.INSTANCE.setCurrentProfile(newProfile);
+        ProfileManager.INSTANCE.setCurrentProfile(newProfile);
 
         // Configurar Options con la ruta del nuevo perfil
         Options opts = Options.INSTANCE;
@@ -499,10 +507,10 @@ public final class FSetupWizard extends Form {
         opts.save();
 
         // Inicializar
-        org.argentumforge.engine.utils.GameData.init();
+        GameData.init();
 
         if (generateMinimap.get()) {
-            org.argentumforge.engine.utils.editor.MinimapColorGenerator.generateBinary();
+            MinimapColorGenerator.generateBinary();
         }
 
         this.close();

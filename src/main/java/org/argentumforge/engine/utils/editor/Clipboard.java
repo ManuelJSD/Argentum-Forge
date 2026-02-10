@@ -2,6 +2,7 @@ package org.argentumforge.engine.utils.editor;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.argentumforge.engine.utils.GameData;
 
 /**
  * Servicio de portapapeles para copiar, cortar y pegar entidades.
@@ -74,7 +75,7 @@ public class Clipboard {
     }
 
     public void copy(List<Selection.SelectedEntity> selectedEntities, int refX, int refY) {
-        var context = org.argentumforge.engine.utils.GameData.getActiveContext();
+        var context = GameData.getActiveContext();
         if (context == null || context.getMapData() == null)
             return;
         var mapData = context.getMapData();

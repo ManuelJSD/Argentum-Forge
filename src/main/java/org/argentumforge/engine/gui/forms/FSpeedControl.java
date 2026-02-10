@@ -3,7 +3,9 @@ package org.argentumforge.engine.gui.forms;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.flag.ImGuiWindowFlags;
+import imgui.flag.ImGuiCond;
 import org.argentumforge.engine.i18n.I18n;
+import org.argentumforge.engine.game.User;
 import static org.argentumforge.engine.utils.GameData.options;
 
 public class FSpeedControl extends Form {
@@ -15,14 +17,14 @@ public class FSpeedControl extends Form {
     @Override
     public void render() {
         // Slightly wider and taller for better spacing
-        ImGui.setNextWindowSize(320, 160, imgui.flag.ImGuiCond.Always);
+        ImGui.setNextWindowSize(320, 160, ImGuiCond.Always);
 
         int windowFlags = ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse;
 
         ImBoolean p_open = new ImBoolean(true);
         if (ImGui.begin(I18n.INSTANCE.get("options.moveSpeed"), p_open, windowFlags)) {
 
-            boolean walking = org.argentumforge.engine.game.User.INSTANCE.isWalkingmode();
+            boolean walking = User.INSTANCE.isWalkingmode();
             int currentSpeed = walking ? options.getMoveSpeedWalk() : options.getMoveSpeedNormal();
             int[] speedPtr = { currentSpeed };
             String label = walking ? I18n.INSTANCE.get("options.moveSpeed.walk")

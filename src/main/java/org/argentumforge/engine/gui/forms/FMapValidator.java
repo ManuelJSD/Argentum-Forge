@@ -7,15 +7,21 @@ import imgui.flag.ImGuiWindowFlags;
 import org.argentumforge.engine.game.Options;
 import org.argentumforge.engine.gui.ImGUISystem;
 import org.argentumforge.engine.utils.editor.MapValidator;
+import org.argentumforge.engine.i18n.I18n;
+import org.argentumforge.engine.game.User;
 
 import imgui.type.ImBoolean;
+import imgui.type.ImInt;
+import imgui.flag.ImGuiCond;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
 
 public class FMapValidator extends Form {
 
     private List<MapValidator.ValidationError> currentErrors = null;
     private final ImBoolean open = new ImBoolean(true);
-    private final imgui.type.ImInt inputObjType = new imgui.type.ImInt(0);
+    private final ImInt inputObjType = new ImInt(0);
 
     public FMapValidator() {
         this.currentErrors = MapValidator.validateCurrentMap();
@@ -23,22 +29,22 @@ public class FMapValidator extends Form {
 
     @Override
     public void render() {
-        ImGui.setNextWindowSize(600, 400, imgui.flag.ImGuiCond.FirstUseEver);
+        ImGui.setNextWindowSize(600, 400, ImGuiCond.FirstUseEver);
 
-        if (ImGui.begin(org.argentumforge.engine.i18n.I18n.INSTANCE.get("validator.title"), open,
+        if (ImGui.begin(I18n.INSTANCE.get("validator.title"), open,
                 ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking)) {
 
-            if (ImGui.button(org.argentumforge.engine.i18n.I18n.INSTANCE.get("validator.rescan"))) {
+            if (ImGui.button(I18n.INSTANCE.get("validator.rescan"))) {
                 this.currentErrors = MapValidator.validateCurrentMap();
             }
 
             ImGui.sameLine();
-            if (ImGui.treeNode(org.argentumforge.engine.i18n.I18n.INSTANCE.get("validator.config"))) {
-                ImGui.text(org.argentumforge.engine.i18n.I18n.INSTANCE.get("validator.ignore"));
+            if (ImGui.treeNode(I18n.INSTANCE.get("validator.config"))) {
+                ImGui.text(I18n.INSTANCE.get("validator.ignore"));
 
-                ImGui.inputInt(org.argentumforge.engine.i18n.I18n.INSTANCE.get("validator.objtype"), inputObjType);
+                ImGui.inputInt(I18n.INSTANCE.get("validator.objtype"), inputObjType);
                 ImGui.sameLine();
-                if (ImGui.button(org.argentumforge.engine.i18n.I18n.INSTANCE.get("validator.add"))) {
+                if (ImGui.button(I18n.INSTANCE.get("validator.add"))) {
                     Options.INSTANCE.getIgnoredObjTypes().add(inputObjType.get());
                     Options.INSTANCE.save(); // Salvar cambios
                 }
@@ -46,15 +52,15 @@ public class FMapValidator extends Form {
                 ImGui.separator();
 
                 // Mostrar tags removibles
-                java.util.List<Integer> sortedTypes = new java.util.ArrayList<>(Options.INSTANCE.getIgnoredObjTypes());
-                java.util.Collections.sort(sortedTypes);
+                List<Integer> sortedTypes = new ArrayList<>(Options.INSTANCE.getIgnoredObjTypes());
+                Collections.sort(sortedTypes);
 
                 for (Integer typeId : sortedTypes) {
                     ImGui.bulletText(String
-                            .format(org.argentumforge.engine.i18n.I18n.INSTANCE.get("validator.item.type"), typeId));
+                            .format(I18n.INSTANCE.get("validator.item.type"), typeId));
                     ImGui.sameLine();
                     if (ImGui.smallButton(
-                            org.argentumforge.engine.i18n.I18n.INSTANCE.get("common.symbol.clear") + "##" + typeId)) {
+                            I18n.INSTANCE.get("common.symbol.clear") + "##" + typeId)) {
                         Options.INSTANCE.getIgnoredObjTypes().remove(typeId);
                         Options.INSTANCE.save();
                     }
@@ -66,21 +72,21 @@ public class FMapValidator extends Form {
 
             if (currentErrors == null || currentErrors.isEmpty()) {
                 ImGui.textColored(0.0f, 1.0f, 0.0f, 1.0f,
-                        org.argentumforge.engine.i18n.I18n.INSTANCE.get("validator.noerrors"));
+                        I18n.INSTANCE.get("validator.noerrors"));
             } else {
-                ImGui.text(String.format(org.argentumforge.engine.i18n.I18n.INSTANCE.get("validator.errors"),
+                ImGui.text(String.format(I18n.INSTANCE.get("validator.errors"),
                         currentErrors.size()));
 
                 if (ImGui.beginTable("ErrorsTable", 4,
                         ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.ScrollY)) {
 
-                    ImGui.tableSetupColumn(org.argentumforge.engine.i18n.I18n.INSTANCE.get("validator.type"),
+                    ImGui.tableSetupColumn(I18n.INSTANCE.get("validator.type"),
                             ImGuiTableColumnFlags.WidthFixed, 80.0f);
-                    ImGui.tableSetupColumn(org.argentumforge.engine.i18n.I18n.INSTANCE.get("validator.pos"),
+                    ImGui.tableSetupColumn(I18n.INSTANCE.get("validator.pos"),
                             ImGuiTableColumnFlags.WidthFixed, 80.0f);
-                    ImGui.tableSetupColumn(org.argentumforge.engine.i18n.I18n.INSTANCE.get("validator.desc"),
+                    ImGui.tableSetupColumn(I18n.INSTANCE.get("validator.desc"),
                             ImGuiTableColumnFlags.WidthFixed, 300.0f);
-                    ImGui.tableSetupColumn(org.argentumforge.engine.i18n.I18n.INSTANCE.get("validator.action"),
+                    ImGui.tableSetupColumn(I18n.INSTANCE.get("validator.action"),
                             ImGuiTableColumnFlags.WidthFixed, 80.0f);
                     ImGui.tableHeadersRow();
 
@@ -105,13 +111,13 @@ public class FMapValidator extends Form {
 
                         // Column 3: Action
                         if (ImGui.tableNextColumn()) {
-                            if (ImGui.button(org.argentumforge.engine.i18n.I18n.INSTANCE.get("common.go") + "##"
+                            if (ImGui.button(I18n.INSTANCE.get("common.go") + "##"
                                     + error.x + "_" + error.y)) {
-                                org.argentumforge.engine.game.User.INSTANCE.teleport(error.x, error.y);
+                                User.INSTANCE.teleport(error.x, error.y);
                                 // Camera operates in pixels, assuming 32x32 tiles.
                                 // We center the camera on the tile.
-                                org.argentumforge.engine.game.User.INSTANCE.getUserPos().setX(error.x);
-                                org.argentumforge.engine.game.User.INSTANCE.getUserPos().setY(error.y);
+                                User.INSTANCE.getUserPos().setX(error.x);
+                                User.INSTANCE.getUserPos().setY(error.y);
                             }
                         }
                     }
