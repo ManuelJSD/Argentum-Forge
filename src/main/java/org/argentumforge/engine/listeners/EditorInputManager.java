@@ -52,7 +52,8 @@ public class EditorInputManager {
     }
 
     public void updateMouse() {
-        if (imgui.ImGui.getIO().getWantCaptureMouse() || ImGUISystem.INSTANCE.isFormVisible("FBindKeys")) {
+        if (Console.INSTANCE.isInputActive() || imgui.ImGui.getIO().getWantCaptureMouse()
+                || ImGUISystem.INSTANCE.isFormVisible("FBindKeys")) {
             // Bloquear interacción con el mapa si estamos sobre un widget (botón, menú,
             // etc.)
             // o si una ventana que no sea el editor principal tiene el foco.
@@ -229,7 +230,7 @@ public class EditorInputManager {
     }
 
     public void updateKeys() {
-        if (ImGUISystem.INSTANCE.isFormVisible("FBindKeys"))
+        if (Console.INSTANCE.isInputActive() || ImGUISystem.INSTANCE.isFormVisible("FBindKeys"))
             return;
 
         ShortcutManager.getInstance().update();

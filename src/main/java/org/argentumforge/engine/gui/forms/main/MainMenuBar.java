@@ -395,6 +395,9 @@ public class MainMenuBar {
             }
 
             if (ImGui.beginMenu(I18n.INSTANCE.get("menu.help"))) {
+                if (ImGui.menuItem(I18n.INSTANCE.get("menu.help.commands"))) {
+                    ImGUISystem.INSTANCE.show(new FHelpCommands());
+                }
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.help.about"))) {
                     ImGUISystem.INSTANCE.show(new FAbout());
                 }

@@ -5,8 +5,14 @@ import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiCond;
 import imgui.flag.ImGuiWindowFlags;
+import imgui.flag.ImGuiInputTextFlags;
+import imgui.type.ImString;
 import imgui.ImGuiViewport;
 import org.argentumforge.engine.renderer.RGBColor;
+import org.argentumforge.engine.game.console.ImGuiFonts;
+import org.argentumforge.engine.game.Options;
+import java.time.format.DateTimeFormatter;
+import java.time.LocalTime;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,20 +31,27 @@ import static org.argentumforge.engine.game.console.FontStyle.*;
  * Esta consola es fundamental para la comunicación unidireccional del sistema
  * hacia el usuario, mostrando eventos importantes,
  * resultados de acciones y otros datos relevantes durante la edición del mapa.
- * <p>
- * TODO: Agregar cursiva y negrita
  */
 
 public enum Console {
     INSTANCE;
 
-    private static final int CONSOLE_WIDTH = 555;
-    private static final int CONSOLE_HEIGHT = 98;
+    public enum MessageType {
+        INFO, WARNING, ERROR, COMMAND, CUSTOM
+    }
+
     private static final int MAX_SIZE_DATA = 500;
-    private static final int MAX_CHARACTERS_LENGTH = 75; // Máxima cantidad de caracteres en horizontal.
+    private static final int MAX_CHARACTERS_LENGTH = 100; // Increased length for wider consoles
     private final boolean autoScroll;
     private final List<ConsoleData> data;
     private boolean scrollToBottom;
+    private final ImString inputBuffer = new ImString(256);
+    private final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+    private boolean isInputActive = false;
+
+    public boolean isInputActive() {
+        return isInputActive;
+    }
 
     Console() {
         autoScroll = true;
@@ -47,12 +60,30 @@ public enum Console {
     }
 
     /**
-     * Agrega un nuevo mensaje en la consola y remplaza cada %s, %d, etc.
-     * Esto mejora el uso de la consola.
+     * Helper to add message with specific type.
      */
+    public void addMsgToConsole(String text, MessageType type) {
+        addMsgToConsole(text, REGULAR, null, type);
+    }
+
+    public void addMsgToConsole(String text, FontStyle style, MessageType type) {
+        addMsgToConsole(text, style, null, type);
+    }
+
+    /**
+     * Legacy support for direct color, mapped to CUSTOM type.
+     */
+    public void addMsgToConsole(String text, FontStyle style, RGBColor color) {
+        addMsgToConsole(text, style, color, MessageType.CUSTOM);
+    }
+
     public void addMsgToConsole(String format, FontStyle style, RGBColor color, Object... args) {
-        // Formateamos la string con los argumentos
-        String text = String.format(format, args);
+        addMsgToConsole(String.format(format, args), style, color, MessageType.CUSTOM);
+    }
+
+    private void addMsgToConsole(String text, FontStyle style, RGBColor color, MessageType type) {
+        String timestamp = LocalTime.now().format(timeFormatter);
+
         StringBuilder resultado = new StringBuilder();
 
         for (String linea : text.split("\n")) {
@@ -61,7 +92,6 @@ public enum Console {
 
             for (String palabra : palabras) {
                 if (lineaActual.length() + palabra.length() + 1 > MAX_CHARACTERS_LENGTH) {
-                    // Si la palabra sola es muy larga, la cortamos igual
                     if (palabra.length() > MAX_CHARACTERS_LENGTH) {
                         if (lineaActual.length() > 0) {
                             resultado.append(lineaActual.toString().stripTrailing()).append("\n");
@@ -82,58 +112,12 @@ public enum Console {
                 }
             }
 
-            // Agregar lo que quedó en la línea
             if (lineaActual.length() > 0) {
                 resultado.append(lineaActual.toString().stripTrailing()).append("\n");
             }
         }
 
-        data.add(new ConsoleData(resultado.toString(), color, style));
-        scrollToBottom = true;
-    }
-
-    /**
-     * Agrega un nuevo mensaje en la consola.
-     */
-    public void addMsgToConsole(String text, FontStyle style, RGBColor color) {
-        StringBuilder resultado = new StringBuilder();
-
-        for (String linea : text.split("\n")) {
-            String[] palabras = linea.split(" ");
-            StringBuilder lineaActual = new StringBuilder();
-
-            for (String palabra : palabras) {
-                if (lineaActual.length() + palabra.length() + 1 > MAX_CHARACTERS_LENGTH) {
-                    // Si la palabra sola es muy larga, la cortamos igual
-                    if (palabra.length() > MAX_CHARACTERS_LENGTH) {
-                        if (lineaActual.length() > 0) {
-                            resultado.append(lineaActual.toString().stripTrailing()).append("\n");
-                            lineaActual.setLength(0);
-                        }
-                        int inicio = 0;
-                        while (inicio < palabra.length()) {
-                            int fin = Math.min(inicio + MAX_CHARACTERS_LENGTH, palabra.length());
-                            resultado.append(palabra.substring(inicio, fin)).append("\n");
-                            inicio = fin;
-                        }
-                    } else {
-                        resultado.append(lineaActual.toString().stripTrailing()).append("\n");
-                        lineaActual = new StringBuilder(palabra + " ");
-                    }
-                } else {
-                    lineaActual.append(palabra).append(" ");
-                }
-            }
-
-            // Agregar lo que quedó en la línea
-            if (lineaActual.length() > 0) {
-                resultado.append(lineaActual.toString().stripTrailing()).append("\n");
-            }
-        }
-
-        data.add(new ConsoleData(resultado.toString(), color, style));
-
-        // Activa el scroll hacia abajo cuando se agrega un mensaje
+        data.add(new ConsoleData(resultado.toString(), color, style, type, timestamp));
         scrollToBottom = true;
     }
 
@@ -146,24 +130,40 @@ public enum Console {
      * Dibuja la consola (esta es una porción de GUI del FMain).
      */
     public void drawConsole() {
+        Options options = Options.INSTANCE;
 
-        // Limpia la consola después de 500 mensajes
         if (data.size() > MAX_SIZE_DATA)
             clearConsole();
 
         ImGuiViewport viewport = ImGui.getMainViewport();
         float xPadding = 10.0f;
-        float yPadding = 45.0f; // Espacio para la barra de estado
-        ImGui.setNextWindowPos(viewport.getWorkPosX() + xPadding,
-                viewport.getWorkPosY() + viewport.getWorkSizeY() - CONSOLE_HEIGHT - yPadding);
-        ImGui.setNextWindowSize(CONSOLE_WIDTH, CONSOLE_HEIGHT, ImGuiCond.Always);
-        ImGui.begin("console", ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoResize
-                | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoScrollbar
-                | ImGuiWindowFlags.NoScrollWithMouse);
-        ImGui.setCursorPos(5, 0);
-        ImGui.beginChild("ScrollingRegion", 0, 0, false, ImGuiWindowFlags.HorizontalScrollbar);
+        float yPadding = 45.0f;
 
-        // Itera cada item y le asignamos un color y lo dibujamos.
+        int width = options.getConsoleWidth();
+        int height = options.getConsoleHeight();
+        float opacity = options.getConsoleOpacity();
+        float fontScale = options.getConsoleFontSize();
+        boolean showTimestamps = options.isConsoleShowTimestamps();
+
+        ImGui.setNextWindowPos(viewport.getWorkPosX() + xPadding,
+                viewport.getWorkPosY() + viewport.getWorkSizeY() - height - yPadding);
+        ImGui.setNextWindowSize(width, height, ImGuiCond.Always);
+        ImGui.setNextWindowBgAlpha(opacity);
+
+        // Allow inputs for scrolling and text input
+        int flags = ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoResize
+                | ImGuiWindowFlags.NoSavedSettings;
+        // Removed NoInputs, NoScrollbar, NoScrollWithMouse to allow interaction
+
+        ImGui.begin("console", flags);
+        ImGui.setWindowFontScale(fontScale);
+
+        // Calculate height for input bar
+        float inputHeight = isInputActive ? ImGui.getTextLineHeightWithSpacing() + 12 : 0;
+        float scrollRegionHeight = height - inputHeight - (isInputActive ? 15 : 10);
+
+        ImGui.beginChild("ScrollingRegion", 0, scrollRegionHeight, false, ImGuiWindowFlags.HorizontalScrollbar);
+
         for (ConsoleData item : data) {
             final ImFont font = switch (item.style) {
                 case REGULAR -> ImGuiFonts.fontRegular;
@@ -172,34 +172,92 @@ public enum Console {
                 case BOLD_ITALIC -> ImGuiFonts.fontBoldItalic;
             };
 
-            ImGui.pushFont(font);
-            ImGui.pushStyleColor(ImGuiCol.Text,
-                    ImGui.getColorU32(item.color.getRed(), item.color.getGreen(), item.color.getBlue(), 1f));
-            ImGui.textUnformatted(item.consoleText);
+            if (font != null)
+                ImGui.pushFont(font);
+
+            // Determine Color
+            int colorU32;
+            if (item.type == MessageType.CUSTOM && item.customColor != null) {
+                colorU32 = ImGui.getColorU32(item.customColor.getRed(), item.customColor.getGreen(),
+                        item.customColor.getBlue(), 1f);
+            } else {
+                float[] c = switch (item.type) {
+                    case INFO, CUSTOM -> options.getConsoleColorInfo();
+                    case WARNING -> options.getConsoleColorWarning();
+                    case ERROR -> options.getConsoleColorError();
+                    case COMMAND -> options.getConsoleColorCommand();
+                };
+                colorU32 = ImGui.getColorU32(c[0], c[1], c[2], c[3]);
+            }
+
+            ImGui.pushStyleColor(ImGuiCol.Text, colorU32);
+
+            if (showTimestamps) {
+                ImGui.textUnformatted("[" + item.timestamp + "] " + item.consoleText);
+            } else {
+                ImGui.textUnformatted(item.consoleText);
+            }
+
             ImGui.popStyleColor();
-            ImGui.popFont();
+            if (font != null)
+                ImGui.popFont();
         }
 
-        // Hace scroll hacia abajo si se solicita o si el autoScroll esta activado y ya
-        // esta cerca del final
         if (scrollToBottom || (autoScroll && ImGui.getScrollY() >= ImGui.getScrollMaxY()))
             ImGui.setScrollHereY(1.0f);
 
         scrollToBottom = false;
 
         ImGui.endChild();
+
+        // Toggle input with Enter
+        if (!isInputActive && ImGui.isKeyPressed(imgui.flag.ImGuiKey.Enter)) {
+            isInputActive = true;
+        }
+
+        if (isInputActive) {
+            ImGui.separator();
+            // Command Input
+            ImGui.pushItemWidth(-1); // Full width
+            if (ImGui.inputText("##ConsoleInput", inputBuffer,
+                    ImGuiInputTextFlags.EnterReturnsTrue | ImGuiInputTextFlags.AutoSelectAll)) {
+                String command = inputBuffer.get().trim();
+                if (!command.isEmpty()) {
+                    addMsgToConsole("> " + command, FontStyle.BOLD, MessageType.COMMAND);
+                    ConsoleCommandProcessor.process(command);
+                    inputBuffer.set("");
+                    scrollToBottom = true;
+                }
+                isInputActive = false; // Hide after submit
+            }
+
+            // Focus management
+            if (ImGui.isWindowFocused() && !ImGui.isAnyItemActive()) {
+                ImGui.setKeyboardFocusHere(-1);
+            }
+
+            // Close on Escape
+            if (ImGui.isKeyPressed(imgui.flag.ImGuiKey.Escape)) {
+                isInputActive = false;
+            }
+
+            ImGui.popItemWidth();
+        }
+
         ImGui.end();
     }
 
-    private record ConsoleData(String consoleText, RGBColor color, FontStyle style) {
+    private record ConsoleData(String consoleText, RGBColor customColor, FontStyle style, MessageType type,
+            String timestamp) {
         public ConsoleData {
-            // Validaciones si son necesarias
             if (consoleText == null)
                 consoleText = "";
-            if (color == null)
-                color = new RGBColor(1f, 1f, 1f);
             if (style == null)
                 style = REGULAR;
+            if (type == null)
+                type = MessageType.INFO;
+            if (timestamp == null)
+                timestamp = "00:00:00";
         }
     }
 
