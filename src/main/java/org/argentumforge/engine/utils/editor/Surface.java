@@ -488,4 +488,134 @@ public class Surface {
         }
     }
 
+    public void fillLayer(org.argentumforge.engine.utils.MapContext context) {
+        if (context == null)
+            return;
+        var mapData = context.getMapData();
+        if (mapData == null)
+            return;
+
+        java.util.Map<org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos, Integer> oldTiles = new java.util.HashMap<>();
+        java.util.Map<org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos, Integer> newTiles = new java.util.HashMap<>();
+
+        // If we are filling with the "erase" graphic (0), acts like clear
+        // But if mode is 1 (insert) use surfaceIndex.
+        int targetGrh = surfaceIndex;
+
+        // However, usually "Fill Layer" implies using the selected GRH.
+        // "Clear Layer" implies using 0.
+
+        for (int x = 0; x < mapData.length; x++) {
+            for (int y = 0; y < mapData[0].length; y++) {
+                int currentGrh = mapData[x][y].getLayer(layer).getGrhIndex();
+                if (currentGrh != targetGrh) {
+                    org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos pos = new org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos(
+                            x, y);
+                    oldTiles.put(pos, currentGrh);
+                    newTiles.put(pos, targetGrh);
+                }
+            }
+        }
+
+        if (!oldTiles.isEmpty()) {
+            org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand command = new org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand(
+                    context, layer, oldTiles, newTiles);
+            org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(command);
+        }
+    }
+
+    public void clearLayer(org.argentumforge.engine.utils.MapContext context) {
+        if (context == null)
+            return;
+        var mapData = context.getMapData();
+        if (mapData == null)
+            return;
+
+        java.util.Map<org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos, Integer> oldTiles = new java.util.HashMap<>();
+        java.util.Map<org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos, Integer> newTiles = new java.util.HashMap<>();
+
+        int targetGrh = 0; // Clear implies 0
+
+        for (int x = 0; x < mapData.length; x++) {
+            for (int y = 0; y < mapData[0].length; y++) {
+                int currentGrh = mapData[x][y].getLayer(layer).getGrhIndex();
+                if (currentGrh != targetGrh) {
+                    org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos pos = new org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos(
+                            x, y);
+                    oldTiles.put(pos, currentGrh);
+                    newTiles.put(pos, targetGrh);
+                }
+            }
+        }
+
+        if (!oldTiles.isEmpty()) {
+            org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand command = new org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand(
+                    context, layer, oldTiles, newTiles);
+            org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(command);
+        }
+    }
+
+    public void fillBorders(org.argentumforge.engine.utils.MapContext context) {
+        applyGlobalAction(context, true, true);
+    }
+
+    public void clearBorders(org.argentumforge.engine.utils.MapContext context) {
+        applyGlobalAction(context, false, true);
+    }
+
+    private void applyGlobalAction(org.argentumforge.engine.utils.MapContext context, boolean fill,
+            boolean bordersOnly) {
+        if (context == null)
+            return;
+        var mapData = context.getMapData();
+        if (mapData == null)
+            return;
+
+        java.util.Map<org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos, Integer> oldTiles = new java.util.HashMap<>();
+        java.util.Map<org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos, Integer> newTiles = new java.util.HashMap<>();
+
+        // If filtering (fill=true), use selected surface, else use 0 (empty)
+        int targetGrh = fill ? surfaceIndex : 0;
+
+        int mapWidth = mapData.length;
+        int mapHeight = mapData[0].length;
+
+        int clientWidth = org.argentumforge.engine.utils.GameData.options.getClientWidth();
+        int clientHeight = org.argentumforge.engine.utils.GameData.options.getClientHeight();
+
+        int halfW = clientWidth / 2;
+        int halfH = clientHeight / 2;
+
+        int minXBorder = halfW;
+        int maxXBorder = mapWidth - 1 - halfW;
+
+        int minYBorder = halfH;
+        int maxYBorder = mapHeight - 1 - halfH;
+
+        for (int x = 0; x < mapData.length; x++) {
+            for (int y = 0; y < mapData[0].length; y++) {
+                if (mapData[x][y] != null) {
+                    // Logic from Block.java
+                    boolean isBorder = x <= minXBorder || x >= maxXBorder || y <= minYBorder || y >= maxYBorder;
+
+                    if (!bordersOnly || isBorder) {
+                        int currentGrh = mapData[x][y].getLayer(layer).getGrhIndex();
+                        if (currentGrh != targetGrh) {
+                            org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos pos = new org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand.TilePos(
+                                    x, y);
+                            oldTiles.put(pos, currentGrh);
+                            newTiles.put(pos, targetGrh);
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!oldTiles.isEmpty()) {
+            org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand command = new org.argentumforge.engine.utils.editor.commands.BulkTileChangeCommand(
+                    context, layer, oldTiles, newTiles);
+            org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().executeCommand(command);
+        }
+    }
+
 }

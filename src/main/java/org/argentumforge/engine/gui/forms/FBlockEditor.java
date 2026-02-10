@@ -35,7 +35,7 @@ public class FBlockEditor extends Form implements IMapEditor {
 
     @Override
     public void render() {
-        ImGui.setNextWindowSize(230, 360, ImGuiCond.FirstUseEver);
+        ImGui.setNextWindowSize(230, 320, ImGuiCond.FirstUseEver);
         if (!ImGui.begin(I18n.INSTANCE.get("editor.block"), ImGuiWindowFlags.None)) {
             ImGui.end();
             return;
@@ -123,56 +123,6 @@ public class FBlockEditor extends Form implements IMapEditor {
             block.setBrushSize(5);
 
         ImGui.spacing();
-        ImGui.separator();
-        ImGui.text(I18n.INSTANCE.get("editor.block.globalActions"));
-
-        if (ImGui.button(I18n.INSTANCE.get("editor.block.blockBorders"), 210, 25)) {
-            ImGui.openPopup(I18n.INSTANCE.get("editor.block.confirm.blockBorders.title"));
-        }
-
-        if (ImGui.button(I18n.INSTANCE.get("editor.block.blockAll"), 210, 25)) {
-            ImGui.openPopup(I18n.INSTANCE.get("editor.block.confirm.blockAll.title"));
-        }
-
-        if (ImGui.button(I18n.INSTANCE.get("editor.block.clearBorders"), 210, 25)) {
-            ImGui.openPopup(I18n.INSTANCE.get("editor.block.confirm.clearBorders.title"));
-        }
-
-        if (ImGui.button(I18n.INSTANCE.get("editor.block.clearAll"), 210, 25)) {
-            ImGui.openPopup(I18n.INSTANCE.get("editor.block.confirm.clearAll.title"));
-        }
-
-        // --- Modales de Confirmación ---
-        UIComponents.confirmDialog(
-                I18n.INSTANCE.get("editor.block.confirm.blockBorders.title"),
-                I18n.INSTANCE.get("editor.block.blockBorders"),
-                I18n.INSTANCE.get("editor.block.confirm.blockBorders.msg"),
-                () -> {
-                    block.blockBorders(org.argentumforge.engine.utils.GameData.getActiveContext());
-                    options.getRenderSettings().setShowBlock(true);
-                });
-
-        UIComponents.confirmDialog(
-                I18n.INSTANCE.get("editor.block.confirm.blockAll.title"),
-                I18n.INSTANCE.get("editor.block.blockAll"),
-                I18n.INSTANCE.get("editor.block.confirm.blockAll.msg"),
-                () -> {
-                    block.blockAll(org.argentumforge.engine.utils.GameData.getActiveContext());
-                    options.getRenderSettings().setShowBlock(true);
-                });
-
-        UIComponents.confirmDialog(
-                I18n.INSTANCE.get("editor.block.confirm.clearBorders.title"),
-                I18n.INSTANCE.get("editor.block.clearBorders"),
-                I18n.INSTANCE.get("editor.block.confirm.clearBorders.msg"),
-                () -> block.unblockBorders(org.argentumforge.engine.utils.GameData.getActiveContext()));
-
-        UIComponents.confirmDialog(
-                I18n.INSTANCE.get("editor.block.confirm.clearAll.title"),
-                I18n.INSTANCE.get("editor.block.clearAll"),
-                I18n.INSTANCE.get("editor.block.confirm.clearAll.msg"),
-                () -> block.unblockAll(org.argentumforge.engine.utils.GameData.getActiveContext()));
-
         ImGui.separator();
         ImGui.text(I18n.INSTANCE.get("editor.block.opacity"));
         float[] opacity = { options.getRenderSettings().getBlockOpacity() };
