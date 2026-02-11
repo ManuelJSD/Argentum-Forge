@@ -955,5 +955,638 @@
         "height": 4
       }
     ]
+  },
+  {
+    "name": "Rocas",
+    "records": [
+      {
+        "name": "Roca Grande [A]",
+        "grhIndex": 7100,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 3,
+        "height": 3
+      },
+      {
+        "name": "Roca Grande [B]",
+        "grhIndex": 7109,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 3,
+        "height": 3
+      },
+      {
+        "name": "Roca Grande [C]",
+        "grhIndex": 7118,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 3,
+        "height": 3
+      },
+      {
+        "name": "Roca Mediana [A]",
+        "grhIndex": 7127,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 2,
+        "height": 2
+      },
+      {
+        "name": "Roca Larga Horizontal [A]",
+        "grhIndex": 7131,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 2,
+        "height": 1
+      },
+      {
+        "name": "Roca Larga Horizontal [B]",
+        "grhIndex": 7137,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 2,
+        "height": 1
+      },
+      {
+        "name": "Roca Larga Vertical [A]",
+        "grhIndex": 7133,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 2
+      },
+      {
+        "name": "Roca Larga Vertical [B]",
+        "grhIndex": 7135,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 2
+      },
+      {
+        "name": "Roca Pequeña [A]",
+        "grhIndex": 7145,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Roca Pequeña [B]",
+        "grhIndex": 7146,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Roca Pequeña [C]",
+        "grhIndex": 7147,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Roca Pequeña [D]",
+        "grhIndex": 7148,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Roca Pequeña [E]",
+        "grhIndex": 7149,
+        "layer": 1,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Roca Pequeña [F]",
+        "grhIndex": 7150,
+        "layer": 1,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Roca Pequeña [G]",
+        "grhIndex": 7151,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Roca Pequeña [H]",
+        "grhIndex": 7152,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Roca Pequeña [I]",
+        "grhIndex": 7153,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Roca Pequeña [J]",
+        "grhIndex": 7154,
+        "layer": 3,
+        "autoBlock": false,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Roca Pequeña [K]",
+        "grhIndex": 7155,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Roca Pequeña [L]",
+        "grhIndex": 7156,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Roca Pequeña [M]",
+        "grhIndex": 7157,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Roca Pequeña [N]",
+        "grhIndex": 7158,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Roca Pequeña [O]",
+        "grhIndex": 7159,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Roca Pequeña [P]",
+        "grhIndex": 7160,
+        "layer": 3,
+        "autoBlock": false,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Roca Pequeña [Q]",
+        "grhIndex": 7161,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Roca Pequeña [Q]",
+        "grhIndex": 7162,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      }
+    ]
+  },
+  {
+    "name": "Casa en Ruinas",
+    "records": [
+      {
+        "name": "Tejado",
+        "grhIndex": 5598,
+        "layer": 4,
+        "autoBlock": false,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Arriba",
+        "grhIndex": 5596,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Abajo",
+        "grhIndex": 5597,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Puerta Abierta",
+        "grhIndex": 5599,
+        "layer": 3,
+        "autoBlock": false,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Puerta Cerrada",
+        "grhIndex": 5600,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      }
+    ]
+  },
+  {
+    "name": "Dungeon",
+    "records": [
+      {
+        "name": "Piso",
+        "grhIndex": 9428,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "Angulo Arriba Izq.",
+        "grhIndex": 9220,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "Angulo Arriba Der.",
+        "grhIndex": 9236,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "Angulo Abajo Izq.",
+        "grhIndex": 9252,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "Angulo Abajo Der.",
+        "grhIndex": 9268,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "Esquina Arriba Izq.",
+        "grhIndex": 9284,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "Esquina Arriba Der.",
+        "grhIndex": 9300,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "Esquina Abajo Izq.",
+        "grhIndex": 9316,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "Esquina Abajo Der.",
+        "grhIndex": 9332,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "Pared Horizontal Arriba",
+        "grhIndex": 9348,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "Pared Horizontal Abajo",
+        "grhIndex": 9380,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "Pared Vertical Izquierda",
+        "grhIndex": 9364,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "Pared Horizontal Derecha",
+        "grhIndex": 9396,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      }
+    ]
+  },
+  {
+    "name": "Dungeon Nevado",
+    "records": [
+      {
+        "name": "Piso",
+        "grhIndex": 7720,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "Angulo Arriba Izq.",
+        "grhIndex": 7736,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "Angulo Arriba Der.",
+        "grhIndex": 7752,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "Angulo Abajo Izq.",
+        "grhIndex": 7768,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "Angulo Abajo Der.",
+        "grhIndex": 7784,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "Esquina Arriba Izq.",
+        "grhIndex": 7764,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "Esquina Arriba Der.",
+        "grhIndex": 7880,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "Esquina Abajo Izq.",
+        "grhIndex": 7896,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "Esquina Abajo Der.",
+        "grhIndex": 7912,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "Pared Arriba Horizontal",
+        "grhIndex": 7800,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "Pared Abajo Horizontal",
+        "grhIndex": 7816,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "Pared Izquierda Horizontal",
+        "grhIndex": 7832,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "Pared Derecha Horizontal",
+        "grhIndex": 7848,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      }
+    ]
+  },
+  {
+    "name": "Caverna",
+    "records": [
+      {
+        "name": "Piso",
+        "grhIndex": 8151,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "Esquina Arriba Izquierda",
+        "grhIndex": 7928,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "Esquina Arriba Derecha",
+        "grhIndex": 7944,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "Esquina Abajo Izquierda",
+        "grhIndex": 8169,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "Esquina Abajo Derecha",
+        "grhIndex": 8181,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "Angulo Arriba Izq.",
+        "grhIndex": 7960,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "Angulo Arriba Der.",
+        "grhIndex": 7976,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "Angulo Abajo Izq.",
+        "grhIndex": 7992,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "Angulo Abajo Der.",
+        "grhIndex": 8008,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "Pared Arriba Horizontal",
+        "grhIndex": 8024,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "Pared Abajo Horizontal",
+        "grhIndex": 8056,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "Pared Izquierda Vertical",
+        "grhIndex": 8040,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "Pared Derecha Vertical",
+        "grhIndex": 8072,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "Entrada Arriba",
+        "grhIndex": 8088,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "Entrada Abajo",
+        "grhIndex": 8104,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "Entrada Izquierda",
+        "grhIndex": 8120,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "Entrada Derecha",
+        "grhIndex": 8135,
+        "layer": 1,
+        "autoBlock": false,
+        "width": 4,
+        "height": 4
+      },
+      {
+        "name": "Arco Vertical",
+        "grhIndex": 8167,
+        "layer": 4,
+        "autoBlock": false,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Arco Horizontal",
+        "grhIndex": 8168,
+        "layer": 4,
+        "autoBlock": false,
+        "width": 1,
+        "height": 1
+      }
+    ]
   }
 ]

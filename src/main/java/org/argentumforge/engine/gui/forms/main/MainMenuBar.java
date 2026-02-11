@@ -406,6 +406,12 @@ public class MainMenuBar {
                             null);
                 }
 
+                if (ImGui.menuItem(I18n.INSTANCE.get("editor.area.title"))) {
+                    ImGUISystem.INSTANCE.show(new FAreaOperations());
+                }
+
+                ImGui.separator();
+
                 if (ImGui.menuItem(I18n.INSTANCE.get("optimizer.title"))) {
                     ImGUISystem.INSTANCE.show(new FOptimizer());
                 }

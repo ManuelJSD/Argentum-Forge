@@ -299,7 +299,12 @@ public class Surface {
                     int mapX = x + dx;
                     int mapY = y + dy;
                     if (mapX >= 0 && mapX < mapData.length && mapY >= 0 && mapY < mapData[0].length) {
-                        int targetGrhWithMosaic = (surfaceIndex + (dy * mosaicWidth) + dx);
+                        int targetGrhWithMosaic;
+                        if (mode == 2) { // Modo Borrar
+                            targetGrhWithMosaic = (layer == 1 ? 1 : 0);
+                        } else { // Modo Insertar (mode == 1)
+                            targetGrhWithMosaic = (surfaceIndex + (dy * mosaicWidth) + dx);
+                        }
                         int currentGrh = mapData[mapX][mapY].getLayer(layer).getGrhIndex();
                         if (currentGrh != targetGrhWithMosaic) {
                             oldTiles.put(
