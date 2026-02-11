@@ -405,6 +405,10 @@ public class MainMenuBar {
                             MinimapColorGenerator::generateBinary,
                             null);
                 }
+
+                if (ImGui.menuItem(I18n.INSTANCE.get("optimizer.title"))) {
+                    ImGUISystem.INSTANCE.show(new FOptimizer());
+                }
                 ImGui.endMenu();
             }
 
