@@ -691,7 +691,9 @@ public class MapRenderer {
     }
 
     private void renderSelectionHighlight(int pixelOffsetX, int pixelOffsetY) {
-        if (!selection.isActive())
+        // Mostrar cursor si hay selección activa o si estamos en modo Capturar (Pick)
+        // de Superficie
+        if (!selection.isActive() && org.argentumforge.engine.utils.editor.Surface.getInstance().getMode() != 3)
             return;
 
         int mx = (int) MouseListener.getX() - POS_SCREEN_X;

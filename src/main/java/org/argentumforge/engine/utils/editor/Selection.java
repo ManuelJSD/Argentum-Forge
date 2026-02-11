@@ -238,6 +238,33 @@ public class Selection {
         areaSelecting = false;
     }
 
+    /**
+     * Obtiene los límites normalizados del área seleccionada (marquee).
+     *
+     * @return int[]{x1, y1, x2, y2} con las coordenadas mínimas y máximas,
+     *         o null si no hay entidades seleccionadas.
+     */
+    public int[] getSelectionBounds() {
+        if (selectedEntities.isEmpty())
+            return null;
+
+        int minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE;
+        int maxX = Integer.MIN_VALUE, maxY = Integer.MIN_VALUE;
+
+        for (SelectedEntity se : selectedEntities) {
+            if (se.x < minX)
+                minX = se.x;
+            if (se.y < minY)
+                minY = se.y;
+            if (se.x > maxX)
+                maxX = se.x;
+            if (se.y > maxY)
+                maxY = se.y;
+        }
+
+        return new int[] { minX, minY, maxX, maxY };
+    }
+
     public void finalizeMove(int destX, int destY) {
         if (!dragging || selectedEntities.isEmpty()) {
             cancelDrag();

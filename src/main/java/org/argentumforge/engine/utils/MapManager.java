@@ -789,11 +789,12 @@ public final class MapManager {
         context.setSaveOptions(MapSaveOptions.extended());
 
         org.argentumforge.engine.Engine.INSTANCE.runOnMainThread(() -> {
-            GameData.setActiveContext(context);
-
-            // Limpiar recursos de renderizado anteriores
+            // Limpiar recursos de renderizado ANTES de cambiar contexto
+            // para que eraseAllChars opere sobre el charList del mapa anterior
             Surface.INSTANCE.deleteAllTextures();
             org.argentumforge.engine.game.models.Character.eraseAllChars();
+
+            GameData.setActiveContext(context);
 
             // Reiniciar estado de modificaciones
             markAsSaved();

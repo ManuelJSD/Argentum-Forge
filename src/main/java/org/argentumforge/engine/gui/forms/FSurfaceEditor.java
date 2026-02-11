@@ -104,6 +104,11 @@ public class FSurfaceEditor extends Form implements IMapEditor {
 
                     if (surface.getSurfaceIndex() != selectedGrhIndex && surface.getMode() != 3) {
                         selectedGrhIndex = surface.getSurfaceIndex();
+                        // Sincronizar paginación si no hay búsqueda activa para mostrar el tile
+                        // capturado
+                        if (searchGrh.get() == 0 && selectedGrhIndex > 0) {
+                            currentPage = (selectedGrhIndex - 1) / ITEMS_PER_PAGE;
+                        }
                     }
 
                     drawTileGrid();

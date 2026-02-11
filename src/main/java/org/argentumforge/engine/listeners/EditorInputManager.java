@@ -287,9 +287,9 @@ public class EditorInputManager {
             if (KeyHandler.isKeyPressed(GLFW_KEY_KP_SUBTRACT)) {
                 org.argentumforge.engine.game.Options.INSTANCE.decreaseSpeed();
             }
-        }
 
-        checkWalkKeys();
+            checkWalkKeys();
+        }
     }
 
     private void checkWalkKeys() {

@@ -37,7 +37,7 @@ public class FGrhLibrary extends Form {
 
     @Override
     public void render() {
-        ImGui.setNextWindowSize(700, 500, ImGuiCond.Always);
+        ImGui.setNextWindowSize(700, 600, ImGuiCond.Always);
         if (ImGui.begin(I18n.INSTANCE.get("grhlib.manageTitle"), pOpen,
                 ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize)) {
 
@@ -165,8 +165,22 @@ public class FGrhLibrary extends Form {
                         if (idx < selectedCategory.getRecords().size() - 1) {
                             selectedCategory.getRecords().remove(idx);
                             selectedCategory.getRecords().add(idx + 1, selectedRecord);
-                            GrhLibraryManager.getInstance().save();
                         }
+                    }
+                    ImGui.sameLine();
+                    if (ImGui.button(I18n.INSTANCE.get("grhlib.duplicate")) && selectedRecord != null) {
+                        GrhIndexRecord newRec = new GrhIndexRecord(selectedRecord.getName() + " (Copia)",
+                                selectedRecord.getGrhIndex());
+                        newRec.setLayer(selectedRecord.getLayer());
+                        newRec.setAutoBlock(selectedRecord.isAutoBlock());
+                        newRec.setWidth(selectedRecord.getWidth());
+                        newRec.setHeight(selectedRecord.getHeight());
+
+                        int idx = selectedCategory.getRecords().indexOf(selectedRecord);
+                        selectedCategory.getRecords().add(idx + 1, newRec);
+                        selectedRecord = newRec;
+                        syncEditFields();
+                        GrhLibraryManager.getInstance().save();
                     }
 
                     if (selectedRecord != null) {
@@ -224,7 +238,7 @@ public class FGrhLibrary extends Form {
                         }
 
                         // Preview del GRH
-                        if (selectedRecord.getGrhIndex() > 0) {
+                        if (selectedRecord != null && selectedRecord.getGrhIndex() > 0) {
                             ImGui.separator();
                             ImGui.text(I18n.INSTANCE.get("editor.npc.preview") + ":");
                             if (selectedRecord.getWidth() > 1 || selectedRecord.getHeight() > 1) {
