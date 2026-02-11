@@ -692,11 +692,12 @@ public class MapRenderer {
 
     private void renderSelectionHighlight(int pixelOffsetX, int pixelOffsetY) {
         // Mostrar cursor si hay selección activa o si estamos en modo Capturar (Pick)
-        // de Superficie
-        if (!selection.isActive() && org.argentumforge.engine.utils.editor.Surface.getInstance().getMode() != 3)
+        // de CUALQUIER herramienta
+        if (!selection.isActive() && !isPickToolActive())
             return;
 
         int mx = (int) MouseListener.getX() - POS_SCREEN_X;
+
         int my = (int) MouseListener.getY() - POS_SCREEN_Y;
         int tx = EditorInputManager.getTileMouseX(mx);
         int ty = EditorInputManager.getTileMouseY(my);
@@ -720,5 +721,14 @@ public class MapRenderer {
         // Right
         Drawn.drawColoredRect(screenX + TILE_PIXEL_SIZE - (int) thickness, screenY, (int) thickness, TILE_PIXEL_SIZE,
                 color, alpha);
+    }
+
+    /**
+     * Verifica si alguna herramienta de edición está en modo "Capturar" (Pick).
+     */
+    private boolean isPickToolActive() {
+        return org.argentumforge.engine.utils.editor.Surface.getInstance().getMode() == 3 ||
+                org.argentumforge.engine.utils.editor.Npc.getInstance().getMode() == 3 ||
+                org.argentumforge.engine.utils.editor.Obj.getInstance().getMode() == 3;
     }
 }
