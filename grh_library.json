@@ -1588,5 +1588,393 @@
         "height": 1
       }
     ]
+  },
+  {
+    "name": "Decoraciones",
+    "records": [
+      {
+        "name": "Huerto",
+        "grhIndex": 5754,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Huerto Vertical",
+        "grhIndex": 5752,
+        "layer": 3,
+        "autoBlock": false,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Piedra de afilar",
+        "grhIndex": 14,
+        "layer": 3,
+        "autoBlock": false,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Horno",
+        "grhIndex": 30,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Carro con Minerales",
+        "grhIndex": 652,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Carro con Minerales Grande",
+        "grhIndex": 650,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Carro con Arena",
+        "grhIndex": 651,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Expositor de telas",
+        "grhIndex": 4504,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Maniqui",
+        "grhIndex": 4500,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Caja con Oro",
+        "grhIndex": 4875,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Caja con Plata",
+        "grhIndex": 4874,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Mesa de Mineria",
+        "grhIndex": 4873,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Mesa de Alquimnia",
+        "grhIndex": 4891,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Maceta con Arbol",
+        "grhIndex": 653,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Mesa de carpintero",
+        "grhIndex": 6560,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Fuente",
+        "grhIndex": 22070,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Cama",
+        "grhIndex": 524,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Poste",
+        "grhIndex": 5753,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Estanteria",
+        "grhIndex": 4889,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Caldero",
+        "grhIndex": 37,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Expositor de espadas",
+        "grhIndex": 4992,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Expositor de armas",
+        "grhIndex": 31,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Mesa grande",
+        "grhIndex": 678,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Arbusto",
+        "grhIndex": 648,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Maceta",
+        "grhIndex": 650,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Estatua de torso",
+        "grhIndex": 679,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      }
+    ]
+  },
+  {
+    "name": "Muralla",
+    "records": [
+      {
+        "name": "Horizontal",
+        "grhIndex": 7231,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Vertical",
+        "grhIndex": 7282,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      }
+    ]
+  },
+  {
+    "name": "Valla",
+    "records": [
+      {
+        "name": "Horizontal",
+        "grhIndex": 630,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Vertical",
+        "grhIndex": 629,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      }
+    ]
+  },
+  {
+    "name": "Barcos",
+    "records": [
+      {
+        "name": "Barca Izquierda",
+        "grhIndex": 10380,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Barca Derecha",
+        "grhIndex": 10381,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Barca Abajo",
+        "grhIndex": 10382,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Barca Arriba",
+        "grhIndex": 10383,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Galera Izquierda",
+        "grhIndex": 10400,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Galera Derecha",
+        "grhIndex": 10401,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Galera Abajo",
+        "grhIndex": 10402,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Galera Arriba",
+        "grhIndex": 10420,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Galeon Izquierda",
+        "grhIndex": 10420,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Galeon Derecha",
+        "grhIndex": 10421,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Galeon Abajo",
+        "grhIndex": 10422,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Galeon Arriba",
+        "grhIndex": 10423,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Barco Fantasma Izquierda",
+        "grhIndex": 10440,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Barco Fantasma Derecha",
+        "grhIndex": 10441,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Barco Fantasma Abajo",
+        "grhIndex": 10442,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "name": "Barco Fantasma Abajo (Copia)",
+        "grhIndex": 10442,
+        "layer": 3,
+        "autoBlock": true,
+        "width": 1,
+        "height": 1
+      }
+    ]
   }
 ]
