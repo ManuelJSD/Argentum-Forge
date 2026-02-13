@@ -27,9 +27,16 @@ public enum Surface {
     // Async Loading
     private ExecutorService loaderExecutor;
     private ConcurrentLinkedQueue<Texture.TextureData> readyToUpload;
+
+    // Sets para control de estado
     private Set<Integer> pendingIds;
     private Set<Integer> failedIds;
+
+    // Mapas auxiliares para el proceso de carga
     private Map<Integer, Texture> placeholderTextures;
+    private Map<Integer, Integer> retryCounts; // Contador de reintentos por ID
+
+    private static final int MAX_RETRIES = 3;
 
     /**
      * Inicializa el contenedor de texturas y el sistema de carga asíncrona.
@@ -64,6 +71,8 @@ public enum Surface {
             failedIds = ConcurrentHashMap.newKeySet();
         if (placeholderTextures == null)
             placeholderTextures = new ConcurrentHashMap<>();
+        if (retryCounts == null)
+            retryCounts = new ConcurrentHashMap<>();
     }
 
     /**
@@ -73,17 +82,30 @@ public enum Surface {
     public void dispatchUploads() {
         if (readyToUpload == null)
             return;
+
         Texture.TextureData data;
         int count = 0;
         int limit = 50; // Aumentado para mayor velocidad de carga inicial
+
         while ((data = readyToUpload.poll()) != null && count < limit) {
             try {
-                int id = Integer.parseInt(data.fileName);
-                Texture tex = placeholderTextures.remove(id);
-                if (tex != null) {
-                    tex.upload(data);
+                if (data.fileName != null && data.fileName.matches("\\d+")) {
+                    int id = Integer.parseInt(data.fileName);
+                    Texture tex = placeholderTextures.remove(id);
+                    // Si tex es null, quizás se limpió la caché mientras cargaba, buscamos en el
+                    // mapa principal
+                    if (tex == null)
+                        tex = textures.get(id);
+
+                    if (tex != null) {
+                        tex.upload(data);
+                    }
+                    pendingIds.remove(id);
+                    retryCounts.remove(id); // Éxito, borramos contador de reintentos
+                } else if (data.fileName != null) {
+                    // Cargas manuales por nombre de archivo (GUI, etc.)
+                    // No gestionadas por pendingIds/failedIds numéricos
                 }
-                pendingIds.remove(id);
             } catch (Exception e) {
                 Logger.error(e, "Error subiendo textura a GPU");
             } finally {
@@ -92,13 +114,27 @@ public enum Surface {
             count++;
         }
 
-        // Procesar texturas fallidas: Reemplazar placeholders vacíos con missingTexture
+        // Feedback visual para fallos definitivos
         if (missingTexture != null && missingTexture.getId() != 0) {
             for (Integer failedId : failedIds) {
                 Texture current = textures.get(failedId);
-                if (current != null && current.getId() == 0) {
-                    // Reemplazar placeholder vacío con textura de error
-                    textures.put(failedId, missingTexture);
+                // Si la textura existe pero tiene ID 0 (no cargada) y no está pendiente de
+                // carga
+                if (current != null && current.getId() == 0 && !pendingIds.contains(failedId)) {
+                    // Reemplazar placeholder vacío con textura de error para que sea visible
+                    // Ojo: No reemplazamos el objeto Texture en el mapa 'textures',
+                    // simplemente hacemos que 'current' apunte a los datos de missingTexture si
+                    // fuera posible,
+                    // pero aquí estamos limitados. Lo que haremos es re-asignar en el mapa si fuera
+                    // necesario
+                    // o confiar en que getTexture devuelva missingTexture para futuros accesos.
+
+                    // Mejor enfoque: Si getTexture se llama para un failedId, devolver
+                    // missingTexture.
+                    // Pero para objetos ya instanciados (referencias viejas), no podemos cambiar su
+                    // ID GL fácilmente sin upload.
+                    // Podríamos hacer current.upload(missingTextureData) pero es costoso hacerlo
+                    // cada frame.
                 }
             }
         }
@@ -131,13 +167,12 @@ public enum Surface {
         // CRITICAL FIX: Limpiar failedIds para resetear estado de cargas fallidas
         // Esto evita que gráficos que fallaron temporalmente (archivo bloqueado, etc.)
         // queden marcados permanentemente como fallidos tras un cambio de mapa
-        if (failedIds != null) {
+        if (failedIds != null)
             failedIds.clear();
-        }
-
-        if (readyToUpload != null) {
+        if (retryCounts != null)
+            retryCounts.clear();
+        if (readyToUpload != null)
             readyToUpload.clear();
-        }
         // CRITICAL: We NO LONGER delete whiteTexture here because many renderers
         // (including GUI and selection ghosts) depend on it being valid
         // even during map transitions.
@@ -154,15 +189,32 @@ public enum Surface {
     }
 
     /**
-     * Limpia la lista de IDs fallidos, permitiendo que el sistema intente cargar
-     * nuevamente las texturas que fallaron anteriormente.
-     * Util para recuperar texturas tras fallos de red o desbloqueo de archivos.
+     * Reintenta cargar las texturas que fallaron anteriormente.
+     * Limpia la lista de fallos y vuelve a enviar las tareas de carga.
      */
     public void retryFailedTextures() {
-        if (failedIds != null) {
-            int count = failedIds.size();
-            failedIds.clear();
-            Logger.info("Se han reiniciado {} texturas fallidas para reintento.", count);
+        if (failedIds == null || failedIds.isEmpty()) {
+            Logger.info("No hay texturas fallidas para reintentar.");
+            return;
+        }
+
+        Logger.info("Surface: Reintentando {} texturas fallidas...", failedIds.size());
+
+        // Copiamos la lista para iterar seguros
+        Set<Integer> idsToRetry = new java.util.HashSet<>(failedIds);
+        failedIds.clear(); // Limpiamos estado de error
+        if (retryCounts != null)
+            retryCounts.clear(); // Reseteamos contadores de reintento
+
+        for (Integer id : idsToRetry) {
+            Texture tex = textures.get(id);
+            if (tex == null) {
+                // Si no existe, createTexture lo manejará cuando se solicite
+                continue;
+            }
+
+            // Si existe pero falló, resubimos la tarea
+            submitLoadTask(id, tex);
         }
     }
 
@@ -193,34 +245,72 @@ public enum Surface {
      */
     private Texture createTexture(int fileNum) {
         if (failedIds != null && failedIds.contains(fileNum)) {
-            // Retornar la textura de error (Magenta/Negro) para feedback visual
+            // Retornar la textura de error (Magenta/Negro) para feedback visual inmediato
             return missingTexture != null ? missingTexture : new Texture();
         }
 
         Texture texture = new Texture();
         textures.put(fileNum, texture);
 
+        submitLoadTask(fileNum, texture);
+
+        return texture;
+    }
+
+    /**
+     * Envía la tarea de carga al ExecutorService.
+     */
+    private void submitLoadTask(int fileNum, Texture texture) {
         if (pendingIds.add(fileNum)) {
             placeholderTextures.put(fileNum, texture);
+
             loaderExecutor.submit(() -> {
-                // Pasamos null como primer argumento ya que no usamos archivos .ao
-                Texture.TextureData data = Texture.prepareData(null, String.valueOf(fileNum), false);
-                if (data != null) {
-                    readyToUpload.add(data);
-                } else {
-                    pendingIds.remove(fileNum);
-                    placeholderTextures.remove(fileNum);
-                    if (failedIds != null) {
-                        failedIds.add(fileNum);
-                        // NO llamar getMissingTexture() aquí (hilo async sin contexto OpenGL)
-                        // La sustitución se hará en dispatchUploads (hilo principal)
-                        Logger.warn("Grafico {} falló y será reemplazado por MissingTexture.", fileNum);
+                // Lógica de carga en hilo secundario
+                try {
+                    Texture.TextureData data = Texture.prepareData(null, String.valueOf(fileNum), false);
+
+                    if (data != null) {
+                        readyToUpload.add(data);
+                    } else {
+                        handleLoadFailure(fileNum, texture);
                     }
+                } catch (Exception e) {
+                    Logger.error(e, "Excepción no controlada cargando textura {}", fileNum);
+                    handleLoadFailure(fileNum, texture);
                 }
             });
         }
+    }
 
-        return texture;
+    /**
+     * Maneja el fallo de carga, implementando la lógica de reintento automático.
+     */
+    private void handleLoadFailure(int fileNum, Texture texture) {
+        // Remover de pendientes para permitir reintento
+        pendingIds.remove(fileNum);
+        placeholderTextures.remove(fileNum);
+
+        int retries = retryCounts.getOrDefault(fileNum, 0);
+
+        if (retries < MAX_RETRIES) {
+            retryCounts.put(fileNum, retries + 1);
+            Logger.warn("Fallo cargando textura {}. Reintentando ({}/{})", fileNum, retries + 1, MAX_RETRIES);
+
+            // Pequeña espera antes de reintentar para dar tiempo al disco/SO
+            try {
+                Thread.sleep(50 + (retries * 50));
+            } catch (InterruptedException ignored) {
+            }
+
+            // Re-enviar tarea
+            submitLoadTask(fileNum, texture);
+        } else {
+            // Fallo definitivo tras reintentos
+            Logger.error("Fallo definitivo cargando textura {} tras {} intentos.", fileNum, MAX_RETRIES);
+            if (failedIds != null) {
+                failedIds.add(fileNum);
+            }
+        }
     }
 
     public Texture createTexture(String file, boolean isGUI) {

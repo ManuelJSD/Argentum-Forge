@@ -59,8 +59,10 @@ public class Texture {
         ByteBuffer rawDataBuffer = null;
         try {
             byte[] resourceData = loadLocalGraphicSync(file);
-            if (resourceData == null)
+            if (resourceData == null) {
+                Logger.warn("Texture.prepareData: loadLocalGraphicSync devolvió null para {}", file);
                 return null;
+            }
 
             rawDataBuffer = BufferUtils.createByteBuffer(resourceData.length);
             rawDataBuffer.put(resourceData);

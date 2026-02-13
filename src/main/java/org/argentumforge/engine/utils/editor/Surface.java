@@ -86,6 +86,32 @@ public class Surface {
 
     public void setSurfaceIndex(int surfaceIndex) {
         this.surfaceIndex = surfaceIndex;
+
+        // [FIX] Pre-cargar texturas de animación para evitar parpadeo en el ghost
+        // Al seleccionar un GRH animado, solicitamos la carga de todos sus frames
+        // inmediatamente
+        // para que estén listos cuando el usuario mueva el mouse al mapa.
+        try {
+            if (surfaceIndex > 0 && org.argentumforge.engine.utils.AssetRegistry.grhData != null
+                    && surfaceIndex < org.argentumforge.engine.utils.AssetRegistry.grhData.length) {
+                var data = org.argentumforge.engine.utils.AssetRegistry.grhData[surfaceIndex];
+                if (data != null && data.getNumFrames() > 1) {
+                    // Cargar todos los frames de la animación
+                    for (int i = 0; i < data.getNumFrames(); i++) {
+                        int frameIdx = data.getFrame(i);
+                        if (frameIdx > 0 && frameIdx < org.argentumforge.engine.utils.AssetRegistry.grhData.length) {
+                            var frameData = org.argentumforge.engine.utils.AssetRegistry.grhData[frameIdx];
+                            if (frameData != null && frameData.getFileNum() > 0) {
+                                // Llamar a getTexture dispara la carga asíncrona si no existe
+                                org.argentumforge.engine.renderer.Surface.INSTANCE.getTexture(frameData.getFileNum());
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // Ignorar errores de precarga para no bloquear la UI
+        }
     }
 
     public int getLayer() {
