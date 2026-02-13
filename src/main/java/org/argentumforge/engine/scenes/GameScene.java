@@ -496,6 +496,22 @@ public final class GameScene extends Scene {
             if (grhData[grhIndex].getTileHeight() != 1.0f) {
                 screenY = screenY - (int) (grhData[grhIndex].getTileHeight() * TILE_PIXEL_SIZE) + TILE_PIXEL_SIZE;
             }
+
+            // [FIX] Soporte para animaciones en el ghost
+            // Si el GRH es una animación (numFrames > 1), calculamos el frame actual
+            // [FIX] Soporte simplificado para animaciones en el ghost
+            // Si el GRH es una animación (numFrames > 1), mostramos siempre el primer frame
+            // estático (índice 1 en la secuencia).
+            // Esto evita problemas de parpadeo por carga asíncrona de frames y es
+            // suficiente
+            // para que el usuario sepa qué superficie está colocando.
+            if (grhData[grhIndex].getNumFrames() > 1) {
+                // Usamos getFrame(1) asumiendo que es el primer frame visualmente relevante
+                // de la animación (similar a como lo hace la paleta).
+                int staticFrameIndex = grhData[grhIndex].getFrame(1);
+                drawGrhIndex(staticFrameIndex, screenX, screenY, alpha, weather.getWeatherColor());
+                return;
+            }
         }
 
         drawGrhIndex(grhIndex, screenX, screenY, alpha,
