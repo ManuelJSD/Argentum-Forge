@@ -131,7 +131,7 @@ git push origin v1.0.0
 
 ## 📸 Capturas de Pantalla
 
-<img width="1366" height="768" alt="image" src="https://github.com/user-attachments/assets/b107a70f-2c76-4d3c-baef-ea691a757edc" />
+<img width="1366" height="768" alt="image" src="https://github.com/user-attachments/assets/8a72836d-55a5-43c7-b1e5-c8c64e1845a6" />
 
 ## 🤝 Cómo Contribuir
 
