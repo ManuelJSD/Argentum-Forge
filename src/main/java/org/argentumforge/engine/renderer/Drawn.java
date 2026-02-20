@@ -48,9 +48,25 @@ public final class Drawn {
         if (grhData == null)
             return;
         final Texture texture = Surface.INSTANCE.getTexture(grhData[grhIndex].getFileNum());
-        if (texture.getId() == 0)
-            return; // Skip if still loading asynchronously
-        float globalScale = org.argentumforge.engine.scenes.Camera.getZoomScale();
+        if (texture.getId() == 0) {
+            // En modo exportación, si la textura no está, intentamos cargarla síncronamente
+            // HOY
+            // como última medida de seguridad para evitar cuadros negros (defensa en
+            // profundidad).
+            if (Engine.batch.isExportMode()) {
+                Surface.INSTANCE.syncLoad(grhData[grhIndex].getFileNum());
+                // Si tras el intento sigue en 0, es que falló real -> return.
+                if (texture.getId() == 0)
+                    return;
+            } else {
+                return; // Modo normal, skip if loading asynchronously
+            }
+        }
+
+        // En modo exportación usamos escala 1:1 (sin zoom de cámara)
+        float globalScale = Engine.batch.isExportMode()
+                ? 1.0f
+                : org.argentumforge.engine.scenes.Camera.getZoomScale();
 
         float drawWidth = srcWidth * globalScale * scaleX;
         float drawHeight = srcHeight * globalScale * scaleY;
@@ -72,9 +88,19 @@ public final class Drawn {
 
     public static void geometryBoxRender(Texture texture, int x, int y, int srcWidth, int srcHeight, float srcX,
             float srcY, float skewX, boolean blend, float alpha, RGBColor color) {
-        if (texture == null || texture.getId() == 0)
+        if (texture == null)
             return;
-        float scale = org.argentumforge.engine.scenes.Camera.getZoomScale();
+
+        // Nota: Aquí no podemos hacer el fallback fácil porque no tenemos el fileNum,
+        // solo el objeto Texture. Asumimos que la lógica principal va por el método
+        // anterior.
+        if (texture.getId() == 0)
+            return;
+
+        // En modo exportación usamos escala 1:1 (sin zoom de cámara)
+        float scale = Engine.batch.isExportMode()
+                ? 1.0f
+                : org.argentumforge.engine.scenes.Camera.getZoomScale();
         batch.draw(texture, x, y, srcX, srcY, srcWidth, srcHeight, srcWidth * scale, srcHeight * scale, skewX, blend,
                 alpha, color);
     }

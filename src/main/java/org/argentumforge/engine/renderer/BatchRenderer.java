@@ -83,6 +83,33 @@ public class BatchRenderer {
     private int projMatrixLoc;
     private final FloatBuffer orthoMatrixBuffer = BufferUtils.createFloatBuffer(16);
 
+    /** Dimensiones del FBO de exportación. 0 = modo normal (usa ventana). */
+    private int exportWidth = 0;
+    private int exportHeight = 0;
+
+    /**
+     * Activa el modo exportación, usando las dimensiones del FBO para la
+     * proyección ortográfica en lugar del tamaño de la ventana del editor.
+     *
+     * @param w ancho del FBO en píxeles
+     * @param h alto del FBO en píxeles
+     */
+    public void setExportProjection(int w, int h) {
+        this.exportWidth = w;
+        this.exportHeight = h;
+    }
+
+    /** Desactiva el modo exportación y restaura la proyección normal. */
+    public void clearExportProjection() {
+        this.exportWidth = 0;
+        this.exportHeight = 0;
+    }
+
+    /** Indica si el BatchRenderer está en modo exportación. */
+    public boolean isExportMode() {
+        return exportWidth > 0 && exportHeight > 0;
+    }
+
     public BatchRenderer() {
         init();
     }
@@ -327,10 +354,21 @@ public class BatchRenderer {
     }
 
     private void updateProjectionMatrix() {
-        int width = 0, height = 0;
-        if (org.argentumforge.engine.Engine.INSTANCE.getWindow() != null) {
-            width = org.argentumforge.engine.Engine.INSTANCE.getWindow().getWidth();
-            height = org.argentumforge.engine.Engine.INSTANCE.getWindow().getHeight();
+        int width;
+        int height;
+
+        if (isExportMode()) {
+            // Modo exportación: usar dimensiones del FBO para proyección 1:1
+            width = exportWidth;
+            height = exportHeight;
+        } else {
+            // Modo normal: usar dimensiones de la ventana del editor
+            width = 0;
+            height = 0;
+            if (org.argentumforge.engine.Engine.INSTANCE.getWindow() != null) {
+                width = org.argentumforge.engine.Engine.INSTANCE.getWindow().getWidth();
+                height = org.argentumforge.engine.Engine.INSTANCE.getWindow().getHeight();
+            }
         }
 
         orthoMatrixBuffer.clear();
@@ -343,7 +381,7 @@ public class BatchRenderer {
 
         // col 2
         orthoMatrixBuffer.put(0.0f);
-        orthoMatrixBuffer.put(-2.0f / height); // Flipped Y
+        orthoMatrixBuffer.put(-2.0f / height); // Y invertida (Top-Down)
         orthoMatrixBuffer.put(0.0f);
         orthoMatrixBuffer.put(0.0f);
 

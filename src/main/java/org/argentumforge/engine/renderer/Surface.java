@@ -341,6 +341,76 @@ public enum Surface {
         return texture;
     }
 
+    /**
+     * Carga de forma síncrona todas las texturas indicadas, bloqueando el hilo
+     * actual hasta que todas estén en GPU.
+     * <p>
+     * Usar solo durante la exportación de imagen, donde el bloqueo del hilo de
+     * render es aceptable y necesario para garantizar texturas completas.
+     *
+     * @param fileNums conjunto de IDs de archivo de textura a pre-cargar
+     */
+    /**
+     * Carga de forma síncrona todas las texturas indicadas, bloqueando el hilo
+     * actual hasta que todas estén en GPU.
+     * <p>
+     * Usar solo durante la exportación de imagen.
+     *
+     * @param fileNums conjunto de IDs de archivo de textura a pre-cargar
+     */
+    public void preloadSync(Set<Integer> fileNums) {
+        Logger.info("Surface:Pre-cargando {} texturas síncronamente...", fileNums.size());
+        for (Integer fileNum : fileNums) {
+            syncLoad(fileNum);
+        }
+        Logger.info("Surface: Pre-carga síncrona completada.");
+    }
+
+    /**
+     * Fuerza la carga síncrona de una textura específica en el hilo actual.
+     * Si la textura no existe, se crea. Si ya está cargada, no hace nada.
+     * Utilizado como fallback en exportación para evitar gráficos faltantes.
+     *
+     * @param fileNum ID del archivo de textura
+     */
+    public void syncLoad(int fileNum) {
+        // Obtener o crear el objeto Texture en el mapa
+        Texture texture = textures.get(fileNum);
+        if (texture == null) {
+            texture = new Texture();
+            textures.put(fileNum, texture);
+        }
+
+        // Si ya está en GPU, saltar
+        if (texture.getId() > 0)
+            return;
+
+        // Si ya falló anteriormente, no reintentar infinitamente en el loop de render
+        if (failedIds != null && failedIds.contains(fileNum))
+            return;
+
+        // Cancelar cualquier tarea asíncrona pendiente para este ID
+        pendingIds.remove(fileNum);
+        placeholderTextures.remove(fileNum);
+
+        try {
+            // Carga y upload síncronos en el hilo GL actual
+            Texture.TextureData data = Texture.prepareData(null, String.valueOf(fileNum), false);
+            if (data != null) {
+                texture.upload(data);
+                data.cleanup();
+                failedIds.remove(fileNum);
+                retryCounts.remove(fileNum);
+            } else {
+                Logger.warn("Surface: Fallo síncrono texture {}", fileNum);
+                failedIds.add(fileNum);
+            }
+        } catch (Exception e) {
+            Logger.error(e, "Surface: Excepción síncrona texture {}", fileNum);
+            failedIds.add(fileNum);
+        }
+    }
+
     public Texture getWhiteTexture() {
         if (whiteTexture == null) {
             whiteTexture = new Texture();
