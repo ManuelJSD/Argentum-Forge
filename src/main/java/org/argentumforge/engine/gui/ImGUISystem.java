@@ -19,6 +19,7 @@ import java.util.List;
 
 import static org.argentumforge.engine.utils.Time.deltaTime;
 import static org.lwjgl.glfw.GLFW.*;
+import org.argentumforge.engine.utils.MapExporter;
 
 /**
  * Sistema centralizado para la gestion de interfaces graficas de usuario basado
@@ -287,7 +288,45 @@ public enum ImGUISystem {
         for (int i = 0; i < frms.size(); i++)
             frms.get(i).render();
 
+        // Overlay bloqueante: se muestra sobre todo mientras se exporta un mapa
+        if (MapExporter.isExporting) {
+            renderExportingOverlay();
+        }
+
         // ImGui.showDemoWindow();
+    }
+
+    /**
+     * Dibuja un overlay de "Exportando mapa..." centrado en pantalla.
+     * Se muestra de forma no interactiva mientras {@link MapExporter#isExporting}
+     * sea true.
+     */
+    private void renderExportingOverlay() {
+        ImGuiViewport viewport = ImGui.getMainViewport();
+        float cx = viewport.getCenterX();
+        float cy = viewport.getCenterY();
+
+        ImGui.setNextWindowBgAlpha(0.85f);
+        ImGui.setNextWindowPos(cx, cy, ImGuiCond.Always, 0.5f, 0.5f);
+        ImGui.setNextWindowSize(300, 80, ImGuiCond.Always);
+
+        int flags = ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoMove
+                | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoMouseInputs
+                | ImGuiWindowFlags.NoNav | ImGuiWindowFlags.NoScrollbar;
+
+        if (ImGui.begin("##exportingOverlay", flags)) {
+            // Centrar el texto horizontalmente
+            float textWidth = ImGui.calcTextSize("Exportando mapa...").x;
+            ImGui.setCursorPosX((300f - textWidth) / 2f);
+            ImGui.setCursorPosY(20f);
+            ImGui.text("Exportando mapa...");
+
+            // Barra de progreso indeterminada
+            float t = (float) (System.currentTimeMillis() % 2000) / 2000f;
+            ImGui.setCursorPosX(20f);
+            ImGui.progressBar(-t, 260f, 12f, "");
+        }
+        ImGui.end();
     }
 
     public void show(Form frm) {

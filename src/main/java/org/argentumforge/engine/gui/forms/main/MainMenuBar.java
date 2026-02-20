@@ -397,7 +397,9 @@ public class MainMenuBar {
                                 I18n.INSTANCE.get("msg.export.success") + path);
                     }
                 }
+
                 ImGui.separator();
+
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.tools.generateColors"))) {
                     DialogManager.getInstance().showConfirm(
                             I18n.INSTANCE.get("menu.tools.generateColors"),
@@ -405,6 +407,8 @@ public class MainMenuBar {
                             MinimapColorGenerator::generateBinary,
                             null);
                 }
+
+                ImGui.separator();
 
                 if (ImGui.menuItem(I18n.INSTANCE.get("editor.area.title"))) {
                     ImGUISystem.INSTANCE.show(new FAreaOperations());
