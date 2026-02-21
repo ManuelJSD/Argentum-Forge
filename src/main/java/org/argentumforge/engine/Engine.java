@@ -37,14 +37,14 @@ public final class Engine {
     private static String loadVersion() {
         try (var stream = Engine.class.getResourceAsStream("/version.properties")) {
             if (stream == null) {
-                return "1.0.0-beta6"; // Fallback para desarrollo en IDE sin build.gradle
+                return "1.0.0-beta7"; // Fallback para desarrollo en IDE sin build.gradle
             }
             java.util.Properties props = new java.util.Properties();
             props.load(stream);
-            return props.getProperty("version", "1.0.0-beta6");
+            return props.getProperty("version", "1.0.0-beta7");
         } catch (java.io.IOException e) {
             org.tinylog.Logger.error("Error al cargar la versión: {}", e.getMessage());
-            return "1.0.0-beta6";
+            return "1.0.0-beta7";
         }
     }
 
