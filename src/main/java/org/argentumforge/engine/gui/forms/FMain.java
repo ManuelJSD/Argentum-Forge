@@ -126,37 +126,38 @@ public final class FMain extends Form {
 
         // 2. VENTANA RAÍZ PARA DOCKING
         ImGuiViewport viewport = ImGui.getMainViewport();
-        ImGui.setNextWindowPos(viewport.getWorkPosX(), viewport.getWorkPosY());
-        ImGui.setNextWindowSize(viewport.getWorkSizeX(), viewport.getWorkSizeY());
-        ImGui.setNextWindowViewport(viewport.getID());
+        if (ImGui.getIO().hasConfigFlags(ImGuiConfigFlags.DockingEnable)) {
+            ImGui.setNextWindowPos(viewport.getWorkPosX(), viewport.getWorkPosY());
+            ImGui.setNextWindowSize(viewport.getWorkSizeX(), viewport.getWorkSizeY());
+            ImGui.setNextWindowViewport(viewport.getID());
 
-        // Estilo para que la ventana sea invisible y cubra el área de trabajo
-        ImGui.pushStyleVar(imgui.flag.ImGuiStyleVar.WindowRounding, 0.0f);
-        ImGui.pushStyleVar(imgui.flag.ImGuiStyleVar.WindowBorderSize, 0.0f);
-        ImGui.pushStyleVar(imgui.flag.ImGuiStyleVar.WindowPadding, 0.0f, 0.0f);
+            // Estilo para que la ventana sea invisible y cubra el área de trabajo
+            ImGui.pushStyleVar(imgui.flag.ImGuiStyleVar.WindowRounding, 0.0f);
+            ImGui.pushStyleVar(imgui.flag.ImGuiStyleVar.WindowBorderSize, 0.0f);
+            ImGui.pushStyleVar(imgui.flag.ImGuiStyleVar.WindowPadding, 0.0f, 0.0f);
 
-        int windowFlags = ImGuiWindowFlags.NoDocking;
-        windowFlags |= ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize
-                | ImGuiWindowFlags.NoMove;
-        windowFlags |= ImGuiWindowFlags.NoBringToFrontOnFocus | ImGuiWindowFlags.NoNavFocus
-                | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse;
+            int windowFlags = ImGuiWindowFlags.NoDocking;
+            windowFlags |= ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize
+                    | ImGuiWindowFlags.NoMove;
+            windowFlags |= ImGuiWindowFlags.NoBringToFrontOnFocus | ImGuiWindowFlags.NoNavFocus
+                    | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse;
 
-        ImGui.begin("MainDockSpaceHolder", windowFlags);
-        ImGui.popStyleVar(3);
+            ImGui.begin("MainDockSpaceHolder", windowFlags);
+            ImGui.popStyleVar(3);
 
-        // Calcular margen superior para no tapar el DockSpace con la Toolbar y Tabs
-        // Calcular margen superior para no tapar el DockSpace con la Toolbar y Tabs
-        float topMargin = 52.0f; // Altura de MainToolbar
-        if (!GameData.getOpenMaps().isEmpty()) {
-            topMargin += 22.0f; // Altura de Tabs
+            // Calcular margen superior para no tapar el DockSpace con la Toolbar y Tabs
+            float topMargin = 52.0f; // Altura de MainToolbar
+            if (!GameData.getOpenMaps().isEmpty()) {
+                topMargin += 22.0f; // Altura de Tabs
+            }
+            ImGui.setCursorPosY(topMargin);
+
+            // Crear el DockSpace real
+            int dockspaceId = ImGui.getID("MainEditorDockSpace");
+            ImGui.dockSpace(dockspaceId, 0.0f, 0.0f, ImGuiDockNodeFlags.PassthruCentralNode | ImGuiDockNodeFlags.NoDockingInCentralNode);
+
+            ImGui.end();
         }
-        ImGui.setCursorPosY(topMargin);
-
-        // Crear el DockSpace real
-        int dockspaceId = ImGui.getID("MainEditorDockSpace");
-        ImGui.dockSpace(dockspaceId, 0.0f, 0.0f, ImGuiDockNodeFlags.PassthruCentralNode);
-
-        ImGui.end();
 
         // 3. RENDERIZADO DE COMPONENTES FIJOS (Se apoyan en el DockSpace o WorkArea)
         if (!isPhoto) {

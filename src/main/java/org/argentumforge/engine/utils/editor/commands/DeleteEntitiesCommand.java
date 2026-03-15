@@ -23,7 +23,9 @@ public class DeleteEntitiesCommand extends AbstractCommand {
             if (se.type == Selection.EntityType.NPC) {
                 commands.add(new NpcChangeCommand(context, se.x, se.y, se.id, 0));
             } else if (se.type == Selection.EntityType.OBJECT) {
-                commands.add(new ObjChangeCommand(context, se.x, se.y, se.id, 0));
+                var tile = context.getMapData()[se.x][se.y];
+                commands.add(new ObjChangeCommand(context, se.x, se.y, tile.getObjGrh().getGrhIndex(), 0,
+                        tile.getObjIndex(), 0, tile.getObjAmount(), 0));
             } else if (se.type == Selection.EntityType.TILE) {
                 int[] oldLayers = new int[5];
                 int[] newLayers = new int[5]; // Todo a 0

@@ -54,8 +54,10 @@ public class ContextMenu {
             if (mapData[tileX][tileY].getObjIndex() > 0) {
                 if (ImGui.menuItem(org.argentumforge.engine.i18n.I18n.INSTANCE.get("context.obj.delete"))) {
                     int oldGrh = mapData[tileX][tileY].getObjGrh().getGrhIndex();
+                    int oldObjIndex = mapData[tileX][tileY].getObjIndex();
+                    int oldAmount = mapData[tileX][tileY].getObjAmount();
                     CommandManager.getInstance().executeCommand(
-                            new ObjChangeCommand(context, tileX, tileY, oldGrh, 0));
+                            new ObjChangeCommand(context, tileX, tileY, oldGrh, 0, oldObjIndex, 0, oldAmount, 0));
                 }
                 ImGui.separator();
             }

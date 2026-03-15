@@ -69,12 +69,18 @@ public class MoveEntityCommand extends AbstractCommand {
                 }
             }
         } else if (type == Selection.EntityType.OBJECT) {
+            // Obtener datos del origen
+            int objIndex = mapData[x1][y1].getObjIndex();
+            int objAmount = mapData[x1][y1].getObjAmount();
+
             // Eliminar de origen
             mapData[x1][y1].getObjGrh().setGrhIndex(0);
+            mapData[x1][y1].setObjIndex(0);
+            mapData[x1][y1].setObjAmount(0);
 
             // Colocar en destino
-            // Usamos initGrh pero necesitamos saber si es static o no.
-            // GameData.initGrh is static.
+            mapData[x2][y2].setObjIndex(objIndex);
+            mapData[x2][y2].setObjAmount(objAmount);
             org.argentumforge.engine.utils.GameData.initGrh(mapData[x2][y2].getObjGrh(), (short) id, false);
         }
     }

@@ -222,12 +222,17 @@ public final class FTileInspector extends Form {
             ImGui.text(I18n.INSTANCE.get("tile.inspector.obj"));
             ImGui.sameLine();
             ImGui.setNextItemWidth(80);
-            int currentObjGrh = tile.getObjGrh().getGrhIndex();
-            tempObj.set(currentObjGrh);
+            int currentObjIndex = tile.getObjIndex();
+            tempObj.set(currentObjIndex);
             if (ImGui.inputInt("##ObjID", tempObj, 1, 10)) {
-                if (tempObj.get() != currentObjGrh) {
+                if (tempObj.get() != currentObjIndex) {
                     int val = Math.max(0, tempObj.get());
-                    commandManager.executeCommand(new ObjChangeCommand(context, x, y, currentObjGrh, val));
+                    int oldGrh = tile.getObjGrh().getGrhIndex();
+                    int newGrh = 0;
+                    if (val > 0 && AssetRegistry.objs != null && AssetRegistry.objs.containsKey(val)) {
+                        newGrh = AssetRegistry.objs.get(val).getGrhIndex();
+                    }
+                    commandManager.executeCommand(new ObjChangeCommand(context, x, y, oldGrh, newGrh, currentObjIndex, val, tile.getObjAmount(), tile.getObjAmount()));
                 }
             }
 

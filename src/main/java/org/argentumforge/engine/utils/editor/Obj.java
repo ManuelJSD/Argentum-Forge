@@ -104,12 +104,15 @@ public class Obj {
                 int oldGrh = mapData[x][y].getObjGrh().getGrhIndex();
                 int newGrh = data.getGrhIndex();
 
-                if (oldGrh == newGrh)
+                int oldObjIndex = mapData[x][y].getObjIndex();
+                int newObjIndex = data.getNumber();
+
+                if (oldGrh == newGrh && oldObjIndex == newObjIndex)
                     return;
 
                 CommandManager.getInstance().executeCommand(
                         new ObjChangeCommand(
-                                context, x, y, oldGrh, newGrh));
+                                context, x, y, oldGrh, newGrh, oldObjIndex, newObjIndex, mapData[x][y].getObjAmount(), 1));
             }
         }
     }
@@ -120,12 +123,13 @@ public class Obj {
         var mapData = context.getMapData();
         if (mapData != null && x >= 0 && x < mapData.length && y >= 0 && y < mapData[0].length) {
             int oldGrh = mapData[x][y].getObjGrh().getGrhIndex();
-            if (oldGrh == 0)
+            int oldObjIndex = mapData[x][y].getObjIndex();
+            if (oldGrh == 0 && oldObjIndex == 0)
                 return;
 
             CommandManager.getInstance().executeCommand(
                     new ObjChangeCommand(
-                            context, x, y, oldGrh, 0));
+                            context, x, y, oldGrh, 0, oldObjIndex, 0, mapData[x][y].getObjAmount(), 0));
         }
     }
 
