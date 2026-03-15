@@ -21,7 +21,7 @@ public class FOptimizer extends Form {
 
     @Override
     public void render() {
-        ImGui.setNextWindowSize(500, 550, imgui.flag.ImGuiCond.FirstUseEver);
+        ImGui.setNextWindowSize(500, 350, imgui.flag.ImGuiCond.FirstUseEver);
 
         if (ImGui.begin(I18n.INSTANCE.get("optimizer.title"), ImGuiWindowFlags.NoCollapse)) {
 
