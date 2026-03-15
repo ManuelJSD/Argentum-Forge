@@ -18,6 +18,7 @@ import org.argentumforge.engine.utils.editor.*;
  * partículas, traslados y NPCs, con soporte para mosaico y modo aleatorio.
  */
 public class FAreaOperations extends Form {
+    private final imgui.type.ImBoolean pOpen = new imgui.type.ImBoolean(true);
 
     /** Fuente del área: 0 = selección actual, 1 = manual, 2 = todo el mapa */
     private int areaSource = 0;
@@ -40,7 +41,10 @@ public class FAreaOperations extends Form {
         ImGui.setNextWindowSize(400, 580, imgui.flag.ImGuiCond.FirstUseEver);
 
         int flags = ImGuiWindowFlags.NoCollapse;
-        if (ImGui.begin(I18n.INSTANCE.get("editor.area.title") + "###FAreaOperations", flags)) {
+        if (ImGui.begin(I18n.INSTANCE.get("editor.area.title") + "###FAreaOperations", pOpen, flags)) {
+            if (!pOpen.get()) {
+                this.close();
+            }
 
             MapContext context = GameData.getActiveContext();
             boolean hasMap = context != null && context.getMapData() != null;
@@ -96,6 +100,13 @@ public class FAreaOperations extends Form {
 
             // ── NPCs ──
             drawNpcSection(context, bounds, enabled);
+
+            ImGui.separator();
+            ImGui.spacing();
+
+            if (ImGui.button(I18n.INSTANCE.get("common.close"), -1, 0)) {
+                this.close();
+            }
         }
         ImGui.end();
     }
