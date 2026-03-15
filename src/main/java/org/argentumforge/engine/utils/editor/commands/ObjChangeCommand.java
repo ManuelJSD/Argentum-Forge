@@ -13,30 +13,39 @@ public class ObjChangeCommand extends AbstractCommand {
     }
 
     private final int x, y;
-    private final int oldObjGrh;
-    private final int newObjGrh;
+    private final int oldObjGrh, newObjGrh;
+    private final int oldObjIndex, newObjIndex;
+    private final int oldObjAmount, newObjAmount;
 
-    public ObjChangeCommand(org.argentumforge.engine.utils.MapContext context, int x, int y, int oldObjGrh,
-            int newObjGrh) {
+    public ObjChangeCommand(org.argentumforge.engine.utils.MapContext context, int x, int y,
+            int oldObjGrh, int newObjGrh,
+            int oldObjIndex, int newObjIndex,
+            int oldObjAmount, int newObjAmount) {
         super(context);
         this.x = x;
         this.y = y;
         this.oldObjGrh = oldObjGrh;
         this.newObjGrh = newObjGrh;
+        this.oldObjIndex = oldObjIndex;
+        this.newObjIndex = newObjIndex;
+        this.oldObjAmount = oldObjAmount;
+        this.newObjAmount = newObjAmount;
     }
 
     @Override
     public void execute() {
-        apply(newObjGrh);
+        apply(newObjGrh, newObjIndex, newObjAmount);
     }
 
     @Override
     public void undo() {
-        apply(oldObjGrh);
+        apply(oldObjGrh, oldObjIndex, oldObjAmount);
     }
 
-    private void apply(int grhIndex) {
+    private void apply(int grhIndex, int objIndex, int objAmount) {
         var mapData = context.getMapData();
+        mapData[x][y].setObjIndex(objIndex);
+        mapData[x][y].setObjAmount(objAmount);
         mapData[x][y].getObjGrh().setGrhIndex(0);
         if (grhIndex > 0) {
             initGrh(mapData[x][y].getObjGrh(), (short) grhIndex, false);

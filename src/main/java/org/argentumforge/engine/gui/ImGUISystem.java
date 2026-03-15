@@ -87,8 +87,7 @@ public enum ImGUISystem {
         final ImGuiIO io = ImGui.getIO();
 
         io.setIniFilename("resources/gui.ini"); // Guardamos en un archivo .ini
-        io.setConfigFlags(ImGuiConfigFlags.NavEnableKeyboard | ImGuiConfigFlags.DockingEnable
-                | ImGuiConfigFlags.ViewportsEnable); // Navegacion con el teclado, Docking y Viewports (Multi-monitor)
+        io.setConfigFlags(ImGuiConfigFlags.NavEnableKeyboard | ImGuiConfigFlags.ViewportsEnable); // Navegacion con el teclado y Viewports (Multi-monitor)
         io.setBackendFlags(ImGuiBackendFlags.HasMouseCursors); // Cursores del mouse para mostrar al cambiar el tamaño
                                                                // de las ventanas, etc.
         io.setBackendPlatformName("imgui_java_impl_glfw");

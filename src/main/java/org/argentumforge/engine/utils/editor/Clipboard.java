@@ -84,20 +84,23 @@ public class Clipboard {
         for (Selection.SelectedEntity se : selectedEntities) {
             ClipboardItem item = new ClipboardItem(se.type, se.id, se.x - refX, se.y - refY);
 
-            if (se.type == Selection.EntityType.TILE) {
+            if (se.type == Selection.EntityType.TILE || se.type == Selection.EntityType.OBJECT) {
                 var data = mapData[se.x][se.y];
-                item.layers = new int[5];
-                for (int i = 1; i <= 4; i++) {
-                    item.layers[i] = data.getLayer(i).getGrhIndex();
-                }
-                item.blocked = data.getBlocked();
-                item.trigger = data.getTrigger();
-                item.exitMap = data.getExitMap();
-                item.exitX = data.getExitX();
-                item.exitY = data.getExitY();
                 item.objIndex = data.getObjIndex();
                 item.objAmount = data.getObjAmount();
-                item.particleIndex = data.getParticleIndex();
+
+                if (se.type == Selection.EntityType.TILE) {
+                    item.layers = new int[5];
+                    for (int i = 1; i <= 4; i++) {
+                        item.layers[i] = data.getLayer(i).getGrhIndex();
+                    }
+                    item.blocked = data.getBlocked();
+                    item.trigger = data.getTrigger();
+                    item.exitMap = data.getExitMap();
+                    item.exitX = data.getExitX();
+                    item.exitY = data.getExitY();
+                    item.particleIndex = data.getParticleIndex();
+                }
             }
             items.add(item);
         }

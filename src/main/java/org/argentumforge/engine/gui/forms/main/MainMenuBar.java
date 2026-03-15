@@ -274,7 +274,25 @@ public class MainMenuBar {
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.view.resetZoom"), "Ctrl+0")) {
                     Camera.setTileSize(32);
                 }
-                // ...
+                
+                if (ImGui.menuItem(I18n.INSTANCE.get("menu.view.resetPanels"))) {
+                    DialogManager.getInstance().showConfirm(
+                            I18n.INSTANCE.get("menu.view.resetPanels.title"),
+                            I18n.INSTANCE.get("menu.view.resetPanels.msg"),
+                            () -> {
+                                // 1. Borrar el archivo de diseño guardado
+                                java.io.File guiIni = new java.io.File("resources/gui.ini");
+                                if (guiIni.exists()) {
+                                    guiIni.delete();
+                                }
+                                // 2. Aplicar estado vacío en memoria para efecto inmediato
+                                //    (ImGui reconstruirá las posiciones en el primer frame)
+                                ImGui.loadIniSettingsFromMemory("");
+                            },
+                            null
+                    );
+                }
+                
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.view.guidesConfig"))) {
                     ImGUISystem.INSTANCE.show(new FOptions());
                 }

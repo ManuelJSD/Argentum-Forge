@@ -195,8 +195,8 @@ public class FBindKeys extends Form {
                 renderKeyBindRow(I18n.INSTANCE.get("options.keys.exit"), Key.EXIT_GAME);
                 ImGui.columns(1);
 
-                ImGui.endChild();
             }
+            ImGui.endChild();
 
             ImGui.separator();
             ImGui.dummy(0, 10);

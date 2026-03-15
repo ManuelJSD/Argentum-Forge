@@ -297,13 +297,26 @@ public final class AreaOperationService {
         var mapData = ctx.getMapData();
         MacroCommand macro = new MacroCommand();
 
+        // Buscar el ObjNumber correspondiente al GrhIndex para mantener sincronización
+        int objIndex = 0;
+        if (org.argentumforge.engine.utils.AssetRegistry.objs != null) {
+            for (var data : org.argentumforge.engine.utils.AssetRegistry.objs.values()) {
+                if (data.getGrhIndex() == objGrhIndex) {
+                    objIndex = data.getNumber();
+                    break;
+                }
+            }
+        }
+
         for (int x = x1; x <= x2; x++) {
             for (int y = y1; y <= y2; y++) {
                 if (!inBounds(mapData, x, y))
                     continue;
                 int oldGrh = mapData[x][y].getObjGrh().getGrhIndex();
-                if (oldGrh != objGrhIndex) {
-                    macro.addCommand(new ObjChangeCommand(ctx, x, y, oldGrh, objGrhIndex));
+                int oldObjIndex = mapData[x][y].getObjIndex();
+                int oldAmount = mapData[x][y].getObjAmount();
+                if (oldGrh != objGrhIndex || oldObjIndex != objIndex) {
+                    macro.addCommand(new ObjChangeCommand(ctx, x, y, oldGrh, objGrhIndex, oldObjIndex, objIndex, oldAmount, 1));
                 }
             }
         }
@@ -328,8 +341,10 @@ public final class AreaOperationService {
                 if (!inBounds(mapData, x, y))
                     continue;
                 int oldGrh = mapData[x][y].getObjGrh().getGrhIndex();
-                if (oldGrh != 0) {
-                    macro.addCommand(new ObjChangeCommand(ctx, x, y, oldGrh, 0));
+                int oldObjIndex = mapData[x][y].getObjIndex();
+                int oldAmount = mapData[x][y].getObjAmount();
+                if (oldGrh != 0 || oldObjIndex != 0) {
+                    macro.addCommand(new ObjChangeCommand(ctx, x, y, oldGrh, 0, oldObjIndex, 0, oldAmount, 0));
                 }
             }
         }

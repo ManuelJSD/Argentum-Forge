@@ -723,7 +723,7 @@ public class FSurfaceEditor extends Form implements IMapEditor {
                 }
                 ImGui.endTable();
             }
-            ImGui.endChild();
         }
+        ImGui.endChild();
     }
 }

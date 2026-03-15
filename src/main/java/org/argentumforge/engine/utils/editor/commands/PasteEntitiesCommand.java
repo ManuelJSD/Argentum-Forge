@@ -45,11 +45,33 @@ public class PasteEntitiesCommand extends AbstractCommand {
             }
             // 2. OBJECT
             else if (item.type == Selection.EntityType.OBJECT && settings.objects) {
-                int oldObj = tile.getObjGrh().getGrhIndex();
-                commands.add(new ObjChangeCommand(context, tx, ty, oldObj, item.id));
+                int oldGrh = tile.getObjGrh().getGrhIndex();
+                int oldObjIndex = tile.getObjIndex();
+                int oldAmount = tile.getObjAmount();
+                commands.add(new ObjChangeCommand(context, tx, ty, oldGrh, item.id, oldObjIndex, item.objIndex,
+                        oldAmount, item.objAmount));
             }
             // 3. TILE (All attributes)
             else if (item.type == Selection.EntityType.TILE) {
+                // Objects
+                if (settings.objects) {
+                    int oldGrh = tile.getObjGrh().getGrhIndex();
+                    int oldObjIndex = tile.getObjIndex();
+                    int oldAmount = tile.getObjAmount();
+                    // Para un tile, el 'id' del item suele ser 0, buscamos el item.objIndex/objAmount
+                    // El gráfico se deriva de AssetRegistry si es necesario, pero ClipboardItem ya tiene grhIndex? 
+                    // No, ClipboardItem.id se usó como grhIndex para OBJECT. Para TILE necesitamos derivarlo.
+                    int newGrh = 0;
+                    if (item.objIndex > 0 && org.argentumforge.engine.utils.AssetRegistry.objs != null) {
+                        var objData = org.argentumforge.engine.utils.AssetRegistry.objs.get(item.objIndex);
+                        if (objData != null) newGrh = objData.getGrhIndex();
+                    }
+                    if (oldObjIndex != item.objIndex || oldGrh != newGrh) {
+                        commands.add(new ObjChangeCommand(context, tx, ty, oldGrh, newGrh, oldObjIndex, item.objIndex,
+                            oldAmount, item.objAmount));
+                    }
+                }
+
                 // Layers
                 if (item.layers != null) {
                     for (int i = 1; i <= 4; i++) {
