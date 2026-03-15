@@ -12,6 +12,7 @@ import org.argentumforge.engine.game.console.Console;
 import org.argentumforge.engine.renderer.RGBColor;
 import org.argentumforge.engine.utils.MapFileUtils;
 import imgui.ImGui;
+import org.argentumforge.engine.i18n.I18n;
 import static org.argentumforge.engine.game.console.FontStyle.REGULAR;
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -229,7 +230,7 @@ public class ShortcutManager {
             org.argentumforge.engine.utils.editor.Surface.getInstance().setMode(1);
             org.argentumforge.engine.utils.editor.Surface.getInstance()
                     .setToolMode(org.argentumforge.engine.utils.editor.Surface.ToolMode.BRUSH);
-            org.argentumforge.engine.game.console.Console.INSTANCE.addMsgToConsole("Herramienta: Pincel",
+            org.argentumforge.engine.game.console.Console.INSTANCE.addMsgToConsole(I18n.INSTANCE.get("msg.tool.brush"),
                     org.argentumforge.engine.game.console.FontStyle.REGULAR,
                     new org.argentumforge.engine.renderer.RGBColor(1f, 1f, 1f));
         }
@@ -237,19 +238,19 @@ public class ShortcutManager {
             org.argentumforge.engine.utils.editor.Surface.getInstance().setMode(1);
             org.argentumforge.engine.utils.editor.Surface.getInstance()
                     .setToolMode(org.argentumforge.engine.utils.editor.Surface.ToolMode.BUCKET);
-            org.argentumforge.engine.game.console.Console.INSTANCE.addMsgToConsole("Herramienta: Cubo de Relleno",
+            org.argentumforge.engine.game.console.Console.INSTANCE.addMsgToConsole(I18n.INSTANCE.get("msg.tool.bucket"),
                     org.argentumforge.engine.game.console.FontStyle.REGULAR,
                     new org.argentumforge.engine.renderer.RGBColor(1f, 1f, 1f));
         }
         if (KeyHandler.isActionKeyJustPressed(Key.TOOL_ERASER)) {
             org.argentumforge.engine.utils.editor.Surface.getInstance().setMode(2);
-            org.argentumforge.engine.game.console.Console.INSTANCE.addMsgToConsole("Herramienta: Borrar",
+            org.argentumforge.engine.game.console.Console.INSTANCE.addMsgToConsole(I18n.INSTANCE.get("msg.tool.eraser"),
                     org.argentumforge.engine.game.console.FontStyle.REGULAR,
                     new org.argentumforge.engine.renderer.RGBColor(1f, 0.5f, 0.5f));
         }
         if (KeyHandler.isActionKeyJustPressed(Key.TOOL_PICK)) {
             org.argentumforge.engine.utils.editor.Surface.getInstance().setMode(3);
-            org.argentumforge.engine.game.console.Console.INSTANCE.addMsgToConsole("Herramienta: Capturar (Pick)",
+            org.argentumforge.engine.game.console.Console.INSTANCE.addMsgToConsole(I18n.INSTANCE.get("msg.tool.pick"),
                     org.argentumforge.engine.game.console.FontStyle.REGULAR,
                     new org.argentumforge.engine.renderer.RGBColor(0.5f, 1f, 0.5f));
         }
@@ -257,7 +258,7 @@ public class ShortcutManager {
             org.argentumforge.engine.utils.editor.Surface.getInstance().setMode(1);
             org.argentumforge.engine.utils.editor.Surface.getInstance()
                     .setToolMode(org.argentumforge.engine.utils.editor.Surface.ToolMode.MAGIC_WAND);
-            org.argentumforge.engine.game.console.Console.INSTANCE.addMsgToConsole("Herramienta: Varita Mágica",
+            org.argentumforge.engine.game.console.Console.INSTANCE.addMsgToConsole(I18n.INSTANCE.get("msg.tool.magic_wand"),
                     org.argentumforge.engine.game.console.FontStyle.REGULAR,
                     new org.argentumforge.engine.renderer.RGBColor(0.8f, 0.4f, 1f));
         }
