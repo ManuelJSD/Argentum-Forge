@@ -484,6 +484,13 @@ public class MainMenuBar {
                 if (ImGui.menuItem(I18n.INSTANCE.get("menu.help.about"))) {
                     ImGUISystem.INSTANCE.show(new FAbout());
                 }
+                if (ImGui.menuItem(I18n.INSTANCE.get("menu.help.reportBug"))) {
+                    try {
+                        java.awt.Desktop.getDesktop().browse(new java.net.URI("https://github.com/ManuelJSD/Argentum-Forge/issues"));
+                    } catch (Exception e) {
+                        org.tinylog.Logger.error(e, "Error al abrir la página de reporte de bugs");
+                    }
+                }
                 ImGui.endMenu();
             }
 

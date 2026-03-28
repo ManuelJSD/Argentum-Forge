@@ -158,7 +158,7 @@ public class MapExporter {
      * Agrega el {@code fileNum} del GRH al conjunto, validando índices.
      */
     private static void addGrhFileNum(Set<Integer> fileNums, int grhIndex) {
-        if (grhIndex <= 0 || grhIndex >= grhData.length || grhData[grhIndex] == null)
+        if (grhData == null || grhIndex <= 0 || grhIndex >= grhData.length || grhData[grhIndex] == null)
             return;
         // GRHs animados: agregar el fileNum de todos sus frames
         int numFrames = grhData[grhIndex].getNumFrames();
@@ -202,9 +202,10 @@ public class MapExporter {
                         }
                     }
                     if (renderSettings.getShowOJBs()) {
-                        if (mapData[x][y].getObjGrh().getGrhIndex() != 0) {
-                            if (grhData[mapData[x][y].getObjGrh().getGrhIndex()].getPixelWidth() == TILE_SIZE &&
-                                    grhData[mapData[x][y].getObjGrh().getGrhIndex()].getPixelHeight() == TILE_SIZE) {
+                        int objGrhIdx = mapData[x][y].getObjGrh().getGrhIndex();
+                        if (objGrhIdx > 0 && grhData != null && objGrhIdx < grhData.length && grhData[objGrhIdx] != null) {
+                            if (grhData[objGrhIdx].getPixelWidth() == TILE_SIZE &&
+                                    grhData[objGrhIdx].getPixelHeight() == TILE_SIZE) {
                                 drawTexture(mapData[x][y].getObjGrh(), x * TILE_SIZE, y * TILE_SIZE,
                                         true, true, false, 1.0f, weather.getWeatherColor());
                             }
@@ -221,9 +222,10 @@ public class MapExporter {
                     continue;
 
                 if (renderSettings.getShowOJBs()) {
-                    if (mapData[x][y].getObjGrh().getGrhIndex() != 0) {
-                        if (grhData[mapData[x][y].getObjGrh().getGrhIndex()].getPixelWidth() != TILE_SIZE &&
-                                grhData[mapData[x][y].getObjGrh().getGrhIndex()].getPixelHeight() != TILE_SIZE) {
+                    int objGrhIdx = mapData[x][y].getObjGrh().getGrhIndex();
+                    if (objGrhIdx > 0 && grhData != null && objGrhIdx < grhData.length && grhData[objGrhIdx] != null) {
+                        if (grhData[objGrhIdx].getPixelWidth() != TILE_SIZE &&
+                                grhData[objGrhIdx].getPixelHeight() != TILE_SIZE) {
                             drawTexture(mapData[x][y].getObjGrh(), x * TILE_SIZE, y * TILE_SIZE,
                                     true, true, false, 1.0f, weather.getWeatherColor());
                         }
