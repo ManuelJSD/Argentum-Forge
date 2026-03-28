@@ -37,6 +37,13 @@ public class MapRenderer {
     }
 
     public void render(int pixelOffsetX, int pixelOffsetY) {
+        // Validar que los datos gráficos (Graficos.ind) se cargaron correctamente.
+        // Si grhData es null, posiblemente la ruta de INIT es incorrecta o el archivo
+        // está corrupto. Evitamos el NullPointerException críptico que confunde al usuario.
+        if (grhData == null) {
+            return;
+        }
+
         var context = org.argentumforge.engine.utils.GameData.getActiveContext();
         if (context == null || context.getMapData() == null)
             return;
@@ -138,9 +145,10 @@ public class MapRenderer {
                 }
 
                 if (renderSettings.getShowOJBs()) {
-                    if (mapData[x][y].getObjGrh().getGrhIndex() != 0) {
-                        if (grhData[mapData[x][y].getObjGrh().getGrhIndex()].getPixelWidth() == TILE_PIXEL_SIZE &&
-                                grhData[mapData[x][y].getObjGrh().getGrhIndex()].getPixelHeight() == TILE_PIXEL_SIZE) {
+                    int objGrhIdx = mapData[x][y].getObjGrh().getGrhIndex();
+                    if (objGrhIdx > 0 && objGrhIdx < grhData.length && grhData[objGrhIdx] != null) {
+                        if (grhData[objGrhIdx].getPixelWidth() == TILE_PIXEL_SIZE &&
+                                grhData[objGrhIdx].getPixelHeight() == TILE_PIXEL_SIZE) {
 
                             boolean isDragged = false;
                             if (selection.isDragging()) {
@@ -213,9 +221,10 @@ public class MapRenderer {
                 }
 
                 if (renderSettings.getShowOJBs()) {
-                    if (mapData[x][y].getObjGrh().getGrhIndex() != 0) {
-                        if (grhData[mapData[x][y].getObjGrh().getGrhIndex()].getPixelWidth() != TILE_PIXEL_SIZE ||
-                                grhData[mapData[x][y].getObjGrh().getGrhIndex()].getPixelHeight() != TILE_PIXEL_SIZE) {
+                    int objGrhIdx = mapData[x][y].getObjGrh().getGrhIndex();
+                    if (objGrhIdx > 0 && objGrhIdx < grhData.length && grhData[objGrhIdx] != null) {
+                        if (grhData[objGrhIdx].getPixelWidth() != TILE_PIXEL_SIZE ||
+                                grhData[objGrhIdx].getPixelHeight() != TILE_PIXEL_SIZE) {
 
                             boolean isDragged = false;
                             if (selection.isDragging()) {
@@ -678,7 +687,7 @@ public class MapRenderer {
     }
 
     private void drawGhostGrh(int grhIndex, int x, int y, float alpha, RGBColor color) {
-        if (grhIndex <= 0 || grhIndex >= grhData.length || grhData[grhIndex] == null)
+        if (grhData == null || grhIndex <= 0 || grhIndex >= grhData.length || grhData[grhIndex] == null)
             return;
 
         // Aplicar logica de centrado de Drawn.drawTexture
