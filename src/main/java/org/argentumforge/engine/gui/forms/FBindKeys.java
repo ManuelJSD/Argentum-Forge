@@ -187,6 +187,25 @@ public class FBindKeys extends Form {
                     ImGui.dummy(0, 5);
                 }
 
+                // EDITORS
+                if (ImGui.collapsingHeader(I18n.INSTANCE.get("options.keys.editors"), ImGuiTreeNodeFlags.DefaultOpen)) {
+                    ImGui.columns(2, "BindKeysCols_Edit", false);
+                    ImGui.setColumnWidth(0, ImGui.getWindowWidth() - 160);
+
+                    renderKeyBindRow(I18n.INSTANCE.get("options.keys.surfaceEditor"), Key.OPEN_SURFACE_EDITOR);
+                    renderKeyBindRow(I18n.INSTANCE.get("options.keys.blockEditor"), Key.OPEN_BLOCK_EDITOR);
+                    renderKeyBindRow(I18n.INSTANCE.get("options.keys.npcEditor"), Key.OPEN_NPC_EDITOR);
+                    renderKeyBindRow(I18n.INSTANCE.get("options.keys.objEditor"), Key.OPEN_OBJ_EDITOR);
+                    renderKeyBindRow(I18n.INSTANCE.get("options.keys.triggerEditor"), Key.OPEN_TRIGGER_EDITOR);
+                    renderKeyBindRow(I18n.INSTANCE.get("options.keys.transferEditor"), Key.OPEN_TRANSFER_EDITOR);
+                    renderKeyBindRow(I18n.INSTANCE.get("options.keys.particleEditor"), Key.OPEN_PARTICLE_EDITOR);
+                    renderKeyBindRow(I18n.INSTANCE.get("options.keys.minimapEditor"), Key.OPEN_MINIMAP_EDITOR);
+                    renderKeyBindRow(I18n.INSTANCE.get("options.keys.inspectorMode"), Key.TOGGLE_INSPECTOR_MODE);
+
+                    ImGui.columns(1);
+                    ImGui.dummy(0, 5);
+                }
+
                 // EXIT
                 ImGui.separator();
                 ImGui.dummy(0, 5);

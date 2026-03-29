@@ -8,6 +8,7 @@ import org.argentumforge.engine.gui.Theme;
 import org.argentumforge.engine.utils.GameData;
 import org.argentumforge.engine.utils.MapManager;
 import org.argentumforge.engine.game.User;
+import org.argentumforge.engine.i18n.I18n;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -86,7 +87,7 @@ public class FilmstripBar {
             drawEyeIcon(ImGui.getItemRectMinX(), ImGui.getItemRectMinY(), btnSize, isVisible, hovered);
 
             if (hovered)
-                ImGui.setTooltip(isVisible ? "Ocultar Cinta" : "Mostrar Cinta");
+                ImGui.setTooltip(isVisible ? I18n.INSTANCE.get("filmstrip.hide") : I18n.INSTANCE.get("filmstrip.show"));
         }
         ImGui.end();
         ImGui.popStyleVar();
@@ -248,7 +249,7 @@ public class FilmstripBar {
 
         // Tooltip con Nombre
         if (ImGui.isItemHovered() && info.exists) {
-            String tooltip = "Mapa " + mapId;
+            String tooltip = I18n.INSTANCE.get("filmstrip.map") + " " + mapId;
             if (info.name != null && !info.name.isEmpty()) {
                 tooltip += "\n" + info.name;
             }

@@ -23,6 +23,21 @@ public class PostProcessor {
     private static final String FRAGMENT_SHADER = "#version 330 core\n" +
             "in vec2 vTexCoord;\n" +
             "out vec4 FragColor;\n" +
+            "uniform sampler2D uTexture;\n" +
+            "uniform float uZoom;\n" +
+            "uniform float uExposure;\n" +
+            "uniform float uContrast;\n" +
+            "uniform float uSaturation;\n" +
+            "uniform int uFilterType;\n" +
+            "uniform int uBloomActive;\n" +
+            "uniform float uBloomIntensity;\n" +
+            "uniform float uBloomThreshold;\n" +
+            "uniform int uDoFActive;\n" +
+            "uniform float uDoFFocus;\n" +
+            "uniform float uDoFRange;\n" +
+            "uniform int uGrainActive;\n" +
+            "uniform float uGrainIntensity;\n" +
+            "uniform float uTime;\n" +
 
             "float rand(vec2 co) {\n" +
             "    return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);\n" +

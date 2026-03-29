@@ -246,7 +246,7 @@ public final class FMain extends Form {
                     try {
                         Form.openURL(release.htmlUrl);
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        org.tinylog.Logger.error(e, "Error al abrir la URL de descarga de la actualización");
                     }
                 }
                 ImGui.closeCurrentPopup();
@@ -274,6 +274,7 @@ public final class FMain extends Form {
             ImGui.endPopup();
         }
 
+        org.argentumforge.engine.gui.ToastManager.INSTANCE.render();
     }
 
     private void drawTabs() {

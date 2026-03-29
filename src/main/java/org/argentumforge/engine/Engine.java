@@ -263,8 +263,6 @@ public final class Engine {
 
             MouseListener.resetReleasedButtons();
 
-            MouseListener.resetReleasedButtons();
-
             // Procesar tareas del hilo principal
             synchronized (taskQueue) {
                 while (!taskQueue.isEmpty()) {

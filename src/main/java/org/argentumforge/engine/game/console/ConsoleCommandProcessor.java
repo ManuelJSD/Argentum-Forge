@@ -7,7 +7,7 @@ import org.argentumforge.engine.game.User;
 import org.argentumforge.engine.game.Options;
 import org.argentumforge.engine.scenes.Camera;
 import org.argentumforge.engine.utils.GameData;
-import org.argentumforge.engine.utils.GameData;
+import org.argentumforge.engine.i18n.I18n;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -21,7 +21,7 @@ public class ConsoleCommandProcessor {
     static {
         // --- System Commands ---
         register("/help", "command.help.desc", args -> {
-            Console.INSTANCE.addMsgToConsole("--- Comandos Disponibles ---", MessageType.INFO);
+            Console.INSTANCE.addMsgToConsole(I18n.INSTANCE.get("console.cmd.help.header"), MessageType.INFO);
             for (ConsoleCommand cmd : commands) {
                 Console.INSTANCE.addMsgToConsole(cmd.name(), MessageType.INFO);
             }
@@ -31,12 +31,12 @@ public class ConsoleCommandProcessor {
         register("/clear", "command.clear.desc", args -> Console.INSTANCE.clearConsole());
 
         register("/reloadgrh", "command.reloadgrh.desc", args -> {
-            Console.INSTANCE.addMsgToConsole("Recargando GRH Library...", Console.MessageType.INFO);
+            Console.INSTANCE.addMsgToConsole(I18n.INSTANCE.get("console.cmd.reloadgrh.start"), Console.MessageType.INFO);
             try {
                 org.argentumforge.engine.utils.editor.GrhLibraryManager.getInstance().load();
-                Console.INSTANCE.addMsgToConsole("GRH Library recargada exitosamente.", Console.MessageType.INFO);
+                Console.INSTANCE.addMsgToConsole(I18n.INSTANCE.get("console.cmd.reloadgrh.success"), Console.MessageType.INFO);
             } catch (Exception e) {
-                Console.INSTANCE.addMsgToConsole("Error al recargar GRH: " + e.getMessage(), Console.MessageType.ERROR);
+                Console.INSTANCE.addMsgToConsole(I18n.INSTANCE.get("console.cmd.reloadgrh.error") + e.getMessage(), Console.MessageType.ERROR);
             }
         });
 
@@ -51,7 +51,7 @@ public class ConsoleCommandProcessor {
         // --- Navigation Commands ---
         register("/goto", "command.goto.desc", args -> {
             if (args.length < 2) {
-                Console.INSTANCE.addMsgToConsole("Uso: /goto <x> <y>", MessageType.ERROR);
+                Console.INSTANCE.addMsgToConsole(I18n.INSTANCE.get("console.cmd.goto.usage"), MessageType.ERROR);
                 return;
             }
             try {
@@ -62,9 +62,9 @@ public class ConsoleCommandProcessor {
                         .getCurrentScene()).getCamera();
                 if (cam != null)
                     cam.update(x, y);
-                Console.INSTANCE.addMsgToConsole("Teletransportado a " + x + ", " + y, MessageType.INFO);
+                Console.INSTANCE.addMsgToConsole(I18n.INSTANCE.get("console.cmd.goto.success") + x + ", " + y, MessageType.INFO);
             } catch (NumberFormatException e) {
-                Console.INSTANCE.addMsgToConsole("Coordenadas inválidas.", MessageType.ERROR);
+                Console.INSTANCE.addMsgToConsole(I18n.INSTANCE.get("console.cmd.goto.invalid"), MessageType.ERROR);
             }
         });
 
@@ -74,12 +74,12 @@ public class ConsoleCommandProcessor {
                     .getCamera();
             if (cam != null)
                 cam.update(50, 50);
-            Console.INSTANCE.addMsgToConsole("Centrado en 50, 50", MessageType.INFO);
+            Console.INSTANCE.addMsgToConsole(I18n.INSTANCE.get("console.cmd.center.done"), MessageType.INFO);
         });
 
         register("/resetzoom", "command.resetzoom.desc", args -> {
             Camera.setTileSize(32);
-            Console.INSTANCE.addMsgToConsole("Zoom restablecido (32px).", MessageType.INFO);
+            Console.INSTANCE.addMsgToConsole(I18n.INSTANCE.get("console.cmd.resetzoom.done"), MessageType.INFO);
         });
 
         // --- Visuals Commands ---
@@ -87,13 +87,13 @@ public class ConsoleCommandProcessor {
         register("/grid", "command.grid.desc", args -> {
             boolean state = !Options.INSTANCE.getRenderSettings().isShowGrid();
             Options.INSTANCE.getRenderSettings().setShowGrid(state);
-            Console.INSTANCE.addMsgToConsole("Grilla " + (state ? "Activada" : "Desactivada"), MessageType.INFO);
+            Console.INSTANCE.addMsgToConsole(I18n.INSTANCE.get(state ? "console.cmd.grid.on" : "console.cmd.grid.off"), MessageType.INFO);
         });
 
         register("/blocks", "command.blocks.desc", args -> {
             boolean state = !Options.INSTANCE.getRenderSettings().getShowBlock();
             Options.INSTANCE.getRenderSettings().setShowBlock(state);
-            Console.INSTANCE.addMsgToConsole("Bloqueos " + (state ? "Visibles" : "Ocultos"), MessageType.INFO);
+            Console.INSTANCE.addMsgToConsole(I18n.INSTANCE.get(state ? "console.cmd.blocks.on" : "console.cmd.blocks.off"), MessageType.INFO);
         });
 
         register("/layers", "command.layers.desc", args -> {
@@ -102,7 +102,7 @@ public class ConsoleCommandProcessor {
             layers[1] = newState;
             layers[2] = newState;
             layers[3] = newState;
-            Console.INSTANCE.addMsgToConsole("Capas superiores " + (newState ? "Visibles" : "Ocultas"),
+            Console.INSTANCE.addMsgToConsole(I18n.INSTANCE.get(newState ? "console.cmd.layers.on" : "console.cmd.layers.off"),
                     MessageType.INFO);
         });
 
@@ -119,13 +119,13 @@ public class ConsoleCommandProcessor {
                 } catch (Exception ignored) {
                 }
 
-                Console.INSTANCE.addMsgToConsole("Mapa: " + mapNum + " - " + ctx.getMapName(), MessageType.INFO);
+                Console.INSTANCE.addMsgToConsole(I18n.INSTANCE.get("console.cmd.mapinfo.map") + mapNum + " - " + ctx.getMapName(), MessageType.INFO);
                 Console.INSTANCE.addMsgToConsole("Tamaño: " + GameData.X_MAX_MAP_SIZE + "x" + GameData.Y_MAX_MAP_SIZE,
                         MessageType.INFO);
                 Console.INSTANCE.addMsgToConsole("Música ID: " + ctx.getMapProperties().getMusicIndex(),
                         MessageType.INFO);
             } else {
-                Console.INSTANCE.addMsgToConsole("No hay mapa cargado.", MessageType.WARNING);
+                Console.INSTANCE.addMsgToConsole(I18n.INSTANCE.get("console.cmd.mapinfo.nomap"), MessageType.WARNING);
             }
         });
 
@@ -143,23 +143,23 @@ public class ConsoleCommandProcessor {
         // --- System/Edit Commands ---
         register("/screenshot", "command.screenshot.desc", args -> {
             org.argentumforge.engine.utils.ScreenshotHandler.takeScreenshot();
-            Console.INSTANCE.addMsgToConsole("Capturando pantalla...", MessageType.INFO);
+            Console.INSTANCE.addMsgToConsole(I18n.INSTANCE.get("console.cmd.screenshot.done"), MessageType.INFO);
         });
 
         register("/theme", "command.theme.desc", args -> {
             if (args.length < 1) {
-                Console.INSTANCE.addMsgToConsole("Uso: /theme [DARK|LIGHT|MODERN|CLASSIC]", MessageType.ERROR);
+                Console.INSTANCE.addMsgToConsole(I18n.INSTANCE.get("console.cmd.theme.usage"), MessageType.ERROR);
                 return;
             }
             String themeName = args[0].toUpperCase();
             Options.INSTANCE.setVisualTheme(themeName);
             Console.INSTANCE.addMsgToConsole(
-                    "Tema cambiado a " + themeName + " (Requiere reinicio para aplicar totalmente)", MessageType.INFO);
+                    I18n.INSTANCE.get("console.cmd.theme.changed") + themeName, MessageType.INFO);
         });
 
         register("/fill", "command.fill.desc", args -> {
             if (args.length < 2) {
-                Console.INSTANCE.addMsgToConsole("Uso: /fill <capa 1-4> <grhIndex>", MessageType.ERROR);
+                Console.INSTANCE.addMsgToConsole(I18n.INSTANCE.get("console.cmd.fill.usage"), MessageType.ERROR);
                 return;
             }
             try {
@@ -172,10 +172,10 @@ public class ConsoleCommandProcessor {
                             ctx.getMapData()[x][y].getLayer(layer).setGrhIndex(grh);
                         }
                     }
-                    Console.INSTANCE.addMsgToConsole("Capa " + layer + " rellenada con Grh " + grh, MessageType.INFO);
+                    Console.INSTANCE.addMsgToConsole(String.format(I18n.INSTANCE.get("console.cmd.fill.done"), layer, grh), MessageType.INFO);
                 }
             } catch (Exception e) {
-                Console.INSTANCE.addMsgToConsole("Error en argumentos.", MessageType.ERROR);
+                Console.INSTANCE.addMsgToConsole(I18n.INSTANCE.get("console.cmd.fill.error"), MessageType.ERROR);
             }
         });
 
@@ -187,7 +187,7 @@ public class ConsoleCommandProcessor {
                         ctx.getMapData()[x][y].setBlocked(false);
                     }
                 }
-                Console.INSTANCE.addMsgToConsole("Bloqueos eliminados.", MessageType.INFO);
+                Console.INSTANCE.addMsgToConsole(I18n.INSTANCE.get("console.cmd.clearblocks.done"), MessageType.INFO);
             }
         });
 
@@ -211,14 +211,14 @@ public class ConsoleCommandProcessor {
                 try {
                     cmd.action().accept(args);
                 } catch (Exception e) {
-                    Console.INSTANCE.addMsgToConsole("Error ejecutando comando: " + e.getMessage(), MessageType.ERROR);
-                    e.printStackTrace();
+                    Console.INSTANCE.addMsgToConsole(I18n.INSTANCE.get("console.cmd.error") + e.getMessage(), MessageType.ERROR);
+                    org.tinylog.Logger.error(e, "Error inesperado procesando comando: " + commandName);
                 }
                 return;
             }
         }
 
-        Console.INSTANCE.addMsgToConsole("Desconocido: " + commandName, MessageType.WARNING);
+        Console.INSTANCE.addMsgToConsole(I18n.INSTANCE.get("console.cmd.unknown") + commandName, MessageType.WARNING);
     }
 
     public static List<ConsoleCommand> getCommands() {

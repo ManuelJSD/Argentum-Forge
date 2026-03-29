@@ -44,7 +44,7 @@ public class FProfileSelector extends Form {
                         this.backgroundTexture.getTex_height());
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            org.tinylog.Logger.error(e, "Error al cargar la textura de fondo del selector de perfiles");
         }
 
         // Preseleccionar el último usado o el primero si existe
