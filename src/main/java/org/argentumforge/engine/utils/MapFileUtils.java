@@ -43,7 +43,7 @@ public class MapFileUtils {
         String filter = "*" + ext;
 
         String selectedFile = FileDialog.showOpenDialog(
-                "Seleccionar Mapa",
+                I18n.INSTANCE.get("dialog.selectMap"),
                 lastPath,
                 desc + " (" + filter + ")",
                 filter);
@@ -102,7 +102,7 @@ public class MapFileUtils {
     public static void quickSaveMap(Runnable onSuccess, Runnable onFailure) {
         MapContext context = GameData.getActiveContext();
         if (context == null) {
-            DialogManager.getInstance().showInfo("Mapa",
+            DialogManager.getInstance().showInfo(I18n.INSTANCE.get("menu.map"),
                     I18n.INSTANCE.get("msg.noActiveMap"));
             if (onFailure != null)
                 onFailure.run();

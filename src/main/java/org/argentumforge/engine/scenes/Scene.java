@@ -19,13 +19,11 @@ import org.argentumforge.engine.renderer.RGBColor;
  * <p>
  * Escenas principales implementadas:
  * <ul>
- * <li>{@code IntroScene} - Pantalla de presentacion inicial
  * <li>{@code MainScene} - Menu principal con opciones de conexion
  * <li>{@code GameScene} - Escena principal de juego donde ocurre la accion
  * </ul>
  *
  * @see SceneType
- * @see IntroScene
  * @see MainScene
  * @see GameScene
  */

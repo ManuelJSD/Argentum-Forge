@@ -57,8 +57,13 @@ public enum KeyHandler {
         // Actualiza flags y rastrea ultima tecla
         updateKeyStates(key, isPressed);
         // Manejo optimizado de teclas de movimiento
-        if (MOVEMENT_KEYS.contains(key))
-            handleMovementKey(key, isPressed);
+        if (MOVEMENT_KEYS.contains(key)) {
+            // Ignorar el inicio de movimiento si CTRL está pulsado para no colisionar con atajos (ej: CTRL+S)
+            boolean ctrlPressed = (mods & org.lwjgl.glfw.GLFW.GLFW_MOD_CONTROL) != 0;
+            if (!(isPressed && ctrlPressed)) {
+                handleMovementKey(key, isPressed);
+            }
+        }
         updateModifierKeys();
     }
 

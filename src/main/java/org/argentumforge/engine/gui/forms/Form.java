@@ -150,7 +150,7 @@ public abstract class Form {
                 Logger.warn("Apertura de URL no soportada automÃ¡ticamente en este OS: " + os);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            Logger.error(e, "Error al intentar abrir la URL: " + url);
         }
     }
 

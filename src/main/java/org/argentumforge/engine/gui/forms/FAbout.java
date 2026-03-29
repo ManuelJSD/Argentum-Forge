@@ -31,7 +31,7 @@ public class FAbout extends Form {
             ImGui.textColored(Theme.COLOR_PRIMARY, title);
 
             // Version
-            String version = "Versión " + Engine.VERSION;
+            String version = I18n.INSTANCE.get("about.version") + " " + Engine.VERSION;
             float verWidth = ImGui.calcTextSize(version).x;
             ImGui.setCursorPosX((windowWidth - verWidth) / 2f);
             ImGui.textColored(0.7f, 0.7f, 0.7f, 1.0f, version);
@@ -46,8 +46,7 @@ public class FAbout extends Form {
             ImGui.textColored(Theme.COLOR_ACCENT, "Lorwik");
 
             ImGui.spacing();
-            ImGui.textWrapped(
-                    "Agradecimientos especiales a la comunidad de Argentum Online por mantener viva la leyenda.");
+            ImGui.textWrapped(I18n.INSTANCE.get("about.thanks"));
 
             ImGui.spacing();
             ImGui.separator();

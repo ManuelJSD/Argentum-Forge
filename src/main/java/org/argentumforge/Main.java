@@ -45,7 +45,7 @@ public class Main {
                     java.nio.file.Path.of("crash.log"),
                     crashContent);
         } catch (Exception e) {
-            e.printStackTrace();
+            org.tinylog.Logger.error(e, "Error al escribir el archivo crash.log");
         }
 
         System.exit(1);

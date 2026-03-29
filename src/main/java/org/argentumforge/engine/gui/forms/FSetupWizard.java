@@ -340,8 +340,7 @@ public final class FSetupWizard extends Form {
         ImGui.bulletText(
                 I18n.INSTANCE.get("wizard.prefs.clientSize") + " " + clientWidth.get() + "x" + clientHeight.get());
         ImGui.bulletText(I18n.INSTANCE.get("options.visualTheme") + ": " + styles[styleIndex.get()]);
-        ImGui.spacing();
-        ImGui.bulletText(I18n.INSTANCE.get("wizard.minimap.generate") + ": " + (generateMinimap.get() ? "Sí" : "No"));
+        ImGui.bulletText(I18n.INSTANCE.get("wizard.minimap.generate") + ": " + (generateMinimap.get() ? I18n.INSTANCE.get("common.yes") : I18n.INSTANCE.get("common.no")));
     }
 
     private void renderNavigation() {

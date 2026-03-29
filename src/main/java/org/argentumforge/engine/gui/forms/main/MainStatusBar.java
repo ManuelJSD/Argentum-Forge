@@ -106,7 +106,7 @@ public class MainStatusBar {
                         try {
                             Form.openURL(release.htmlUrl);
                         } catch (Exception e) {
-                            e.printStackTrace();
+                            org.tinylog.Logger.error(e, "Error al abrir enlace de actualización");
                         }
                     }
                 }

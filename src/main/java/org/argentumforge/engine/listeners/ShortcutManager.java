@@ -288,5 +288,38 @@ public class ShortcutManager {
         if (KeyHandler.isActionKeyJustPressed(Key.ZOOM_OUT)) {
             Camera.setTileSize(Math.max(16, Camera.TILE_PIXEL_SIZE - 16));
         }
+
+        if (KeyHandler.isActionKeyJustPressed(Key.TOGGLE_INSPECTOR_MODE)) {
+            EditorController.INSTANCE.setInspectorMode(!EditorController.INSTANCE.isInspectorMode());
+        }
+
+        // Atajos de paneles de edición
+        org.argentumforge.engine.gui.forms.FMain fMain = ImGUISystem.INSTANCE.getForm(org.argentumforge.engine.gui.forms.FMain.class);
+        if (fMain != null) {
+            if (KeyHandler.isActionKeyJustPressed(Key.OPEN_SURFACE_EDITOR))
+                toggleForm("FSurfaceEditor", fMain.getSurfaceEditor());
+            if (KeyHandler.isActionKeyJustPressed(Key.OPEN_BLOCK_EDITOR))
+                toggleForm("FBlockEditor", fMain.getBlockEditor());
+            if (KeyHandler.isActionKeyJustPressed(Key.OPEN_NPC_EDITOR))
+                toggleForm("FNpcEditor", fMain.getNpcEditor());
+            if (KeyHandler.isActionKeyJustPressed(Key.OPEN_OBJ_EDITOR))
+                toggleForm("FObjEditor", fMain.getObjEditor());
+            if (KeyHandler.isActionKeyJustPressed(Key.OPEN_TRIGGER_EDITOR))
+                toggleForm("FTriggerEditor", fMain.getTriggerEditor());
+            if (KeyHandler.isActionKeyJustPressed(Key.OPEN_TRANSFER_EDITOR))
+                toggleForm("FTransferEditor", fMain.getTransferEditor());
+            if (KeyHandler.isActionKeyJustPressed(Key.OPEN_PARTICLE_EDITOR))
+                toggleForm("FParticleEditor", fMain.getParticleEditor());
+            if (KeyHandler.isActionKeyJustPressed(Key.OPEN_MINIMAP_EDITOR))
+                toggleForm("FMinimap", fMain.getMinimap());
+        }
+    }
+
+    private void toggleForm(String formId, org.argentumforge.engine.gui.forms.Form instance) {
+        if (ImGUISystem.INSTANCE.isFormVisible(formId)) {
+            ImGUISystem.INSTANCE.deleteFrmArray(instance);
+        } else {
+            ImGUISystem.INSTANCE.show(instance);
+        }
     }
 }

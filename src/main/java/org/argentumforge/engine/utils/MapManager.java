@@ -738,7 +738,10 @@ public final class MapManager {
             }
 
             Logger.info("Mapa guardado exitosamente en: {}", filePath);
-            DialogManager.getInstance().showInfo("Guardar Mapa", "Mapa guardado correctamente.");
+            org.argentumforge.engine.gui.ToastManager.INSTANCE.show(
+                org.argentumforge.engine.i18n.I18n.INSTANCE.get("toast.map.saved"), 
+                org.argentumforge.engine.gui.ToastManager.Type.SUCCESS
+            );
         } catch (IOException e) {
             Logger.error(e, "Error al guardar el mapa en: {}", filePath);
             DialogManager.getInstance().showError("Error", "Error al guardar el mapa:\n" + e.getMessage());

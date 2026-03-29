@@ -406,11 +406,11 @@ public final class FOptions extends Form {
                 ImGui.dummy(0, 10);
 
                 // --- INDICADORES Y ESTILOS ---
-                ImGui.textColored(ImGui.getColorU32(0.2f, 0.7f, 1.0f, 1.0f), "Estilos de Indicadores:");
+                ImGui.textColored(ImGui.getColorU32(0.2f, 0.7f, 1.0f, 1.0f), I18n.INSTANCE.get("options.visual.indicatorStyles"));
                 ImGui.separator();
 
                 // 1. BLOQUEOS
-                ImGui.text("Bloqueos:");
+                ImGui.text(I18n.INSTANCE.get("options.visual.blocks"));
                 float[] blockAlpha = { settings.getBlockOpacity() };
                 ImGui.setNextItemWidth(150);
                 if (ImGui.sliderFloat(I18n.INSTANCE.get("options.visual.opacity.blocks"),
@@ -443,7 +443,7 @@ public final class FOptions extends Form {
 
                 // 2. TRASLADOS
                 ImGui.dummy(0, 5);
-                ImGui.text("Traslados:");
+                ImGui.text(I18n.INSTANCE.get("options.visual.transfers"));
                 float[] transferAlpha = { settings.getTransferOpacity() };
                 ImGui.setNextItemWidth(150);
                 if (ImGui.sliderFloat(
@@ -478,7 +478,7 @@ public final class FOptions extends Form {
                 ImGui.dummy(0, 10);
 
                 // --- OTROS ---
-                ImGui.textColored(ImGui.getColorU32(0.2f, 0.7f, 1.0f, 1.0f), "Otros:");
+                ImGui.textColored(ImGui.getColorU32(0.2f, 0.7f, 1.0f, 1.0f), I18n.INSTANCE.get("options.visual.others"));
                 ImGui.separator();
                 // Effecto Respiración (Moved here from Graphics)
                 if (ImGui.checkbox(I18n.INSTANCE.get("options.visual.breathing"),
@@ -500,9 +500,9 @@ public final class FOptions extends Form {
             }
 
             // --- TAB: CONSOLA ---
-            if (ImGui.beginTabItem("Consola")) {
+            if (ImGui.beginTabItem(I18n.INSTANCE.get("options.tab.console"))) {
                 ImGui.dummy(0, 10);
-                ImGui.textColored(ImGui.getColorU32(0.2f, 0.7f, 1.0f, 1.0f), "Apariencia de la Consola:");
+                ImGui.textColored(ImGui.getColorU32(0.2f, 0.7f, 1.0f, 1.0f), I18n.INSTANCE.get("options.console.appearance"));
                 ImGui.separator();
                 ImGui.dummy(0, 5);
 
@@ -510,14 +510,14 @@ public final class FOptions extends Form {
                 ImInt cW = new ImInt(options.getConsoleWidth());
                 ImInt cH = new ImInt(options.getConsoleHeight());
 
-                ImGui.text("Dimensiones:");
-                if (ImGui.inputInt("Ancho", cW)) {
+                ImGui.text(I18n.INSTANCE.get("options.console.dimensions"));
+                if (ImGui.inputInt(I18n.INSTANCE.get("options.console.width"), cW)) {
                     if (cW.get() < 100)
                         cW.set(100);
                     options.setConsoleWidth(cW.get());
                     options.save();
                 }
-                if (ImGui.inputInt("Alto", cH)) {
+                if (ImGui.inputInt(I18n.INSTANCE.get("options.console.height"), cH)) {
                     if (cH.get() < 50)
                         cH.set(50);
                     options.setConsoleHeight(cH.get());
@@ -528,14 +528,14 @@ public final class FOptions extends Form {
 
                 // Font Size
                 float[] fontScale = { options.getConsoleFontSize() };
-                if (ImGui.sliderFloat("Escala Fuente", fontScale, 0.5f, 3.0f)) {
+                if (ImGui.sliderFloat(I18n.INSTANCE.get("options.console.fontScale"), fontScale, 0.5f, 3.0f)) {
                     options.setConsoleFontSize(fontScale[0]);
                     options.save();
                 }
 
                 // Opacity
                 float[] opacity = { options.getConsoleOpacity() };
-                if (ImGui.sliderFloat("Opacidad Fondo", opacity, 0.0f, 1.0f)) {
+                if (ImGui.sliderFloat(I18n.INSTANCE.get("options.console.bgOpacity"), opacity, 0.0f, 1.0f)) {
                     options.setConsoleOpacity(opacity[0]);
                     options.save();
                 }
@@ -543,37 +543,37 @@ public final class FOptions extends Form {
                 ImGui.dummy(0, 5);
 
                 // Timestamps
-                if (ImGui.checkbox("Mostrar Timestamps", options.isConsoleShowTimestamps())) {
+                if (ImGui.checkbox(I18n.INSTANCE.get("options.console.timestamps"), options.isConsoleShowTimestamps())) {
                     options.setConsoleShowTimestamps(!options.isConsoleShowTimestamps());
                     options.save();
                 }
 
                 ImGui.dummy(0, 10);
-                ImGui.textColored(ImGui.getColorU32(0.2f, 0.7f, 1.0f, 1.0f), "Colores de Mensajes:");
+                ImGui.textColored(ImGui.getColorU32(0.2f, 0.7f, 1.0f, 1.0f), I18n.INSTANCE.get("options.console.msgColors"));
                 ImGui.separator();
                 ImGui.dummy(0, 5);
 
                 // Colors
                 float[] colorInfo = options.getConsoleColorInfo();
-                if (ImGui.colorEdit3("Información", colorInfo)) {
+                if (ImGui.colorEdit3(I18n.INSTANCE.get("options.console.color.info"), colorInfo)) {
                     options.setConsoleColorInfo(colorInfo);
                     options.save();
                 }
 
                 float[] colorWarn = options.getConsoleColorWarning();
-                if (ImGui.colorEdit3("Advertencia", colorWarn)) {
+                if (ImGui.colorEdit3(I18n.INSTANCE.get("options.console.color.warning"), colorWarn)) {
                     options.setConsoleColorWarning(colorWarn);
                     options.save();
                 }
 
                 float[] colorError = options.getConsoleColorError();
-                if (ImGui.colorEdit3("Error", colorError)) {
+                if (ImGui.colorEdit3(I18n.INSTANCE.get("options.console.color.error"), colorError)) {
                     options.setConsoleColorError(colorError);
                     options.save();
                 }
 
                 float[] colorCmd = options.getConsoleColorCommand();
-                if (ImGui.colorEdit3("Comando", colorCmd)) {
+                if (ImGui.colorEdit3(I18n.INSTANCE.get("options.console.color.command"), colorCmd)) {
                     options.setConsoleColorCommand(colorCmd);
                     options.save();
                 }
@@ -582,7 +582,7 @@ public final class FOptions extends Form {
                 ImGui.separator();
 
                 // Reset Button
-                if (ImGui.button("Restablecer Valores Por Defecto")) {
+                if (ImGui.button(I18n.INSTANCE.get("options.console.resetDefaults"))) {
                     options.resetConsoleToDefaults();
                     options.save();
                 }

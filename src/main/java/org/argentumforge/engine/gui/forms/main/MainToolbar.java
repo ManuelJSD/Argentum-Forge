@@ -40,6 +40,7 @@ public class MainToolbar {
         ImGui.setNextWindowSize(viewport.getWorkSizeX(), toolbarHeight);
         ImGui.setNextWindowViewport(viewport.getID());
 
+
         if (ImGui.begin("ToolBar", ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoBackground
                 | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoMove
                 | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse)) {
@@ -174,7 +175,7 @@ public class MainToolbar {
         ImGui.popStyleColor(3);
 
         if (ImGui.isItemHovered()) {
-            ImGui.setTooltip(I18n.INSTANCE.get("common.inspector")); // Fallback text if key missing
+            ImGui.setTooltip(I18n.INSTANCE.get("common.inspector") + getShortcutText(org.argentumforge.engine.game.models.Key.TOGGLE_INSPECTOR_MODE)); // Dinamico
         }
 
         ImGui.popStyleVar(); // Pop BorderSize
@@ -256,11 +257,56 @@ public class MainToolbar {
         ImGui.popStyleColor(3);
 
         if (ImGui.isItemHovered()) {
-            ImGui.setTooltip(tooltip);
+            ImGui.setTooltip(tooltip + getShortcut(formName));
         }
         if (!enabled)
             ImGui.endDisabled();
         ImGui.popID();
+    }
+
+
+
+    private org.argentumforge.engine.game.models.Key getFormKey(String formName) {
+        switch (formName) {
+            case "FSurfaceEditor": return org.argentumforge.engine.game.models.Key.OPEN_SURFACE_EDITOR;
+            case "FBlockEditor": return org.argentumforge.engine.game.models.Key.OPEN_BLOCK_EDITOR;
+            case "FNpcEditor": return org.argentumforge.engine.game.models.Key.OPEN_NPC_EDITOR;
+            case "FObjEditor": return org.argentumforge.engine.game.models.Key.OPEN_OBJ_EDITOR;
+            case "FTriggerEditor": return org.argentumforge.engine.game.models.Key.OPEN_TRIGGER_EDITOR;
+            case "FTransferEditor": return org.argentumforge.engine.game.models.Key.OPEN_TRANSFER_EDITOR;
+            case "FParticleEditor": return org.argentumforge.engine.game.models.Key.OPEN_PARTICLE_EDITOR;
+            case "FMinimap": return org.argentumforge.engine.game.models.Key.OPEN_MINIMAP_EDITOR;
+            default: return null;
+        }
+    }
+
+    private String getShortcut(String formName) {
+        org.argentumforge.engine.game.models.Key key = getFormKey(formName);
+        if (key == null) return "";
+        return getShortcutText(key);
+    }
+
+    private String getShortcutText(org.argentumforge.engine.game.models.Key key) {
+        int code = key.getKeyCode();
+        if (code <= 0) return "";
+        int scancode = org.lwjgl.glfw.GLFW.glfwGetKeyScancode(code);
+        String name = org.lwjgl.glfw.GLFW.glfwGetKeyName(code, scancode);
+        if (name != null) return " (" + name.toUpperCase() + ")";
+        
+        switch (code) {
+            case org.lwjgl.glfw.GLFW.GLFW_KEY_KP_1: return " (NUM 1)";
+            case org.lwjgl.glfw.GLFW.GLFW_KEY_KP_2: return " (NUM 2)";
+            case org.lwjgl.glfw.GLFW.GLFW_KEY_KP_3: return " (NUM 3)";
+            case org.lwjgl.glfw.GLFW.GLFW_KEY_KP_4: return " (NUM 4)";
+            case org.lwjgl.glfw.GLFW.GLFW_KEY_KP_5: return " (NUM 5)";
+            case org.lwjgl.glfw.GLFW.GLFW_KEY_KP_6: return " (NUM 6)";
+            case org.lwjgl.glfw.GLFW.GLFW_KEY_KP_7: return " (NUM 7)";
+            case org.lwjgl.glfw.GLFW.GLFW_KEY_KP_8: return " (NUM 8)";
+            case org.lwjgl.glfw.GLFW.GLFW_KEY_KP_9: return " (NUM 9)";
+            case org.lwjgl.glfw.GLFW.GLFW_KEY_KP_0: return " (NUM 0)";
+            case org.lwjgl.glfw.GLFW.GLFW_KEY_I: return " (I)";
+            default: return " (Key " + code + ")";
+        }
     }
 
     private void toggleForm(boolean isVisible, Form formInstance) {
