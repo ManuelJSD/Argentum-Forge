@@ -49,6 +49,8 @@ public enum Console {
     private final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
     private boolean isInputActive = false;
     private boolean reclaimFocus = false;
+    private final List<String> commandHistory = new ArrayList<>();
+    private int historyPos = -1;
 
     public boolean isInputActive() {
         return isInputActive;
@@ -228,12 +230,46 @@ public enum Console {
 
             // Command Input
             ImGui.pushItemWidth(-1); // Full width
-            if (ImGui.inputText("##ConsoleInput", inputBuffer,
-                    ImGuiInputTextFlags.EnterReturnsTrue | ImGuiInputTextFlags.AutoSelectAll)) {
+            
+            int inputFlags = ImGuiInputTextFlags.EnterReturnsTrue | ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.CallbackHistory;
+            if (ImGui.inputText("##ConsoleInput", inputBuffer, inputFlags, new imgui.callback.ImGuiInputTextCallback() {
+                @Override
+                public void accept(imgui.ImGuiInputTextCallbackData data) {
+                    if (data.getEventFlag() == ImGuiInputTextFlags.CallbackHistory) {
+                        int prevHistoryPos = historyPos;
+                        if (data.getEventKey() == imgui.flag.ImGuiKey.UpArrow) {
+                            if (historyPos == -1) {
+                                historyPos = commandHistory.size() - 1;
+                            } else if (historyPos > 0) {
+                                historyPos--;
+                            }
+                        } else if (data.getEventKey() == imgui.flag.ImGuiKey.DownArrow) {
+                            if (historyPos != -1) {
+                                if (++historyPos >= commandHistory.size()) {
+                                    historyPos = -1;
+                                }
+                            }
+                        }
+                        
+                        if (prevHistoryPos != historyPos) {
+                            String historyStr = (historyPos >= 0) ? commandHistory.get(historyPos) : "";
+                            data.deleteChars(0, data.getBufTextLen());
+                            data.insertChars(0, historyStr);
+                        }
+                    }
+                }
+            })) {
                 String command = inputBuffer.get().trim();
                 if (!command.isEmpty()) {
                     addMsgToConsole("> " + command, FontStyle.BOLD, MessageType.COMMAND);
                     ConsoleCommandProcessor.process(command);
+                    
+                    // Añadir al historial si no es igual al último comando
+                    if (commandHistory.isEmpty() || !commandHistory.get(commandHistory.size() - 1).equals(command)) {
+                        commandHistory.add(command);
+                    }
+                    historyPos = -1;
+                    
                     inputBuffer.set("");
                     scrollToBottom = true;
                 }

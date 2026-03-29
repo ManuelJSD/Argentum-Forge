@@ -104,18 +104,31 @@ public final class GameData {
     }
 
     public static void updateWindowTitle() {
+        String profileName = "";
+        if (org.argentumforge.engine.utils.ProfileManager.INSTANCE.getCurrentProfile() != null) {
+            profileName = org.argentumforge.engine.utils.ProfileManager.INSTANCE.getCurrentProfile().getName();
+        }
+
         if (activeContext != null) {
-            String title = activeContext.getMapName();
+            String title = profileName;
+            String mapName = activeContext.getMapName();
+            
+            if (mapName != null && !mapName.isEmpty()) {
+                if (!title.isEmpty()) title += " - ";
+                title += mapName;
+            }
+            
             if (activeContext.isModified()) {
                 title += " *";
             }
+            
             if (title.length() > 0) {
                 Engine.INSTANCE.getWindow().updateTitle(title);
             } else {
                 Engine.INSTANCE.getWindow().updateTitle("");
             }
         } else {
-            Engine.INSTANCE.getWindow().updateTitle("");
+            Engine.INSTANCE.getWindow().updateTitle(profileName);
         }
     }
 

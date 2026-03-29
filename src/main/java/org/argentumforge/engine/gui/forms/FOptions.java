@@ -315,7 +315,7 @@ public final class FOptions extends Form {
 
                 // Fullscreen
                 if (ImGui.checkbox(
-                        I18n.INSTANCE.get("options.graphics") + " (Fullscreen)",
+                        I18n.INSTANCE.get("options.fullscreen"),
                         options.isFullscreen())) {
                     options.setFullscreen(!options.isFullscreen());
                     Engine.INSTANCE.getWindow().toggleWindow();

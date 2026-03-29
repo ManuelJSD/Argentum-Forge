@@ -160,15 +160,15 @@ public final class FSetupWizard extends Form {
                     Engine.INSTANCE.getWindow().getHeight());
         }
 
-        // Tamaño adaptativo según el paso actual
+        // Tamaño adaptativo según el paso actual + Margen del stepper
         int windowHeight = switch (currentStep) {
-            case STEP_WELCOME -> 250;
-            case STEP_PROFILE -> 200;
-            case STEP_ROUTES -> 350;
-            case STEP_PREFERENCES -> 450;
-            case STEP_MINIMAP -> 320;
-            case STEP_CONFIRMATION -> 400;
-            default -> 400;
+            case STEP_WELCOME -> 310;
+            case STEP_PROFILE -> 260;
+            case STEP_ROUTES -> 410;
+            case STEP_PREFERENCES -> 510;
+            case STEP_MINIMAP -> 380;
+            case STEP_CONFIRMATION -> 460;
+            default -> 460;
         };
 
         ImGui.setNextWindowSize(650, windowHeight, ImGuiCond.Always);
@@ -181,6 +181,7 @@ public final class FSetupWizard extends Form {
                 | ImGuiWindowFlags.NoScrollWithMouse;
 
         if (ImGui.begin(I18n.INSTANCE.get("wizard.title"), windowOpen, flags)) {
+            renderStepper();
             switch (currentStep) {
                 case STEP_WELCOME -> renderWelcome();
                 case STEP_PROFILE -> renderProfile();
@@ -211,6 +212,42 @@ public final class FSetupWizard extends Form {
                 this.close();
             }
         }
+    }
+
+    private void renderStepper() {
+        int totalSteps = 6;
+        float windowWidth = ImGui.getWindowWidth();
+        float startX = 50;
+        float endX = windowWidth - 50;
+        
+        float sx = ImGui.getCursorScreenPosX() + startX;
+        float sy = ImGui.getCursorScreenPosY() + 15;
+        
+        imgui.ImDrawList drawList = ImGui.getWindowDrawList();
+        float spacing = (endX - startX) / (totalSteps - 1);
+        
+        for (int i = 0; i < totalSteps - 1; i++) {
+            float lineStartX = sx + i * spacing;
+            float lineEndX = sx + (i + 1) * spacing;
+            int lineColor = (i < currentStep) ? org.argentumforge.engine.gui.Theme.COLOR_PRIMARY : org.argentumforge.engine.gui.Theme.COLOR_TEXT_DIM;
+            drawList.addLine(lineStartX, sy, lineEndX, sy, lineColor, 3.0f);
+        }
+        
+        for (int i = 0; i < totalSteps; i++) {
+            float cx = sx + i * spacing;
+            int circleColor;
+            if (i < currentStep) circleColor = org.argentumforge.engine.gui.Theme.COLOR_PRIMARY;
+            else if (i == currentStep) circleColor = org.argentumforge.engine.gui.Theme.COLOR_ACCENT;
+            else circleColor = org.argentumforge.engine.gui.Theme.COLOR_TEXT_DIM;
+            
+            drawList.addCircleFilled(cx, sy, 12.0f, circleColor);
+            String stepStr = String.valueOf(i + 1);
+            float textWidth = ImGui.calcTextSize(stepStr).x;
+            drawList.addText(cx - textWidth/2, sy - 8, org.argentumforge.engine.gui.Theme.COLOR_TEXT, stepStr);
+        }
+        ImGui.dummy(0, 35);
+        ImGui.separator();
+        ImGui.spacing();
     }
 
     private void renderProfile() {

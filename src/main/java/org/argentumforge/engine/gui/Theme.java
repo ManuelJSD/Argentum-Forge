@@ -93,7 +93,8 @@ public class Theme {
         MODERN,
         MATRIX,
         DRACULA,
-        CHERRY
+        CHERRY,
+        CLASSIC_AO
     }
 
     /**
@@ -112,7 +113,70 @@ public class Theme {
             case MATRIX -> applyMatrixStyle();
             case DRACULA -> applyDraculaStyle();
             case CHERRY -> applyCherryStyle();
+            case CLASSIC_AO -> applyClassicAOStyle();
         }
+    }
+
+    /**
+     * Tema "Argentum Classic" sugerido para los nostálgicos.
+     * Paleta inspirada en la interfaz del Connect y el Main del AO.
+     * Fondo oscuro metalizado/petróleo, bordes dorados, letras marfil oscuro.
+     */
+    public static void applyClassicAOStyle() {
+        ImGuiStyle style = ImGui.getStyle();
+        ImGui.styleColorsDark();
+
+        style.setColor(ImGuiCol.Text, rgba(235, 220, 190, 255));             // Marfil Suave
+        style.setColor(ImGuiCol.TextDisabled, rgba(150, 130, 100, 255));
+        
+        style.setColor(ImGuiCol.WindowBg, rgba(15, 12, 10, 245));            // Muy oscuro, casi negro perla
+        style.setColor(ImGuiCol.ChildBg, rgba(25, 20, 15, 255));
+        style.setColor(ImGuiCol.PopupBg, rgba(20, 15, 12, 250));
+
+        style.setColor(ImGuiCol.Border, rgba(160, 110, 30, 180));            // Dorado Ocre
+        style.setColor(ImGuiCol.BorderShadow, rgba(0, 0, 0, 150));
+
+        style.setColor(ImGuiCol.FrameBg, rgba(40, 30, 20, 255));
+        style.setColor(ImGuiCol.FrameBgHovered, rgba(140, 90, 20, 150));
+        style.setColor(ImGuiCol.FrameBgActive, rgba(180, 120, 30, 180));
+
+        style.setColor(ImGuiCol.TitleBg, rgba(30, 20, 10, 255));
+        style.setColor(ImGuiCol.TitleBgActive, rgba(80, 50, 15, 255));
+        style.setColor(ImGuiCol.TitleBgCollapsed, rgba(20, 15, 5, 130));
+
+        style.setColor(ImGuiCol.MenuBarBg, rgba(30, 20, 10, 255));
+
+        style.setColor(ImGuiCol.ScrollbarBg, rgba(15, 10, 5, 255));
+        style.setColor(ImGuiCol.ScrollbarGrab, rgba(80, 50, 15, 255));
+        style.setColor(ImGuiCol.ScrollbarGrabHovered, rgba(120, 80, 20, 255));
+        style.setColor(ImGuiCol.ScrollbarGrabActive, rgba(160, 110, 30, 255));
+
+        style.setColor(ImGuiCol.CheckMark, rgba(255, 190, 50, 255));
+        style.setColor(ImGuiCol.SliderGrab, rgba(140, 90, 20, 255));
+        style.setColor(ImGuiCol.SliderGrabActive, rgba(180, 120, 30, 255));
+
+        style.setColor(ImGuiCol.Button, rgba(80, 50, 15, 255));
+        style.setColor(ImGuiCol.ButtonHovered, rgba(140, 90, 20, 255));
+        style.setColor(ImGuiCol.ButtonActive, rgba(180, 120, 30, 255));
+
+        style.setColor(ImGuiCol.Header, rgba(80, 50, 15, 255));
+        style.setColor(ImGuiCol.HeaderHovered, rgba(140, 90, 20, 200));
+        style.setColor(ImGuiCol.HeaderActive, rgba(180, 120, 30, 200));
+
+        style.setColor(ImGuiCol.Separator, rgba(160, 110, 30, 100));
+        style.setColor(ImGuiCol.SeparatorHovered, rgba(200, 140, 40, 150));
+        style.setColor(ImGuiCol.SeparatorActive, rgba(220, 160, 50, 200));
+
+        style.setColor(ImGuiCol.TextSelectedBg, rgba(160, 110, 30, 100));
+
+        // Bordes afilados clásicos (AO era Flat)
+        style.setWindowRounding(0.0f);
+        style.setChildRounding(0.0f);
+        style.setFrameRounding(2.0f);
+        style.setPopupRounding(0.0f);
+        style.setScrollbarRounding(0.0f);
+        style.setGrabRounding(0.0f);
+        style.setTabRounding(2.0f);
     }
 
     /**
