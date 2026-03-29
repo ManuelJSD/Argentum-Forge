@@ -1,8 +1,8 @@
 package org.argentumforge.engine.utils;
 
 public enum MapFormat {
-    LEGACY(".map", "Argentum Online Map (Legacy)", true),
-    CSM(".csm", "Client Side Map (Optimized)", false); // TODO: Implementar
+    LEGACY(".map", "Argentum Online Map (Legacy)", true);
+
 
     private final String extension;
     private final String description;

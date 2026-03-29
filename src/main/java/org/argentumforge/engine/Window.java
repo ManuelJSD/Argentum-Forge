@@ -56,7 +56,7 @@ public class Window {
     private boolean cursorCrosshair;
 
     public Window() {
-        this.title = "Argentum Forge";
+        this.title = "Argentum Forge " + Engine.VERSION;
         this.width = options.getScreenWidth();
         this.height = options.getScreenHeight();
         this.cursorCrosshair = false;

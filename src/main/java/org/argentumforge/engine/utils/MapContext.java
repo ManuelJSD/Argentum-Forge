@@ -44,8 +44,8 @@ public class MapContext {
     }
 
     private String normalizePath(String path) {
-        if (path == null)
-            return null;
+        if (path == null || path.trim().isEmpty())
+            return path;
         try {
             return java.nio.file.Paths.get(path).toAbsolutePath().normalize().toString();
         } catch (Exception e) {
@@ -98,8 +98,8 @@ public class MapContext {
     }
 
     public String getMapName() {
-        if (filePath == null || filePath.isEmpty())
-            return "Sin Título";
+        if (filePath == null || filePath.trim().isEmpty())
+            return org.argentumforge.engine.i18n.I18n.INSTANCE.get("menu.file.new");
         java.io.File file = new java.io.File(filePath);
         return file.getName();
     }
