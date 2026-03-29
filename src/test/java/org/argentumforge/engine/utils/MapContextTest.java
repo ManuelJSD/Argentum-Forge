@@ -8,7 +8,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class MapContextTest {
 
     @Test
-    @DisplayName("Should return 'Sin Título' when filePath is null")
+    @DisplayName("Should return 'menu.file.new' translation key when filePath is null")
     void shouldReturnDefaultNameWhenFilePathIsNull() {
         // Arrange
         MapContext context = new MapContext(null, null, null, null);
@@ -17,7 +17,7 @@ class MapContextTest {
         String name = context.getMapName();
 
         // Assert
-        assertThat(name).isEqualTo("Sin Título");
+        assertThat(name).isEqualTo("menu.file.new");
     }
 
     @Test
