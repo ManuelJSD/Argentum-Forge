@@ -87,13 +87,13 @@ public class FCreatePrefab extends Form {
             ImGui.text(I18n.INSTANCE.get("prefab.include"));
 
             // Capas
-            ImGui.checkbox(I18n.INSTANCE.get("grhlib.layer") + " 1", optLayer1);
+            ImGui.checkbox(I18n.INSTANCE.get("prefab.layer") + " 1", optLayer1);
             ImGui.sameLine();
-            ImGui.checkbox(I18n.INSTANCE.get("grhlib.layer") + " 2", optLayer2);
+            ImGui.checkbox(I18n.INSTANCE.get("prefab.layer") + " 2", optLayer2);
             ImGui.sameLine();
-            ImGui.checkbox(I18n.INSTANCE.get("grhlib.layer") + " 3", optLayer3);
+            ImGui.checkbox(I18n.INSTANCE.get("prefab.layer") + " 3", optLayer3);
             ImGui.sameLine();
-            ImGui.checkbox(I18n.INSTANCE.get("grhlib.layer") + " 4", optLayer4);
+            ImGui.checkbox(I18n.INSTANCE.get("prefab.layer") + " 4", optLayer4);
 
             ImGui.separator();
             ImGui.checkbox(I18n.INSTANCE.get("prefab.block"), optBlock);

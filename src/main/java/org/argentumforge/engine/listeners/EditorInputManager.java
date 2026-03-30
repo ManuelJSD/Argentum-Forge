@@ -52,12 +52,25 @@ public class EditorInputManager {
     }
 
     public void updateMouse() {
-        if (Console.INSTANCE.isInputActive() || imgui.ImGui.getIO().getWantCaptureMouse()
-                || ImGUISystem.INSTANCE.isFormVisible("FBindKeys")) {
-            // Bloquear interacción con el mapa si estamos sobre un widget (botón, menú,
-            // etc.)
-            // o si una ventana que no sea el editor principal tiene el foco.
-            if (imgui.ImGui.isAnyItemHovered() || imgui.ImGui.isAnyItemActive() || !ImGUISystem.INSTANCE.isMainLast()) {
+        if (Console.INSTANCE.isInputActive() || ImGUISystem.INSTANCE.isFormVisible("FBindKeys")) {
+
+            // Si el usuario intenta pintar con la consola activa, avisarle amablemente
+            if (Console.INSTANCE.isInputActive() && inGameArea() && hasActiveInsertOrDeleteTool()) {
+                if (MouseListener.mouseButtonJustPressed(org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
+                    org.argentumforge.engine.gui.ToastManager.INSTANCE.show(
+                        org.argentumforge.engine.i18n.I18n.INSTANCE.get("msg.editor.consoleActiveBlock"),
+                        org.argentumforge.engine.gui.ToastManager.Type.WARNING
+                    );
+                }
+            }
+
+            return;
+        }
+
+        // Si ImGui quiere capturar el ratón explícitamente y el cursor de verdad está sobre sus paneles (no sobre el vacío de mapa)
+        if (imgui.ImGui.getIO().getWantCaptureMouse()) {
+            // Evitar early return si simplemente quedó un control activo pero estamos flotando el ratón en el mapa
+            if (imgui.ImGui.isWindowHovered(imgui.flag.ImGuiHoveredFlags.AnyWindow)) {
                 return;
             }
         }

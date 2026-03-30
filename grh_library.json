@@ -716,6 +716,14 @@
         "height": 1
       },
       {
+        "name": "Abajo",
+        "grhIndex": 5588,
+        "layer": 3,
+        "autoBlock": false,
+        "width": 1,
+        "height": 1
+      },
+      {
         "name": "Techo",
         "grhIndex": 5591,
         "layer": 4,
