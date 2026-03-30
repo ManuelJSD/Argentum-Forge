@@ -456,7 +456,7 @@ public class EditorInputManager {
                 obj.getMode() != 0 ||
                 block.getMode() != 0 ||
                 trigger.getMode() != 0 ||
-                transfer.getMode() != 0 ||
+                transfer.isActive() ||
                 particle.getMode() != 0;
     }
 }
