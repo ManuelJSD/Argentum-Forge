@@ -242,12 +242,28 @@ public class GithubReleaseChecker {
             String pre1 = v1Parts[1];
             String pre2 = v2Parts[1];
 
-            // Manejo especial para RC (Release Candidate)
-            // Necesitamos orden: alpha < beta < rc
-            // Alfabéticamente: alpha < beta < rc funciona correctamente
-            // Pero qué pasa con "snapshot"? "snapshot" > "rc" > "beta"
-            // Por ahora confiamos en el orden alfabético para alpha/beta/rc
-            return pre1.compareTo(pre2);
+            // Extraer la parte de texto (alpha/beta/rc) y la parte numérica por separado
+            // para evitar que "beta9" > "beta10" por comparación caracter a caracter
+            String label1 = pre1.replaceAll("\\d+$", "");
+            String label2 = pre2.replaceAll("\\d+$", "");
+
+            int labelCmp = label1.compareTo(label2);
+            if (labelCmp != 0)
+                return labelCmp; // alpha < beta < rc (orden alfabético correcto)
+
+            // Mismo prefijo (ej: ambos "beta") → comparar número como entero
+            int num1Pre = 0;
+            int num2Pre = 0;
+            try {
+                String n1 = pre1.replaceAll("^\\D+", "");
+                if (!n1.isEmpty()) num1Pre = Integer.parseInt(n1);
+            } catch (NumberFormatException ignored) {}
+            try {
+                String n2 = pre2.replaceAll("^\\D+", "");
+                if (!n2.isEmpty()) num2Pre = Integer.parseInt(n2);
+            } catch (NumberFormatException ignored) {}
+
+            return Integer.compare(num1Pre, num2Pre);
         }
 
         return 0;
