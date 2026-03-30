@@ -799,6 +799,13 @@ public final class MapManager {
 
             GameData.setActiveContext(context);
 
+            // --- Limpieza de Estado de Herramientas para evitar "Objetos Fantasma" ---
+            EditorController.INSTANCE.setPasteModeActive(false);
+            Selection.getInstance().setActive(false);
+            Particle.getInstance().setActive(false);
+            Obj.getInstance().setMode(0);
+            // -----------------------------------------------------------------------------
+
             // Reiniciar estado de modificaciones
             markAsSaved();
             org.argentumforge.engine.utils.editor.commands.CommandManager.getInstance().clearHistory();

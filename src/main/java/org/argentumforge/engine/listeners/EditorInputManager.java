@@ -102,6 +102,7 @@ public class EditorInputManager {
 
             if (MouseListener.mouseButtonJustPressed(GLFW_MOUSE_BUTTON_LEFT)) {
                 surface.startBatch();
+                transfer.startDrag(x, y);
             }
 
             if (MouseListener.mouseButtonDown(GLFW_MOUSE_BUTTON_LEFT)) {
@@ -116,6 +117,7 @@ public class EditorInputManager {
 
             if (MouseListener.mouseButtonReleased(GLFW_MOUSE_BUTTON_LEFT)) {
                 surface.endBatch();
+                transfer.endDrag();
             }
         }
     }
@@ -163,10 +165,24 @@ public class EditorInputManager {
             // Check form directly, allow capture even if tool mode is not active yet
             var frm = ImGUISystem.INSTANCE.getForm(org.argentumforge.engine.gui.forms.FTransferEditor.class);
             if (frm != null) {
-                int currentMap = user.getUserMap();
-                frm.updateInputFields(currentMap, x, y);
+                var mapData = GameData.getActiveContext().getMapData();
+                int destMap, destX, destY;
+                
+                // Si el tile tiene un traslado, capturamos el destino de dicho traslado
+                if (mapData != null && mapData[x][y].getExitMap() > 0) {
+                    destMap = mapData[x][y].getExitMap();
+                    destX = mapData[x][y].getExitX();
+                    destY = mapData[x][y].getExitY();
+                } else {
+                    // Si el tile no tiene traslado, capturamos estas coordenadas como futuro destino
+                    destMap = user.getUserMap();
+                    destX = x;
+                    destY = y;
+                }
+                
+                frm.updateInputFields(destMap, destX, destY);
                 Console.INSTANCE.addMsgToConsole(
-                        "Destino de traslado capturado: Mapa " + currentMap + " (" + x + "," + y + ")",
+                        "Destino de traslado capturado: Mapa " + destMap + " (" + destX + "," + destY + ")",
                         REGULAR, new RGBColor(0f, 1f, 0f));
                 return; // Consumir evento, no abrir menú
             }

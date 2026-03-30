@@ -317,7 +317,7 @@ public final class FMain extends Form {
                         flags |= imgui.flag.ImGuiTabItemFlags.SetSelected;
                     }
 
-                    if (ImGui.beginTabItem(context.getMapName() + "###Tab" + context.getFilePath(), open, flags)) {
+                    if (ImGui.beginTabItem(context.getMapName() + "###Tab" + context.hashCode(), open, flags)) {
                         // Si estamos en medio de un sync, esperamos a que ImGui active el tab
                         if (syncRequested && context == currentActive) {
                             syncRequested = false;

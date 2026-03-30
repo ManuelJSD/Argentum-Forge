@@ -21,6 +21,10 @@ public class Transfer {
     // Estado de la herramienta
     private boolean isActive;
 
+    private boolean isDragging;
+    private int dragOriginX;
+    private int dragOriginY;
+
     // Modo: 0 = quitar, 1 = insertar
     private int mode;
 
@@ -45,6 +49,9 @@ public class Transfer {
         this.destinationX = 0;
         this.destinationY = 0;
         this.manualUnion = false;
+        this.isDragging = false;
+        this.dragOriginX = 0;
+        this.dragOriginY = 0;
     }
 
     public static Transfer getInstance() {
@@ -140,7 +147,19 @@ public class Transfer {
                     finalY = borderBottom - 1;
                     finalX = x;
                 }
+                
+                // Si la unión manual está activa pero el usuario NO está pintando
+                // en ningún borde (pinta en el centro), permitimos que use la interpolación.
+                boolean wasInBorder = (x >= borderRight) || (x <= borderLeft) || (y >= borderBottom) || (y <= borderTop);
+                if (!wasInBorder && isDragging) {
+                    finalX = destinationX + (x - dragOriginX);
+                    finalY = destinationY + (y - dragOriginY);
+                }
             }
+
+            // Evitar que el arrastre produzca coordenadas ilegales
+            finalX = Math.max(1, Math.min(100, finalX));
+            finalY = Math.max(1, Math.min(100, finalY));
 
             // Aplicar traslado mediante comando (con soporte para undo/redo)
             int oldMap = mapData[x][y].getExitMap();
@@ -369,5 +388,16 @@ public class Transfer {
 
     public boolean isManualUnion() {
         return manualUnion;
+    }
+
+    public void startDrag(int x, int y) {
+        if (!isActive || mode != 1) return;
+        this.isDragging = true;
+        this.dragOriginX = x;
+        this.dragOriginY = y;
+    }
+
+    public void endDrag() {
+        this.isDragging = false;
     }
 }
