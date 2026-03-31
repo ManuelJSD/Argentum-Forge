@@ -283,9 +283,15 @@ public enum ImGUISystem {
     }
 
     private void renderFrms() {
+        boolean isPhoto = org.argentumforge.engine.utils.GameData.options.getRenderSettings().isPhotoModeActive();
 
-        for (int i = 0; i < frms.size(); i++)
-            frms.get(i).render();
+        for (int i = 0; i < frms.size(); i++) {
+            Form frm = frms.get(i);
+            if (isPhoto && !(frm instanceof org.argentumforge.engine.gui.forms.FMain)) {
+                continue;
+            }
+            frm.render();
+        }
 
         // Overlay bloqueante: se muestra sobre todo mientras se exporta un mapa
         if (MapExporter.isExporting) {
