@@ -86,7 +86,7 @@ public class FMapSaveOptions extends Form {
 
     @Override
     public void render() {
-        ImGui.setNextWindowSize(400, 300, ImGuiCond.Appearing);
+        ImGui.setNextWindowSize(400, 330, ImGuiCond.Appearing);
         int flags = ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoDocking;
 
         if (ImGui.begin(I18n.INSTANCE.get("menu.file.save.custom.title"), flags)) {
