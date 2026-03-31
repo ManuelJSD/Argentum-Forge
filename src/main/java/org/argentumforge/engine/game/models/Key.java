@@ -47,6 +47,9 @@ public enum Key {
     ZOOM_IN(GLFW_KEY_KP_ADD),
     ZOOM_OUT(GLFW_KEY_KP_SUBTRACT),
 
+    // Cámara
+    CAMERA_PAN(GLFW_KEY_SPACE),
+
     // Herramientas de Editor
     TOOL_BRUSH(GLFW_KEY_B),
     TOOL_BUCKET(GLFW_KEY_F),

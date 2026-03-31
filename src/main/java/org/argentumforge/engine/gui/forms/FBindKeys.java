@@ -95,6 +95,12 @@ public class FBindKeys extends Form {
                     renderKeyBindRow(I18n.INSTANCE.get("options.keys.left"), Key.LEFT);
                     renderKeyBindRow(I18n.INSTANCE.get("options.keys.right"), Key.RIGHT);
 
+                    ImGui.separator();
+
+                    renderStaticRow(I18n.INSTANCE.get("options.keys.cameraPanMouse"),
+                            I18n.INSTANCE.get("options.keys.mouseMiddle"));
+                    renderKeyBindRow(I18n.INSTANCE.get("options.keys.cameraPan"), Key.CAMERA_PAN);
+
                     ImGui.columns(1); // End columns
                     ImGui.dummy(0, 5);
                 }
@@ -264,31 +270,26 @@ public class FBindKeys extends Form {
     private void renderKeyBindRow(String label, Key key) {
         ImGui.pushID(label);
 
-        // Column 0: Label
+        // Columna 0: etiqueta
         ImGui.alignTextToFramePadding();
         ImGui.text(label);
 
         ImGui.nextColumn();
 
-        // Column 1: Button
-        float buttonWidth = ImGui.getColumnWidth() - 10; // Fill column with small padding
+        // Columna 1: botón
+        float buttonWidth = ImGui.getColumnWidth() - 10;
 
-        // Ensure we always get the LATEST key code from Key map
         String actual = getKeyName(key.getKeyCode()).toUpperCase();
 
-        // Store initial state to ensure Push/Pop symmetry even if state changes
-        // mid-frame
         boolean isBinding = key.getPreparedToBind();
 
         if (isBinding) {
             actual = I18n.INSTANCE.get("options.keys.pressKey");
-            // Push Style Color for "Waiting for input" state (Gold/Yellow)
             ImGui.pushStyleColor(ImGuiCol.Button, 0.8f, 0.6f, 0.1f, 1.0f);
             ImGui.pushStyleColor(ImGuiCol.ButtonHovered, 0.9f, 0.7f, 0.2f, 1.0f);
             ImGui.pushStyleColor(ImGuiCol.ButtonActive, 0.7f, 0.5f, 0.0f, 1.0f);
         }
 
-        // Use ### to ensure the ID is stable but let the label change?
         String buttonId = actual + "###" + label + "_btn";
 
         if (ImGui.button(buttonId, buttonWidth, 0)) {
@@ -297,16 +298,43 @@ public class FBindKeys extends Form {
             } else {
                 if (!Key.checkIsBinding()) {
                     key.setPreparedToBind(true);
-                    KeyHandler.bindError = null; // Clear any previous error when starting new bind
+                    KeyHandler.bindError = null;
                 }
             }
         }
 
         if (isBinding) {
-            ImGui.popStyleColor(3); // Pop the 3 pushed colors
+            ImGui.popStyleColor(3);
         }
 
-        ImGui.nextColumn(); // Go back to column 0 for next row
+        ImGui.nextColumn();
+
+        ImGui.popID();
+    }
+
+    /**
+     * Renderiza una fila de solo lectura en el panel de teclas,
+     * útil para mostrar bindings fijos (ej. botón central del ratón).
+     */
+    private void renderStaticRow(String label, String value) {
+        ImGui.pushID(label + "_static");
+
+        ImGui.alignTextToFramePadding();
+        ImGui.text(label);
+
+        ImGui.nextColumn();
+
+        float buttonWidth = ImGui.getColumnWidth() - 10;
+
+        // Botón desactivado visualmente (no interactable)
+        ImGui.pushStyleColor(ImGuiCol.Button,        0.18f, 0.18f, 0.18f, 1.0f);
+        ImGui.pushStyleColor(ImGuiCol.ButtonHovered, 0.18f, 0.18f, 0.18f, 1.0f);
+        ImGui.pushStyleColor(ImGuiCol.ButtonActive,  0.18f, 0.18f, 0.18f, 1.0f);
+        ImGui.pushStyleColor(ImGuiCol.Text,          0.55f, 0.55f, 0.55f, 1.0f);
+        ImGui.button(value + "###static_" + label, buttonWidth, 0);
+        ImGui.popStyleColor(4);
+
+        ImGui.nextColumn();
 
         ImGui.popID();
     }

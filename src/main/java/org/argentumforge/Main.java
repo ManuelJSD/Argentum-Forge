@@ -112,7 +112,7 @@ public class Main {
         // --- Mensaje genérico mejorado ---
         return "ERROR INESPERADO: " + className + "\n"
                 + "DETALLE: " + (message.isEmpty() ? "(sin mensaje)" : message) + "\n"
-                + "Si este error persiste, por favor repórtelo en: https://github.com/Lorwp/Argentum-Forge/issues";
+                + "Si este error persiste, por favor repórtelo en: https://github.com/ManuelJSD/Argentum-Forge/issues";
     }
 
     /**
@@ -148,10 +148,10 @@ public class Main {
 
         sb.append("\n═══════════════════════════════════════════════════════════════\n");
         sb.append("  Si necesita ayuda, comparta este archivo (crash.log) en:\n");
-        sb.append("  https://github.com/Lorwp/Argentum-Forge/issues\n");
+        sb.append("  https://github.com/ManuelJSD/Argentum-Forge/issues\n");
         sb.append("═══════════════════════════════════════════════════════════════\n");
 
         return sb.toString();
     }
 
-}
+}

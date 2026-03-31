@@ -180,17 +180,17 @@ public final class GameScene extends Scene {
             offSetCounterY = 0;
         }
 
-        // Calcular Offset de Píxeles para Renderizado: -1 * Dirección * (Progreso *
-        // TileSize)
+        // Calcular Offset de Píxeles para Renderizado: -1 * Dirección * (Progreso * TileSize)
         // Nota: Progreso es ahora offSetCounter (0 a totalDistance)
-        int pixelOffsetX = 0;
-        int pixelOffsetY = 0;
+        // Se le suma también el offset suave de la cámara del EditorInputManager
+        int pixelOffsetX = org.argentumforge.engine.listeners.EditorInputManager.getPanOffsetX();
+        int pixelOffsetY = org.argentumforge.engine.listeners.EditorInputManager.getPanOffsetY();
 
         if (user.getAddToUserPos().getX() != 0) {
-            pixelOffsetX = (int) (-1 * Math.signum(user.getAddToUserPos().getX()) * (offSetCounterX * TILE_PIXEL_SIZE));
+            pixelOffsetX += (int) (-1 * Math.signum(user.getAddToUserPos().getX()) * (offSetCounterX * TILE_PIXEL_SIZE));
         }
         if (user.getAddToUserPos().getY() != 0) {
-            pixelOffsetY = (int) (-1 * Math.signum(user.getAddToUserPos().getY()) * (offSetCounterY * TILE_PIXEL_SIZE));
+            pixelOffsetY += (int) (-1 * Math.signum(user.getAddToUserPos().getY()) * (offSetCounterY * TILE_PIXEL_SIZE));
         }
 
         // Fórmula correcta: (UserPos - AddToUserPos) da el tile de inicio.
@@ -223,14 +223,14 @@ public final class GameScene extends Scene {
      * Renderiza los overlays de ImGui delegando al MapRenderer.
      */
     public void renderImGuiOverlays() {
-        int pixelOffsetX = 0;
-        int pixelOffsetY = 0;
+        int pixelOffsetX = org.argentumforge.engine.listeners.EditorInputManager.getPanOffsetX();
+        int pixelOffsetY = org.argentumforge.engine.listeners.EditorInputManager.getPanOffsetY();
 
         if (user.getAddToUserPos().getX() != 0) {
-            pixelOffsetX = (int) (-1 * Math.signum(user.getAddToUserPos().getX()) * (offSetCounterX * TILE_PIXEL_SIZE));
+            pixelOffsetX += (int) (-1 * Math.signum(user.getAddToUserPos().getX()) * (offSetCounterX * TILE_PIXEL_SIZE));
         }
         if (user.getAddToUserPos().getY() != 0) {
-            pixelOffsetY = (int) (-1 * Math.signum(user.getAddToUserPos().getY()) * (offSetCounterY * TILE_PIXEL_SIZE));
+            pixelOffsetY += (int) (-1 * Math.signum(user.getAddToUserPos().getY()) * (offSetCounterY * TILE_PIXEL_SIZE));
         }
 
         mapRenderer.renderImGuiOverlays(pixelOffsetX, pixelOffsetY);
