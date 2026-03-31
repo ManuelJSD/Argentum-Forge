@@ -128,6 +128,14 @@ public class PasteEntitiesCommand extends AbstractCommand {
                         commands.add(new ParticleChangeCommand(context, oldMap, newMap));
                     }
                 }
+
+                // NPCs
+                if (settings.npc) {
+                    int oldNpc = tile.getNpcIndex();
+                    if (oldNpc != item.npcIndex) {
+                        commands.add(new NpcChangeCommand(context, tx, ty, oldNpc, item.npcIndex));
+                    }
+                }
             }
         }
     }

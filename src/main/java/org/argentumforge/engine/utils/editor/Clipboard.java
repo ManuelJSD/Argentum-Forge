@@ -41,6 +41,7 @@ public class Clipboard {
         public int exitMap, exitX, exitY;
         public int objIndex, objAmount;
         public int particleIndex;
+        public int npcIndex;
 
         public ClipboardItem(Selection.EntityType type, int id, int offsetX, int offsetY) {
             this(type, id, offsetX, offsetY, null);
@@ -100,6 +101,7 @@ public class Clipboard {
                     item.exitX = data.getExitX();
                     item.exitY = data.getExitY();
                     item.particleIndex = data.getParticleIndex();
+                    item.npcIndex = data.getNpcIndex();
                 }
             }
             items.add(item);
