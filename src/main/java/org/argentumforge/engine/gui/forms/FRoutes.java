@@ -41,7 +41,7 @@ public class FRoutes extends Form {
     public void render() {
         ImGui.setNextWindowFocus();
         int windowWidth = 400;
-        int windowHeight = 220;
+        int windowHeight = 250;
         ImGui.setNextWindowPos(
                 (Engine.INSTANCE.getWindow().getWidth() - windowWidth) / 2f,
                 (Engine.INSTANCE.getWindow().getHeight() - windowHeight) / 2f,
