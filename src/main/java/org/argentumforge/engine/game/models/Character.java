@@ -230,11 +230,16 @@ public final class Character {
 
     public static void drawCharacter(int charIndex, int PixelOffsetX, int PixelOffsetY, float alpha,
             RGBColor ambientcolor) {
-        drawCharacter(charIndex, PixelOffsetX, PixelOffsetY, alpha, ambientcolor, 1.0f, 1.0f, 0.0f);
+        drawCharacter(charIndex, PixelOffsetX, PixelOffsetY, alpha, ambientcolor, 1.0f, 1.0f, 0.0f, true);
     }
 
     public static void drawCharacter(int charIndex, int PixelOffsetX, int PixelOffsetY, float alpha,
             RGBColor ambientcolor, float scaleX, float scaleY, float skewX) {
+        drawCharacter(charIndex, PixelOffsetX, PixelOffsetY, alpha, ambientcolor, scaleX, scaleY, skewX, true);
+    }
+
+    public static void drawCharacter(int charIndex, int PixelOffsetX, int PixelOffsetY, float alpha,
+            RGBColor ambientcolor, float scaleX, float scaleY, float skewX, boolean updateState) {
         var context = org.argentumforge.engine.utils.GameData.getActiveContext();
         if (context == null)
             return;
@@ -249,7 +254,7 @@ public final class Character {
             breathingScale = 1.0f + (float) (Math.sin(System.currentTimeMillis() / 200.0) * 0.025f);
         }
 
-        if (charList[charIndex].getMoving()) {
+        if (updateState && charList[charIndex].getMoving()) {
             if (charList[charIndex].getScrollDirectionX() != 0) {
 
                 charList[charIndex].setMoveOffsetX(charList[charIndex].getMoveOffsetX() +
@@ -304,7 +309,7 @@ public final class Character {
             }
         }
 
-        if (!moved) {
+        if (updateState && !moved) {
             charList[charIndex].getBody().getWalk(charList[charIndex].getHeading().getId()).setStarted(false);
             charList[charIndex].getBody().getWalk(charList[charIndex].getHeading().getId()).setFrameCounter(1);
 
@@ -329,7 +334,7 @@ public final class Character {
             if (charList[charIndex].getBody().getWalk(charList[charIndex].getHeading().getId())
                     .getGrhIndex() != 0) {
                 drawTexture(charList[charIndex].getBody().getWalk(charList[charIndex].getHeading().getId()),
-                        PixelOffsetX, PixelOffsetY, true, true, false, alpha, ambientcolor, scaleX,
+                        PixelOffsetX, PixelOffsetY, true, updateState, false, alpha, ambientcolor, scaleX,
                         breathingScale * scaleY, skewX);
             }
 
@@ -359,12 +364,12 @@ public final class Character {
 
                 drawTexture(
                         charList[charIndex].getWeapon().getWeaponWalk(charList[charIndex].getHeading().getId()),
-                        PixelOffsetX, PixelOffsetY, true, true, false, alpha, ambientcolor, scaleX,
+                        PixelOffsetX, PixelOffsetY, true, updateState, false, alpha, ambientcolor, scaleX,
                         breathingScale * scaleY, skewX);
 
                 drawTexture(
                         charList[charIndex].getShield().getShieldWalk(charList[charIndex].getHeading().getId()),
-                        PixelOffsetX, PixelOffsetY, true, true, false, alpha, ambientcolor, scaleX,
+                        PixelOffsetX, PixelOffsetY, true, updateState, false, alpha, ambientcolor, scaleX,
                         breathingScale * scaleY, skewX);
 
             }
@@ -372,7 +377,7 @@ public final class Character {
         } else {
             if (charList[charIndex].getBody().getWalk(charList[charIndex].getHeading().getId()).getGrhIndex() > 0) {
                 drawTexture(charList[charIndex].getBody().getWalk(charList[charIndex].getHeading().getId()),
-                        PixelOffsetX, PixelOffsetY, true, true, false, alpha, ambientcolor, scaleX,
+                        PixelOffsetX, PixelOffsetY, true, updateState, false, alpha, ambientcolor, scaleX,
                         breathingScale * scaleY, skewX);
             }
         }
@@ -383,7 +388,7 @@ public final class Character {
             drawTexture(charList[charIndex].fX,
                     PixelOffsetX + (int) (fxData[charList[charIndex].fxIndex].getOffsetX() * scale),
                     PixelOffsetY + (int) (fxData[charList[charIndex].fxIndex].getOffsetY() * scale),
-                    true, true, true, 1.0f, ambientcolor);
+                    true, updateState, true, 1.0f, ambientcolor);
 
             // Comprobar si la animación ha terminado
             if (!charList[charIndex].fX.isStarted())

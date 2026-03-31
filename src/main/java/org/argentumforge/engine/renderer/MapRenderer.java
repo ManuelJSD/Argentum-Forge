@@ -202,11 +202,11 @@ public class MapRenderer {
             boolean soft) {
         if (soft) {
             float softAlpha = alpha * 0.4f;
-            drawCharacter(charIndex, x - 1, y, softAlpha, new RGBColor(0, 0, 0), scaleX, scaleY, skewX);
-            drawCharacter(charIndex, x + 1, y, softAlpha, new RGBColor(0, 0, 0), scaleX, scaleY, skewX);
-            drawCharacter(charIndex, x, y - 1, softAlpha, new RGBColor(0, 0, 0), scaleX, scaleY, skewX);
+            drawCharacter(charIndex, x - 1, y, softAlpha, new RGBColor(0, 0, 0), scaleX, scaleY, skewX, false);
+            drawCharacter(charIndex, x + 1, y, softAlpha, new RGBColor(0, 0, 0), scaleX, scaleY, skewX, false);
+            drawCharacter(charIndex, x, y - 1, softAlpha, new RGBColor(0, 0, 0), scaleX, scaleY, skewX, false);
         }
-        drawCharacter(charIndex, x, y, alpha, new RGBColor(0, 0, 0), scaleX, scaleY, skewX);
+        drawCharacter(charIndex, x, y, alpha, new RGBColor(0, 0, 0), scaleX, scaleY, skewX, false);
     }
 
     private void renderThirdLayer(org.argentumforge.engine.utils.inits.MapData[][] mapData,
