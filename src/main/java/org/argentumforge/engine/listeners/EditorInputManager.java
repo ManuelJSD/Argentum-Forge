@@ -47,6 +47,13 @@ public class EditorInputManager {
     // Prevenir diálogos múltiples
     private boolean isTransferDialogActive = false;
 
+    // Acumuladores de píxeles para el arrastre de cámara
+    private static float panAccumX = 0f;
+    private static float panAccumY = 0f;
+
+    public static int getPanOffsetX() { return (int) panAccumX; }
+    public static int getPanOffsetY() { return (int) panAccumY; }
+
     public EditorInputManager(Camera camera) {
         this.camera = camera;
     }
@@ -77,6 +84,17 @@ public class EditorInputManager {
 
         if (inGameArea()) {
             handleZoom();
+
+            // Arrastre de cámara (rueda del ratón o tecla alternativa)
+            // Tiene prioridad sobre cualquier otra acción de edición
+            if (isCameraPanning()) {
+                handleCameraPan();
+                return;
+            } else {
+                panAccumX = 0f;
+                panAccumY = 0f;
+            }
+
             int x = getTileMouseX((int) MouseListener.getX() - POS_SCREEN_X);
             int y = getTileMouseY((int) MouseListener.getY() - POS_SCREEN_Y);
 
@@ -256,6 +274,68 @@ public class EditorInputManager {
             int newSize = Camera.TILE_PIXEL_SIZE + (int) (scrollY * 4);
             Camera.setTileSize(newSize);
         }
+    }
+
+    /**
+     * Comprueba si el usuario está activando el arrastre de cámara.
+     * Siempre deshabilitado en modo caminata para no romper la lógica
+     * del personaje (colisiones, animaciones, mapData).
+     */
+    private boolean isCameraPanning() {
+        if (user.isWalkingmode()) return false;
+        // Botón central del ratón (siempre disponible)
+        if (MouseListener.mouseButtonDown(GLFW_MOUSE_BUTTON_MIDDLE)) return true;
+        // Tecla alternativa configurable + botón izquierdo arrastrado
+        if (KeyHandler.isActionKeyPressed(Key.CAMERA_PAN)
+                && MouseListener.mouseButtonDown(GLFW_MOUSE_BUTTON_LEFT)) return true;
+        return false;
+    }
+
+    /**
+     * Arrastrar cámara: acumula el delta del mouse en píxeles y mueve
+     * la cámara un tile cada vez que el acumulador supera TILE_PIXEL_SIZE.
+     * Convención: arrastrar a la derecha (getDx < 0) → cámara va a la derecha.
+     */
+    private void handleCameraPan() {
+        float dx = MouseListener.getDx(); // positivo = mouse se movió a la izquierda
+        float dy = MouseListener.getDy(); // positivo = mouse se movió hacia arriba
+
+        panAccumX += dx;
+        panAccumY += dy;
+
+        int tileSize = Camera.TILE_PIXEL_SIZE;
+
+        // Eje X
+        while (panAccumX <= -tileSize) {
+            moveCameraBy(1, 0);   // mouse fue a la derecha → cámara va a la derecha
+            panAccumX += tileSize;
+        }
+        while (panAccumX >= tileSize) {
+            moveCameraBy(-1, 0);  // mouse fue a la izquierda → cámara va a la izquierda
+            panAccumX -= tileSize;
+        }
+
+        // Eje Y
+        while (panAccumY <= -tileSize) {
+            moveCameraBy(0, 1);   // mouse fue hacia abajo → cámara va hacia abajo
+            panAccumY += tileSize;
+        }
+        while (panAccumY >= tileSize) {
+            moveCameraBy(0, -1);  // mouse fue hacia arriba → cámara va hacia arriba
+            panAccumY -= tileSize;
+        }
+    }
+
+    /**
+     * Mueve la cámara (posición del usuario) en delta tiles,
+     * con clamp dentro de los límites del mapa.
+     */
+    private void moveCameraBy(int dx, int dy) {
+        int newX = Math.max(Camera.XMinMapSize,
+                Math.min(Camera.XMaxMapSize, user.getUserPos().getX() + dx));
+        int newY = Math.max(Camera.YMinMapSize,
+                Math.min(Camera.YMaxMapSize, user.getUserPos().getY() + dy));
+        user.teleport(newX, newY);
     }
 
     public void updateKeys() {
@@ -454,12 +534,12 @@ public class EditorInputManager {
     }
 
     public static int getTileMouseX(int mouseX) {
-        return (User.INSTANCE.getUserPos().getX() + (int) Math.floor((double) mouseX / Camera.TILE_PIXEL_SIZE)
+        return (User.INSTANCE.getUserPos().getX() + (int) Math.floor((double) (mouseX - getPanOffsetX()) / Camera.TILE_PIXEL_SIZE)
                 - Camera.HALF_WINDOW_TILE_WIDTH);
     }
 
     public static int getTileMouseY(int mouseY) {
-        return (User.INSTANCE.getUserPos().getY() + (int) Math.floor((double) mouseY / Camera.TILE_PIXEL_SIZE)
+        return (User.INSTANCE.getUserPos().getY() + (int) Math.floor((double) (mouseY - getPanOffsetY()) / Camera.TILE_PIXEL_SIZE)
                 - Camera.HALF_WINDOW_TILE_HEIGHT);
     }
 
