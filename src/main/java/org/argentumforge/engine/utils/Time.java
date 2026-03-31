@@ -46,15 +46,15 @@ public final class Time {
         deltaTime = -1.0f;
     }
 
-    /**
-     * Actualizamos los timers, incluido los FPS
-     */
     public static void updateTime() {
-        updateFPS();
-
         endTime = (float) glfwGetTime();
-        deltaTime = endTime - beginTime;
+        float realDeltaTime = endTime - beginTime;
         beginTime = endTime;
+
+        updateFPS(realDeltaTime);
+
+        // Cap deltaTime to prevent physics/movement jumps (max 0.05s = min 20fps)
+        deltaTime = Math.min(realDeltaTime, 0.05f);
 
         boolean timeStopped = org.argentumforge.engine.utils.GameData.options.getRenderSettings().isPhotoTimeStop()
                 && org.argentumforge.engine.utils.GameData.options.getRenderSettings().isPhotoModeActive();
@@ -70,10 +70,7 @@ public final class Time {
         return (float) glfwGetTime();
     }
 
-    /**
-     * Actualizamos los FPS
-     */
-    private static void updateFPS() {
+    private static void updateFPS(float realDelta) {
         // paso 1 seg?
         if (timerFPS <= 0) {
             timerFPS = 1.0f;
@@ -81,7 +78,7 @@ public final class Time {
             contFPS = 0;
         }
         contFPS++;
-        timerFPS -= deltaTime;
+        timerFPS -= realDelta;
     }
 
 }
