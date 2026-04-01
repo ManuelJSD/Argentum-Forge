@@ -553,11 +553,11 @@ public class MapRenderer {
     public void renderImGuiOverlays(int pixelOffsetX, int pixelOffsetY) {
         RenderSettings renderSettings = Options.INSTANCE.getRenderSettings();
 
-        // El overlay del viewport necesita renderizarse dentro de un contexto ImGui
-        renderViewportOverlay();
-
         if (renderSettings.isPhotoModeActive())
             return;
+
+        // El overlay del viewport necesita renderizarse dentro de un contexto ImGui
+        renderViewportOverlay();
 
         if (org.argentumforge.engine.utils.editor.Trigger.getInstance().isActive()
                 || renderSettings.getShowTriggers()
