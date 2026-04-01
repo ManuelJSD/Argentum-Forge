@@ -262,9 +262,11 @@ public final class GameScene extends Scene {
 
         mapRenderer.render(pixelOffsetX, pixelOffsetY);
 
-        renderGrid(renderSettings, pixelOffsetX, pixelOffsetY);
-        renderEditorPreviews(pixelOffsetX, pixelOffsetY);
-        renderCommandHighlight(pixelOffsetX, pixelOffsetY);
+        if (!renderSettings.isPhotoModeActive()) {
+            renderGrid(renderSettings, pixelOffsetX, pixelOffsetY);
+            renderEditorPreviews(pixelOffsetX, pixelOffsetY);
+            renderCommandHighlight(pixelOffsetX, pixelOffsetY);
+        }
     }
 
     /**
