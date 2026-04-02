@@ -59,10 +59,13 @@ public class FBlockEditor extends Form implements IMapEditor {
         if (currentMode == 2) {
             ImGui.pushStyleColor(ImGuiCol.Button, Theme.COLOR_DANGER);
         }
-        if (ImGui.button(I18n.INSTANCE.get("editor.block.eraseShort"), 65, 30)) {
+        if (ImGui.button(I18n.INSTANCE.get("editor.block.eraseShort"), 70, 30)) {
             block.setMode(currentMode == 2 ? 0 : 2);
             if (block.getMode() != 0)
                 options.getRenderSettings().setShowBlock(true);
+        }
+        if (ImGui.isItemHovered()) {
+            ImGui.setTooltip(I18n.INSTANCE.get("editor.block.eraseTooltip"));
         }
         if (currentMode == 2) {
             ImGui.popStyleColor();
@@ -71,10 +74,13 @@ public class FBlockEditor extends Form implements IMapEditor {
         ImGui.sameLine();
 
         // Botón Bloquear (Activo - usa verde)
-        if (UIComponents.toggleButton(I18n.INSTANCE.get("editor.block.blockShort"), currentMode == 1, 65, 30)) {
+        if (UIComponents.toggleButton(I18n.INSTANCE.get("editor.block.blockShort"), currentMode == 1, 70, 30)) {
             block.setMode(currentMode == 1 ? 0 : 1);
             if (block.getMode() != 0)
                 options.getRenderSettings().setShowBlock(true);
+        }
+        if (ImGui.isItemHovered()) {
+            ImGui.setTooltip(I18n.INSTANCE.get("editor.block.blockTooltip"));
         }
 
         ImGui.sameLine();
@@ -83,10 +89,13 @@ public class FBlockEditor extends Form implements IMapEditor {
         if (currentMode == 3) {
             ImGui.pushStyleColor(ImGuiCol.Button, Theme.COLOR_PRIMARY);
         }
-        if (ImGui.button(I18n.INSTANCE.get("editor.block.invertShort"), 65, 30)) {
+        if (ImGui.button(I18n.INSTANCE.get("editor.block.invertShort"), 70, 30)) {
             block.setMode(currentMode == 3 ? 0 : 3);
             if (block.getMode() != 0)
                 options.getRenderSettings().setShowBlock(true);
+        }
+        if (ImGui.isItemHovered()) {
+            ImGui.setTooltip(I18n.INSTANCE.get("editor.block.invertTooltip"));
         }
         if (currentMode == 3) {
             ImGui.popStyleColor();
