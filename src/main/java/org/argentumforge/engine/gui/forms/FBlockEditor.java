@@ -35,7 +35,7 @@ public class FBlockEditor extends Form implements IMapEditor {
 
     @Override
     public void render() {
-        ImGui.setNextWindowSize(230, 320, ImGuiCond.FirstUseEver);
+        ImGui.setNextWindowSize(240, 320, ImGuiCond.FirstUseEver);
         if (!ImGui.begin(I18n.INSTANCE.get("editor.block"), ImGuiWindowFlags.None)) {
             ImGui.end();
             return;
