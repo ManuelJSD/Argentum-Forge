@@ -76,8 +76,14 @@ public class EditorInputManager {
 
         // Si ImGui quiere capturar el ratón explícitamente y el cursor de verdad está sobre sus paneles (no sobre el vacío de mapa)
         if (imgui.ImGui.getIO().getWantCaptureMouse()) {
-            // Evitar early return si simplemente quedó un control activo pero estamos flotando el ratón en el mapa
-            if (imgui.ImGui.isWindowHovered(imgui.flag.ImGuiHoveredFlags.AnyWindow)) {
+            // Usamos flags de jerarquía para detectar ventanas acopladas (docked)
+            // Cualquier ventana que no sea el "dockspace passthru" debería bloquear el input del juego
+            if (imgui.ImGui.isWindowHovered(imgui.flag.ImGuiHoveredFlags.AnyWindow | imgui.flag.ImGuiHoveredFlags.RootAndChildWindows)) {
+                return;
+            }
+
+            // Refuerzo: si el ratón está sobre un item real (botón, slider, etc.), bloquear siempre
+            if (imgui.ImGui.isAnyItemHovered()) {
                 return;
             }
         }
