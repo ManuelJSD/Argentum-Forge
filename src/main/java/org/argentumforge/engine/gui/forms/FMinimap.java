@@ -33,12 +33,13 @@ public final class FMinimap extends Form {
 
     @Override
     public void render() {
-        ImGui.setNextWindowSize(MINIMAP_SIZE + 20, MINIMAP_SIZE + 40, ImGuiCond.FirstUseEver);
+        // Tamaño fijo e inamovible (NoResize)
+        ImGui.setNextWindowSize(MINIMAP_SIZE + 20, MINIMAP_SIZE + 40, ImGuiCond.Always);
 
-        if (ImGui.begin(I18n.INSTANCE.get("minimap.title"), ImGuiWindowFlags.None)) {
+        int windowFlags = ImGuiWindowFlags.NoResize;
 
-            float mouseX = ImGui.getMousePosX();
-            float mouseY = ImGui.getMousePosY();
+        if (ImGui.begin(I18n.INSTANCE.get("minimap.title"), windowFlags)) {
+
             float contentX = ImGui.getWindowPosX() + 10;
             float contentY = ImGui.getWindowPosY() + 30;
 
@@ -105,27 +106,30 @@ public final class FMinimap extends Form {
                     contentY + (userY - 1) * TILE_SIZE + TILE_SIZE + 1,
                     ImGui.getColorU32(1.0f, 1.0f, 1.0f, 1.0f));
 
-            // Teleport Click
-            if (ImGui.isWindowHovered() && ImGui.isMouseClicked(0)) {
-                float localX = mouseX - contentX;
-                float localY = mouseY - contentY;
+            // Captura de input para el minimapa (Teleport / Drag)
+            // Usamos un Botón Invisible para capturar el foco y evitar que ImGui mueva la ventana al arrastrar.
+            ImGui.setCursorScreenPos(contentX, contentY);
+            ImGui.invisibleButton("##minimap_logic", MINIMAP_SIZE, MINIMAP_SIZE);
+
+            if (ImGui.isItemActive()) {
+                float mX = ImGui.getMousePosX();
+                float mY = ImGui.getMousePosY();
+                float localX = mX - contentX;
+                float localY = mY - contentY;
+
                 if (localX >= 0 && localX < MINIMAP_SIZE && localY >= 0 && localY < MINIMAP_SIZE) {
                     int targetX = (int) (localX / TILE_SIZE) + 1;
                     int targetY = (int) (localY / TILE_SIZE) + 1;
-                    // Validity check
-                    if (targetX >= 1 && targetX <= 100 && targetY >= 1 && targetY <= 100) {
-                        // Borders check
-                        targetX = Math.max(Camera.minXBorder,
-                                Math.min(targetX, Camera.maxXBorder));
-                        targetY = Math.max(Camera.minYBorder,
-                                Math.min(targetY, Camera.maxYBorder));
 
-                        User.INSTANCE.getUserPos().setX(targetX);
-                        User.INSTANCE.getUserPos().setY(targetY);
-                        User.INSTANCE.getAddToUserPos().setX(0);
-                        User.INSTANCE.getAddToUserPos().setY(0);
-                        User.INSTANCE.setUserMoving(false);
-                    }
+                    // Validity check \& Borders check
+                    targetX = Math.max(Camera.minXBorder, Math.min(targetX, Camera.maxXBorder));
+                    targetY = Math.max(Camera.minYBorder, Math.min(targetY, Camera.maxYBorder));
+
+                    User.INSTANCE.getUserPos().setX(targetX);
+                    User.INSTANCE.getUserPos().setY(targetY);
+                    User.INSTANCE.getAddToUserPos().setX(0);
+                    User.INSTANCE.getAddToUserPos().setY(0);
+                    User.INSTANCE.setUserMoving(false);
                 }
             }
 
