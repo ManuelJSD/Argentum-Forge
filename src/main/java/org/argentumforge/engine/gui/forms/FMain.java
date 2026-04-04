@@ -426,7 +426,7 @@ public final class FMain extends Form {
     }
 
     private void handleShortcuts() {
-        if (ImGui.getIO().getWantCaptureKeyboard())
+        if (ImGui.getIO().getWantCaptureKeyboard() && ImGui.isAnyItemActive())
             return;
 
         boolean modifierPressed = KeyHandler.isActionKeyPressed(Key.MULTI_SELECT);

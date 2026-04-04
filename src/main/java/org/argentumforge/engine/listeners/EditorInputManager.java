@@ -392,8 +392,8 @@ public class EditorInputManager {
             org.argentumforge.engine.game.EditorController.INSTANCE.reloadMap();
         }
 
-        // Atajos de velocidad
-        if (!imgui.ImGui.getIO().getWantCaptureKeyboard()) {
+        // Atajos de velocidad y movimiento - Permitir siempre que no haya un ítem activo en ImGui
+        if (!imgui.ImGui.getIO().getWantCaptureKeyboard() || !imgui.ImGui.isAnyItemActive()) {
             // Teclado numérico + para aumentar velocidad
             if (KeyHandler.isKeyPressed(GLFW_KEY_KP_ADD)) {
                 org.argentumforge.engine.game.Options.INSTANCE.increaseSpeed();
