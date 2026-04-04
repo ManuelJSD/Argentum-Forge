@@ -34,6 +34,19 @@ public class FBlockEditor extends Form implements IMapEditor {
     }
 
     @Override
+    public int getEditorMode() {
+        int mode = block.getMode();
+        if (mode == 1) return 1; // Bloquear
+        if (mode == 2) return 2; // Borrar
+        return 0;
+    }
+
+    @Override
+    public void deactivateMode() {
+        block.setMode(0);
+    }
+
+    @Override
     public void render() {
         ImGui.setNextWindowSize(240, 320, ImGuiCond.FirstUseEver);
         if (!ImGui.begin(I18n.INSTANCE.get("editor.block"), ImGuiWindowFlags.None)) {

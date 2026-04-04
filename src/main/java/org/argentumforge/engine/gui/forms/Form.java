@@ -42,6 +42,9 @@ public abstract class Form {
     public abstract void render();
 
     public void close() {
+        if (this instanceof IMapEditor) {
+            ((IMapEditor) this).deactivateMode();
+        }
         glDeleteTextures(backgroundImage);
         IM_GUI_SYSTEM.deleteFrmArray(this);
     }

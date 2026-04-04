@@ -12,4 +12,18 @@ public interface IMapEditor {
      * @param context The map context to edit, or null to disable editing.
      */
     void setContext(MapContext context);
+
+    /**
+     * Devuelve el modo actual del editor.
+     * @return 0: Inactivo, 1: Insertar, 2: Eliminar
+     */
+    default int getEditorMode() {
+        return 0;
+    }
+
+    /**
+     * Desactiva cualquier modo de edición activo (vuelve a selección).
+     */
+    default void deactivateMode() {
+    }
 }

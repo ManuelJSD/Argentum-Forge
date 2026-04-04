@@ -88,6 +88,19 @@ public class FSurfaceEditor extends Form implements IMapEditor {
     }
 
     @Override
+    public int getEditorMode() {
+        int mode = surface.getMode();
+        if (mode == 1) return 1; // Insertar
+        if (mode == 2) return 2; // Eliminar
+        return 0;
+    }
+
+    @Override
+    public void deactivateMode() {
+        surface.setMode(0);
+    }
+
+    @Override
     public void render() {
         ImGui.setNextWindowSize(350, 600, ImGuiCond.FirstUseEver);
 

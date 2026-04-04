@@ -218,10 +218,28 @@ public class MainToolbar {
         int colorActive;
 
         if (isVisible) {
-            // Estado ACTIVO (Ventana Abierta)
-            colorButton = Theme.COLOR_PRIMARY;
-            colorHovered = Theme.rgba(100, 181, 246, 255); // Azul más claro
-            colorActive = Theme.rgba(21, 101, 192, 255); // Azul más oscuro
+            // Determinar si es un editor con modos (Insertar/Eliminar)
+            int mode = 0;
+            if (formInstance instanceof org.argentumforge.engine.gui.forms.IMapEditor) {
+                mode = ((org.argentumforge.engine.gui.forms.IMapEditor) formInstance).getEditorMode();
+            }
+
+            if (mode == 1) {
+                // Modo INSERTAR (Verde)
+                colorButton = Theme.COLOR_ACCENT;
+                colorHovered = Theme.rgba(102, 187, 106, 255); // Verde claro (#66BB6A)
+                colorActive = Theme.rgba(56, 142, 60, 255);   // Verde oscuro (#388E3C)
+            } else if (mode == 2) {
+                // Modo ELIMINAR (Rojo)
+                colorButton = Theme.COLOR_DANGER;
+                colorHovered = Theme.rgba(239, 83, 80, 255);  // Rojo claro (#EF5350)
+                colorActive = Theme.rgba(211, 47, 47, 255);   // Rojo oscuro (#D32F2F)
+            } else {
+                // Estado ACTIVO ESTÁNDAR (Azul)
+                colorButton = Theme.COLOR_PRIMARY;
+                colorHovered = Theme.rgba(100, 181, 246, 255); // Azul más claro
+                colorActive = Theme.rgba(21, 101, 192, 255); // Azul más oscuro
+            }
         } else {
             // Estado INACTIVO (Ventana Cerrada)
             colorButton = Theme.rgba(45, 45, 45, 255); // Fondo base
@@ -311,6 +329,9 @@ public class MainToolbar {
 
     private void toggleForm(boolean isVisible, Form formInstance) {
         if (isVisible) {
+            if (formInstance instanceof org.argentumforge.engine.gui.forms.IMapEditor) {
+                ((org.argentumforge.engine.gui.forms.IMapEditor) formInstance).deactivateMode();
+            }
             ImGUISystem.INSTANCE.deleteFrmArray(formInstance);
         } else {
             ImGUISystem.INSTANCE.show(formInstance);

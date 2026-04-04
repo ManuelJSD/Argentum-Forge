@@ -25,6 +25,19 @@ public class FParticleEditor extends Form implements IMapEditor {
     }
 
     @Override
+    public int getEditorMode() {
+        Particle p = Particle.getInstance();
+        if (p.getMode() != 1)
+            return 0;
+        return (p.getSelectedParticleId() == 0) ? 2 : 1;
+    }
+
+    @Override
+    public void deactivateMode() {
+        Particle.getInstance().setMode(0);
+    }
+
+    @Override
     public void render() {
         // Auto-activar visualización de partículas
         if (!GameData.options.getRenderSettings().getShowParticles()) {

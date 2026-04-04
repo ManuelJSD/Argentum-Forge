@@ -34,6 +34,18 @@ public class FTriggerEditor extends Form implements IMapEditor {
     }
 
     @Override
+    public int getEditorMode() {
+        if (!tool.isActive())
+            return 0;
+        return (tool.getSelectedTriggerId() == 0) ? 2 : 1;
+    }
+
+    @Override
+    public void deactivateMode() {
+        tool.setActive(false);
+    }
+
+    @Override
     public void render() {
         ImGui.setNextWindowSize(460, 350, ImGuiCond.Once);
         ImGui.begin(I18n.INSTANCE.get("editor.trigger"), ImGuiWindowFlags.NoResize);
