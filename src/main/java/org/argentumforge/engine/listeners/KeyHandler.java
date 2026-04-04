@@ -123,6 +123,17 @@ public enum KeyHandler {
     public static void update() {
         Arrays.fill(keyJustPressed, false);
         Arrays.fill(keyJustReleased, false);
+
+        // Sincronización Global con ImGui para soportar Viewports (ventanas flotantes)
+        // Esto permite que el movimiento funcione incluso si la ventana principal no tiene el foco.
+        for (int key : MOVEMENT_KEYS) {
+            boolean isDown = ImGui.isKeyDown(key);
+            if (isDown != keyPressed[key]) {
+                updateKeyStates(key, isDown);
+                handleMovementKey(key, isDown);
+            }
+        }
+
         validateMovementKeys();
     }
 

@@ -35,9 +35,9 @@ public class ShortcutManager {
      * activa.
      */
     public void update() {
-        // Si ImGui está capturando texto (ej. en buscadores) o estamos configurando
-        // teclas, no procesamos atajos
-        if (ImGui.getIO().getWantTextInput() || Key.checkIsBinding()
+        // Si ImGui está interactuando activamente con un ítem (ej. moviendo un slider o escribiendo)
+        // bloqueamos los atajos. Si solo una ventana tiene el foco, permitimos que pasen.
+        if ((ImGui.getIO().getWantCaptureKeyboard() && ImGui.isAnyItemActive()) || Key.checkIsBinding()
                 || ImGUISystem.INSTANCE.isFormVisible("FBindKeys")) {
             return;
         }
