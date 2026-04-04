@@ -58,6 +58,19 @@ public final class FObjEditor extends Form implements IMapEditor {
     }
 
     @Override
+    public int getEditorMode() {
+        int mode = objEditor.getMode();
+        if (mode == 1) return 1; // Colocar
+        if (mode == 2) return 2; // Quitar
+        return 0;
+    }
+
+    @Override
+    public void deactivateMode() {
+        objEditor.setMode(0);
+    }
+
+    @Override
     public void render() {
         ImGui.setNextWindowSize(350, 550, ImGuiCond.FirstUseEver);
         if (ImGui.begin(I18n.INSTANCE.get("editor.object"), ImGuiWindowFlags.None)) {

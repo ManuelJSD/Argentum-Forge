@@ -37,6 +37,18 @@ public class FTransferEditor extends Form implements IMapEditor {
     }
 
     @Override
+    public int getEditorMode() {
+        if (!transfer.isActive())
+            return 0;
+        return (transfer.getMode() == 1) ? 1 : 2; // 1: Insertar, 0: Quitar en Transfer.java
+    }
+
+    @Override
+    public void deactivateMode() {
+        transfer.setActive(false);
+    }
+
+    @Override
     public void render() {
         ImGui.setNextWindowSize(320, 310, imgui.flag.ImGuiCond.Once);
         ImGui.begin(I18n.INSTANCE.get("editor.transfer.title"), imgui.flag.ImGuiWindowFlags.NoResize);
