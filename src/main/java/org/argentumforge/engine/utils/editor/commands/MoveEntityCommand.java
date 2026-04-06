@@ -48,17 +48,17 @@ public class MoveEntityCommand extends AbstractCommand {
         var mapData = context.getMapData();
         if (type == Selection.EntityType.NPC) {
             // Eliminar de origen
-            short oldChar = mapData[x1][y1].getCharIndex();
+            int oldChar = mapData[x1][y1].getCharIndex();
             if (oldChar != 0)
                 Character.eraseChar(oldChar);
-            mapData[x1][y1].setNpcIndex((short) 0);
+            mapData[x1][y1].setNpcIndex(0);
 
             // Colocar en destino
-            mapData[x2][y2].setNpcIndex((short) id);
+            mapData[x2][y2].setNpcIndex(id);
             if (id > 0 && AssetRegistry.npcs.containsKey(id)) {
                 NpcData data = AssetRegistry.npcs.get(id);
                 var charList = context.getCharList();
-                for (short i = 1; i < charList.length; i++) {
+                for (int i = 1; i < charList.length; i++) {
                     if (!charList[i].isActive()) {
                         // TODO: Character.makeChar likely still uses static GameData or needs
                         // refactoring.
@@ -81,7 +81,7 @@ public class MoveEntityCommand extends AbstractCommand {
             // Colocar en destino
             mapData[x2][y2].setObjIndex(objIndex);
             mapData[x2][y2].setObjAmount(objAmount);
-            org.argentumforge.engine.utils.GameData.initGrh(mapData[x2][y2].getObjGrh(), (short) id, false);
+            org.argentumforge.engine.utils.GameData.initGrh(mapData[x2][y2].getObjGrh(), id, false);
         }
     }
 }

@@ -520,7 +520,7 @@ public final class MapManager {
         // Actualizar ID del mapa en el usuario si es posible extraerlo del nombre
         int mapId = extractMapNumber(result.context.getFilePath());
         if (mapId > 0) {
-            User.INSTANCE.setUserMap((short) mapId);
+            User.INSTANCE.setUserMap(mapId);
         }
 
         // Teleport Usuario
@@ -1167,7 +1167,7 @@ public final class MapManager {
                                     }
 
                                     // Actualizar mapa
-                                    mapData[x][y].setCharIndex((short) openCharIndex);
+                                    mapData[x][y].setCharIndex(openCharIndex);
                                 }
                             }
                         }
@@ -1513,7 +1513,7 @@ public final class MapManager {
                                     && AssetRegistry.headData[headIdx] != null) {
                                 chr.setHead(new HeadData(AssetRegistry.headData[headIdx]));
                             }
-                            mapData[x][y].setCharIndex((short) openCharIndex);
+                            mapData[x][y].setCharIndex(openCharIndex);
                         }
                     }
                 }

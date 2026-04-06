@@ -11,15 +11,15 @@ package org.argentumforge.engine.utils.inits;
  */
 public final class IndexBodys {
 
-    private short[] body = new short[5];
+    private int[] body = new int[5];
     private short headOffsetX;
     private short headOffsetY;
 
-    public short getBody(int index) {
+    public int getBody(int index) {
         return body[index];
     }
 
-    public void setBody(int index, short body) {
+    public void setBody(int index, int body) {
         this.body[index] = body;
     }
 

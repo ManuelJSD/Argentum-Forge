@@ -16,7 +16,7 @@ public class MapContext {
     private MapProperties mapProperties;
     private Character[] charList;
     private boolean modified = false;
-    private short lastChar = 0;
+    private int lastChar = 0;
     private MapManager.MapSaveOptions saveOptions = MapManager.MapSaveOptions.standard();
     private final Stack<Command> undoStack = new Stack<>();
     private final Stack<Command> redoStack = new Stack<>();
@@ -112,11 +112,11 @@ public class MapContext {
         this.modified = modified;
     }
 
-    public short getLastChar() {
+    public int getLastChar() {
         return lastChar;
     }
 
-    public void setLastChar(short lastChar) {
+    public void setLastChar(int lastChar) {
         this.lastChar = lastChar;
     }
 

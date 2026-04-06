@@ -12,7 +12,7 @@ package org.argentumforge.engine.utils.inits;
 public final class MapData {
 
     private final GrhInfo[] layer = new GrhInfo[5];
-    private short charIndex;
+    private int charIndex;
     private GrhInfo objGrh;
     private int npcIndex;
     private boolean blocked;
@@ -44,12 +44,12 @@ public final class MapData {
         this.layer[index] = layer;
     }
 
-    public short getCharIndex() {
+    public int getCharIndex() {
         return charIndex;
     }
 
     public void setCharIndex(int charIndex) {
-        this.charIndex = (short) charIndex;
+        this.charIndex = charIndex;
     }
 
     public GrhInfo getObjGrh() {

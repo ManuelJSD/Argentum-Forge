@@ -40,8 +40,8 @@ public class Trigger {
         if (!isActive || mapData == null)
             return;
 
-        Map<TriggerChangeCommand.TilePos, Short> oldStates = new HashMap<>();
-        Map<TriggerChangeCommand.TilePos, Short> newStates = new HashMap<>();
+        Map<TriggerChangeCommand.TilePos, Integer> oldStates = new HashMap<>();
+        Map<TriggerChangeCommand.TilePos, Integer> newStates = new HashMap<>();
 
         int offset = brushSize / 2;
         double radiusSq = Math.pow(brushSize / 2.0, 2);
@@ -59,12 +59,12 @@ public class Trigger {
                     }
 
                     // Aplicar trigger mediante comando (soporta undo/redo y dirty flag)
-                    short oldTrigger = (short) mapData[i][j].getTrigger();
-                    if (oldTrigger != (short) selectedTriggerId) {
+                    int oldTrigger = mapData[i][j].getTrigger();
+                    if (oldTrigger != selectedTriggerId) {
                         TriggerChangeCommand.TilePos pos = new TriggerChangeCommand.TilePos(
                                 i, j);
                         oldStates.put(pos, oldTrigger);
-                        newStates.put(pos, (short) selectedTriggerId);
+                        newStates.put(pos, selectedTriggerId);
                     }
                 }
             }

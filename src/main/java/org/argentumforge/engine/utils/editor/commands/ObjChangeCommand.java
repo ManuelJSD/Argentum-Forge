@@ -48,7 +48,7 @@ public class ObjChangeCommand extends AbstractCommand {
         mapData[x][y].setObjAmount(objAmount);
         mapData[x][y].getObjGrh().setGrhIndex(0);
         if (grhIndex > 0) {
-            initGrh(mapData[x][y].getObjGrh(), (short) grhIndex, false);
+            initGrh(mapData[x][y].getObjGrh(), grhIndex, false);
         }
     }
 }

@@ -44,7 +44,7 @@ public class NpcChangeCommand extends AbstractCommand {
         var charList = context.getCharList();
 
         // Borrar visual actual
-        short currentChar = mapData[x][y].getCharIndex();
+        int currentChar = mapData[x][y].getCharIndex();
         if (currentChar != 0) {
             Character.eraseChar(currentChar);
         }

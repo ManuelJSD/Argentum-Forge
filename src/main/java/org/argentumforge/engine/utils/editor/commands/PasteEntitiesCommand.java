@@ -76,8 +76,8 @@ public class PasteEntitiesCommand extends AbstractCommand {
                 if (item.layers != null) {
                     for (int i = 1; i <= 4; i++) {
                         if (settings.layers[i - 1]) {
-                            short oldGrh = (short) tile.getLayer(i).getGrhIndex();
-                            commands.add(new TileChangeCommand(context, tx, ty, i, oldGrh, (short) item.layers[i]));
+                            int oldGrh = tile.getLayer(i).getGrhIndex();
+                            commands.add(new TileChangeCommand(context, tx, ty, i, oldGrh, item.layers[i]));
                         }
                     }
                 }
@@ -98,10 +98,10 @@ public class PasteEntitiesCommand extends AbstractCommand {
                 if (settings.triggers) {
                     int oldTrigger = tile.getTrigger();
                     if (oldTrigger != item.trigger) {
-                        java.util.Map<TriggerChangeCommand.TilePos, Short> oldMap = java.util.Map
-                                .of(new TriggerChangeCommand.TilePos(tx, ty), (short) oldTrigger);
-                        java.util.Map<TriggerChangeCommand.TilePos, Short> newMap = java.util.Map
-                                .of(new TriggerChangeCommand.TilePos(tx, ty), (short) item.trigger);
+                        java.util.Map<TriggerChangeCommand.TilePos, Integer> oldMap = java.util.Map
+                                .of(new TriggerChangeCommand.TilePos(tx, ty), oldTrigger);
+                        java.util.Map<TriggerChangeCommand.TilePos, Integer> newMap = java.util.Map
+                                .of(new TriggerChangeCommand.TilePos(tx, ty), item.trigger);
                         commands.add(new TriggerChangeCommand(context, oldMap, newMap));
                     }
                 }

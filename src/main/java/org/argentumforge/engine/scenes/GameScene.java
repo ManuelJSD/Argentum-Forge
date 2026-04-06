@@ -292,7 +292,7 @@ public final class GameScene extends Scene {
                     for (int dy = 0; dy < surface.getMosaicHeight(); dy++) {
                         int mapX = tileX + dx;
                         int mapY = tileY + dy;
-                        drawPreviewGrh((short) (surface.getSurfaceIndex() + (dy * surface.getMosaicWidth()) + dx), mapX,
+                        drawPreviewGrh(surface.getSurfaceIndex() + (dy * surface.getMosaicWidth()) + dx, mapX,
                                 mapY, pixelOffsetX, pixelOffsetY, alpha);
                     }
                 }
@@ -304,11 +304,11 @@ public final class GameScene extends Scene {
                                 && (Math.pow(i - tileX, 2) + Math.pow(j - tileY, 2) > Math.pow(half, 2)))
                             continue;
 
-                        short targetGrh = (short) surface.getSurfaceIndex();
+                        int targetGrh = surface.getSurfaceIndex();
                         if (surface.getMosaicWidth() > 1 || surface.getMosaicHeight() > 1) {
-                            targetGrh = (short) (surface.getSurfaceIndex()
+                            targetGrh = surface.getSurfaceIndex()
                                     + ((j % surface.getMosaicHeight()) * surface.getMosaicWidth())
-                                    + (i % surface.getMosaicWidth()));
+                                    + (i % surface.getMosaicWidth());
                         }
                         drawPreviewGrh(targetGrh, i, j, pixelOffsetX, pixelOffsetY, alpha);
                     }
@@ -354,7 +354,7 @@ public final class GameScene extends Scene {
         if (obj.getMode() == 1 && obj.getObjNumber() > 0) {
             ObjData data = AssetRegistry.objs.get(obj.getObjNumber());
             if (data != null) {
-                drawPreviewGrh((short) data.getGrhIndex(), tileX, tileY, pixelOffsetX, pixelOffsetY,
+                drawPreviewGrh(data.getGrhIndex(), tileX, tileY, pixelOffsetX, pixelOffsetY,
                         options.getRenderSettings().getGhostOpacity());
             }
         }
@@ -382,7 +382,7 @@ public final class GameScene extends Scene {
                                 weather.getWeatherColor());
                     }
                 } else if (se.type == Selection.EntityType.OBJECT) {
-                    drawPreviewGrh((short) se.id, dragTileX, dragTileY, pixelOffsetX, pixelOffsetY,
+                    drawPreviewGrh(se.id, dragTileX, dragTileY, pixelOffsetX, pixelOffsetY,
                             options.getRenderSettings().getGhostOpacity());
                 } else if (se.type == Selection.EntityType.TILE) {
                     // Si arrastramos un TILE, deberíamos ver sus capas?
@@ -478,7 +478,7 @@ public final class GameScene extends Scene {
                 new RGBColor(1.0f, 1.0f, 0.0f));
     }
 
-    private void drawPreviewGrh(short grhIndex, int tileX, int tileY, int pixelOffsetX, int pixelOffsetY, float alpha) {
+    private void drawPreviewGrh(int grhIndex, int tileX, int tileY, int pixelOffsetX, int pixelOffsetY, float alpha) {
         if (mapData == null || tileX < 0 || tileX >= mapData.length || tileY < 0 || tileY >= mapData[0].length)
             return;
 

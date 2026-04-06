@@ -656,10 +656,10 @@ public final class GameData {
             AssetRegistry.headData[0] = new HeadData();
             for (int i = 1; i <= numHeads; i++) {
                 myHeads[i] = new IndexHeads();
-                myHeads[i].setHead(1, (short) readDynamic(reader, useLongs));
-                myHeads[i].setHead(2, (short) readDynamic(reader, useLongs));
-                myHeads[i].setHead(3, (short) readDynamic(reader, useLongs));
-                myHeads[i].setHead(4, (short) readDynamic(reader, useLongs));
+                myHeads[i].setHead(1, readDynamic(reader, useLongs));
+                myHeads[i].setHead(2, readDynamic(reader, useLongs));
+                myHeads[i].setHead(3, readDynamic(reader, useLongs));
+                myHeads[i].setHead(4, readDynamic(reader, useLongs));
 
                 AssetRegistry.headData[i] = new HeadData();
                 if (myHeads[i].getHead(1) != 0) {
@@ -749,10 +749,10 @@ public final class GameData {
 
                 myHeads[i] = new IndexHeads();
                 if (useLongs) {
-                    myHeads[i].setHead(1, (short) reader.readInt());
-                    myHeads[i].setHead(2, (short) reader.readInt());
-                    myHeads[i].setHead(3, (short) reader.readInt());
-                    myHeads[i].setHead(4, (short) reader.readInt());
+                    myHeads[i].setHead(1, reader.readInt());
+                    myHeads[i].setHead(2, reader.readInt());
+                    myHeads[i].setHead(3, reader.readInt());
+                    myHeads[i].setHead(4, reader.readInt());
                 } else {
                     // Legacy: Read strict Shorts (2 bytes)
                     myHeads[i].setHead(1, reader.readShort());
@@ -828,10 +828,10 @@ public final class GameData {
             AssetRegistry.bodyData[0] = new BodyData();
             for (int i = 1; i <= numBodys; i++) {
                 myBodys[i] = new IndexBodys();
-                myBodys[i].setBody(1, (short) readDynamic(reader, useLongs));
-                myBodys[i].setBody(2, (short) readDynamic(reader, useLongs));
-                myBodys[i].setBody(3, (short) readDynamic(reader, useLongs));
-                myBodys[i].setBody(4, (short) readDynamic(reader, useLongs));
+                myBodys[i].setBody(1, readDynamic(reader, useLongs));
+                myBodys[i].setBody(2, readDynamic(reader, useLongs));
+                myBodys[i].setBody(3, readDynamic(reader, useLongs));
+                myBodys[i].setBody(4, readDynamic(reader, useLongs));
 
                 myBodys[i].setHeadOffsetX(reader.readShort());
                 myBodys[i].setHeadOffsetY(reader.readShort());
@@ -990,7 +990,7 @@ public final class GameData {
                     continue;
 
                 try {
-                    short grhIndex = Short.parseShort(value);
+                    int grhIndex = Integer.parseInt(value);
                     if (key.equalsIgnoreCase("Dir1")) {
                         // Dir1 -> Norte (Índice 1)
                         initGrh(currentWeapon.getWeaponWalk(1), grhIndex, false);
@@ -1152,7 +1152,7 @@ public final class GameData {
                     continue;
 
                 try {
-                    short grhIndex = Short.parseShort(value);
+                    int grhIndex = Integer.parseInt(value);
                     if (key.equalsIgnoreCase("Dir1")) {
                         initGrh(currentShield.getShieldWalk(1), grhIndex, false);
                     } else if (key.equalsIgnoreCase("Dir2")) {
@@ -1296,7 +1296,7 @@ public final class GameData {
 
             for (int i = 1; i <= numFXs; i++) {
                 AssetRegistry.fxData[i] = new FxData();
-                AssetRegistry.fxData[i].setAnimacion((short) readDynamic(reader, useLongs));
+                AssetRegistry.fxData[i].setAnimacion(readDynamic(reader, useLongs));
                 AssetRegistry.fxData[i].setOffsetX(reader.readShort());
                 AssetRegistry.fxData[i].setOffsetY(reader.readShort());
             }
@@ -1524,8 +1524,8 @@ public final class GameData {
             AssetRegistry.grhData[grhIndex] = new GrhData();
             GrhData current = AssetRegistry.grhData[grhIndex];
 
-            int numFrames = reader.readShort();
-            current.setNumFrames((short) numFrames);
+            int numFrames = reader.readShort() & 0xFFFF;
+            current.setNumFrames(numFrames);
 
             if (numFrames > 1) {
                 // ANIMACIONES

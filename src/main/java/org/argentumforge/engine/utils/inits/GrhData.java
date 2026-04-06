@@ -13,18 +13,18 @@ package org.argentumforge.engine.utils.inits;
  */
 public final class GrhData {
 
-    private short sX;
-    private short sY;
+    private int sX;
+    private int sY;
 
     private int fileNum;
 
-    private short pixelWidth;
-    private short pixelHeight;
+    private int pixelWidth;
+    private int pixelHeight;
 
     private float tileWidth;
     private float tileHeight;
 
-    private short numFrames;
+    private int numFrames;
     private int[] frames;
 
     private float speed;
@@ -33,19 +33,19 @@ public final class GrhData {
 
     }
 
-    public short getsX() {
+    public int getsX() {
         return sX;
     }
 
-    public void setsX(short sX) {
+    public void setsX(int sX) {
         this.sX = sX;
     }
 
-    public short getsY() {
+    public int getsY() {
         return sY;
     }
 
-    public void setsY(short sY) {
+    public void setsY(int sY) {
         this.sY = sY;
     }
 
@@ -57,19 +57,19 @@ public final class GrhData {
         this.fileNum = fileNum;
     }
 
-    public short getPixelWidth() {
+    public int getPixelWidth() {
         return pixelWidth;
     }
 
-    public void setPixelWidth(short pixelWidth) {
+    public void setPixelWidth(int pixelWidth) {
         this.pixelWidth = pixelWidth;
     }
 
-    public short getPixelHeight() {
+    public int getPixelHeight() {
         return pixelHeight;
     }
 
-    public void setPixelHeight(short pixelHeight) {
+    public void setPixelHeight(int pixelHeight) {
         this.pixelHeight = pixelHeight;
     }
 
@@ -89,11 +89,11 @@ public final class GrhData {
         this.tileHeight = tileHeight;
     }
 
-    public short getNumFrames() {
+    public int getNumFrames() {
         return numFrames;
     }
 
-    public void setNumFrames(short numFrames) {
+    public void setNumFrames(int numFrames) {
         this.numFrames = numFrames;
     }
 

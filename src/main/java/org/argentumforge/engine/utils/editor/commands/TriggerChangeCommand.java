@@ -12,14 +12,14 @@ public class TriggerChangeCommand extends AbstractCommand {
         return I18n.INSTANCE.get("history.command.trigger");
     }
 
-    private final Map<TilePos, Short> oldStates;
-    private final Map<TilePos, Short> newStates;
+    private final Map<TilePos, Integer> oldStates;
+    private final Map<TilePos, Integer> newStates;
 
     public static record TilePos(int x, int y) {
     }
 
-    public TriggerChangeCommand(org.argentumforge.engine.utils.MapContext context, Map<TilePos, Short> oldStates,
-            Map<TilePos, Short> newStates) {
+    public TriggerChangeCommand(org.argentumforge.engine.utils.MapContext context, Map<TilePos, Integer> oldStates,
+            Map<TilePos, Integer> newStates) {
         super(context);
         this.oldStates = oldStates;
         this.newStates = newStates;
@@ -28,7 +28,7 @@ public class TriggerChangeCommand extends AbstractCommand {
     @Override
     public void execute() {
         var mapData = context.getMapData();
-        for (Map.Entry<TilePos, Short> entry : newStates.entrySet()) {
+        for (Map.Entry<TilePos, Integer> entry : newStates.entrySet()) {
             mapData[entry.getKey().x][entry.getKey().y].setTrigger(entry.getValue());
         }
     }
@@ -36,7 +36,7 @@ public class TriggerChangeCommand extends AbstractCommand {
     @Override
     public void undo() {
         var mapData = context.getMapData();
-        for (Map.Entry<TilePos, Short> entry : oldStates.entrySet()) {
+        for (Map.Entry<TilePos, Integer> entry : oldStates.entrySet()) {
             mapData[entry.getKey().x][entry.getKey().y].setTrigger(entry.getValue());
         }
     }

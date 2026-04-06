@@ -11,15 +11,15 @@ package org.argentumforge.engine.utils.inits;
  */
 public final class FxData {
 
-    private short Animacion;
+    private int Animacion;
     private short OffsetX;
     private short OffsetY;
 
-    public short getAnimacion() {
+    public int getAnimacion() {
         return Animacion;
     }
 
-    public void setAnimacion(short animacion) {
+    public void setAnimacion(int animacion) {
         Animacion = animacion;
     }
 

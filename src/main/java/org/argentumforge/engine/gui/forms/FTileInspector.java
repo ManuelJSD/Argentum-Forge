@@ -108,9 +108,9 @@ public final class FTileInspector extends Form {
                 if (ImGui.inputInt("##LGrh" + i, lGrh, 0, 0)) {
                     if (lGrh.get() != grh) {
                         int maxGrh = (AssetRegistry.grhData != null) ? AssetRegistry.grhData.length - 1 : 32000;
-                        short val = (short) Math.max(0, Math.min(maxGrh, lGrh.get()));
+                        int val = Math.max(0, Math.min(maxGrh, lGrh.get()));
                         commandManager.executeCommand(
-                                new TileChangeCommand(context, x, y, i, (short) grh, val));
+                                new TileChangeCommand(context, x, y, i, grh, val));
                     }
                 }
                 ImGui.popItemWidth();
@@ -161,10 +161,10 @@ public final class FTileInspector extends Form {
             if (ImGui.inputInt("##TrigID", tempTrig, 1, 5)) {
                 if (tempTrig.get() != tile.getTrigger()) {
                     // Triggers typical range 0-6
-                    short val = (short) Math.max(0, Math.min(6, tempTrig.get()));
-                    Map<TriggerChangeCommand.TilePos, Short> oldS = new HashMap<>();
-                    Map<TriggerChangeCommand.TilePos, Short> newS = new HashMap<>();
-                    oldS.put(new TriggerChangeCommand.TilePos(x, y), (short) tile.getTrigger());
+                    int val = Math.max(0, Math.min(6, tempTrig.get()));
+                    Map<TriggerChangeCommand.TilePos, Integer> oldS = new HashMap<>();
+                    Map<TriggerChangeCommand.TilePos, Integer> newS = new HashMap<>();
+                    oldS.put(new TriggerChangeCommand.TilePos(x, y), tile.getTrigger());
                     newS.put(new TriggerChangeCommand.TilePos(x, y), val);
                     commandManager.executeCommand(new TriggerChangeCommand(context, oldS, newS));
                 }

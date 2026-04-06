@@ -10,13 +10,13 @@ package org.argentumforge.engine.utils.inits;
  */
 public final class IndexHeads {
 
-    private short[] head = new short[5];
+    private int[] head = new int[5];
 
-    public short getHead(int index) {
+    public int getHead(int index) {
         return head[index];
     }
 
-    public void setHead(int index, short head) {
+    public void setHead(int index, int head) {
         this.head[index] = head;
     }
 

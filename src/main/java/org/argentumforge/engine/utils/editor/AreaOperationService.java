@@ -244,30 +244,30 @@ public final class AreaOperationService {
      */
     public static int fillTriggers(MapContext ctx, int x1, int y1, int x2, int y2,
             int triggerId) {
-        return setTriggers(ctx, x1, y1, x2, y2, (short) triggerId);
+        return setTriggers(ctx, x1, y1, x2, y2, triggerId);
     }
 
     /**
      * Limpia triggers (pone a 0).
      */
     public static int clearTriggers(MapContext ctx, int x1, int y1, int x2, int y2) {
-        return setTriggers(ctx, x1, y1, x2, y2, (short) 0);
+        return setTriggers(ctx, x1, y1, x2, y2, 0);
     }
 
     private static int setTriggers(MapContext ctx, int x1, int y1, int x2, int y2,
-            short target) {
+            int target) {
         if (ctx == null || ctx.getMapData() == null)
             return 0;
         var mapData = ctx.getMapData();
 
-        Map<TriggerChangeCommand.TilePos, Short> oldStates = new HashMap<>();
-        Map<TriggerChangeCommand.TilePos, Short> newStates = new HashMap<>();
+        Map<TriggerChangeCommand.TilePos, Integer> oldStates = new HashMap<>();
+        Map<TriggerChangeCommand.TilePos, Integer> newStates = new HashMap<>();
 
         for (int x = x1; x <= x2; x++) {
             for (int y = y1; y <= y2; y++) {
                 if (!inBounds(mapData, x, y))
                     continue;
-                short current = (short) mapData[x][y].getTrigger();
+                int current = mapData[x][y].getTrigger();
                 if (current != target) {
                     var pos = new TriggerChangeCommand.TilePos(x, y);
                     oldStates.put(pos, current);

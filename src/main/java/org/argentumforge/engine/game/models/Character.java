@@ -41,12 +41,12 @@ import static org.argentumforge.engine.utils.Time.timerTicksPerFrame;
 public final class Character {
 
     // ultimo personaje del array
-    public static short lastChar = 0;
+    public static int lastChar = 0;
     private boolean active;
     private Direction direction;
     private Position pos;
-    private short iHead;
-    private short iBody;
+    private int iHead;
+    private int iBody;
     private BodyData body;
     private HeadData head;
     private HeadData helmet;
@@ -59,8 +59,8 @@ public final class Character {
     private GrhInfo fX;
     private int fxIndex;
 
-    private short scrollDirectionX;
-    private short scrollDirectionY;
+    private int scrollDirectionX;
+    private int scrollDirectionY;
 
     private boolean moving;
     private float moveOffsetX;
@@ -91,7 +91,7 @@ public final class Character {
     /**
      * Crea un nuevo personaje segun los parametros establecidos.
      */
-    public static void makeChar(short charIndex, int body, int head, Direction direction, int x, int y, int weapon,
+    public static void makeChar(int charIndex, int body, int head, Direction direction, int x, int y, int weapon,
             int shield, int helmet) {
         var context = org.argentumforge.engine.utils.GameData.getActiveContext();
         if (context == null)
@@ -156,7 +156,7 @@ public final class Character {
      * @param charIndex Numero de identificador de personaje
      *                  Elimina un personaje del array de personajes.
      */
-    public static void eraseChar(short charIndex) {
+    public static void eraseChar(int charIndex) {
         var context = org.argentumforge.engine.utils.GameData.getActiveContext();
         if (context == null)
             return;
@@ -193,7 +193,7 @@ public final class Character {
         var charList = context.getCharList();
         var mapData = context.getMapData();
 
-        for (short i = 1; i < charList.length; i++) {
+        for (int i = 1; i < charList.length; i++) {
             if (charList[i] != null && charList[i].isActive()) {
                 mapData[charList[i].getPos().getX()][charList[i].getPos().getY()].setCharIndex(0);
             }
@@ -206,7 +206,7 @@ public final class Character {
      * @param charIndex Numero de identificador del personaje
      *                  Resetea los atributos del personaje.
      */
-    private static void resetCharInfo(short charIndex) {
+    private static void resetCharInfo(int charIndex) {
         var context = org.argentumforge.engine.utils.GameData.getActiveContext();
         if (context != null) {
             context.getCharList()[charIndex] = new Character();
@@ -427,7 +427,7 @@ public final class Character {
         }
     }
 
-    public static int sgn(short number) {
+    public static int sgn(int number) {
         if (number == 0)
             return 0;
         return (number / Math.abs(number));
@@ -461,20 +461,20 @@ public final class Character {
         return pos;
     }
 
-    public short getiHead() {
+    public int getiHead() {
         return iHead;
     }
 
     public void setiHead(int iHead) {
-        this.iHead = (short) iHead;
+        this.iHead = iHead;
     }
 
-    public short getiBody() {
+    public int getiBody() {
         return iBody;
     }
 
     public void setiBody(int iBody) {
-        this.iBody = (short) iBody;
+        this.iBody = iBody;
     }
 
     public BodyData getBody() {
@@ -533,20 +533,20 @@ public final class Character {
         this.fxIndex = fxIndex;
     }
 
-    public short getScrollDirectionX() {
+    public int getScrollDirectionX() {
         return scrollDirectionX;
     }
 
     public void setScrollDirectionX(int scrollDirectionX) {
-        this.scrollDirectionX = (short) scrollDirectionX;
+        this.scrollDirectionX = scrollDirectionX;
     }
 
-    public short getScrollDirectionY() {
+    public int getScrollDirectionY() {
         return scrollDirectionY;
     }
 
     public void setScrollDirectionY(int scrollDirectionY) {
-        this.scrollDirectionY = (short) scrollDirectionY;
+        this.scrollDirectionY = scrollDirectionY;
     }
 
     public boolean getMoving() {

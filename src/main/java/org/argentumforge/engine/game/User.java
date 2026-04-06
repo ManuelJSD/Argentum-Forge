@@ -28,8 +28,8 @@ public enum User {
     private boolean userMoving;
     private boolean walkingmode;
     // mapa
-    private short userMap;
-    private short userCharIndex;
+    private int userMap;
+    private int userCharIndex;
 
     // Apariencia persistente
     private int userBody = GameData.options.getUserBody();
@@ -74,8 +74,8 @@ public enum User {
         // refresco
 
         // Aplicar apariencia persistente
-        charList[userCharIndex].setiBody((short) userBody);
-        charList[userCharIndex].setiHead((short) userHead);
+        charList[userCharIndex].setiBody(userBody);
+        charList[userCharIndex].setiHead(userHead);
 
         // Actualizar objetos de datos (Importante para renderizado!)
         if (AssetRegistry.bodyData != null && userBody < AssetRegistry.bodyData.length
@@ -256,7 +256,7 @@ public enum User {
      * @param nDirection Direccion del personaje Mueve el personaje segun la
      *                   direccion establecida en "nHeading".
      */
-    public void moveCharbyHead(short charIndex, Direction nDirection) {
+    public void moveCharbyHead(int charIndex, Direction nDirection) {
         var context = GameData.getActiveContext();
         if (context == null)
             return;
@@ -336,7 +336,7 @@ public enum User {
      * @param nY        Posicion Y a actualizar Mueve el personaje segun la
      *                  direccion establecida en "nX" y "nY".
      */
-    public void moveCharbyPos(short charIndex, int nX, int nY) {
+    public void moveCharbyPos(int charIndex, int nX, int nY) {
         var context = GameData.getActiveContext();
         if (context == null)
             return;
@@ -349,13 +349,13 @@ public enum User {
         final int addX = nX - x;
         final int addY = nY - y;
 
-        if (sgn((short) addX) == 1)
+        if (sgn(addX) == 1)
             charList[charIndex].setHeading(RIGHT);
-        else if (sgn((short) addX) == -1)
+        else if (sgn(addX) == -1)
             charList[charIndex].setHeading(LEFT);
-        else if (sgn((short) addY) == -1)
+        else if (sgn(addY) == -1)
             charList[charIndex].setHeading(UP);
-        else if (sgn((short) addY) == 1)
+        else if (sgn(addY) == 1)
             charList[charIndex].setHeading(DOWN);
 
         if (mapData != null) {
@@ -371,8 +371,8 @@ public enum User {
 
         charList[charIndex].setMoving(true);
 
-        charList[charIndex].setScrollDirectionX(sgn((short) addX));
-        charList[charIndex].setScrollDirectionY(sgn((short) addY));
+        charList[charIndex].setScrollDirectionX(sgn(addX));
+        charList[charIndex].setScrollDirectionY(sgn(addY));
 
     }
 
@@ -433,19 +433,19 @@ public enum User {
         this.underCeiling = underCeiling;
     }
 
-    public short getUserCharIndex() {
+    public int getUserCharIndex() {
         return userCharIndex;
     }
 
-    public void setUserCharIndex(short userCharIndex) {
+    public void setUserCharIndex(int userCharIndex) {
         this.userCharIndex = userCharIndex;
     }
 
-    public short getUserMap() {
+    public int getUserMap() {
         return userMap;
     }
 
-    public void setUserMap(short userMap) {
+    public void setUserMap(int userMap) {
         this.userMap = userMap;
     }
 

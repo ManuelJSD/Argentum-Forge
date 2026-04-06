@@ -15,11 +15,11 @@ public class TileChangeCommand extends AbstractCommand {
     }
 
     private final int x, y, layer;
-    private final short oldGrhIndex;
-    private final short newGrhIndex;
+    private final int oldGrhIndex;
+    private final int newGrhIndex;
 
     public TileChangeCommand(org.argentumforge.engine.utils.MapContext context, int x, int y, int layer,
-            short oldGrhIndex, short newGrhIndex) {
+            int oldGrhIndex, int newGrhIndex) {
         super(context);
         this.x = x;
         this.y = y;
@@ -38,7 +38,7 @@ public class TileChangeCommand extends AbstractCommand {
         apply(oldGrhIndex);
     }
 
-    private void apply(short grhIndex) {
+    private void apply(int grhIndex) {
         var mapData = context.getMapData();
         GrhInfo layerGrh = mapData[x][y].getLayer(layer);
         layerGrh.setGrhIndex(grhIndex);

@@ -181,7 +181,7 @@ public final class FLauncher extends Form {
         User user = User.INSTANCE;
         int startX = 50;
         int startY = 50;
-        short charIndex = 1;
+        int charIndex = 1;
 
         user.getUserPos().setX(startX);
         user.getUserPos().setY(startY);
