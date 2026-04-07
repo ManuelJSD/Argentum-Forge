@@ -6,6 +6,7 @@ import org.argentumforge.engine.game.Options;
 import org.argentumforge.engine.game.Weather;
 import org.argentumforge.engine.renderer.RenderSettings;
 import org.argentumforge.engine.renderer.Surface;
+import org.argentumforge.engine.scenes.Camera;
 import org.argentumforge.engine.utils.inits.MapData;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.system.MemoryStack;
@@ -100,6 +101,15 @@ public class MapExporter {
             // Indicar al BatchRenderer que use la proyección del FBO (1:1, sin zoom)
             Engine.batch.setExportProjection(pixelWidth, pixelHeight);
 
+            // --- PASO 4b: Forzar TILE_PIXEL_SIZE = 32 durante la exportación ---
+            // Drawn.drawTexture() y Character.drawCharacter() usan Camera.TILE_PIXEL_SIZE
+            // para centrar gráficos multi-tile y posicionar cabezas de NPCs.
+            // Si el usuario tiene zoom activo (ej: TILE_PIXEL_SIZE=48), los cálculos
+            // de centrado se desfasan respecto a la grilla de 32px del exportador,
+            // causando sprites descolocados en la imagen exportada.
+            int prevTilePixelSize = Camera.TILE_PIXEL_SIZE;
+            Camera.TILE_PIXEL_SIZE = TILE_SIZE;
+
             // --- PASO 5: Renderizar al FBO ---
             glClearColor(0f, 0f, 0f, 1f);
             glClear(GL_COLOR_BUFFER_BIT);
@@ -107,6 +117,9 @@ public class MapExporter {
             Engine.batch.begin();
             renderMapContent(mapData, mapWidth, mapHeight);
             Engine.batch.end();
+
+            // Restaurar TILE_PIXEL_SIZE al valor del zoom del editor
+            Camera.TILE_PIXEL_SIZE = prevTilePixelSize;
 
             // --- PASO 6: Leer píxeles y guardar PNG ---
             ByteBuffer buffer = BufferUtils.createByteBuffer(pixelWidth * pixelHeight * 4);
@@ -174,10 +187,15 @@ public class MapExporter {
         RenderSettings renderSettings = Options.INSTANCE.getRenderSettings();
         Weather weather = Weather.INSTANCE;
 
+        // IMPORTANTE: El orden de iteración DEBE ser Y exterior, X interior
+        // (fila por fila, de arriba hacia abajo) para que la oclusión vertical
+        // sea correcta. Los gráficos más al sur deben dibujarse después (encima)
+        // de los más al norte, igual que hace MapRenderer en el editor.
+
         // Capa 1
         if (renderSettings.getShowLayer()[0]) {
-            for (int x = 0; x < mapWidth; x++) {
-                for (int y = 0; y < mapHeight; y++) {
+            for (int y = 0; y < mapHeight; y++) {
+                for (int x = 0; x < mapWidth; x++) {
                     if (mapData[x][y] == null)
                         continue;
                     if (mapData[x][y].getLayer(1).getGrhIndex() != 0) {
@@ -190,8 +208,8 @@ public class MapExporter {
 
         // Capa 2 y Objetos pequeños (32x32)
         if (renderSettings.getShowLayer()[1] || renderSettings.getShowOJBs()) {
-            for (int x = 0; x < mapWidth; x++) {
-                for (int y = 0; y < mapHeight; y++) {
+            for (int y = 0; y < mapHeight; y++) {
+                for (int x = 0; x < mapWidth; x++) {
                     if (mapData[x][y] == null)
                         continue;
 
@@ -216,15 +234,15 @@ public class MapExporter {
         }
 
         // Capa 3, NPCs y Objetos grandes
-        for (int x = 0; x < mapWidth; x++) {
-            for (int y = 0; y < mapHeight; y++) {
+        for (int y = 0; y < mapHeight; y++) {
+            for (int x = 0; x < mapWidth; x++) {
                 if (mapData[x][y] == null)
                     continue;
 
                 if (renderSettings.getShowOJBs()) {
                     int objGrhIdx = mapData[x][y].getObjGrh().getGrhIndex();
                     if (objGrhIdx > 0 && grhData != null && objGrhIdx < grhData.length && grhData[objGrhIdx] != null) {
-                        if (grhData[objGrhIdx].getPixelWidth() != TILE_SIZE &&
+                        if (grhData[objGrhIdx].getPixelWidth() != TILE_SIZE ||
                                 grhData[objGrhIdx].getPixelHeight() != TILE_SIZE) {
                             drawTexture(mapData[x][y].getObjGrh(), x * TILE_SIZE, y * TILE_SIZE,
                                     true, true, false, 1.0f, weather.getWeatherColor());
@@ -248,8 +266,8 @@ public class MapExporter {
 
         // Capa 4
         if (renderSettings.getShowLayer()[3]) {
-            for (int x = 0; x < mapWidth; x++) {
-                for (int y = 0; y < mapHeight; y++) {
+            for (int y = 0; y < mapHeight; y++) {
+                for (int x = 0; x < mapWidth; x++) {
                     if (mapData[x][y] == null)
                         continue;
                     if (mapData[x][y].getLayer(4).getGrhIndex() > 0) {

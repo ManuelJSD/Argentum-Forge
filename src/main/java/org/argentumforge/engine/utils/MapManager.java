@@ -1212,7 +1212,7 @@ public final class MapManager {
                 headerBuf.order(java.nio.ByteOrder.LITTLE_ENDIAN);
 
                 headerBuf.putShort(options.getVersion()); // Versión del mapa
-                headerBuf.put(new byte[263]); // Relleno cabecera
+                headerBuf.put(generateHeaderMetadata()); // Cabecera informativa
                 headerBuf.putShort((short) 0);
                 headerBuf.putShort((short) 0);
                 headerBuf.putShort((short) 0);
@@ -1385,7 +1385,7 @@ public final class MapManager {
                 java.nio.ByteBuffer headerBuf = java.nio.ByteBuffer.allocate(273);
                 headerBuf.order(java.nio.ByteOrder.LITTLE_ENDIAN);
                 headerBuf.putShort(options.getVersion());
-                headerBuf.put(new byte[263]); // Fixed header padding
+                headerBuf.put(generateHeaderMetadata()); // Cabecera informativa
                 headerBuf.putShort((short) 0);
                 headerBuf.putShort((short) 0);
                 headerBuf.putShort((short) 0);
@@ -1532,8 +1532,22 @@ public final class MapManager {
 
                 // Unused/Placeholders (4 bytes)
                 GameData.reader.readShort();
-                GameData.reader.readShort();
             }
         }
+    }
+
+    /**
+     * Genera un bloque de 263 bytes con información del editor (versión, fecha y repositorio).
+     * Reemplaza el bloque de ceros que se escribía anteriormente en la cabecera del mapa.
+     */
+    private static byte[] generateHeaderMetadata() {
+        byte[] header = new byte[263];
+        String version = org.argentumforge.engine.Engine.VERSION;
+        String date = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        String metadata = "Argentum Forge v" + version + " - Map Editor | " + date + " | https://github.com/ManuelJSD/Argentum-Forge";
+
+        byte[] metaBytes = metadata.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        System.arraycopy(metaBytes, 0, header, 0, Math.min(metaBytes.length, header.length));
+        return header;
     }
 }
