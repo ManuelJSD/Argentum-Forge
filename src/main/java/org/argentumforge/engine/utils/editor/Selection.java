@@ -155,13 +155,18 @@ public class Selection {
             } else {
                 // Pinchar en vacío (o tile si no hay nada más y no es multiSelect)
                 if (!multiSelectPressed) {
-                    selectedEntities.clear();
-                    // Seleccionar el tile como entidad base
-                    SelectedEntity tile = new SelectedEntity(EntityType.TILE, 0, x, y);
-                    selectedEntities.add(tile);
-                    startDrag(x, y);
+                    // Si el modo Inspector está activo, permitimos seleccionar el tile al hacer clic
+                    if (org.argentumforge.engine.game.EditorController.INSTANCE.isInspectorMode()) {
+                        selectedEntities.clear();
+                        SelectedEntity tile = new SelectedEntity(EntityType.TILE, 0, x, y);
+                        selectedEntities.add(tile);
+                        startDrag(x, y);
+                    } else {
+                        // Clic en vacío sin nada más: Simplemente limpiar selección previa
+                        selectedEntities.clear();
+                    }
                 } else {
-                    // Iniciar selección rectángular
+                    // Iniciar selección rectángular (Shift presionado)
                     startAreaSelect(x, y);
                 }
             }

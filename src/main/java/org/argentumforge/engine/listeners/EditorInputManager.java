@@ -116,9 +116,8 @@ public class EditorInputManager {
                 return;
             }
 
-            // Lógica de Selección siempre activa por defecto (Si no hay herramientas de
-            // edición activas)
-            // Y si no estamos en modo pegar
+            // Lógica de Selección activa por defecto (Si no hay herramientas de edición activas)
+            // Esto permite que el recuadro de resaltado siga al ratón y que se puedan seleccionar NPCs/Objetos.
             if (!hasActiveInsertOrDeleteTool() && !EditorController.INSTANCE.isPasteModeActive()) {
                 selection.setActive(true);
             } else {
