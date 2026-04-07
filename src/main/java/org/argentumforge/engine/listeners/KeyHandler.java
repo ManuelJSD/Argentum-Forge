@@ -21,19 +21,19 @@ public enum KeyHandler {
     private static final ImGuiIO imGuiIo = ImGui.getIO();
     /**
      * Arreglo que almacena el estado de presionado (true) o no presionado (false)
-     * para cada tecla hasta el indice 350.
+     * para cada tecla hasta el indice 512.
      */
-    private static final boolean[] keyPressed = new boolean[350];
+    private static final boolean[] keyPressed = new boolean[512];
     /**
      * Arreglo que indica cuando una tecla ha sido presionada por primera vez,
      * evitando el efecto de repeticion de teclas.
      */
-    private static final boolean[] keyJustPressed = new boolean[350];
+    private static final boolean[] keyJustPressed = new boolean[512];
     /**
      * Arreglo que indica cuando una tecla ha sido liberada por primera vez,
      * evitando el efecto de repeticion de teclas.
      */
-    private static final boolean[] keyJustReleased = new boolean[350];
+    private static final boolean[] keyJustReleased = new boolean[512];
 
     /**
      * Conjunto de teclas asociadas al movimiento del personaje (arriba, abajo,
@@ -125,12 +125,28 @@ public enum KeyHandler {
         Arrays.fill(keyJustReleased, false);
 
         // Sincronización Global con ImGui para soportar Viewports (ventanas flotantes)
-        // Esto permite que el movimiento funcione incluso si la ventana principal no tiene el foco.
-        for (int key : MOVEMENT_KEYS) {
+        // Sincronizamos modificadores, teclas de movimiento y todas las teclas de acción del juego
+        Set<Integer> keysToSync = new java.util.HashSet<>(MOVEMENT_KEYS);
+        // Modificadores
+        keysToSync.addAll(Set.of(
+                GLFW_KEY_LEFT_CONTROL, GLFW_KEY_RIGHT_CONTROL,
+                GLFW_KEY_LEFT_SHIFT, GLFW_KEY_RIGHT_SHIFT,
+                GLFW_KEY_LEFT_ALT, GLFW_KEY_RIGHT_ALT,
+                GLFW_KEY_LEFT_SUPER, GLFW_KEY_RIGHT_SUPER));
+        // Todas las teclas de acción
+        for (Key k : Key.values()) {
+            keysToSync.add(k.getKeyCode());
+        }
+
+        for (int key : keysToSync) {
+            if (key < 0 || key >= keyPressed.length)
+                continue;
             boolean isDown = ImGui.isKeyDown(key);
             if (isDown != keyPressed[key]) {
                 updateKeyStates(key, isDown);
-                handleMovementKey(key, isDown);
+                if (MOVEMENT_KEYS.contains(key)) {
+                    handleMovementKey(key, isDown);
+                }
             }
         }
 

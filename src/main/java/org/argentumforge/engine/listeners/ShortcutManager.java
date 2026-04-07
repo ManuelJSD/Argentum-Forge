@@ -151,38 +151,47 @@ public class ShortcutManager {
             Options.INSTANCE.save();
         }
 
-        // Capas (Toggles)
-        if (KeyHandler.isActionKeyJustPressed(Key.TOGGLE_LAYER_1)) {
-            boolean[] layers = Options.INSTANCE.getRenderSettings().getShowLayer();
-            layers[0] = !layers[0];
-            org.argentumforge.engine.game.console.Console.INSTANCE.addMsgToConsole(
-                    "Capa 1: " + (layers[0] ? "ON" : "OFF"),
-                    org.argentumforge.engine.game.console.FontStyle.REGULAR,
-                    new org.argentumforge.engine.renderer.RGBColor(1f, 1f, 1f));
-        }
-        if (KeyHandler.isActionKeyJustPressed(Key.TOGGLE_LAYER_2)) {
-            boolean[] layers = Options.INSTANCE.getRenderSettings().getShowLayer();
-            layers[1] = !layers[1];
-            org.argentumforge.engine.game.console.Console.INSTANCE.addMsgToConsole(
-                    "Capa 2: " + (layers[1] ? "ON" : "OFF"),
-                    org.argentumforge.engine.game.console.FontStyle.REGULAR,
-                    new org.argentumforge.engine.renderer.RGBColor(1f, 1f, 1f));
-        }
-        if (KeyHandler.isActionKeyJustPressed(Key.TOGGLE_LAYER_3)) {
-            boolean[] layers = Options.INSTANCE.getRenderSettings().getShowLayer();
-            layers[2] = !layers[2];
-            org.argentumforge.engine.game.console.Console.INSTANCE.addMsgToConsole(
-                    "Capa 3: " + (layers[2] ? "ON" : "OFF"),
-                    org.argentumforge.engine.game.console.FontStyle.REGULAR,
-                    new org.argentumforge.engine.renderer.RGBColor(1f, 1f, 1f));
-        }
-        if (KeyHandler.isActionKeyJustPressed(Key.TOGGLE_LAYER_4)) {
-            boolean[] layers = Options.INSTANCE.getRenderSettings().getShowLayer();
-            layers[3] = !layers[3];
-            org.argentumforge.engine.game.console.Console.INSTANCE.addMsgToConsole(
-                    "Capa 4: " + (layers[3] ? "ON" : "OFF"),
-                    org.argentumforge.engine.game.console.FontStyle.REGULAR,
-                    new org.argentumforge.engine.renderer.RGBColor(1f, 1f, 1f));
+        boolean isAltPressed = KeyHandler.isKeyPressed(GLFW_KEY_LEFT_ALT) || KeyHandler.isKeyPressed(GLFW_KEY_RIGHT_ALT);
+
+        // Capas (Selección con ALT o Toggles sin ALT)
+        if (isAltPressed) {
+            if (KeyHandler.isActionKeyJustPressed(Key.SELECT_LAYER_1)) selectLayer(1);
+            else if (KeyHandler.isActionKeyJustPressed(Key.SELECT_LAYER_2)) selectLayer(2);
+            else if (KeyHandler.isActionKeyJustPressed(Key.SELECT_LAYER_3)) selectLayer(3);
+            else if (KeyHandler.isActionKeyJustPressed(Key.SELECT_LAYER_4)) selectLayer(4);
+        } else {
+            if (KeyHandler.isActionKeyJustPressed(Key.TOGGLE_LAYER_1)) {
+                boolean[] layers = Options.INSTANCE.getRenderSettings().getShowLayer();
+                layers[0] = !layers[0];
+                org.argentumforge.engine.game.console.Console.INSTANCE.addMsgToConsole(
+                        "Capa 1: " + (layers[0] ? "ON" : "OFF"),
+                        org.argentumforge.engine.game.console.FontStyle.REGULAR,
+                        new org.argentumforge.engine.renderer.RGBColor(1f, 1f, 1f));
+            }
+            if (KeyHandler.isActionKeyJustPressed(Key.TOGGLE_LAYER_2)) {
+                boolean[] layers = Options.INSTANCE.getRenderSettings().getShowLayer();
+                layers[1] = !layers[1];
+                org.argentumforge.engine.game.console.Console.INSTANCE.addMsgToConsole(
+                        "Capa 2: " + (layers[1] ? "ON" : "OFF"),
+                        org.argentumforge.engine.game.console.FontStyle.REGULAR,
+                        new org.argentumforge.engine.renderer.RGBColor(1f, 1f, 1f));
+            }
+            if (KeyHandler.isActionKeyJustPressed(Key.TOGGLE_LAYER_3)) {
+                boolean[] layers = Options.INSTANCE.getRenderSettings().getShowLayer();
+                layers[2] = !layers[2];
+                org.argentumforge.engine.game.console.Console.INSTANCE.addMsgToConsole(
+                        "Capa 3: " + (layers[2] ? "ON" : "OFF"),
+                        org.argentumforge.engine.game.console.FontStyle.REGULAR,
+                        new org.argentumforge.engine.renderer.RGBColor(1f, 1f, 1f));
+            }
+            if (KeyHandler.isActionKeyJustPressed(Key.TOGGLE_LAYER_4)) {
+                boolean[] layers = Options.INSTANCE.getRenderSettings().getShowLayer();
+                layers[3] = !layers[3];
+                org.argentumforge.engine.game.console.Console.INSTANCE.addMsgToConsole(
+                        "Capa 4: " + (layers[3] ? "ON" : "OFF"),
+                        org.argentumforge.engine.game.console.FontStyle.REGULAR,
+                        new org.argentumforge.engine.renderer.RGBColor(1f, 1f, 1f));
+            }
         }
 
         // Visibilidad (Toggles)
@@ -321,5 +330,11 @@ public class ShortcutManager {
         } else {
             ImGUISystem.INSTANCE.show(instance);
         }
+    }
+
+    private void selectLayer(int layerNum) {
+        org.argentumforge.engine.utils.editor.Surface.getInstance().setLayer(layerNum);
+        String msg = I18n.INSTANCE.get("msg.editor.layerActive", layerNum);
+        Console.INSTANCE.addMsgToConsole(msg, REGULAR, new RGBColor(1f, 1f, 0f));
     }
 }

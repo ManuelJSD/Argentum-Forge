@@ -105,6 +105,16 @@ public class FSurfaceEditor extends Form implements IMapEditor {
         ImGui.setNextWindowSize(350, 600, ImGuiCond.FirstUseEver);
 
         if (ImGui.begin(I18n.INSTANCE.get("editor.surface"), ImGuiWindowFlags.None)) {
+            // Sincronizar capa activa si cambió externamente (ej. por atajo)
+            if (capas.get(selectedLayer.get()) != surface.getLayer()) {
+                for (int i = 0; i < capas.size(); i++) {
+                    if (capas.get(i) == surface.getLayer()) {
+                        selectedLayer.set(i);
+                        break;
+                    }
+                }
+            }
+
             drawToolSettings();
             ImGui.separator();
             drawLayerAndModeControls();
