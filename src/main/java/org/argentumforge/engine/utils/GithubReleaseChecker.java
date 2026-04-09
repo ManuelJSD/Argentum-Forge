@@ -80,15 +80,19 @@ public class GithubReleaseChecker {
                     Logger.debug("Response status: {}", response.statusCode());
 
                     if (response.statusCode() == 404) {
-                        Console.INSTANCE.addMsgToConsole("[Update] " + I18n.INSTANCE.get("update.repo_404"),
-                                FontStyle.BOLD, new RGBColor(1f, 0.5f, 0f));
+                        Engine.INSTANCE.runOnMainThread(() -> 
+                            Console.INSTANCE.addMsgToConsole("[Update] " + I18n.INSTANCE.get("update.repo_404"),
+                                    FontStyle.BOLD, new RGBColor(1f, 0.5f, 0f))
+                        );
                         return null;
                     }
 
                     if (response.statusCode() != 200) {
-                        Console.INSTANCE.addMsgToConsole(
-                                "[Update] " + I18n.INSTANCE.get("update.error_api", response.statusCode()),
-                                FontStyle.REGULAR, new RGBColor(1f, 0f, 0f));
+                        Engine.INSTANCE.runOnMainThread(() -> 
+                            Console.INSTANCE.addMsgToConsole(
+                                    "[Update] " + I18n.INSTANCE.get("update.error_api", response.statusCode()),
+                                    FontStyle.REGULAR, new RGBColor(1f, 0f, 0f))
+                        );
                         return null;
                     }
 
@@ -105,25 +109,45 @@ public class GithubReleaseChecker {
                         if (newer) {
                             latestRelease = release;
                             Logger.info("New version found: {}", release.tagName);
-                            Console.INSTANCE.addMsgToConsole(
-                                    "[Update] " + I18n.INSTANCE.get("update.new_version", release.tagName),
-                                    FontStyle.BOLD,
-                                    new RGBColor(0f, 1f, 0f));
+                            Engine.INSTANCE.runOnMainThread(() -> 
+                                Console.INSTANCE.addMsgToConsole(
+                                        "[Update] " + I18n.INSTANCE.get("update.new_version", release.tagName),
+                                        FontStyle.BOLD,
+                                        new RGBColor(0f, 1f, 0f))
+                            );
                         } else {
                             Logger.info("No updates found or current version is up to date.");
-                            Console.INSTANCE.addMsgToConsole("[Update] " + I18n.INSTANCE.get("update.up_to_date"),
-                                    FontStyle.ITALIC,
-                                    new RGBColor(0.5f, 1f, 0.5f));
+                            Engine.INSTANCE.runOnMainThread(() -> 
+                                Console.INSTANCE.addMsgToConsole("[Update] " + I18n.INSTANCE.get("update.up_to_date"),
+                                        FontStyle.ITALIC,
+                                        new RGBColor(0.5f, 1f, 0.5f))
+                            );
                         }
                     } else {
                         Logger.warn("Release object is null after parsing.");
                     }
                 })
                 .exceptionally(e -> {
-                    Logger.error(e, "Exception during update check");
-                    Console.INSTANCE.addMsgToConsole(
-                            "[Update] " + I18n.INSTANCE.get("update.error_generic", e.getMessage()), FontStyle.BOLD,
-                            new RGBColor(1f, 0f, 0f));
+                    // Si el error es de conexión o DNS (sin internet), no mostramos un error técnico alarmante
+                    Throwable cause = e.getCause();
+                    boolean isNetworkError = cause instanceof java.net.ConnectException || 
+                                             cause instanceof java.nio.channels.UnresolvedAddressException ||
+                                             cause instanceof java.net.http.HttpConnectTimeoutException;
+
+                    if (isNetworkError) {
+                        Logger.info("Update check skipped: No internet connection found.");
+                        Engine.INSTANCE.runOnMainThread(() -> 
+                            Console.INSTANCE.addMsgToConsole("[Update] " + I18n.INSTANCE.get("update.error_no_connection"), 
+                            FontStyle.ITALIC, new RGBColor(0.7f, 0.7f, 0.7f))
+                        );
+                    } else {
+                        Logger.error(e, "Exception during update check");
+                        Engine.INSTANCE.runOnMainThread(() -> 
+                            Console.INSTANCE.addMsgToConsole(
+                                "[Update] " + I18n.INSTANCE.get("update.error_generic", e.getMessage()), FontStyle.BOLD,
+                                new RGBColor(1f, 0f, 0f))
+                        );
+                    }
                     return null;
                 });
     }
